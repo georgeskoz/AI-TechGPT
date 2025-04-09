@@ -15,7 +15,7 @@ export default function ChatPage() {
   const [showMobileTopics, setShowMobileTopics] = useState(false);
   
   // Chat functionality with OpenAI
-  const { messages, isLoading, error, sendMessage, clearError } = useChat(username);
+  const { messages, isLoading, error, typingMessage, isTyping, sendMessage, clearError } = useChat(username);
   
   // Check if username exists on mount
   useEffect(() => {
@@ -59,6 +59,8 @@ export default function ChatPage() {
             messages={messages} 
             isLoading={isLoading} 
             username={username || 'User'} 
+            typingMessage={typingMessage}
+            isTyping={isTyping}
           />
           
           {/* Chat Input - Always at the bottom */}

@@ -8,18 +8,20 @@ interface ChatAreaProps {
   messages: Message[];
   isLoading: boolean;
   username: string;
+  typingMessage?: string | null;
+  isTyping?: boolean;
 }
 
-export default function ChatArea({ messages, isLoading, username }: ChatAreaProps) {
+export default function ChatArea({ messages, isLoading, username, typingMessage, isTyping }: ChatAreaProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // Scroll to bottom whenever messages change
+  // Scroll to bottom whenever messages or typing message changes
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages]);
+  }, [messages, typingMessage]);
 
   const formatTimestamp = (timestamp?: Date) => {
     if (!timestamp) return 'Just now';
@@ -172,7 +174,7 @@ export default function ChatArea({ messages, isLoading, username }: ChatAreaProp
         ))}
         
         {/* Typing indicator */}
-        {isLoading && (
+        {isTyping && (
           <div className="flex items-start">
             <div className="flex-shrink-0 mr-2">
               <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
@@ -181,14 +183,25 @@ export default function ChatArea({ messages, isLoading, username }: ChatAreaProp
                 </svg>
               </div>
             </div>
-            <div className="rounded-lg bg-white p-4 shadow-sm">
+            <div className="rounded-lg bg-white p-4 shadow-sm max-w-3xl">
               <div className="flex items-center mb-1">
                 <span className="text-sm font-semibold text-gray-800">TechGPT</span>
                 <span className="text-xs text-gray-500 ml-2">Now</span>
               </div>
-              <div className="typing-indicator text-gray-500">
-                <span>●</span><span>●</span><span>●</span>
-              </div>
+              
+              {typingMessage ? (
+                <div className="text-gray-700">
+                  {formatContentWithCodeBlocks(typingMessage)}
+                  <span className="ml-1 inline-block animate-pulse">▌</span>
+                </div>
+              ) : (
+                <div className="flex items-center">
+                  <div className="typing-indicator text-gray-500 flex items-center space-x-1">
+                    <span>●</span><span>●</span><span>●</span>
+                  </div>
+                  <span className="text-xs text-gray-400 ml-2 italic">TechGPT is thinking...</span>
+                </div>
+              )}
             </div>
           </div>
         )}
