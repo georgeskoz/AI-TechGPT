@@ -54,18 +54,22 @@ export default function ChatPage() {
         <TopicSidebar onSelectTopic={handleSelectTopic} />
         
         {/* Chat Messages Area */}
-        <ChatArea 
-          messages={messages} 
-          isLoading={isLoading} 
-          username={username || 'User'} 
-        />
-        
-        {/* Chat Input */}
-        <ChatInput 
-          onSendMessage={sendMessage} 
-          isLoading={isLoading} 
-          onToggleTopics={toggleMobileTopics} 
-        />
+        <div className="flex-grow flex flex-col overflow-hidden">
+          <ChatArea 
+            messages={messages} 
+            isLoading={isLoading} 
+            username={username || 'User'} 
+          />
+          
+          {/* Chat Input - Always at the bottom */}
+          <div className="sticky bottom-0 w-full z-10">
+            <ChatInput 
+              onSendMessage={sendMessage} 
+              isLoading={isLoading} 
+              onToggleTopics={toggleMobileTopics} 
+            />
+          </div>
+        </div>
       </div>
       
       {/* Mobile Topic Suggestions */}
@@ -87,24 +91,6 @@ export default function ChatPage() {
       {error && (
         <ErrorToast message={error} onClose={clearError} />
       )}
-      
-      {/* CSS for typing indicator animation */}
-      <style jsx global>{`
-        .typing-indicator span {
-          animation: blink 1.4s infinite both;
-        }
-        .typing-indicator span:nth-child(2) {
-          animation-delay: 0.2s;
-        }
-        .typing-indicator span:nth-child(3) {
-          animation-delay: 0.4s;
-        }
-        @keyframes blink {
-          0% { opacity: 0.1; }
-          20% { opacity: 1; }
-          100% { opacity: 0.1; }
-        }
-      `}</style>
     </div>
   );
 }

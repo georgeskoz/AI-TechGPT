@@ -48,7 +48,7 @@ export default function ChatInput({ onSendMessage, isLoading, onToggleTopics }: 
   }, [message]);
 
   return (
-    <div className="border-t border-gray-200 bg-white p-4">
+    <div className="border-t border-gray-200 bg-white p-4 shadow-md">
       <div className="container mx-auto">
         <form onSubmit={handleSubmit} className="flex items-end space-x-2">
           <div className="flex-grow relative">
