@@ -63,13 +63,26 @@ export default function ProfilePage() {
   
   const updateProfileMutation = useMutation({
     mutationFn: async (values: UpdateProfile) => {
-      // Filter out any null values
+      // Filter out any null values and empty strings
       const sanitizedValues = Object.fromEntries(
-        Object.entries(values).filter(([_, v]) => v !== null)
+        Object.entries(values)
+          .filter(([_, v]) => v !== null && v !== undefined)
+          .map(([k, v]) => [k, v === null ? "" : v])
       ) as UpdateProfile;
       
-      const res = await apiRequest("PUT", `/api/users/${username}/profile`, sanitizedValues);
-      return await res.json();
+      try {
+        const res = await apiRequest("PUT", `/api/users/${username}/profile`, sanitizedValues);
+        
+        if (!res.ok) {
+          const errorData = await res.text();
+          throw new Error(`Failed to update profile: ${errorData}`);
+        }
+        
+        return await res.json();
+      } catch (error) {
+        console.error("Profile update error:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users", username] });
