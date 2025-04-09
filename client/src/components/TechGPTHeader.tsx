@@ -7,17 +7,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import logoSvg from '../assets/thodel-logo.svg';
+import logoSvg from '../assets/techgpt-logo-simple.svg';
 
-interface ThodelHeaderProps {
+interface TechGPTHeaderProps {
   username: string;
 }
 
-export default function ThodelHeader({ username }: ThodelHeaderProps) {
+export default function TechGPTHeader({ username }: TechGPTHeaderProps) {
   const [, navigate] = useLocation();
 
   const handleProfileClick = () => {
-    navigate(`/${username}/profile`);
+    navigate(`/profile/${username}`);
   };
   
   const handleLogoClick = () => {
@@ -31,9 +31,9 @@ export default function ThodelHeader({ username }: ThodelHeaderProps) {
           <button 
             onClick={handleLogoClick} 
             className="flex items-center focus:outline-none transition-transform hover:scale-105"
-            title="THODEL - Go to Home"
+            title="TechGPT - Go to Home"
           >
-            <img src={logoSvg} alt="THODEL Logo" className="h-10" />
+            <img src={logoSvg} alt="TechGPT Logo" className="h-10" />
           </button>
         </div>
         <div className="flex items-center space-x-2">

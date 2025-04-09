@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useChat } from '@/hooks/useChat';
-import ThodelHeader from '@/components/ThodelHeader';
+import TechGPTHeader from '@/components/TechGPTHeader';
 import TopicSidebar from '@/components/TopicSidebar';
 import ChatArea from '@/components/ChatArea';
 import ChatInput from '@/components/ChatInput';
@@ -10,7 +10,7 @@ import ErrorToast from '@/components/ErrorToast';
 
 export default function ChatPage() {
   // State for username and storage
-  const [username, setUsername] = useLocalStorage<string>('thodel_username', '');
+  const [username, setUsername] = useLocalStorage<string>('techgpt_username', '');
   const [showUsernameModal, setShowUsernameModal] = useState(false);
   const [showMobileTopics, setShowMobileTopics] = useState(false);
   
@@ -46,7 +46,7 @@ export default function ChatPage() {
   return (
     <div className="flex flex-col h-screen bg-gray-100">
       {/* App Header */}
-      <ThodelHeader username={username || 'User'} />
+      <TechGPTHeader username={username || 'User'} />
       
       {/* Main Chat Area */}
       <div className="flex-grow flex flex-col md:flex-row overflow-hidden">
