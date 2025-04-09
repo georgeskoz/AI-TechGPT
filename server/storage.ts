@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, messages, type Message, type InsertMessage } from "@shared/schema";
+import { users, type User, type InsertUser, messages, type Message, type InsertMessage, type UpdateProfile } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
@@ -6,6 +6,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateProfile(username: string, profile: UpdateProfile): Promise<User>;
   createMessage(message: InsertMessage): Promise<Message>;
   getMessagesByUsername(username: string): Promise<Message[]>;
 }
@@ -25,6 +26,15 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .insert(users)
       .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async updateProfile(username: string, profile: UpdateProfile): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set(profile)
+      .where(eq(users.username, username))
       .returning();
     return user;
   }

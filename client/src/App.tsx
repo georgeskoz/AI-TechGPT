@@ -4,11 +4,13 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import ChatPage from "@/pages/ChatPage";
+import ProfilePage from "@/pages/ProfilePage";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={ChatPage} />
+      <Route path="/profile/:username" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>
   );
