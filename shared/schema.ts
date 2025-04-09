@@ -1,11 +1,11 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, timestamp } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
-  password: text("password").notNull(),
 });
 
 export const messages = pgTable("messages", {
@@ -16,9 +16,19 @@ export const messages = pgTable("messages", {
   timestamp: timestamp("timestamp").notNull().defaultNow(),
 });
 
+export const usersRelations = relations(users, ({ many }) => ({
+  messages: many(messages),
+}));
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  user: one(users, {
+    fields: [messages.username],
+    references: [users.username],
+  }),
+}));
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
-  password: true,
 });
 
 export const insertMessageSchema = createInsertSchema(messages).pick({
