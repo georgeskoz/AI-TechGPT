@@ -20,7 +20,7 @@ const profileFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }).optional().or(z.literal("")),
   fullName: z.string().max(100, { message: "Full name must be less than 100 characters" }).optional().or(z.literal("")),
   bio: z.string().max(500, { message: "Bio must be less than 500 characters" }).optional().or(z.literal("")),
-  avatar: z.string().url({ message: "Please enter a valid URL" }).optional().or(z.literal("")),
+  avatar: z.string().optional().or(z.literal("")),
 });
 
 export default function ProfilePage() {
@@ -210,7 +210,7 @@ export default function ProfilePage() {
                     name="avatar"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Profile Picture URL</FormLabel>
+                        <FormLabel>Profile Picture URL (Optional)</FormLabel>
                         <FormControl>
                           <Input 
                             placeholder="https://example.com/your-image.jpg" 
@@ -222,7 +222,7 @@ export default function ProfilePage() {
                           />
                         </FormControl>
                         <FormDescription>
-                          Enter a valid image URL for your profile picture
+                          Optional: Enter an image URL or leave empty
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
