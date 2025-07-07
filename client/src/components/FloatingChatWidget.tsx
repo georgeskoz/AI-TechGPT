@@ -46,6 +46,9 @@ export default function FloatingChatWidget({ username }: FloatingChatWidgetProps
       setIsOpen(false);
     } else if (action === "AI Triage Analysis") {
       setCurrentView('triage');
+    } else if (action === "Generate Diagnostic Checklist") {
+      setLocation('/diagnostic');
+      setIsOpen(false);
     } else {
       setMessage(action);
       setLocation(`/chat?message=${encodeURIComponent(action)}&username=${encodeURIComponent(username)}`);
@@ -81,6 +84,7 @@ export default function FloatingChatWidget({ username }: FloatingChatWidgetProps
 
   const quickActions = [
     "AI Triage Analysis",
+    "Generate Diagnostic Checklist",
     "Start Live Support Chat", 
     "Help me troubleshoot a network connection issue",
     "I need help with software installation",
