@@ -33,8 +33,10 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
 ### API Endpoints
 - `GET /api/messages?username=<username>` - Retrieve message history for a user
 - `GET /api/users/:username` - Get user profile information
-- `POST /api/messages` - Send a message and receive AI response (implementation in progress)
-- `PUT /api/users/:username` - Update user profile (implementation in progress)
+- `POST /api/messages` - Send a message and receive AI response with domain-specific behavior
+- `PUT /api/users/:username` - Update user profile
+- `GET /api/support-services` - Get available phone support services with pricing
+- `POST /api/calculate-price` - Calculate dynamic pricing for phone support services
 
 ### Frontend Components
 - **ChatPage**: Main chat interface with message display and input
@@ -43,6 +45,10 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
 - **ChatInput**: Auto-resizing textarea with keyboard shortcuts
 - **TopicSidebar**: Predefined technical topics for quick access
 - **UsernameModal**: Initial user setup modal
+- **IssueCategorizationPage**: Technical issue management with categorization and tracking
+- **PhoneSupportPage**: Phone support services with dynamic pricing and booking
+- **PhoneSupportPricing**: Advanced pricing calculator with real-time factors
+- **IssueTracker**: Issue dashboard with status management and filtering
 
 ### Data Flow
 1. User enters username on first visit (stored in localStorage)
@@ -96,6 +102,21 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
 ## Recent Changes
 
 ### January 7, 2025
+- **Advanced Phone Support System with Dynamic Pricing**: Comprehensive phone support services with sophisticated pricing algorithms
+  - Created 8 tiered phone support services across 4 levels: Basic ($25-40), Intermediate ($55-75), Advanced ($95-125), Expert ($150-200)
+  - Implemented dynamic pricing engine with multiple factors: time of day, urgency level, distance, traffic conditions, demand surge, weekend surcharge
+  - Added real-time pricing calculator with transparent cost breakdown
+  - Created dedicated phone support page (/phone-support) with service selection and booking interface
+  - Integrated phone support into issue categorization system with automatic navigation
+  - Added pricing factors: Morning (1.0x), Midday (1.1x), Evening (1.2x), Midnight (1.5x), Weekend (1.3x), Urgency (1.0x-2.0x)
+  - Implemented distance-based pricing for on-site coordination with out-of-town surcharges
+
+- **Enhanced Issue Categorization System**: Split support services into specialized categories
+  - Separated "Online Remote Support" with 7 phone support subcategories
+  - Added "On-Site Support Services" with 7 traditional support options
+  - Enhanced navigation with automatic routing to phone support when selecting phone support subcategories
+  - Integrated phone support booking confirmation flow with automatic return to chat
+
 - **Domain-Specific AI Behavior**: Implemented customizable AI behavior for different technical domains
   - Created domain configuration system with specialized prompts, temperature settings, and response styles
   - Added 9 technical domains: Web Development, Hardware Issues, Network Troubleshooting, Database Help, Mobile Devices, Security Questions, Cyber security, Online Remote Support, Order a technician onsite
