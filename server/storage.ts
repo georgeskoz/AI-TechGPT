@@ -364,4 +364,255 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+// Temporary in-memory storage for support system
+class MemoryStorage implements IStorage {
+  private users: Map<number, User> = new Map();
+  private messages: Map<number, Message> = new Map();
+  private technicians: Map<number, Technician> = new Map();
+  private serviceRequests: Map<number, ServiceRequest> = new Map();
+  private jobs: Map<number, Job> = new Map();
+  private jobUpdates: Map<number, JobUpdate> = new Map();
+  private supportCases: Map<number, SupportCase> = new Map();
+  private supportMessages: Map<number, SupportMessage> = new Map();
+  
+  private nextId = 1;
+  
+  // User management
+  async getUser(id: number): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+  
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    for (const user of this.users.values()) {
+      if (user.username === username) return user;
+    }
+    return undefined;
+  }
+  
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const user = { id: this.nextId++, ...insertUser } as User;
+    this.users.set(user.id, user);
+    return user;
+  }
+  
+  async updateProfile(username: string, profile: UpdateProfile): Promise<User> {
+    const user = await this.getUserByUsername(username);
+    if (!user) throw new Error("User not found");
+    const updatedUser = { ...user, ...profile };
+    this.users.set(user.id, updatedUser);
+    return updatedUser;
+  }
+  
+  // Message management
+  async createMessage(insertMessage: InsertMessage): Promise<Message> {
+    const message = { id: this.nextId++, ...insertMessage, timestamp: new Date() } as Message;
+    this.messages.set(message.id, message);
+    return message;
+  }
+  
+  async getMessagesByUsername(username: string): Promise<Message[]> {
+    return Array.from(this.messages.values()).filter(m => m.username === username);
+  }
+  
+  // Technician management
+  async createTechnician(insertTechnician: InsertTechnician): Promise<Technician> {
+    const technician = { id: this.nextId++, ...insertTechnician } as Technician;
+    this.technicians.set(technician.id, technician);
+    return technician;
+  }
+  
+  async getTechnician(id: number): Promise<Technician | undefined> {
+    return this.technicians.get(id);
+  }
+  
+  async getTechnicianByUserId(userId: number): Promise<Technician | undefined> {
+    for (const technician of this.technicians.values()) {
+      if (technician.userId === userId) return technician;
+    }
+    return undefined;
+  }
+  
+  async updateTechnician(id: number, updates: Partial<InsertTechnician>): Promise<Technician> {
+    const technician = this.technicians.get(id);
+    if (!technician) throw new Error("Technician not found");
+    const updatedTechnician = { ...technician, ...updates };
+    this.technicians.set(id, updatedTechnician);
+    return updatedTechnician;
+  }
+  
+  async searchTechnicians(criteria: {
+    skills?: string[];
+    location?: string;
+    serviceRadius?: number;
+    availability?: boolean;
+  }): Promise<Technician[]> {
+    return Array.from(this.technicians.values()).filter(technician => {
+      if (criteria.skills && !criteria.skills.some(skill => technician.skills.includes(skill))) {
+        return false;
+      }
+      if (criteria.location && technician.location !== criteria.location) {
+        return false;
+      }
+      if (criteria.availability !== undefined && technician.availability !== criteria.availability) {
+        return false;
+      }
+      return true;
+    });
+  }
+  
+  // Service request management
+  async createServiceRequest(insertRequest: InsertServiceRequest): Promise<ServiceRequest> {
+    const request = { id: this.nextId++, ...insertRequest, createdAt: new Date(), updatedAt: new Date() } as ServiceRequest;
+    this.serviceRequests.set(request.id, request);
+    return request;
+  }
+  
+  async getServiceRequest(id: number): Promise<ServiceRequest | undefined> {
+    return this.serviceRequests.get(id);
+  }
+  
+  async getServiceRequestsByCustomer(customerId: number): Promise<ServiceRequest[]> {
+    return Array.from(this.serviceRequests.values()).filter(r => r.customerId === customerId);
+  }
+  
+  async getServiceRequestsByTechnician(technicianId: number): Promise<ServiceRequest[]> {
+    return Array.from(this.serviceRequests.values()).filter(r => r.technicianId === technicianId);
+  }
+  
+  async updateServiceRequestStatus(id: number, status: string, technicianId?: number): Promise<ServiceRequest> {
+    const request = this.serviceRequests.get(id);
+    if (!request) throw new Error("Service request not found");
+    const updatedRequest = { ...request, status, technicianId, updatedAt: new Date() };
+    this.serviceRequests.set(id, updatedRequest);
+    return updatedRequest;
+  }
+  
+  // Job management
+  async createJob(insertJob: InsertJob): Promise<Job> {
+    const job = { id: this.nextId++, ...insertJob, createdAt: new Date(), updatedAt: new Date() } as Job;
+    this.jobs.set(job.id, job);
+    return job;
+  }
+  
+  async getJob(id: number): Promise<Job | undefined> {
+    return this.jobs.get(id);
+  }
+  
+  async getJobsByCustomer(customerId: number): Promise<Job[]> {
+    return Array.from(this.jobs.values()).filter(j => j.customerId === customerId);
+  }
+  
+  async getJobsByTechnician(technicianId: number): Promise<Job[]> {
+    return Array.from(this.jobs.values()).filter(j => j.technicianId === technicianId);
+  }
+  
+  async updateJobStatus(id: number, status: string, updates?: Partial<Job>): Promise<Job> {
+    const job = this.jobs.get(id);
+    if (!job) throw new Error("Job not found");
+    const updatedJob = { ...job, status, ...updates, updatedAt: new Date() };
+    this.jobs.set(id, updatedJob);
+    return updatedJob;
+  }
+  
+  // Job updates
+  async createJobUpdate(insertUpdate: InsertJobUpdate): Promise<JobUpdate> {
+    const update = { id: this.nextId++, ...insertUpdate, timestamp: new Date() } as JobUpdate;
+    this.jobUpdates.set(update.id, update);
+    return update;
+  }
+  
+  async getJobUpdates(jobId: number): Promise<JobUpdate[]> {
+    return Array.from(this.jobUpdates.values()).filter(u => u.jobId === jobId);
+  }
+  
+  // Support case management
+  async createSupportCase(insertCase: InsertSupportCase): Promise<SupportCase> {
+    const supportCase = { 
+      id: this.nextId++, 
+      ...insertCase, 
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      startTime: new Date().toISOString(),
+      totalDuration: 0,
+      isFreeSupport: true,
+      status: 'open'
+    } as SupportCase;
+    this.supportCases.set(supportCase.id, supportCase);
+    return supportCase;
+  }
+  
+  async getSupportCase(id: number): Promise<SupportCase | undefined> {
+    return this.supportCases.get(id);
+  }
+  
+  async getSupportCasesByCustomer(customerId: number): Promise<SupportCase[]> {
+    return Array.from(this.supportCases.values()).filter(c => c.customerId === customerId);
+  }
+  
+  async getSupportCasesByTechnician(technicianId: number): Promise<SupportCase[]> {
+    return Array.from(this.supportCases.values()).filter(c => c.technicianId === technicianId);
+  }
+  
+  async updateSupportCase(id: number, updates: Partial<SupportCase>): Promise<SupportCase> {
+    const supportCase = this.supportCases.get(id);
+    if (!supportCase) throw new Error("Support case not found");
+    const updatedCase = { ...supportCase, ...updates, updatedAt: new Date().toISOString() };
+    this.supportCases.set(id, updatedCase);
+    return updatedCase;
+  }
+  
+  async assignTechnicianToCase(caseId: number, technicianId: number): Promise<SupportCase> {
+    const supportCase = this.supportCases.get(caseId);
+    if (!supportCase) throw new Error("Support case not found");
+    const updatedCase = { ...supportCase, technicianId, status: 'assigned', updatedAt: new Date().toISOString() };
+    this.supportCases.set(caseId, updatedCase);
+    return updatedCase;
+  }
+  
+  async closeSupportCase(caseId: number, totalDuration: number): Promise<SupportCase> {
+    const supportCase = this.supportCases.get(caseId);
+    if (!supportCase) throw new Error("Support case not found");
+    const updatedCase = { 
+      ...supportCase, 
+      status: 'closed', 
+      totalDuration,
+      endTime: new Date().toISOString(),
+      updatedAt: new Date().toISOString() 
+    };
+    this.supportCases.set(caseId, updatedCase);
+    return updatedCase;
+  }
+  
+  // Support messages
+  async createSupportMessage(insertMessage: InsertSupportMessage): Promise<SupportMessage> {
+    const message = { 
+      id: this.nextId++, 
+      ...insertMessage, 
+      timestamp: new Date().toISOString(),
+      isRead: false,
+      messageType: 'text'
+    } as SupportMessage;
+    this.supportMessages.set(message.id, message);
+    return message;
+  }
+  
+  async getSupportMessages(caseId: number): Promise<SupportMessage[]> {
+    return Array.from(this.supportMessages.values()).filter(m => m.caseId === caseId);
+  }
+  
+  async markMessageAsRead(messageId: number): Promise<void> {
+    const message = this.supportMessages.get(messageId);
+    if (message) {
+      message.isRead = true;
+      this.supportMessages.set(messageId, message);
+    }
+  }
+  
+  async getUnreadMessageCount(caseId: number, userId: number): Promise<number> {
+    return Array.from(this.supportMessages.values())
+      .filter(m => m.caseId === caseId && m.senderId !== userId && !m.isRead)
+      .length;
+  }
+}
+
+export const storage = new MemoryStorage();
