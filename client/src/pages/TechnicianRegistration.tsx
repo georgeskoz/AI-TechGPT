@@ -27,6 +27,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import TechnicianProfilePreview from "@/components/TechnicianProfilePreview";
 
 const technicianSchema = z.object({
   businessName: z.string().optional(), // Optional - for technicians working with fleets
@@ -99,7 +100,11 @@ export default function TechnicianRegistration() {
       profileDescription: "",
       responseTime: 60,
     },
+    mode: "onChange", // Enable real-time validation and updates
   });
+
+  // Watch form values for real-time preview updates
+  const watchedValues = form.watch();
 
   const registerMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -196,7 +201,7 @@ export default function TechnicianRegistration() {
   const progress = (step / 5) * 100;
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
+    <div className="container mx-auto p-4 max-w-7xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Become a TechGPT Technician</h1>
         <p className="text-gray-600">Join our network of skilled technicians and start earning</p>
@@ -204,7 +209,10 @@ export default function TechnicianRegistration() {
         <p className="text-sm text-gray-500 mt-2">Step {step} of 5</p>
       </div>
 
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <div className="grid lg:grid-cols-2 gap-8">
+        {/* Form Section */}
+        <div>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         {step === 1 && (
           <Card>
             <CardHeader>
@@ -584,7 +592,21 @@ export default function TechnicianRegistration() {
             </CardContent>
           </Card>
         )}
-      </form>
+          </form>
+        </div>
+
+        {/* Preview Section */}
+        <div className="lg:sticky lg:top-4">
+          <TechnicianProfilePreview
+            formData={watchedValues}
+            selectedSkills={selectedSkills}
+            selectedCategories={selectedCategories}
+            selectedLanguages={selectedLanguages}
+            selectedCertifications={selectedCertifications}
+            serviceAreas={serviceAreas}
+          />
+        </div>
+      </div>
     </div>
   );
 }
