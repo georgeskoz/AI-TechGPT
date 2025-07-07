@@ -54,7 +54,8 @@ export const insertMessageSchema = createInsertSchema(messages).pick({
   username: true,
   content: true,
   isUser: true,
-  domain: true,
+}).extend({
+  domain: z.string().optional(),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

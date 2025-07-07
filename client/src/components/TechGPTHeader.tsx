@@ -1,5 +1,5 @@
 import { useLocation } from 'wouter';
-import { Settings, User } from 'lucide-react';
+import { Settings, User, List, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   DropdownMenu,
@@ -54,6 +54,10 @@ export default function TechGPTHeader({ username }: TechGPTHeaderProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setLocation('/issues')} className="cursor-pointer">
+                <List className="h-4 w-4 mr-2" />
+                <span>Issue Tracker</span>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={handleProfileClick} className="cursor-pointer">
                 <User className="h-4 w-4 mr-2" />
                 <span>Edit Profile</span>
