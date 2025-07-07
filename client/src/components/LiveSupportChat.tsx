@@ -71,6 +71,8 @@ export default function LiveSupportChat({
   const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
   const [chatStartTime, setChatStartTime] = useState<Date | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [aiMode, setAiMode] = useState(true);
+  const [isAiResponding, setIsAiResponding] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const queryClient = useQueryClient();
@@ -104,10 +106,26 @@ export default function LiveSupportChat({
       });
       return response.json();
     },
-    onSuccess: (newCase) => {
+    onSuccess: async (newCase) => {
       setCurrentCase(newCase);
       setChatStartTime(new Date());
       queryClient.invalidateQueries({ queryKey: ["/api/support/cases/customer", userId] });
+      
+      // Send AI welcome message
+      try {
+        await apiRequest("POST", `/api/support/cases/${newCase.id}/messages`, {
+          senderId: 999,
+          senderType: "technician",
+          content: "Hello! I'm your AI Technical Assistant. I'm here to help you with your technical questions and issues. What can I assist you with today?",
+          messageType: "text",
+        });
+        
+        queryClient.invalidateQueries({ 
+          queryKey: ["/api/support/cases", newCase.id, "messages"] 
+        });
+      } catch (error) {
+        console.error("Error sending welcome message:", error);
+      }
     },
   });
 
@@ -123,13 +141,55 @@ export default function LiveSupportChat({
       });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (message) => {
       setNewMessage("");
       queryClient.invalidateQueries({ 
         queryKey: ["/api/support/cases", currentCase?.id, "messages"] 
       });
+      
+      // If in AI mode, generate AI response
+      if (aiMode && currentCase) {
+        handleAiResponse(message.content);
+      }
     },
   });
+
+  // AI response handler
+  const handleAiResponse = async (userMessage: string) => {
+    if (!currentCase) return;
+    
+    setIsAiResponding(true);
+    
+    try {
+      // Simulate AI thinking delay
+      await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000));
+      
+      const response = await apiRequest("POST", `/api/support/ai-response`, {
+        caseId: currentCase.id,
+        userMessage,
+        context: messages.slice(-5), // Last 5 messages for context
+      });
+      
+      const aiResponse = await response.json();
+      
+      // Send AI response as message
+      await apiRequest("POST", `/api/support/cases/${currentCase.id}/messages`, {
+        senderId: 999, // AI assistant ID
+        senderType: "technician",
+        content: aiResponse.message,
+        messageType: "text",
+      });
+      
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/support/cases", currentCase?.id, "messages"] 
+      });
+      
+    } catch (error) {
+      console.error("Error generating AI response:", error);
+    } finally {
+      setIsAiResponding(false);
+    }
+  };
 
   // Close case mutation
   const closeCaseMutation = useMutation({
@@ -224,6 +284,24 @@ export default function LiveSupportChat({
     });
   };
 
+  const handleSwitchToHuman = async () => {
+    if (!currentCase) return;
+    
+    setAiMode(false);
+    
+    // Send system message about switching to human agent
+    await apiRequest("POST", `/api/support/cases/${currentCase.id}/messages`, {
+      senderId: 999,
+      senderType: "technician", 
+      content: "I'm connecting you with a human technician who can provide more specialized assistance. Please wait a moment...",
+      messageType: "system",
+    });
+    
+    queryClient.invalidateQueries({ 
+      queryKey: ["/api/support/cases", currentCase?.id, "messages"] 
+    });
+  };
+
   const formatTime = (minutes: number) => {
     const hrs = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -291,9 +369,16 @@ export default function LiveSupportChat({
           {currentCase && (
             <div className="mt-2 space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-1">
-                  {getStatusIcon(currentCase.status)}
-                  <span className="capitalize">{currentCase.status}</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    {getStatusIcon(currentCase.status)}
+                    <span className="capitalize">{currentCase.status}</span>
+                  </div>
+                  {aiMode && (
+                    <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
+                      AI Support
+                    </Badge>
+                  )}
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
@@ -331,73 +416,113 @@ export default function LiveSupportChat({
               </div>
               
               <div className="text-center space-y-2">
+                <div className="flex items-center gap-2 text-xs text-purple-600">
+                  <CheckCircle className="h-3 w-3" />
+                  <span>AI Assistant first</span>
+                </div>
                 <div className="flex items-center gap-2 text-xs text-green-600">
                   <CheckCircle className="h-3 w-3" />
                   <span>First 10 minutes free</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-blue-600">
                   <Users className="h-3 w-3" />
-                  <span>Real-time expert help</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-purple-600">
-                  <MessageSquare className="h-3 w-3" />
-                  <span>Case tracking included</span>
+                  <span>Human expert backup</span>
                 </div>
               </div>
               
               <Button
                 onClick={handleStartNewCase}
                 disabled={createCaseMutation.isPending}
-                className="w-full"
+                className="w-full bg-purple-600 hover:bg-purple-700"
                 size="sm"
               >
-                {createCaseMutation.isPending ? "Starting..." : "Start Live Chat"}
+                {createCaseMutation.isPending ? "Starting..." : "Start AI Support"}
               </Button>
             </div>
           ) : (
             <>
               {/* Messages */}
               <div className="flex-1 overflow-y-auto space-y-3 pr-2">
-                {messages.map((message: SupportMessage) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${
-                      message.senderType === "customer" ? "justify-end" : "justify-start"
-                    }`}
-                  >
+                {messages.map((message: SupportMessage) => {
+                  const isAiMessage = message.senderId === 999;
+                  const isSystemMessage = message.messageType === "system";
+                  
+                  return (
                     <div
-                      className={`max-w-[80%] p-2 rounded-lg text-xs ${
-                        message.senderType === "customer"
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-100 text-gray-900"
+                      key={message.id}
+                      className={`flex ${
+                        message.senderType === "customer" ? "justify-end" : "justify-start"
                       }`}
                     >
-                      <div className="flex items-center gap-1 mb-1">
-                        <Avatar className="h-4 w-4">
-                          <AvatarFallback className="text-xs">
-                            {message.senderType === "customer" ? "C" : "T"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium">
-                          {message.senderType === "customer" ? "You" : "Technician"}
-                        </span>
-                        <span className="text-xs opacity-70">
-                          {new Date(message.timestamp).toLocaleTimeString()}
-                        </span>
+                      <div
+                        className={`max-w-[80%] p-2 rounded-lg text-xs ${
+                          message.senderType === "customer"
+                            ? "bg-blue-600 text-white"
+                            : isAiMessage
+                            ? "bg-purple-100 text-purple-900 border border-purple-200"
+                            : isSystemMessage
+                            ? "bg-yellow-100 text-yellow-900 border border-yellow-200"
+                            : "bg-gray-100 text-gray-900"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1 mb-1">
+                          <Avatar className="h-4 w-4">
+                            <AvatarFallback className="text-xs">
+                              {message.senderType === "customer" 
+                                ? "C" 
+                                : isAiMessage 
+                                ? "🤖" 
+                                : "T"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="font-medium">
+                            {message.senderType === "customer" 
+                              ? "You" 
+                              : isAiMessage 
+                              ? "AI Assistant" 
+                              : "Technician"}
+                          </span>
+                          <span className="text-xs opacity-70">
+                            {new Date(message.timestamp).toLocaleTimeString()}
+                          </span>
+                        </div>
+                        <p>{message.content}</p>
+                        
+                        {isAiMessage && aiMode && (
+                          <div className="mt-2 pt-2 border-t border-purple-200">
+                            <Button
+                              onClick={handleSwitchToHuman}
+                              variant="ghost"
+                              size="sm"
+                              className="text-xs h-6 px-2 text-purple-700 hover:bg-purple-200"
+                            >
+                              Talk to Human Agent
+                            </Button>
+                          </div>
+                        )}
                       </div>
-                      <p>{message.content}</p>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 
-                {isTyping && (
+                {(isTyping || isAiResponding) && (
                   <div className="flex justify-start">
-                    <div className="bg-gray-100 text-gray-900 p-2 rounded-lg text-xs">
+                    <div className={`p-2 rounded-lg text-xs ${
+                      isAiResponding 
+                        ? "bg-purple-100 text-purple-900 border border-purple-200"
+                        : "bg-gray-100 text-gray-900"
+                    }`}>
                       <div className="flex items-center gap-1">
                         <Avatar className="h-4 w-4">
-                          <AvatarFallback className="text-xs">T</AvatarFallback>
+                          <AvatarFallback className="text-xs">
+                            {isAiResponding ? "🤖" : "T"}
+                          </AvatarFallback>
                         </Avatar>
-                        <span>Technician is typing...</span>
+                        <span>
+                          {isAiResponding 
+                            ? "AI Assistant is analyzing..." 
+                            : "Technician is typing..."}
+                        </span>
                       </div>
                     </div>
                   </div>
