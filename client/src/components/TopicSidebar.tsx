@@ -1,4 +1,4 @@
-import { Check, Code, Cpu, Database, Monitor, Network, Shield } from 'lucide-react';
+import { Check, Code, Cpu, Database, Monitor, Network, Shield, Wrench } from 'lucide-react';
 
 interface TopicSidebarProps {
   onSelectTopic: (topic: string) => void;
@@ -13,6 +13,7 @@ const topics = [
   { name: 'Database Help', icon: <Database className="h-4 w-4 mr-2 text-blue-500" /> },
   { name: 'Mobile Devices', icon: <Monitor className="h-4 w-4 mr-2 text-blue-500" /> },
   { name: 'Security Questions', icon: <Shield className="h-4 w-4 mr-2 text-blue-500" /> },
+  { name: 'Order a technician onsite', icon: <Wrench className="h-4 w-4 mr-2 text-blue-500" /> },
 ];
 
 export default function TopicSidebar({ onSelectTopic, isMobile = false, onClose }: TopicSidebarProps) {
