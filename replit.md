@@ -45,7 +45,8 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
 - **ChatInput**: Auto-resizing textarea with keyboard shortcuts
 - **TopicSidebar**: Predefined technical topics for quick access
 - **UsernameModal**: Initial user setup modal
-- **IssueCategorizationPage**: Technical issue management with categorization and tracking
+- **IssueCategorizationPage**: Technical issue management with categorization, universal pricing, and tracking
+- **UniversalPricingCalculator**: Interactive pricing calculator for all technical categories and subcategories with real-time updates, service configuration, and booking workflow
 - **PhoneSupportPage**: Phone support services with dynamic pricing and booking
 - **PhoneSupportPricing**: Advanced pricing calculator with real-time factors
 - **IssueTracker**: Issue dashboard with status management and filtering
@@ -102,6 +103,16 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
 ## Recent Changes
 
 ### January 7, 2025
+- **Universal Interactive Pricing Calculator for All Categories**: Extended interactive pricing calculator to all technical issue categories and subcategories
+  - Created comprehensive UniversalPricingCalculator component with dynamic pricing for all 9 technical categories and 63 subcategories
+  - Implemented category-specific base pricing: Web Development ($45-85), Hardware Issues ($35-60), Network Troubleshooting ($30-95), Database Help ($50-90), Mobile Devices ($25-65), Security Questions ($35-85), System Administration ($35-95), Software Issues ($25-75)
+  - Added complexity-based pricing tiers: Basic, Intermediate, Advanced, Expert with automatic service recommendations
+  - Enhanced interactive features: Real-time pricing updates, time simulation controls, service type selection (remote/phone/onsite/consultation), advanced pricing factors display
+  - Integrated tabbed interface in issue categorization: Categorize New Issue → Service Pricing → Issue Tracker → AI Chat Support
+  - Added service booking workflow that creates tracked issues with pricing information and automatic navigation to chat support
+  - Implemented comprehensive pricing factors: Time-based multipliers, urgency levels, service type adjustments, weekend surcharges, distance charges for on-site services
+  - Created price optimization features with money-saving tips and cost comparison tools
+
 - **Advanced Phone Support System with Dynamic Pricing**: Comprehensive phone support services with sophisticated pricing algorithms
   - Created 8 tiered phone support services across 4 levels: Basic ($25-40), Intermediate ($55-75), Advanced ($95-125), Expert ($150-200)
   - Implemented dynamic pricing engine with multiple factors: time of day, urgency level, distance, traffic conditions, demand surge, weekend surcharge
@@ -148,7 +159,8 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
 
 ## Changelog
 
-- July 07, 2025. Domain-specific AI behavior implementation
+- January 07, 2025. Universal interactive pricing calculator for all technical categories and subcategories
+- January 07, 2025. Domain-specific AI behavior implementation
 - December 2024. Enhanced topic categorization with subtopics
 - Initial setup with PostgreSQL and OpenAI integration
 

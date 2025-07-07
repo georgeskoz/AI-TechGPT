@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, MessageCircle, List, Plus } from 'lucide-react';
+import { ArrowLeft, MessageCircle, List, Plus, DollarSign } from 'lucide-react';
 import IssueCategorization, { TechnicalIssue } from '@/components/IssueCategorization';
 import IssueTracker from '@/components/IssueTracker';
+import UniversalPricingCalculator from '@/components/UniversalPricingCalculator';
 import useLocalStorage from '@/hooks/useLocalStorage';
 
 export default function IssueCategorizationPage() {
@@ -14,6 +15,8 @@ export default function IssueCategorizationPage() {
   const [issues, setIssues] = useLocalStorage<TechnicalIssue[]>('techgpt_issues', []);
   const [selectedIssue, setSelectedIssue] = useState<TechnicalIssue | null>(null);
   const [activeTab, setActiveTab] = useState('categorize');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
 
   const handleIssueCreated = (newIssue: TechnicalIssue) => {
     setIssues(prev => [...prev, newIssue]);
@@ -26,8 +29,35 @@ export default function IssueCategorizationPage() {
   };
 
   const handleCategorySelected = (category: string, subcategory: string) => {
-    // This could be used to provide immediate suggestions or context
-    console.log('Category selected:', category, subcategory);
+    setSelectedCategory(category);
+    setSelectedSubcategory(subcategory);
+    if (subcategory) {
+      setActiveTab('pricing');
+    }
+  };
+
+  const handleServiceBooked = (category: string, subcategory: string, factors: any, price: number) => {
+    const serviceBooking = {
+      id: Date.now().toString(),
+      title: `${subcategory} Service Booking`,
+      description: `Booked ${subcategory} service in ${category} for $${price}`,
+      category,
+      subcategory,
+      priority: factors.urgency as 'low' | 'medium' | 'high' | 'urgent',
+      status: 'open' as const,
+      domain: category,
+      keywords: [category.toLowerCase(), subcategory.toLowerCase(), 'service', 'booking'],
+      estimatedResolutionTime: `${factors.estimatedDuration} minutes`,
+      reportedBy: 'user',
+      timestamp: new Date()
+    };
+    
+    setIssues(prev => [...prev, serviceBooking]);
+    setActiveTab('tracker');
+    
+    setTimeout(() => {
+      setLocation('/chat');
+    }, 2000);
   };
 
   const handleIssueSelect = (issue: TechnicalIssue) => {
@@ -79,10 +109,14 @@ export default function IssueCategorizationPage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="categorize" className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
               Categorize New Issue
+            </TabsTrigger>
+            <TabsTrigger value="pricing" className="flex items-center gap-2">
+              <DollarSign className="w-4 h-4" />
+              Service Pricing
             </TabsTrigger>
             <TabsTrigger value="tracker" className="flex items-center gap-2">
               <List className="w-4 h-4" />
@@ -98,6 +132,14 @@ export default function IssueCategorizationPage() {
             <IssueCategorization
               onIssueCreated={handleIssueCreated}
               onCategorySelected={handleCategorySelected}
+            />
+          </TabsContent>
+
+          <TabsContent value="pricing" className="mt-6">
+            <UniversalPricingCalculator
+              selectedCategory={selectedCategory}
+              selectedSubcategory={selectedSubcategory}
+              onServiceBooked={handleServiceBooked}
             />
           </TabsContent>
 
