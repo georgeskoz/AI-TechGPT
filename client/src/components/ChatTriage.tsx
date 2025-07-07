@@ -15,7 +15,9 @@ import {
   Clock,
   ArrowRight,
   Brain,
-  Zap
+  Zap,
+  MapPin,
+  Home
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -89,6 +91,7 @@ export default function ChatTriage({ username, onPathSelected }: ChatTriageProps
       case 'ai_chat': return <Bot className="h-4 w-4" />;
       case 'live_chat': return <MessageSquare className="h-4 w-4" />;
       case 'phone_support': return <Phone className="h-4 w-4" />;
+      case 'onsite_support': return <MapPin className="h-4 w-4" />;
       case 'escalate': return <AlertTriangle className="h-4 w-4" />;
       default: return <CheckCircle className="h-4 w-4" />;
     }
@@ -99,6 +102,7 @@ export default function ChatTriage({ username, onPathSelected }: ChatTriageProps
       case 'ai_chat': return 'bg-purple-100 text-purple-800 border-purple-200';
       case 'live_chat': return 'bg-green-100 text-green-800 border-green-200';
       case 'phone_support': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'onsite_support': return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'escalate': return 'bg-red-100 text-red-800 border-red-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -109,6 +113,7 @@ export default function ChatTriage({ username, onPathSelected }: ChatTriageProps
       case 'ai_chat': return 'AI Chat Support';
       case 'live_chat': return 'Live Chat with Human';
       case 'phone_support': return 'Phone Support';
+      case 'onsite_support': return 'Onsite Support';
       case 'escalate': return 'Escalate to Specialist';
       default: return 'General Support';
     }
@@ -337,6 +342,22 @@ export default function ChatTriage({ username, onPathSelected }: ChatTriageProps
                     </div>
                   )}
                   
+                  {triageResult.recommendedPath === 'onsite_support' && (
+                    <div>
+                      <p className="mb-2">Onsite technician visit recommended for hands-on assistance.</p>
+                      <div className="flex items-center gap-4 text-xs">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          In-person visit
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Home className="h-3 w-3" />
+                          At your location
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  
                   {triageResult.recommendedPath === 'escalate' && (
                     <div>
                       <p className="mb-2">This issue requires specialist attention and escalation.</p>
@@ -360,7 +381,7 @@ export default function ChatTriage({ username, onPathSelected }: ChatTriageProps
                   Not satisfied with the recommendation? Choose a different path:
                 </p>
                 <div className="flex justify-center gap-2 flex-wrap">
-                  {['ai_chat', 'live_chat', 'phone_support'].map((path) => (
+                  {['ai_chat', 'live_chat', 'phone_support', 'onsite_support'].map((path) => (
                     <Button
                       key={path}
                       variant="outline"

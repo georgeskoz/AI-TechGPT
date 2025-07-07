@@ -11,6 +11,7 @@ import ChatInput from '@/components/ChatInput';
 import UsernameModal from '@/components/UsernameModal';
 import ErrorToast from '@/components/ErrorToast';
 import DomainSelector from '@/components/DomainSelector';
+import SupportOptionsWidget from '@/components/SupportOptionsWidget';
 
 export default function ChatPage() {
   // State for username and storage
@@ -47,6 +48,26 @@ export default function ChatPage() {
       setSelectedDomain(domain);
     }
     sendMessage(`I need help with ${topic}`);
+  };
+
+  const handleSupportOptionSelected = (option: string) => {
+    switch (option) {
+      case 'ai_chat':
+        // Continue in current chat
+        break;
+      case 'triage':
+        setLocation('/triage');
+        break;
+      case 'live_chat':
+        setLocation('/live-support');
+        break;
+      case 'phone_support':
+        setLocation('/phone-support');
+        break;
+      case 'onsite_support':
+        setLocation('/marketplace');
+        break;
+    }
   };
 
   const handleSendMessage = (message: string) => {
@@ -86,6 +107,24 @@ export default function ChatPage() {
             typingMessage={typingMessage}
             isTyping={isTyping}
           />
+          
+          {/* Support Options Widget - Show after first message */}
+          {messages.length > 0 && (
+            <div className="bg-white border-t border-gray-200 p-4">
+              <div className="mb-3">
+                <h3 className="text-sm font-medium text-gray-900 mb-1">
+                  Need more help? Choose your preferred support:
+                </h3>
+                <p className="text-xs text-gray-600">
+                  Get instant assistance through multiple channels
+                </p>
+              </div>
+              <SupportOptionsWidget 
+                category={selectedDomain || undefined}
+                onOptionSelected={handleSupportOptionSelected}
+              />
+            </div>
+          )}
           
           {/* Chat Input - Always at the bottom */}
           <div className="sticky bottom-0 w-full z-10">

@@ -66,6 +66,10 @@ export default function FloatingChatWidget({ username }: FloatingChatWidgetProps
         setLocation('/phone-support');
         setIsOpen(false);
         break;
+      case 'onsite_support':
+        setLocation('/marketplace');
+        setIsOpen(false);
+        break;
       case 'escalate':
         setLocation('/live-support');
         setIsOpen(false);
