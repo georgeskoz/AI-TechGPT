@@ -18,6 +18,7 @@ import TechnicianRegistration from "@/pages/TechnicianRegistration";
 import TechnicianDashboard from "@/pages/TechnicianDashboard";
 import TechnicianLanding from "@/pages/TechnicianLanding";
 import TechnicianMatchingPage from "@/pages/TechnicianMatchingPage";
+import TechnicianEarnings from "@/pages/TechnicianEarnings";
 import CustomerHomePage from "@/pages/CustomerHomePage";
 import TechnicianHomePage from "@/pages/TechnicianHomePage";
 import AdminHomePage from "@/pages/AdminHomePage";
@@ -43,6 +44,7 @@ function Router() {
       <Route path="/technician-dashboard" component={TechnicianDashboard} />
       <Route path="/technicians" component={TechnicianLanding} />
       <Route path="/technician-matching" component={TechnicianMatchingPage} />
+      <Route path="/technician-earnings" component={TechnicianEarnings} />
       <Route path="/domains" component={DomainSelector} />
       <Route path="/customer-home" component={CustomerHomePage} />
       <Route path="/technician-home" component={TechnicianHomePage} />

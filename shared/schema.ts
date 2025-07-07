@@ -79,10 +79,37 @@ export const jobs = pgTable("jobs", {
   technicianId: integer("technician_id").notNull().references(() => technicians.id),
   customerId: integer("customer_id").notNull().references(() => users.id),
   status: text("status").notNull().default("assigned"), // assigned, started, in_progress, completed, cancelled
+  
+  // Detailed timing tracking
+  requestedAt: timestamp("requested_at").defaultNow(),
+  acceptedAt: timestamp("accepted_at"),
   startedAt: timestamp("started_at"),
+  arrivedAt: timestamp("arrived_at"), // for on-site jobs
   completedAt: timestamp("completed_at"),
+  
+  // Duration tracking
   actualDuration: integer("actual_duration"), // minutes
+  travelTime: integer("travel_time"), // minutes for on-site jobs
+  
+  // Financial tracking
+  hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
+  basePrice: decimal("base_price", { precision: 10, scale: 2 }),
   finalPrice: decimal("final_price", { precision: 10, scale: 2 }),
+  technicianEarnings: decimal("technician_earnings", { precision: 10, scale: 2 }),
+  platformFee: decimal("platform_fee", { precision: 10, scale: 2 }),
+  
+  // Tax and location information
+  serviceLocation: text("service_location"), // province/state where service was performed
+  taxRate: decimal("tax_rate", { precision: 5, scale: 4 }), // applicable tax rate
+  taxAmount: decimal("tax_amount", { precision: 10, scale: 2 }),
+  
+  // Payment tracking
+  paymentStatus: text("payment_status").default("pending"), // pending, processing, paid, failed
+  paymentMethod: text("payment_method"), // stripe, bank_transfer, etc
+  paidAt: timestamp("paid_at"),
+  payoutStatus: text("payout_status").default("pending"), // pending, processed, paid, failed
+  payoutAt: timestamp("payout_at"),
+  
   notes: text("notes"),
   customerRating: integer("customer_rating"), // 1-5 stars
   technicianRating: integer("technician_rating"), // 1-5 stars
@@ -101,6 +128,119 @@ export const jobUpdates = pgTable("job_updates", {
   description: text("description"),
   attachments: jsonb("attachments").$type<string[]>(), // Array of file URLs
   timestamp: timestamp("timestamp").notNull().defaultNow(),
+});
+
+// Earnings and payment tracking
+export const earnings = pgTable("earnings", {
+  id: serial("id").primaryKey(),
+  technicianId: integer("technician_id").notNull().references(() => technicians.id),
+  jobId: integer("job_id").references(() => jobs.id),
+  
+  // Earnings breakdown
+  grossAmount: decimal("gross_amount", { precision: 10, scale: 2 }).notNull(),
+  platformFee: decimal("platform_fee", { precision: 10, scale: 2 }).notNull(),
+  netAmount: decimal("net_amount", { precision: 10, scale: 2 }).notNull(),
+  
+  // Tax information
+  taxableAmount: decimal("taxable_amount", { precision: 10, scale: 2 }),
+  province: text("province"), // For Canadian taxes
+  state: text("state"), // For US taxes
+  country: text("country").notNull().default("CA"),
+  
+  // Payment details
+  paymentPeriod: text("payment_period").notNull(), // weekly, biweekly, monthly
+  paymentDate: timestamp("payment_date"),
+  payoutMethod: text("payout_method"), // direct_deposit, paypal, check
+  payoutReference: text("payout_reference"), // transaction ID
+  payoutStatus: text("payout_status").default("pending"), // pending, processing, completed, failed
+  
+  // Service details
+  serviceType: text("service_type"), // remote, phone, onsite
+  serviceDate: timestamp("service_date").notNull(),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Tax information by province/state
+export const taxRates = pgTable("tax_rates", {
+  id: serial("id").primaryKey(),
+  province: text("province"),
+  state: text("state"),
+  country: text("country").notNull(),
+  
+  // Tax rates
+  gst: decimal("gst", { precision: 5, scale: 4 }), // Goods and Services Tax (Canada)
+  pst: decimal("pst", { precision: 5, scale: 4 }), // Provincial Sales Tax (Canada)
+  hst: decimal("hst", { precision: 5, scale: 4 }), // Harmonized Sales Tax (Canada)
+  salesTax: decimal("sales_tax", { precision: 5, scale: 4 }), // State sales tax (US)
+  
+  totalTaxRate: decimal("total_tax_rate", { precision: 5, scale: 4 }).notNull(),
+  effectiveDate: timestamp("effective_date").notNull(),
+  isActive: boolean("is_active").default(true),
+});
+
+// Payment schedules and statements
+export const paymentSchedules = pgTable("payment_schedules", {
+  id: serial("id").primaryKey(),
+  technicianId: integer("technician_id").notNull().references(() => technicians.id),
+  
+  // Schedule settings
+  frequency: text("frequency").notNull().default("weekly"), // weekly, biweekly, monthly
+  dayOfWeek: integer("day_of_week"), // 1-7 for weekly payments
+  dayOfMonth: integer("day_of_month"), // 1-31 for monthly payments
+  
+  // Banking information
+  bankAccount: text("bank_account"), // encrypted
+  routingNumber: text("routing_number"), // encrypted
+  accountType: text("account_type"), // checking, savings
+  
+  // Minimum payout threshold
+  minimumPayout: decimal("minimum_payout", { precision: 10, scale: 2 }).default("25.00"),
+  
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Financial statements for tax purposes
+export const statements = pgTable("statements", {
+  id: serial("id").primaryKey(),
+  technicianId: integer("technician_id").notNull().references(() => technicians.id),
+  
+  // Statement period
+  statementType: text("statement_type").notNull(), // weekly, monthly, quarterly, annual, t4a
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  
+  // Financial summary
+  totalGrossEarnings: decimal("total_gross_earnings", { precision: 10, scale: 2 }).notNull(),
+  totalPlatformFees: decimal("total_platform_fees", { precision: 10, scale: 2 }).notNull(),
+  totalNetEarnings: decimal("total_net_earnings", { precision: 10, scale: 2 }).notNull(),
+  totalTaxableAmount: decimal("total_taxable_amount", { precision: 10, scale: 2 }),
+  
+  // Job statistics
+  totalJobs: integer("total_jobs").notNull(),
+  remoteJobs: integer("remote_jobs").default(0),
+  phoneJobs: integer("phone_jobs").default(0),
+  onsiteJobs: integer("onsite_jobs").default(0),
+  totalHours: decimal("total_hours", { precision: 8, scale: 2 }),
+  
+  // Tax breakdown by province/state
+  taxBreakdown: jsonb("tax_breakdown").$type<{
+    province?: string;
+    state?: string;
+    gst?: number;
+    pst?: number;
+    hst?: number;
+    salesTax?: number;
+    totalTax?: number;
+  }>(),
+  
+  // Statement file
+  pdfUrl: text("pdf_url"), // Generated PDF statement
+  generatedAt: timestamp("generated_at"),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const messages = pgTable("messages", {
@@ -236,6 +376,35 @@ export const supportMessagesRelations = relations(supportMessages, ({ one }) => 
   }),
 }));
 
+export const earningsRelations = relations(earnings, ({ one }) => ({
+  technician: one(technicians, {
+    fields: [earnings.technicianId],
+    references: [technicians.id],
+  }),
+  job: one(jobs, {
+    fields: [earnings.jobId],
+    references: [jobs.id],
+  }),
+}));
+
+export const taxRatesRelations = relations(taxRates, ({ many }) => ({
+  earnings: many(earnings),
+}));
+
+export const paymentSchedulesRelations = relations(paymentSchedules, ({ one }) => ({
+  technician: one(technicians, {
+    fields: [paymentSchedules.technicianId],
+    references: [technicians.id],
+  }),
+}));
+
+export const statementsRelations = relations(statements, ({ one }) => ({
+  technician: one(technicians, {
+    fields: [statements.technicianId],
+    references: [technicians.id],
+  }),
+}));
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -313,6 +482,71 @@ export const insertJobUpdateSchema = createInsertSchema(jobUpdates).pick({
   attachments: z.array(z.string()).optional(),
 });
 
+export const insertEarningsSchema = createInsertSchema(earnings).pick({
+  technicianId: true,
+  jobId: true,
+  grossAmount: true,
+  platformFee: true,
+  netAmount: true,
+  taxableAmount: true,
+  province: true,
+  state: true,
+  country: true,
+  paymentPeriod: true,
+  payoutMethod: true,
+  serviceType: true,
+  serviceDate: true,
+});
+
+export const insertTaxRateSchema = createInsertSchema(taxRates).pick({
+  province: true,
+  state: true,
+  country: true,
+  gst: true,
+  pst: true,
+  hst: true,
+  salesTax: true,
+  totalTaxRate: true,
+  effectiveDate: true,
+});
+
+export const insertPaymentScheduleSchema = createInsertSchema(paymentSchedules).pick({
+  technicianId: true,
+  frequency: true,
+  dayOfWeek: true,
+  dayOfMonth: true,
+  bankAccount: true,
+  routingNumber: true,
+  accountType: true,
+  minimumPayout: true,
+});
+
+export const insertStatementSchema = createInsertSchema(statements).pick({
+  technicianId: true,
+  statementType: true,
+  periodStart: true,
+  periodEnd: true,
+  totalGrossEarnings: true,
+  totalPlatformFees: true,
+  totalNetEarnings: true,
+  totalTaxableAmount: true,
+  totalJobs: true,
+  remoteJobs: true,
+  phoneJobs: true,
+  onsiteJobs: true,
+  totalHours: true,
+}).extend({
+  taxBreakdown: z.object({
+    province: z.string().optional(),
+    state: z.string().optional(),
+    gst: z.number().optional(),
+    pst: z.number().optional(),
+    hst: z.number().optional(),
+    salesTax: z.number().optional(),
+    totalTax: z.number().optional(),
+  }).optional(),
+});
+
 export const insertSupportCaseSchema = createInsertSchema(supportCases).pick({
   customerId: true,
   technicianId: true,
@@ -348,6 +582,14 @@ export type InsertSupportCase = z.infer<typeof insertSupportCaseSchema>;
 export type SupportCase = typeof supportCases.$inferSelect;
 export type InsertSupportMessage = z.infer<typeof insertSupportMessageSchema>;
 export type SupportMessage = typeof supportMessages.$inferSelect;
+export type InsertEarnings = z.infer<typeof insertEarningsSchema>;
+export type Earnings = typeof earnings.$inferSelect;
+export type InsertTaxRate = z.infer<typeof insertTaxRateSchema>;
+export type TaxRate = typeof taxRates.$inferSelect;
+export type InsertPaymentSchedule = z.infer<typeof insertPaymentScheduleSchema>;
+export type PaymentSchedule = typeof paymentSchedules.$inferSelect;
+export type InsertStatement = z.infer<typeof insertStatementSchema>;
+export type Statement = typeof statements.$inferSelect;
 
 // Enhanced technician schemas
 export const insertTechnicianEnhancedSchema = createInsertSchema(technicians).pick({
