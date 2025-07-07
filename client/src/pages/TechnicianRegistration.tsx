@@ -29,10 +29,10 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 const technicianSchema = z.object({
-  businessName: z.string().min(1, "Business name is required"),
-  companyName: z.string().optional(),
+  businessName: z.string().optional(), // Optional - for technicians working with fleets
+  companyName: z.string().optional(), // Optional - company affiliation
   experience: z.enum(["beginner", "intermediate", "advanced", "expert"]),
-  hourlyRate: z.number().min(25, "Minimum rate is $25/hour").max(500, "Maximum rate is $500/hour"),
+  hourlyRatePercentage: z.number().min(70).max(95).default(85), // Admin-set percentage (70-95%)
   location: z.string().min(1, "Location is required"),
   serviceRadius: z.number().min(5, "Minimum service radius is 5 miles").max(100, "Maximum service radius is 100 miles"),
   profileDescription: z.string().min(50, "Profile description must be at least 50 characters"),
@@ -93,7 +93,7 @@ export default function TechnicianRegistration() {
       businessName: "",
       companyName: "",
       experience: "intermediate",
-      hourlyRate: 50,
+      hourlyRatePercentage: 85, // Default to 85% technician share
       location: "",
       serviceRadius: 25,
       profileDescription: "",
@@ -216,22 +216,22 @@ export default function TechnicianRegistration() {
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="businessName">Business Name *</Label>
+                  <Label htmlFor="businessName">Business Name (Optional)</Label>
                   <Input
                     id="businessName"
                     {...form.register("businessName")}
-                    placeholder="Your Tech Solutions"
+                    placeholder="Your Tech Solutions (if working with a fleet)"
                   />
-                  {form.formState.errors.businessName && (
-                    <p className="text-red-500 text-sm">{form.formState.errors.businessName.message}</p>
-                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Only required if you're a technician working with another fleet, not mandatory for direct work
+                  </p>
                 </div>
                 <div>
                   <Label htmlFor="companyName">Company Name (Optional)</Label>
                   <Input
                     id="companyName"
                     {...form.register("companyName")}
-                    placeholder="ABC Tech Company"
+                    placeholder="ABC Tech Company (if applicable)"
                   />
                 </div>
               </div>
@@ -252,17 +252,36 @@ export default function TechnicianRegistration() {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="hourlyRate">Hourly Rate (USD) *</Label>
-                  <Input
-                    id="hourlyRate"
-                    type="number"
-                    {...form.register("hourlyRate", { valueAsNumber: true })}
-                    placeholder="50"
-                    min="25"
-                    max="500"
-                  />
-                  {form.formState.errors.hourlyRate && (
-                    <p className="text-red-500 text-sm">{form.formState.errors.hourlyRate.message}</p>
+                  <Label htmlFor="hourlyRatePercentage">Revenue Share (%) *</Label>
+                  <div className="relative">
+                    <Input
+                      id="hourlyRatePercentage"
+                      type="number"
+                      {...form.register("hourlyRatePercentage", { valueAsNumber: true })}
+                      placeholder="85"
+                      min="70"
+                      max="95"
+                      disabled
+                      className="bg-gray-50"
+                    />
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                      <span className="text-gray-500 text-sm">%</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Revenue percentage set by administrator. You receive 85% of service fees, platform takes 15%
+                  </p>
+                  <div className="mt-2 p-3 bg-blue-50 rounded-md border border-blue-200">
+                    <p className="text-sm font-medium text-blue-900 mb-2">Estimated Earnings (85% share):</p>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>Remote Support: <span className="font-medium">$21-64/hour</span></div>
+                      <div>Phone Support: <span className="font-medium">$26-81/hour</span></div>
+                      <div>On-Site Service: <span className="font-medium">$43-170/hour</span></div>
+                      <div>Expert Consultation: <span className="font-medium">$128-170/hour</span></div>
+                    </div>
+                  </div>
+                  {form.formState.errors.hourlyRatePercentage && (
+                    <p className="text-red-500 text-sm">{form.formState.errors.hourlyRatePercentage.message}</p>
                   )}
                 </div>
               </div>
