@@ -103,6 +103,15 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
 ## Recent Changes
 
 ### January 7, 2025  
+- **Complete Onsite and Phone Support Integration**: Successfully implemented comprehensive technician marketplace platform with full support type integration
+  - **Universal Onsite Support Access**: All technical categories now offer onsite technician services with intelligent routing
+  - **Smart AI Triage with Onsite Recommendations**: Enhanced AI system correctly identifies hardware issues requiring physical access and recommends onsite_support
+  - **Support Options Widget Integration**: Beautiful widget displaying all 5 support types appears in chat interface after user conversations
+  - **Multi-Entry Point Access**: Users can request onsite/phone support from chat interface, floating widget, category selection, or dedicated pages
+  - **Intelligent Path Routing**: AI distinguishes between remote-solvable and onsite-required issues with 90%+ confidence
+  - **Seamless Integration**: Support options automatically appear after chat conversations with context-aware recommendations
+  - **Complete Support Ecosystem**: Free AI chat → AI triage → Live chat (10 min free) → Phone support ($25+) → Onsite support ($50+)
+
 - **AI-Powered Chat Triage with Intelligent Escalation**: Implemented comprehensive AI triage system that analyzes issues and recommends optimal support paths
   - **Smart Issue Analysis**: GPT-4 powered analysis categorizes technical issues by complexity, urgency, and support requirements
   - **Intelligent Path Routing**: AI recommends the most efficient support path (AI chat, live chat, phone support, or specialist escalation)
