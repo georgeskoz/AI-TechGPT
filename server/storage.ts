@@ -59,6 +59,16 @@ export interface IStorage {
   declineJob(technicianId: number, serviceRequestId: number): Promise<any>;
   getTechnicianEarnings(technicianId: number): Promise<any[]>;
 
+  // Admin dashboard methods
+  getAdminDashboardStats(): Promise<any>;
+  getAllUsers(): Promise<any[]>;
+  getAllTechnicians(): Promise<any[]>;
+  getAllJobs(): Promise<any[]>;
+  getAllDisputes(): Promise<any[]>;
+  updateUserStatus(userId: number, status: string): Promise<any>;
+  updateTechnicianStatus(technicianId: number, status: string): Promise<any>;
+  resolveDispute(disputeId: number, resolution: string): Promise<any>;
+
   // Live support chat
   createSupportCase(supportCase: InsertSupportCase): Promise<SupportCase>;
   getSupportCase(id: number): Promise<SupportCase | undefined>;
@@ -391,6 +401,90 @@ class MemoryStorage implements IStorage {
   private supportMessages: Map<number, SupportMessage> = new Map();
   
   private nextId = 1;
+
+  constructor() {
+    // Initialize with sample data for demo
+    this.initializeSampleData();
+  }
+
+  private initializeSampleData() {
+    // Sample users
+    const sampleUsers = [
+      { id: 1, username: "john_doe", email: "john@example.com", fullName: "John Doe", bio: "Tech enthusiast", avatar: null },
+      { id: 2, username: "jane_smith", email: "jane@example.com", fullName: "Jane Smith", bio: "Software developer", avatar: null },
+      { id: 3, username: "bob_wilson", email: "bob@example.com", fullName: "Bob Wilson", bio: "Hardware specialist", avatar: null },
+      { id: 4, username: "alice_brown", email: "alice@example.com", fullName: "Alice Brown", bio: "Network admin", avatar: null }
+    ];
+
+    sampleUsers.forEach(user => {
+      this.users.set(user.id, user as User);
+    });
+
+    // Sample technicians
+    const sampleTechnicians = [
+      {
+        id: 1, userId: 5, businessName: "TechFix Pro", companyName: "TechFix Solutions", 
+        experience: "5+ years", hourlyRate: "85", location: "San Francisco, CA", 
+        serviceRadius: 25, serviceAreas: ["San Francisco", "Oakland"], 
+        skills: ["Hardware Repair", "Network Setup", "Software Installation"], 
+        categories: ["Hardware Issues", "Network Troubleshooting"], 
+        certifications: ["CompTIA A+", "Cisco CCNA"], languages: ["English", "Spanish"],
+        availability: { monday: "9-17", tuesday: "9-17", wednesday: "9-17" },
+        profileDescription: "Expert in hardware and network solutions", rating: "4.9",
+        completedJobs: 245, totalEarnings: "18750", responseTime: 30, 
+        isActive: true, isVerified: true, verificationStatus: "verified",
+        stripeAccountId: null, createdAt: new Date(), updatedAt: new Date()
+      },
+      {
+        id: 2, userId: 6, businessName: "Code Solutions", companyName: "Mike Chen Tech", 
+        experience: "7+ years", hourlyRate: "95", location: "New York, NY", 
+        serviceRadius: 30, serviceAreas: ["Manhattan", "Brooklyn"], 
+        skills: ["Web Development", "Database Management", "System Administration"], 
+        categories: ["Web Development", "Database Help"], 
+        certifications: ["AWS Certified", "Microsoft Certified"], languages: ["English", "Mandarin"],
+        availability: { monday: "8-18", tuesday: "8-18", wednesday: "8-18" },
+        profileDescription: "Full-stack developer and system architect", rating: "4.8",
+        completedJobs: 198, totalEarnings: "15840", responseTime: 45, 
+        isActive: true, isVerified: true, verificationStatus: "verified",
+        stripeAccountId: null, createdAt: new Date(), updatedAt: new Date()
+      }
+    ];
+
+    sampleTechnicians.forEach(tech => {
+      this.technicians.set(tech.id, tech as Technician);
+    });
+
+    // Sample jobs
+    const sampleJobs = [
+      {
+        id: 1, customerId: 1, technicianId: 1, serviceRequestId: 1,
+        description: "Computer not starting up", status: "in_progress",
+        scheduledTime: new Date(), estimatedDuration: 120, totalCost: "150.00",
+        location: "123 Main St, San Francisco", completedAt: null,
+        rating: null, feedback: null, createdAt: new Date()
+      },
+      {
+        id: 2, customerId: 2, technicianId: 2, serviceRequestId: 2,
+        description: "Website database optimization", status: "completed",
+        scheduledTime: new Date(Date.now() - 86400000), estimatedDuration: 180, totalCost: "270.00",
+        location: "Remote", completedAt: new Date(Date.now() - 3600000),
+        rating: 5, feedback: "Excellent work!", createdAt: new Date(Date.now() - 86400000)
+      },
+      {
+        id: 3, customerId: 3, technicianId: 1, serviceRequestId: 3,
+        description: "Network setup for small office", status: "disputed",
+        scheduledTime: new Date(Date.now() - 172800000), estimatedDuration: 240, totalCost: "320.00",
+        location: "456 Business Ave, Oakland", completedAt: new Date(Date.now() - 86400000),
+        rating: null, feedback: null, createdAt: new Date(Date.now() - 172800000)
+      }
+    ];
+
+    sampleJobs.forEach(job => {
+      this.jobs.set(job.id, job as Job);
+    });
+
+    this.nextId = 10; // Start IDs from 10 to avoid conflicts
+  }
   
   // User management
   async getUser(id: number): Promise<User | undefined> {
@@ -726,6 +820,103 @@ class MemoryStorage implements IStorage {
       { month: "December", amount: 1650, jobs: 11 },
       { month: "January", amount: 850, jobs: 5 }
     ];
+  }
+
+  // Admin dashboard methods
+  async getAdminDashboardStats(): Promise<any> {
+    const totalUsers = this.users.size;
+    const totalTechnicians = this.technicians.size;
+    const totalJobs = this.jobs.size;
+    const activeJobs = Array.from(this.jobs.values()).filter(job => job.status === "in_progress").length;
+    const completedJobs = Array.from(this.jobs.values()).filter(job => job.status === "completed").length;
+    const totalRevenue = Array.from(this.jobs.values()).reduce((sum, job) => sum + parseFloat(job.totalCost || "0"), 0);
+    
+    return {
+      totalUsers,
+      totalTechnicians,
+      activeJobs,
+      completedJobs,
+      totalRevenue: Math.round(totalRevenue),
+      disputesClosed: 23,
+      avgRating: 4.7
+    };
+  }
+
+  async getAllUsers(): Promise<any[]> {
+    return Array.from(this.users.values()).map(user => ({
+      ...user,
+      type: "customer",
+      status: "active",
+      totalSpent: Math.floor(Math.random() * 1000) + 100
+    }));
+  }
+
+  async getAllTechnicians(): Promise<any[]> {
+    return Array.from(this.technicians.values()).map(tech => ({
+      ...tech,
+      status: tech.isVerified ? "verified" : "pending",
+      earnings: Math.floor(Math.random() * 20000) + 5000
+    }));
+  }
+
+  async getAllJobs(): Promise<any[]> {
+    return Array.from(this.jobs.values()).map(job => ({
+      ...job,
+      customer: "Customer Name",
+      technician: "Technician Name",
+      service: job.description || "General Support",
+      amount: parseFloat(job.totalCost || "100"),
+      created: job.createdAt?.toISOString() || new Date().toISOString()
+    }));
+  }
+
+  async getAllDisputes(): Promise<any[]> {
+    // Mock disputes data
+    return [
+      {
+        id: 1,
+        jobId: 3,
+        customer: "Bob Wilson",
+        technician: "Emma Wilson",
+        reason: "Service not completed",
+        status: "open",
+        created: new Date().toISOString()
+      },
+      {
+        id: 2,
+        jobId: 15,
+        customer: "Tom Johnson",
+        technician: "Sarah Johnson",
+        reason: "Billing issue",
+        status: "resolved",
+        created: new Date(Date.now() - 86400000).toISOString()
+      }
+    ];
+  }
+
+  async updateUserStatus(userId: number, status: string): Promise<any> {
+    const user = this.users.get(userId);
+    if (user) {
+      // In a real implementation, you'd update the user status
+      return { success: true, message: "User status updated" };
+    }
+    throw new Error("User not found");
+  }
+
+  async updateTechnicianStatus(technicianId: number, status: string): Promise<any> {
+    const technician = this.technicians.get(technicianId);
+    if (technician) {
+      technician.isVerified = status === "verified";
+      technician.updatedAt = new Date();
+      this.technicians.set(technicianId, technician);
+      return technician;
+    }
+    throw new Error("Technician not found");
+  }
+
+  async resolveDispute(disputeId: number, resolution: string): Promise<any> {
+    // Mock dispute resolution
+    return { success: true, message: "Dispute resolved", resolution };
   }
 }
 

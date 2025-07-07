@@ -17,6 +17,8 @@ import AuthTestPage from "@/components/AuthTestPage";
 import TechnicianRegistration from "@/pages/TechnicianRegistration";
 import TechnicianDashboard from "@/pages/TechnicianDashboard";
 import TechnicianLanding from "@/pages/TechnicianLanding";
+import AdminDashboard from "@/pages/AdminDashboard";
+import AdminNavigation from "@/components/AdminNavigation";
 import FloatingChatWidget from "@/components/FloatingChatWidget";
 
 function Router() {
@@ -35,6 +37,8 @@ function Router() {
       <Route path="/technician-register" component={TechnicianRegistration} />
       <Route path="/technician-dashboard" component={TechnicianDashboard} />
       <Route path="/technicians" component={TechnicianLanding} />
+      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin-portal" component={AdminNavigation} />
       <Route path="/:username/profile" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>
