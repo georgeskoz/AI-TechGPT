@@ -11,9 +11,14 @@ import {
   Minimize2,
   Maximize2,
   HelpCircle,
-  Zap
+  Zap,
+  Brain,
+  Phone,
+  Users
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import ChatTriage from "./ChatTriage";
+import LiveSupportChat from "./LiveSupportChat";
 
 interface FloatingChatWidgetProps {
   username: string;
@@ -23,6 +28,7 @@ export default function FloatingChatWidget({ username }: FloatingChatWidgetProps
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [message, setMessage] = useState("");
+  const [currentView, setCurrentView] = useState<'menu' | 'triage' | 'live_chat'>('menu');
   const [, setLocation] = useLocation();
 
   const handleSendMessage = () => {
@@ -38,6 +44,8 @@ export default function FloatingChatWidget({ username }: FloatingChatWidgetProps
     if (action === "Start Live Support Chat") {
       setLocation("/live-support");
       setIsOpen(false);
+    } else if (action === "AI Triage Analysis") {
+      setCurrentView('triage');
     } else {
       setMessage(action);
       setLocation(`/chat?message=${encodeURIComponent(action)}&username=${encodeURIComponent(username)}`);
@@ -45,8 +53,31 @@ export default function FloatingChatWidget({ username }: FloatingChatWidgetProps
     }
   };
 
+  const handlePathSelected = (path: string, data?: any) => {
+    switch (path) {
+      case 'ai_chat':
+        setLocation('/chat');
+        setIsOpen(false);
+        break;
+      case 'live_chat':
+        setCurrentView('live_chat');
+        break;
+      case 'phone_support':
+        setLocation('/phone-support');
+        setIsOpen(false);
+        break;
+      case 'escalate':
+        setLocation('/live-support');
+        setIsOpen(false);
+        break;
+      default:
+        setCurrentView('menu');
+    }
+  };
+
   const quickActions = [
-    "Start Live Support Chat",
+    "AI Triage Analysis",
+    "Start Live Support Chat", 
     "Help me troubleshoot a network connection issue",
     "I need help with software installation",
     "My computer is running slowly, what should I check?",
@@ -69,6 +100,57 @@ export default function FloatingChatWidget({ username }: FloatingChatWidgetProps
             <HelpCircle className="h-3 w-3" />
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (currentView === 'triage') {
+    return (
+      <div className="fixed bottom-6 right-6 z-50">
+        <Card className="w-96 h-[500px] shadow-xl border-2">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCurrentView('menu')}
+                  className="h-6 w-6 p-0"
+                >
+                  ←
+                </Button>
+                <CardTitle className="text-sm">AI Triage</CardTitle>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsOpen(false)}
+                className="h-6 w-6 p-0"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="h-full overflow-y-auto">
+            <ChatTriage username={username} onPathSelected={handlePathSelected} />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (currentView === 'live_chat') {
+    return (
+      <div className="fixed bottom-6 right-6 z-50">
+        <Card className="w-96 h-[500px] shadow-xl border-2">
+          <CardContent className="h-full p-0">
+            <LiveSupportChat 
+              username={username}
+              isMinimized={false}
+              onToggleMinimize={() => setCurrentView('menu')}
+            />
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -117,12 +199,23 @@ export default function FloatingChatWidget({ username }: FloatingChatWidgetProps
                 <span className="text-sm font-medium">Quick Help</span>
               </div>
               <div className="space-y-1 max-h-32 overflow-y-auto">
-                {quickActions.slice(0, 3).map((action, index) => (
+                {quickActions.slice(0, 4).map((action, index) => (
                   <button
                     key={index}
                     onClick={() => handleQuickAction(action)}
-                    className="text-left text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded w-full transition-colors"
+                    className={`text-left text-xs p-2 rounded w-full transition-colors flex items-center gap-2 ${
+                      action === "AI Triage Analysis" 
+                        ? "text-purple-600 hover:text-purple-800 hover:bg-purple-50"
+                        : "text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                    }`}
                   >
+                    {action === "AI Triage Analysis" ? (
+                      <Brain className="h-3 w-3" />
+                    ) : action === "Start Live Support Chat" ? (
+                      <Users className="h-3 w-3" />
+                    ) : (
+                      <Bot className="h-3 w-3" />
+                    )}
                     {action}
                   </button>
                 ))}
