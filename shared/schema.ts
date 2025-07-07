@@ -48,6 +48,12 @@ export const technicians = pgTable("technicians", {
   isVerified: boolean("is_verified").default(false),
   verificationStatus: text("verification_status").default("pending"), // pending, approved, rejected
   stripeAccountId: text("stripe_account_id"),
+  
+  // Admin-controlled earning percentages per service type
+  remoteEarningPercentage: decimal("remote_earning_percentage", { precision: 5, scale: 2 }).default("85.00"), // Admin can set custom %
+  phoneEarningPercentage: decimal("phone_earning_percentage", { precision: 5, scale: 2 }).default("85.00"), // Admin can set custom %
+  onsiteEarningPercentage: decimal("onsite_earning_percentage", { precision: 5, scale: 2 }).default("85.00"), // Admin can set custom %
+  
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -128,6 +134,33 @@ export const jobUpdates = pgTable("job_updates", {
   description: text("description"),
   attachments: jsonb("attachments").$type<string[]>(), // Array of file URLs
   timestamp: timestamp("timestamp").notNull().defaultNow(),
+});
+
+// Admin earning settings per technician
+export const technicianEarningSettings = pgTable("technician_earning_settings", {
+  id: serial("id").primaryKey(),
+  technicianId: integer("technician_id").notNull().references(() => technicians.id),
+  
+  // Service-specific earning percentages (admin controlled)
+  remoteEarningPercentage: decimal("remote_earning_percentage", { precision: 5, scale: 2 }).default("85.00"),
+  phoneEarningPercentage: decimal("phone_earning_percentage", { precision: 5, scale: 2 }).default("85.00"),
+  onsiteEarningPercentage: decimal("onsite_earning_percentage", { precision: 5, scale: 2 }).default("85.00"),
+  
+  // Bonus multipliers (admin controlled)
+  performanceBonus: decimal("performance_bonus", { precision: 5, scale: 2 }).default("0.00"), // Additional % for high performers
+  loyaltyBonus: decimal("loyalty_bonus", { precision: 5, scale: 2 }).default("0.00"), // Additional % for long-term technicians
+  
+  // Special rates
+  premiumServiceRate: decimal("premium_service_rate", { precision: 5, scale: 2 }).default("0.00"), // Extra % for premium services
+  
+  // Admin notes and effective dates
+  adminNotes: text("admin_notes"),
+  effectiveDate: timestamp("effective_date").defaultNow(),
+  lastModifiedBy: integer("last_modified_by").references(() => users.id), // Admin user who made changes
+  
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Earnings and payment tracking
@@ -405,6 +438,17 @@ export const statementsRelations = relations(statements, ({ one }) => ({
   }),
 }));
 
+export const technicianEarningSettingsRelations = relations(technicianEarningSettings, ({ one }) => ({
+  technician: one(technicians, {
+    fields: [technicianEarningSettings.technicianId],
+    references: [technicians.id],
+  }),
+  lastModifiedByUser: one(users, {
+    fields: [technicianEarningSettings.lastModifiedBy],
+    references: [users.id],
+  }),
+}));
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -547,6 +591,19 @@ export const insertStatementSchema = createInsertSchema(statements).pick({
   }).optional(),
 });
 
+export const insertTechnicianEarningSettingsSchema = createInsertSchema(technicianEarningSettings).pick({
+  technicianId: true,
+  remoteEarningPercentage: true,
+  phoneEarningPercentage: true,
+  onsiteEarningPercentage: true,
+  performanceBonus: true,
+  loyaltyBonus: true,
+  premiumServiceRate: true,
+  adminNotes: true,
+  effectiveDate: true,
+  lastModifiedBy: true,
+});
+
 export const insertSupportCaseSchema = createInsertSchema(supportCases).pick({
   customerId: true,
   technicianId: true,
@@ -590,6 +647,8 @@ export type InsertPaymentSchedule = z.infer<typeof insertPaymentScheduleSchema>;
 export type PaymentSchedule = typeof paymentSchedules.$inferSelect;
 export type InsertStatement = z.infer<typeof insertStatementSchema>;
 export type Statement = typeof statements.$inferSelect;
+export type InsertTechnicianEarningSettings = z.infer<typeof insertTechnicianEarningSettingsSchema>;
+export type TechnicianEarningSettings = typeof technicianEarningSettings.$inferSelect;
 
 // Enhanced technician schemas
 export const insertTechnicianEnhancedSchema = createInsertSchema(technicians).pick({

@@ -25,6 +25,7 @@ import AdminHomePage from "@/pages/AdminHomePage";
 import DomainSelector from "@/pages/DomainSelector";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminNavigation from "@/components/AdminNavigation";
+import AdminEarningSettings from "@/components/AdminEarningSettings";
 import FloatingChatWidget from "@/components/FloatingChatWidget";
 
 function Router() {
@@ -51,6 +52,7 @@ function Router() {
       <Route path="/admin-home" component={AdminHomePage} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin-portal" component={AdminNavigation} />
+      <Route path="/admin-earnings" component={AdminEarningSettings} />
       <Route path="/:username/profile" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>

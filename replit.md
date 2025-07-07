@@ -113,6 +113,15 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
   - **Performance Analytics**: Detailed service type breakdown, monthly performance tracking, and earnings optimization insights
   - **Database Schema**: Enhanced job tracking with payment status, payout tracking, tax information, and comprehensive earnings tables
   - **Professional Interface**: Clean, tabbed interface at `/technician-earnings` with comprehensive financial dashboard and reporting tools
+- **Admin-Controlled Earning Percentages**: Implemented flexible earning percentage management system for individual service providers
+  - **Individual Rate Control**: Admins can set custom earning percentages per service type (remote, phone, on-site) for each technician
+  - **Performance & Loyalty Bonuses**: Additional percentage bonuses for high performers and long-term technicians
+  - **Premium Service Rates**: Extra percentage rates for premium or specialized services
+  - **Bulk Operations**: Mass update capabilities with preset templates (Standard 85%, High Performer 90%, New Technician 80%, Premium Partner 95%)
+  - **Admin Interface**: Comprehensive table interface at `/admin-earnings` with editing capabilities, performance badges, and effective rate calculations
+  - **Database Schema**: Added `technicianEarningSettings` table with admin notes, effective dates, and modification tracking
+  - **API Routes**: Complete CRUD operations for individual and bulk earning percentage management
+  - **Replaced Fixed Rates**: Moved from fixed 85% rate to flexible admin-controlled percentages per service provider
 - **Uber-Style Technician Matching System**: Implemented comprehensive technician matching platform with skill-based search and real-time notifications
   - **Smart Matching Algorithm**: Technicians matched by skill compatibility and sorted by distance proximity
   - **Skill Analysis**: Visual skill matching with green badges for matched skills and gray for additional capabilities
