@@ -15,7 +15,7 @@ import FloatingChatWidget from "@/components/FloatingChatWidget";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={() => <MarketplacePage username={localStorage.getItem("username") || "Guest"} />} />
+      <Route path="/" component={ChatPage} />
       <Route path="/marketplace" component={() => <MarketplacePage username={localStorage.getItem("username") || "Guest"} />} />
       <Route path="/chat" component={ChatPage} />
       <Route path="/issues" component={IssueCategorizationPage} />
