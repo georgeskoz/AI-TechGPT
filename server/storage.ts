@@ -802,6 +802,8 @@ class MemoryStorage implements IStorage {
     };
     
     this.technicians.set(id, technician);
+    console.log(`Registered new technician with ID ${id}:`, technician);
+    console.log(`Total technicians now: ${this.technicians.size}`);
     return technician;
   }
 
@@ -892,11 +894,13 @@ class MemoryStorage implements IStorage {
   }
 
   async getAllTechnicians(): Promise<any[]> {
-    return Array.from(this.technicians.values()).map(tech => ({
+    const allTechnicians = Array.from(this.technicians.values()).map(tech => ({
       ...tech,
       status: tech.isVerified ? "verified" : "pending",
       earnings: Math.floor(Math.random() * 20000) + 5000
     }));
+    console.log(`getAllTechnicians called, returning ${allTechnicians.length} technicians:`, allTechnicians.map(t => ({ id: t.id, businessName: t.businessName, location: t.location })));
+    return allTechnicians;
   }
 
   async getAllJobs(): Promise<any[]> {
