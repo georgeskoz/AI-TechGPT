@@ -93,9 +93,34 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
 - `npm run start`: Production server startup
 - `npm run db:push`: Push database schema changes
 
+## Recent Changes
+
+### January 7, 2025
+- **Domain-Specific AI Behavior**: Implemented customizable AI behavior for different technical domains
+  - Created domain configuration system with specialized prompts, temperature settings, and response styles
+  - Added 9 technical domains: Web Development, Hardware Issues, Network Troubleshooting, Database Help, Mobile Devices, Security Questions, Cyber security, Online Remote Support, Order a technician onsite
+  - Integrated domain detection from message content and topic selection
+  - Added domain indicator badges in chat interface
+  - Created domain selector component for explicit domain selection
+  - Enhanced AI responses with conversation context and domain-specific expertise
+
+### December 2024
+- **Enhanced Topic Sidebar**: Added expandable subtopics for each technical category
+  - Each main topic now contains 7 relevant subtopics for more targeted assistance
+  - Added chevron icons for expand/collapse functionality
+  - Improved user experience on both desktop and mobile views
+
+### Earlier 2024
+- Initial application setup with PostgreSQL integration
+- User authentication and profile management
+- Real-time chat interface with typing indicators
+- OpenAI GPT-4 integration for AI responses
+
 ## Changelog
 
-- July 07, 2025. Initial setup
+- July 07, 2025. Domain-specific AI behavior implementation
+- December 2024. Enhanced topic categorization with subtopics
+- Initial setup with PostgreSQL and OpenAI integration
 
 ## User Preferences
 

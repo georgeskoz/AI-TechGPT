@@ -6,6 +6,7 @@ export interface Message {
   username: string;
   content: string;
   isUser: boolean;
+  domain?: string;
   timestamp?: Date;
 }
 
