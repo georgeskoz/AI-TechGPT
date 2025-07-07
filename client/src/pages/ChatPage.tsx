@@ -12,6 +12,7 @@ import UsernameModal from '@/components/UsernameModal';
 import ErrorToast from '@/components/ErrorToast';
 import DomainSelector from '@/components/DomainSelector';
 import SupportOptionsWidget from '@/components/SupportOptionsWidget';
+import DiagnosticChecklist from '@/components/DiagnosticChecklist';
 
 export default function ChatPage() {
   // State for username and storage
@@ -19,6 +20,8 @@ export default function ChatPage() {
   const [showUsernameModal, setShowUsernameModal] = useState(false);
   const [showMobileTopics, setShowMobileTopics] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
+  const [showDiagnosticChecklist, setShowDiagnosticChecklist] = useState(false);
+  const [lastUserMessage, setLastUserMessage] = useState<string>('');
   const [, setLocation] = useLocation();
   
   // Chat functionality with OpenAI
@@ -71,6 +74,8 @@ export default function ChatPage() {
   };
 
   const handleSendMessage = (message: string) => {
+    // Track the last user message for diagnostic checklist
+    setLastUserMessage(message);
     // Include domain information when sending message
     sendMessage(message);
   };
@@ -108,17 +113,50 @@ export default function ChatPage() {
             isTyping={isTyping}
           />
           
+          {/* Diagnostic Checklist */}
+          {showDiagnosticChecklist && lastUserMessage && (
+            <div className="bg-white border-t border-gray-200 p-4">
+              <DiagnosticChecklist 
+                issue={lastUserMessage}
+                category={selectedDomain || undefined}
+                onComplete={() => setShowDiagnosticChecklist(false)}
+              />
+            </div>
+          )}
+
           {/* Support Options Widget - Show after AI has provided initial help */}
-          {messages.length >= 2 && (
+          {messages.length >= 2 && !showDiagnosticChecklist && (
             <div className="bg-white border-t border-gray-200 p-4">
               <div className="mb-3">
                 <h3 className="text-sm font-medium text-gray-900 mb-1">
                   Still need help? Get additional support:
                 </h3>
                 <p className="text-xs text-gray-600">
-                  Connect with human experts or schedule onsite assistance
+                  Try our diagnostic checklist or connect with human experts
                 </p>
               </div>
+              
+              {/* Diagnostic Checklist Button */}
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-sm font-medium text-blue-900">
+                      🔍 Try Our AI Diagnostic Checklist
+                    </h4>
+                    <p className="text-xs text-blue-700 mt-1">
+                      Get a personalized step-by-step troubleshooting guide for your issue
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={() => setShowDiagnosticChecklist(true)}
+                    size="sm"
+                    className="ml-3"
+                  >
+                    Generate Checklist
+                  </Button>
+                </div>
+              </div>
+              
               <SupportOptionsWidget 
                 category={selectedDomain || undefined}
                 onOptionSelected={handleSupportOptionSelected}
