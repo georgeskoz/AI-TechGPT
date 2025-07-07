@@ -672,3 +672,218 @@ export const insertTechnicianEnhancedSchema = createInsertSchema(technicians).pi
 
 export type InsertTechnicianEnhanced = z.infer<typeof insertTechnicianEnhancedSchema>;
 export type TechnicianEnhanced = typeof technicians.$inferSelect;
+
+// Customer complaints and investigations
+export const complaints = pgTable("complaints", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").notNull().references(() => users.id),
+  technicianId: integer("technician_id").notNull().references(() => technicians.id),
+  jobId: integer("job_id").references(() => jobs.id),
+  category: varchar("category", { length: 100 }).notNull(), // behavior, quality, pricing, safety, communication
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  severity: varchar("severity", { length: 50 }).notNull(), // low, medium, high, critical
+  status: varchar("status", { length: 50 }).notNull().default("pending"), // pending, investigating, resolved, dismissed
+  priority: varchar("priority", { length: 50 }).notNull().default("normal"), // low, normal, high, urgent
+  evidence: jsonb("evidence"), // photos, videos, documents
+  incidentDate: timestamp("incident_date"),
+  reportedAt: timestamp("reported_at").defaultNow(),
+  assignedTo: integer("assigned_to").references(() => users.id), // admin investigator
+  investigationNotes: text("investigation_notes"),
+  resolution: text("resolution"),
+  resolvedAt: timestamp("resolved_at"),
+  followUpRequired: boolean("follow_up_required").default(false),
+  followUpDate: timestamp("follow_up_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Transportation and vehicle information
+export const technicianTransportation = pgTable("technician_transportation", {
+  id: serial("id").primaryKey(),
+  technicianId: integer("technician_id").notNull().references(() => technicians.id),
+  transportationMethod: varchar("transportation_method", { length: 50 }).notNull(), // vehicle, bike, bus, walk
+  vehicleType: varchar("vehicle_type", { length: 100 }), // car, van, truck, motorcycle
+  vehicleMake: varchar("vehicle_make", { length: 100 }),
+  vehicleModel: varchar("vehicle_model", { length: 100 }),
+  vehicleYear: integer("vehicle_year"),
+  vehicleColor: varchar("vehicle_color", { length: 50 }),
+  licensePlate: varchar("license_plate", { length: 20 }),
+  insuranceProvider: varchar("insurance_provider", { length: 255 }),
+  insurancePolicyNumber: varchar("insurance_policy_number", { length: 100 }),
+  insuranceExpiryDate: timestamp("insurance_expiry_date"),
+  registrationNumber: varchar("registration_number", { length: 100 }),
+  registrationExpiryDate: timestamp("registration_expiry_date"),
+  driversLicenseNumber: varchar("drivers_license_number", { length: 100 }),
+  driversLicenseExpiryDate: timestamp("drivers_license_expiry_date"),
+  isVerified: boolean("is_verified").default(false),
+  verificationDate: timestamp("verification_date"),
+  verificationNotes: text("verification_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Background checks and verification
+export const backgroundChecks = pgTable("background_checks", {
+  id: serial("id").primaryKey(),
+  technicianId: integer("technician_id").notNull().references(() => technicians.id),
+  checkType: varchar("check_type", { length: 100 }).notNull(), // criminal, employment, reference, education, driving
+  provider: varchar("provider", { length: 255 }), // background check company
+  requestedAt: timestamp("requested_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  status: varchar("status", { length: 50 }).notNull().default("pending"), // pending, in_progress, completed, failed
+  result: varchar("result", { length: 50 }), // passed, failed, conditional
+  score: integer("score"), // 1-100 risk score
+  details: jsonb("details"), // detailed results
+  documentUrl: varchar("document_url", { length: 500 }), // link to background check report
+  expiryDate: timestamp("expiry_date"),
+  notes: text("notes"),
+  reviewedBy: integer("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Technician approval workflow
+export const technicianApprovals = pgTable("technician_approvals", {
+  id: serial("id").primaryKey(),
+  technicianId: integer("technician_id").notNull().references(() => technicians.id),
+  status: varchar("status", { length: 50 }).notNull().default("pending"), // pending, approved, rejected, suspended
+  reviewedBy: integer("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  approvalNotes: text("approval_notes"),
+  rejectionReason: text("rejection_reason"),
+  requiredDocuments: jsonb("required_documents"), // list of required documents
+  submittedDocuments: jsonb("submitted_documents"), // list of submitted documents
+  verificationChecklist: jsonb("verification_checklist"), // checklist items and their status
+  conditionalApproval: boolean("conditional_approval").default(false),
+  conditions: text("conditions"), // conditions for approval
+  nextReviewDate: timestamp("next_review_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Relations for new tables
+export const complaintsRelations = relations(complaints, ({ one }) => ({
+  customer: one(users, {
+    fields: [complaints.customerId],
+    references: [users.id],
+  }),
+  technician: one(technicians, {
+    fields: [complaints.technicianId],
+    references: [technicians.id],
+  }),
+  job: one(jobs, {
+    fields: [complaints.jobId],
+    references: [jobs.id],
+  }),
+  assignedToUser: one(users, {
+    fields: [complaints.assignedTo],
+    references: [users.id],
+  }),
+}));
+
+export const technicianTransportationRelations = relations(technicianTransportation, ({ one }) => ({
+  technician: one(technicians, {
+    fields: [technicianTransportation.technicianId],
+    references: [technicians.id],
+  }),
+}));
+
+export const backgroundChecksRelations = relations(backgroundChecks, ({ one }) => ({
+  technician: one(technicians, {
+    fields: [backgroundChecks.technicianId],
+    references: [technicians.id],
+  }),
+  reviewer: one(users, {
+    fields: [backgroundChecks.reviewedBy],
+    references: [users.id],
+  }),
+}));
+
+export const technicianApprovalsRelations = relations(technicianApprovals, ({ one }) => ({
+  technician: one(technicians, {
+    fields: [technicianApprovals.technicianId],
+    references: [technicians.id],
+  }),
+  reviewer: one(users, {
+    fields: [technicianApprovals.reviewedBy],
+    references: [users.id],
+  }),
+}));
+
+// Insert schemas for new tables
+export const insertComplaintSchema = createInsertSchema(complaints).pick({
+  customerId: true,
+  technicianId: true,
+  jobId: true,
+  category: true,
+  title: true,
+  description: true,
+  severity: true,
+  priority: true,
+  incidentDate: true,
+}).extend({
+  evidence: z.object({
+    photos: z.array(z.string()).optional(),
+    videos: z.array(z.string()).optional(),
+    documents: z.array(z.string()).optional(),
+  }).optional(),
+});
+
+export const insertTechnicianTransportationSchema = createInsertSchema(technicianTransportation).pick({
+  technicianId: true,
+  transportationMethod: true,
+  vehicleType: true,
+  vehicleMake: true,
+  vehicleModel: true,
+  vehicleYear: true,
+  vehicleColor: true,
+  licensePlate: true,
+  insuranceProvider: true,
+  insurancePolicyNumber: true,
+  insuranceExpiryDate: true,
+  registrationNumber: true,
+  registrationExpiryDate: true,
+  driversLicenseNumber: true,
+  driversLicenseExpiryDate: true,
+});
+
+export const insertBackgroundCheckSchema = createInsertSchema(backgroundChecks).pick({
+  technicianId: true,
+  checkType: true,
+  provider: true,
+  documentUrl: true,
+  expiryDate: true,
+  notes: true,
+});
+
+export const insertTechnicianApprovalSchema = createInsertSchema(technicianApprovals).pick({
+  technicianId: true,
+  status: true,
+  approvalNotes: true,
+  rejectionReason: true,
+  conditionalApproval: true,
+  conditions: true,
+  nextReviewDate: true,
+}).extend({
+  requiredDocuments: z.array(z.string()).optional(),
+  submittedDocuments: z.array(z.string()).optional(),
+  verificationChecklist: z.object({
+    identity: z.boolean().optional(),
+    background: z.boolean().optional(),
+    skills: z.boolean().optional(),
+    insurance: z.boolean().optional(),
+    transportation: z.boolean().optional(),
+  }).optional(),
+});
+
+// Types for new tables
+export type InsertComplaint = z.infer<typeof insertComplaintSchema>;
+export type Complaint = typeof complaints.$inferSelect;
+export type InsertTechnicianTransportation = z.infer<typeof insertTechnicianTransportationSchema>;
+export type TechnicianTransportation = typeof technicianTransportation.$inferSelect;
+export type InsertBackgroundCheck = z.infer<typeof insertBackgroundCheckSchema>;
+export type BackgroundCheck = typeof backgroundChecks.$inferSelect;
+export type InsertTechnicianApproval = z.infer<typeof insertTechnicianApprovalSchema>;
+export type TechnicianApproval = typeof technicianApprovals.$inferSelect;

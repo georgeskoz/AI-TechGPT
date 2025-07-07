@@ -164,6 +164,21 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/disputes"],
   });
 
+  // Fetch complaints
+  const { data: complaints = [] } = useQuery({
+    queryKey: ["/api/admin/complaints"],
+  });
+
+  // Fetch pending technician approvals
+  const { data: pendingApprovals = [] } = useQuery({
+    queryKey: ["/api/admin/technicians/pending-approvals"],
+  });
+
+  // Fetch pending background checks
+  const { data: pendingBackgroundChecks = [] } = useQuery({
+    queryKey: ["/api/admin/background-checks/pending"],
+  });
+
   // Update user status mutation
   const updateUserStatusMutation = useMutation({
     mutationFn: async ({ userId, status }: { userId: number; status: string }) => {
@@ -193,6 +208,106 @@ export default function AdminDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/technicians"] });
       toast({ title: "Success", description: "Technician status updated successfully" });
+    }
+  });
+
+  // Approve technician mutation
+  const approveTechnicianMutation = useMutation({
+    mutationFn: async ({ technicianId, notes }: { technicianId: number; notes?: string }) => {
+      const response = await fetch(`/api/admin/technicians/${technicianId}/approve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes })
+      });
+      if (!response.ok) throw new Error("Failed to approve technician");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/technicians"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/technicians/pending-approvals"] });
+      toast({ 
+        title: "Success", 
+        description: "Technician approved successfully",
+        variant: "default"
+      });
+    },
+    onError: (error: Error) => {
+      toast({ 
+        title: "Error", 
+        description: error.message || "Failed to approve technician",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Reject technician mutation
+  const rejectTechnicianMutation = useMutation({
+    mutationFn: async ({ technicianId, reason }: { technicianId: number; reason: string }) => {
+      const response = await fetch(`/api/admin/technicians/${technicianId}/reject`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason })
+      });
+      if (!response.ok) throw new Error("Failed to reject technician");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/technicians"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/technicians/pending-approvals"] });
+      toast({ 
+        title: "Success", 
+        description: "Technician rejected",
+        variant: "default"
+      });
+    },
+    onError: (error: Error) => {
+      toast({ 
+        title: "Error", 
+        description: error.message || "Failed to reject technician",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Update complaint status mutation
+  const updateComplaintStatusMutation = useMutation({
+    mutationFn: async ({ complaintId, status, notes }: { complaintId: number; status: string; notes?: string }) => {
+      const response = await fetch(`/api/admin/complaints/${complaintId}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status, notes })
+      });
+      if (!response.ok) throw new Error("Failed to update complaint status");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/complaints"] });
+      toast({ 
+        title: "Success", 
+        description: "Complaint status updated successfully",
+        variant: "default"
+      });
+    }
+  });
+
+  // Resolve complaint mutation
+  const resolveComplaintMutation = useMutation({
+    mutationFn: async ({ complaintId, resolution }: { complaintId: number; resolution: string }) => {
+      const response = await fetch(`/api/admin/complaints/${complaintId}/resolve`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resolution })
+      });
+      if (!response.ok) throw new Error("Failed to resolve complaint");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/complaints"] });
+      toast({ 
+        title: "Success", 
+        description: "Complaint resolved successfully",
+        variant: "default"
+      });
     }
   });
 
@@ -379,7 +494,7 @@ export default function AdminDashboard() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Users
@@ -387,10 +502,24 @@ export default function AdminDashboard() {
             <TabsTrigger value="technicians" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
               Technicians
+              {pendingApprovals.length > 0 && (
+                <Badge variant="destructive" className="ml-1 text-xs">
+                  {pendingApprovals.length}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="jobs" className="flex items-center gap-2">
               <Briefcase className="h-4 w-4" />
               Jobs
+            </TabsTrigger>
+            <TabsTrigger value="complaints" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              Complaints
+              {complaints.filter((c: any) => c.status === 'pending').length > 0 && (
+                <Badge variant="destructive" className="ml-1 text-xs">
+                  {complaints.filter((c: any) => c.status === 'pending').length}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="disputes" className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4" />
@@ -639,8 +768,41 @@ export default function AdminDashboard() {
                                     <SelectItem value="suspended">Suspended</SelectItem>
                                     <SelectItem value="pending">Pending</SelectItem>
                                     <SelectItem value="verified">Verified</SelectItem>
+                                    <SelectItem value="approved">Approved</SelectItem>
+                                    <SelectItem value="rejected">Rejected</SelectItem>
                                   </SelectContent>
                                 </Select>
+
+                                {/* Approval/Rejection Actions */}
+                                {status === 'pending' && (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      variant="default"
+                                      onClick={() => approveTechnicianMutation.mutate({ 
+                                        technicianId: technician.id, 
+                                        notes: "Approved by admin" 
+                                      })}
+                                      disabled={approveTechnicianMutation.isPending}
+                                      className="bg-green-600 hover:bg-green-700"
+                                    >
+                                      <CheckCircle className="h-4 w-4 mr-1" />
+                                      Approve
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      onClick={() => rejectTechnicianMutation.mutate({ 
+                                        technicianId: technician.id, 
+                                        reason: "Rejected by admin" 
+                                      })}
+                                      disabled={rejectTechnicianMutation.isPending}
+                                    >
+                                      <XCircle className="h-4 w-4 mr-1" />
+                                      Reject
+                                    </Button>
+                                  </>
+                                )}
                               </div>
                             </TableCell>
                           </TableRow>
@@ -698,6 +860,152 @@ export default function AdminDashboard() {
                             <Button size="sm" variant="outline">
                               <Eye className="h-4 w-4" />
                             </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Complaints Tab */}
+          <TabsContent value="complaints">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Shield className="h-5 w-5" />
+                    Complaint Management
+                  </span>
+                  <Badge variant="outline" className="bg-orange-50 text-orange-700">
+                    {complaints.length} complaints
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4 flex items-center gap-4">
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Search complaints..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="max-w-sm"
+                    />
+                  </div>
+                  <Select value={filterStatus} onValueChange={setFilterStatus}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="investigating">Investigating</SelectItem>
+                      <SelectItem value="resolved">Resolved</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Complaint ID</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Complainant</TableHead>
+                        <TableHead>Against</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Priority</TableHead>
+                        <TableHead>Created</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {complaints.map((complaint: any) => (
+                        <TableRow key={complaint.id}>
+                          <TableCell>#{complaint.id}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{complaint.complaintType}</Badge>
+                          </TableCell>
+                          <TableCell>{complaint.complainantName || 'Anonymous'}</TableCell>
+                          <TableCell>{complaint.againstTechnicianName || 'N/A'}</TableCell>
+                          <TableCell>
+                            <Badge className={getStatusBadge(complaint.status)}>
+                              {complaint.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={complaint.priority === 'high' ? 'destructive' : complaint.priority === 'medium' ? 'default' : 'secondary'}>
+                              {complaint.priority}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{new Date(complaint.createdAt).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button size="sm" variant="outline">
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl">
+                                  <DialogHeader>
+                                    <DialogTitle>Complaint Details</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="space-y-4">
+                                    <div>
+                                      <label className="text-sm font-medium">Complaint Type</label>
+                                      <p className="text-sm text-gray-600">{complaint.complaintType}</p>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium">Description</label>
+                                      <p className="text-sm text-gray-600">{complaint.description}</p>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium">Evidence</label>
+                                      <p className="text-sm text-gray-600">{complaint.evidence || 'No evidence provided'}</p>
+                                    </div>
+                                    <div className="flex gap-4">
+                                      <Select
+                                        value={complaint.status}
+                                        onValueChange={(newStatus) => 
+                                          updateComplaintStatusMutation.mutate({ 
+                                            complaintId: complaint.id, 
+                                            status: newStatus,
+                                            notes: "Status updated by admin"
+                                          })
+                                        }
+                                      >
+                                        <SelectTrigger className="w-48">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="pending">Pending</SelectItem>
+                                          <SelectItem value="investigating">Investigating</SelectItem>
+                                          <SelectItem value="resolved">Resolved</SelectItem>
+                                          <SelectItem value="closed">Closed</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      {complaint.status !== 'resolved' && (
+                                        <Button
+                                          onClick={() => resolveComplaintMutation.mutate({ 
+                                            complaintId: complaint.id, 
+                                            resolution: "Resolved by admin review"
+                                          })}
+                                          disabled={resolveComplaintMutation.isPending}
+                                          variant="default"
+                                          className="bg-green-600 hover:bg-green-700"
+                                        >
+                                          Mark Resolved
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
