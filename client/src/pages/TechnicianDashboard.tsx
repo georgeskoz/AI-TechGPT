@@ -518,7 +518,15 @@ export default function TechnicianDashboard() {
                     <p className="text-sm text-gray-600">Hardware Repair, Network Setup, Software Issues</p>
                   </div>
                 </div>
-                <Button className="mt-4">Edit Profile</Button>
+                <div className="flex gap-2 mt-4">
+                  <Button>Edit Profile</Button>
+                  <Link href="/profile-visibility">
+                    <Button variant="outline">
+                      <Users className="h-4 w-4 mr-2" />
+                      View Visibility
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </CardContent>
           </Card>

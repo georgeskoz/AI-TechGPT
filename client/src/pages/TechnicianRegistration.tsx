@@ -33,6 +33,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import TechnicianProfilePreview from "@/components/TechnicianProfilePreview";
+import TechnicianProfileVisibility from "@/components/TechnicianProfileVisibility";
 
 const technicianSchema = z.object({
   businessName: z.string().optional(), // Optional - for technicians working with fleets
@@ -787,7 +788,7 @@ export default function TechnicianRegistration() {
         </div>
 
         {/* Preview Section */}
-        <div className="lg:sticky lg:top-4">
+        <div className="lg:sticky lg:top-4 space-y-4">
           <TechnicianProfilePreview
             formData={watchedValues}
             selectedSkills={selectedSkills}
@@ -795,6 +796,22 @@ export default function TechnicianRegistration() {
             selectedLanguages={selectedLanguages}
             selectedCertifications={selectedCertifications}
             serviceAreas={serviceAreas}
+          />
+          
+          {/* Enhanced Profile Visibility Preview */}
+          <TechnicianProfileVisibility
+            technicianData={{
+              ...watchedValues,
+              skills: selectedSkills,
+              categories: selectedCategories,
+              languages: selectedLanguages,
+              certifications: selectedCertifications,
+              serviceAreas: serviceAreas,
+              rating: "5.0",
+              completedJobs: 0,
+              isVerified: false,
+              isActive: true
+            }}
           />
         </div>
       </div>
