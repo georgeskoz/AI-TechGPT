@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Navigation from "@/components/Navigation";
 import { 
   User, 
   Settings, 
@@ -134,6 +135,7 @@ export default function ClientDashboard() {
 
   return (
     <div className="container mx-auto p-4 max-w-6xl">
+      <Navigation title="Client Dashboard" backTo="/customer-home" />
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

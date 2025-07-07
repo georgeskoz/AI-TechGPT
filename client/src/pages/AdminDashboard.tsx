@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import Navigation from "@/components/Navigation";
 import { 
   Users, 
   Settings, 
@@ -345,12 +346,18 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      <Navigation 
+        title="Admin Dashboard" 
+        backTo="/admin-home" 
+        showHomeButton={false}
+      />
+      
+      {/* Admin Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Platform Management</h1>
               <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
                 <Shield className="h-3 w-3 mr-1" />
                 Administrator
@@ -366,15 +373,6 @@ export default function AdminDashboard() {
               >
                 <DollarSign className="h-4 w-4" />
                 Earnings Settings
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setLocation("/")}
-                className="flex items-center gap-2"
-              >
-                <Home className="h-4 w-4" />
-                Home
               </Button>
             </div>
           </div>
