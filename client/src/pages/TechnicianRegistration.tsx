@@ -172,6 +172,7 @@ export default function TechnicianRegistration() {
     const registrationData = {
       ...data,
       location: `${data.city}, ${availableStates.find(s => s.code === data.state)?.name}, ${countries.find(c => c.code === data.country)?.name}`,
+      hourlyRate: data.hourlyRatePercentage, // Map the percentage to hourlyRate for backend compatibility
       skills: selectedSkills,
       categories: selectedCategories,
       languages: selectedLanguages,

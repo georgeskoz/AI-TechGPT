@@ -775,7 +775,7 @@ class MemoryStorage implements IStorage {
       businessName: technicianData.businessName,
       companyName: technicianData.companyName,
       experience: technicianData.experience,
-      hourlyRate: technicianData.hourlyRate.toString(),
+      hourlyRate: (technicianData.hourlyRatePercentage || technicianData.hourlyRate || 85).toString(),
       // Geographic location
       country: technicianData.country,
       state: technicianData.state,
