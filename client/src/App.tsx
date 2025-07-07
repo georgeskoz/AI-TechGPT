@@ -14,6 +14,9 @@ import TriagePage from "@/pages/TriagePage";
 import DiagnosticPage from "@/pages/DiagnosticPage";
 import ClientDashboard from "@/pages/ClientDashboard";
 import AuthTestPage from "@/components/AuthTestPage";
+import TechnicianRegistration from "@/pages/TechnicianRegistration";
+import TechnicianDashboard from "@/pages/TechnicianDashboard";
+import TechnicianLanding from "@/pages/TechnicianLanding";
 import FloatingChatWidget from "@/components/FloatingChatWidget";
 
 function Router() {
@@ -29,6 +32,9 @@ function Router() {
       <Route path="/diagnostic" component={DiagnosticPage} />
       <Route path="/dashboard" component={ClientDashboard} />
       <Route path="/auth-test" component={AuthTestPage} />
+      <Route path="/technician-register" component={TechnicianRegistration} />
+      <Route path="/technician-dashboard" component={TechnicianDashboard} />
+      <Route path="/technicians" component={TechnicianLanding} />
       <Route path="/:username/profile" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>
