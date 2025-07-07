@@ -54,7 +54,7 @@ export default function TechGPTHeader({ username }: TechGPTHeaderProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setLocation('/issues')} className="cursor-pointer">
+              <DropdownMenuItem onClick={() => navigate('/issues')} className="cursor-pointer">
                 <List className="h-4 w-4 mr-2" />
                 <span>Issue Tracker</span>
               </DropdownMenuItem>
