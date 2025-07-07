@@ -108,15 +108,15 @@ export default function ChatPage() {
             isTyping={isTyping}
           />
           
-          {/* Support Options Widget - Show after first message */}
-          {messages.length > 0 && (
+          {/* Support Options Widget - Show after AI has provided initial help */}
+          {messages.length >= 2 && (
             <div className="bg-white border-t border-gray-200 p-4">
               <div className="mb-3">
                 <h3 className="text-sm font-medium text-gray-900 mb-1">
-                  Need more help? Choose your preferred support:
+                  Still need help? Get additional support:
                 </h3>
                 <p className="text-xs text-gray-600">
-                  Get instant assistance through multiple channels
+                  Connect with human experts or schedule onsite assistance
                 </p>
               </div>
               <SupportOptionsWidget 
