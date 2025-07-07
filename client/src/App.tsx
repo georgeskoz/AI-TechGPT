@@ -7,11 +7,14 @@ import ChatPage from "@/pages/ChatPage";
 import ProfilePage from "@/pages/ProfilePage";
 import IssueCategorizationPage from "@/pages/IssueCategorizationPage";
 import PhoneSupportPage from "@/pages/PhoneSupportPage";
+import MarketplacePage from "@/pages/MarketplacePage";
+import FloatingChatWidget from "@/components/FloatingChatWidget";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={ChatPage} />
+      <Route path="/" component={() => <MarketplacePage username={localStorage.getItem("username") || "Guest"} />} />
+      <Route path="/marketplace" component={() => <MarketplacePage username={localStorage.getItem("username") || "Guest"} />} />
       <Route path="/chat" component={ChatPage} />
       <Route path="/issues" component={IssueCategorizationPage} />
       <Route path="/phone-support" component={PhoneSupportPage} />
@@ -22,9 +25,13 @@ function Router() {
 }
 
 function App() {
+  // Get username from localStorage for the floating chat widget
+  const username = localStorage.getItem("username") || "Guest";
+
   return (
     <QueryClientProvider client={queryClient}>
       <Router />
+      <FloatingChatWidget username={username} />
       <Toaster />
     </QueryClientProvider>
   );
