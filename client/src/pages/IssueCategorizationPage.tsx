@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, MessageCircle, List, Plus, DollarSign } from 'lucide-react';
+import Navigation from '@/components/Navigation';
 import IssueCategorization, { TechnicalIssue } from '@/components/IssueCategorization';
 import IssueTracker from '@/components/IssueTracker';
 import UniversalPricingCalculator from '@/components/UniversalPricingCalculator';
@@ -76,6 +77,7 @@ export default function IssueCategorizationPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Navigation title="Issue Management" backTo="/" />
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">

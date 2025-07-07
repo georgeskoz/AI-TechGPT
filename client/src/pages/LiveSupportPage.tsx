@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Navigation from "@/components/Navigation";
 import LiveSupportChat from "@/components/LiveSupportChat";
 import { 
   MessageSquare, 
@@ -69,6 +70,7 @@ export default function LiveSupportPage({ username }: LiveSupportPageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Navigation title="Live Support" backTo="/" />
       {/* Navigation Header */}
       <div className="bg-white border-b shadow-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-3">

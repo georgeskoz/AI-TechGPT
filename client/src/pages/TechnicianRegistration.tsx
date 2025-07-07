@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Navigation from "@/components/Navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -233,6 +234,7 @@ export default function TechnicianRegistration() {
 
   return (
     <div className="container mx-auto p-4 max-w-7xl">
+      <Navigation title="Technician Registration" backTo="/technician-landing" />
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Become a TechGPT Technician</h1>
         <p className="text-gray-600">Join our network of skilled technicians and start earning</p>

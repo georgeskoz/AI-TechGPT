@@ -13,6 +13,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Navigation from "@/components/Navigation";
 import { ArrowLeft, Save, User } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
@@ -118,6 +119,7 @@ export default function ProfilePage() {
   
   return (
     <div className="container max-w-3xl mx-auto py-6 px-4">
+      <Navigation title="User Profile" backTo="/" />
       <Button 
         variant="ghost" 
         onClick={handleBackToChat} 
