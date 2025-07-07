@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +16,10 @@ import {
   XCircle,
   Phone,
   Video,
-  Monitor
+  Monitor,
+  ArrowLeft,
+  Home,
+  X
 } from "lucide-react";
 
 interface LiveSupportPageProps {
@@ -25,6 +29,7 @@ interface LiveSupportPageProps {
 export default function LiveSupportPage({ username }: LiveSupportPageProps) {
   const [showChat, setShowChat] = useState(false);
   const [selectedUserId] = useState(1); // Mock user ID for demo
+  const [, setLocation] = useLocation();
 
   // Get user's support cases history
   const { data: supportCases = [] } = useQuery({
@@ -63,26 +68,67 @@ export default function LiveSupportPage({ username }: LiveSupportPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation Header */}
+      <div className="bg-white border-b shadow-sm sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Live Support Center</h1>
-              <p className="text-gray-600 mt-1">
-                Get instant help from our expert technicians
-              </p>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLocation("/")}
+                className="flex items-center gap-2"
+              >
+                <Home className="h-4 w-4" />
+                Home
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.history.back()}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-semibold">Live Support Center</h1>
             </div>
             <Button
-              onClick={() => setShowChat(true)}
-              className="bg-green-600 hover:bg-green-700"
+              variant="outline"
+              size="sm"
+              onClick={() => setLocation("/")}
+              className="flex items-center gap-2"
             >
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Start Live Chat
+              <X className="h-4 w-4" />
+              Exit
             </Button>
           </div>
         </div>
+      </div>
+
+      <div className="p-4">
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Live Support Center</h1>
+                <p className="text-gray-600 mt-1">
+                  Get instant help from our expert technicians
+                </p>
+              </div>
+              <Button
+                onClick={() => setShowChat(true)}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Start Live Chat
+              </Button>
+            </div>
+          </div>
 
         {/* Features Overview */}
         <div className="grid md:grid-cols-3 gap-6">
@@ -279,6 +325,7 @@ export default function LiveSupportPage({ username }: LiveSupportPageProps) {
             )}
           </CardContent>
         </Card>
+        </div>
       </div>
 
       {/* Live Support Chat Widget */}
