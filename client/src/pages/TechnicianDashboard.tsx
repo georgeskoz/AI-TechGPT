@@ -1,333 +1,547 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Progress } from "@/components/ui/progress";
 import { 
-  Calendar, 
   DollarSign, 
-  MapPin, 
   Clock, 
-  CheckCircle, 
+  Star, 
+  Users, 
+  Award, 
+  Bell,
+  CheckCircle,
+  XCircle,
   AlertCircle,
-  Users,
-  Star,
   TrendingUp,
-  Settings
+  MapPin,
+  Calendar,
+  MessageSquare,
+  Settings,
+  Shield,
+  Activity
 } from "lucide-react";
-import type { Technician, ServiceRequest, Job } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
-interface TechnicianDashboardProps {
-  technicianId: number;
-  userId: number;
+interface TechnicianStats {
+  totalEarnings: number;
+  completedJobs: number;
+  averageRating: number;
+  responseTime: number;
+  activeJobs: number;
+  pendingJobs: number;
 }
 
-export default function TechnicianDashboard({ technicianId, userId }: TechnicianDashboardProps) {
-  const [activeTab, setActiveTab] = useState("overview");
+interface JobNotification {
+  id: number;
+  title: string;
+  message: string;
+  type: 'new_job' | 'job_update' | 'payment_received';
+  isRead: boolean;
+  expiresAt?: string;
+  serviceRequest: {
+    id: number;
+    category: string;
+    serviceType: string;
+    location: string;
+    budget: number;
+    urgency: string;
+  };
+}
 
-  const { data: technician, isLoading: technicianLoading } = useQuery({
-    queryKey: [`/api/technicians/${technicianId}`],
+export default function TechnicianDashboard() {
+  const [isAvailable, setIsAvailable] = useState(true);
+  const [selectedTab, setSelectedTab] = useState("overview");
+  const { toast } = useToast();
+
+  // Fetch technician profile and stats
+  const { data: technicianData, isLoading: profileLoading } = useQuery({
+    queryKey: ['/api/technicians/profile'],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/technicians/profile");
+      return await response.json();
+    },
   });
 
-  const { data: serviceRequests = [], isLoading: requestsLoading } = useQuery({
-    queryKey: [`/api/service-requests/technician/${technicianId}`],
+  // Fetch job notifications
+  const { data: notifications, isLoading: notificationsLoading } = useQuery({
+    queryKey: ['/api/technicians/notifications'],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/technicians/notifications");
+      return await response.json();
+    },
   });
 
-  const { data: jobs = [], isLoading: jobsLoading } = useQuery({
-    queryKey: [`/api/jobs/technician/${technicianId}`],
+  // Fetch earnings data
+  const { data: earnings, isLoading: earningsLoading } = useQuery({
+    queryKey: ['/api/technicians/earnings'],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/technicians/earnings");
+      return await response.json();
+    },
   });
 
-  if (technicianLoading) {
+  // Accept job mutation
+  const acceptJobMutation = useMutation({
+    mutationFn: async (jobId: number) => {
+      const response = await apiRequest("POST", `/api/technicians/jobs/${jobId}/accept`);
+      return await response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Job Accepted",
+        description: "You have successfully accepted this job.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/technicians/notifications'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to accept job.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Decline job mutation
+  const declineJobMutation = useMutation({
+    mutationFn: async (jobId: number) => {
+      const response = await apiRequest("POST", `/api/technicians/jobs/${jobId}/decline`);
+      return await response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Job Declined",
+        description: "You have declined this job.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/technicians/notifications'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to decline job.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Toggle availability mutation
+  const toggleAvailabilityMutation = useMutation({
+    mutationFn: async (available: boolean) => {
+      const response = await apiRequest("PUT", "/api/technicians/availability", { available });
+      return await response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Availability Updated",
+        description: `You are now ${isAvailable ? 'available' : 'unavailable'} for new jobs.`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update availability.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAvailabilityChange = (available: boolean) => {
+    setIsAvailable(available);
+    toggleAvailabilityMutation.mutate(available);
+  };
+
+  const handleAcceptJob = (jobId: number) => {
+    acceptJobMutation.mutate(jobId);
+  };
+
+  const handleDeclineJob = (jobId: number) => {
+    declineJobMutation.mutate(jobId);
+  };
+
+  const mockStats: TechnicianStats = {
+    totalEarnings: 2850.00,
+    completedJobs: 47,
+    averageRating: 4.8,
+    responseTime: 45,
+    activeJobs: 3,
+    pendingJobs: 2,
+  };
+
+  const mockNotifications: JobNotification[] = [
+    {
+      id: 1,
+      title: "New Job Opportunity",
+      message: "Hardware repair needed in your area",
+      type: "new_job",
+      isRead: false,
+      expiresAt: new Date(Date.now() + 3600000).toISOString(),
+      serviceRequest: {
+        id: 123,
+        category: "Hardware Issues",
+        serviceType: "onsite",
+        location: "San Francisco, CA",
+        budget: 150,
+        urgency: "medium"
+      }
+    },
+    {
+      id: 2,
+      title: "Job Update",
+      message: "Customer updated requirements for network troubleshooting",
+      type: "job_update",
+      isRead: false,
+      serviceRequest: {
+        id: 124,
+        category: "Network Troubleshooting",
+        serviceType: "remote",
+        location: "Remote",
+        budget: 100,
+        urgency: "high"
+      }
+    }
+  ];
+
+  const mockEarnings = [
+    { month: "Nov", amount: 1200 },
+    { month: "Dec", amount: 1650 },
+    { month: "Jan", amount: 2850 },
+  ];
+
+  if (profileLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading dashboard...</p>
-        </div>
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
-
-  if (!technician) {
-    return (
-      <div className="text-center py-12">
-        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-        <h2 className="text-xl font-semibold mb-2">Technician Profile Not Found</h2>
-        <p className="text-gray-600">Unable to load your technician profile.</p>
-      </div>
-    );
-  }
-
-  const pendingRequests = serviceRequests.filter((req: ServiceRequest) => req.status === "pending");
-  const activeJobs = jobs.filter((job: Job) => ["assigned", "started", "in_progress"].includes(job.status));
-  const completedJobs = jobs.filter((job: Job) => job.status === "completed");
-  
-  const totalEarnings = completedJobs.reduce((sum: number, job: Job) => {
-    return sum + (parseFloat(job.finalPrice || "0"));
-  }, 0);
-
-  const averageRating = completedJobs.length > 0 
-    ? completedJobs.reduce((sum: number, job: Job) => sum + (job.customerRating || 0), 0) / completedJobs.length
-    : 0;
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-start">
+    <div className="container mx-auto p-4 max-w-6xl">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Technician Dashboard</h1>
-          <p className="text-gray-600 mt-1">Welcome back, {technician.companyName || "Technician"}!</p>
+          <h1 className="text-3xl font-bold text-gray-900">Technician Dashboard</h1>
+          <p className="text-gray-600">Welcome back, {technicianData?.businessName || "Technician"}</p>
         </div>
-        <Button variant="outline" className="flex items-center gap-2">
-          <Settings className="h-4 w-4" />
-          Edit Profile
-        </Button>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">Available for Jobs</span>
+            <Switch
+              checked={isAvailable}
+              onCheckedChange={handleAvailabilityChange}
+            />
+          </div>
+          <Badge variant={isAvailable ? "default" : "secondary"}>
+            {isAvailable ? "Available" : "Away"}
+          </Badge>
+        </div>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Pending Requests</p>
-                <p className="text-2xl font-bold">{pendingRequests.length}</p>
-              </div>
-              <AlertCircle className="h-8 w-8 text-orange-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active Jobs</p>
-                <p className="text-2xl font-bold">{activeJobs.length}</p>
-              </div>
-              <Clock className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Completed Jobs</p>
-                <p className="text-2xl font-bold">{completedJobs.length}</p>
-              </div>
-              <CheckCircle className="h-8 w-8 text-green-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Earnings</p>
-                <p className="text-2xl font-bold">${totalEarnings.toFixed(2)}</p>
-              </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="requests">Service Requests</TabsTrigger>
-          <TabsTrigger value="jobs">Active Jobs</TabsTrigger>
-          <TabsTrigger value="history">Job History</TabsTrigger>
+          <TabsTrigger value="jobs">Jobs</TabsTrigger>
+          <TabsTrigger value="earnings">Earnings</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Profile Summary */}
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Profile Summary</CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-gray-500" />
-                  <span>{technician.location}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline">{technician.experience}</Badge>
-                  <Badge variant="outline">${technician.hourlyRate}/hour</Badge>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <span>{averageRating.toFixed(1)} average rating</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium mb-2">Skills:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {technician.skills?.map((skill: string) => (
-                      <Badge key={skill} variant="secondary" className="text-xs">
-                        {skill}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+              <CardContent>
+                <div className="text-2xl font-bold">${mockStats.totalEarnings.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">
+                  +12% from last month
+                </p>
               </CardContent>
             </Card>
 
-            {/* Recent Activity */}
             <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Completed Jobs</CardTitle>
+                <CheckCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {activeJobs.slice(0, 3).map((job: Job) => (
-                    <div key={job.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">Job #{job.id}</p>
-                        <p className="text-sm text-gray-600">{job.status}</p>
-                      </div>
-                      <Badge
-                        variant={
-                          job.status === "completed" ? "default" :
-                          job.status === "in_progress" ? "secondary" : "outline"
-                        }
-                      >
-                        {job.status}
-                      </Badge>
-                    </div>
-                  ))}
-                  {activeJobs.length === 0 && (
-                    <p className="text-gray-500 text-center py-4">No active jobs</p>
-                  )}
+                <div className="text-2xl font-bold">{mockStats.completedJobs}</div>
+                <p className="text-xs text-muted-foreground">
+                  +5 this month
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
+                <Star className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{mockStats.averageRating}</div>
+                <p className="text-xs text-muted-foreground">
+                  From 47 reviews
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Response Time</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{mockStats.responseTime}m</div>
+                <p className="text-xs text-muted-foreground">
+                  Average response
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recent Activity */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                Recent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="font-medium">Job Completed</p>
+                    <p className="text-sm text-gray-600">Network troubleshooting for ABC Corp - $125</p>
+                  </div>
+                  <span className="text-sm text-gray-500 ml-auto">2 hours ago</span>
                 </div>
+                <div className="flex items-center gap-3">
+                  <DollarSign className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="font-medium">Payment Received</p>
+                    <p className="text-sm text-gray-600">$125 deposited to your account</p>
+                  </div>
+                  <span className="text-sm text-gray-500 ml-auto">3 hours ago</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Bell className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="font-medium">New Job Available</p>
+                    <p className="text-sm text-gray-600">Hardware repair in your area</p>
+                  </div>
+                  <span className="text-sm text-gray-500 ml-auto">5 hours ago</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="jobs" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Active Jobs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge variant="outline">In Progress</Badge>
+                    <span className="text-sm text-gray-500">Started 2 hours ago</span>
+                  </div>
+                  <h3 className="font-semibold">PC Hardware Repair</h3>
+                  <p className="text-gray-600 mb-2">Computer won't boot, suspected motherboard issue</p>
+                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="h-4 w-4" />
+                      San Francisco, CA
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <DollarSign className="h-4 w-4" />
+                      $150
+                    </span>
+                  </div>
+                </div>
+                <div className="text-center text-gray-500 py-8">
+                  No other active jobs
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="earnings" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">This Month</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">$1,250</div>
+                <p className="text-xs text-green-600">+15% from last month</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Pending Payments</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">$340</div>
+                <p className="text-xs text-gray-600">2 payments pending</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Total Earned</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">$12,850</div>
+                <p className="text-xs text-gray-600">Since joining</p>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
 
-        <TabsContent value="requests" className="space-y-4">
+        <TabsContent value="notifications" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Pending Service Requests</CardTitle>
-              <CardDescription>
-                Review and accept service requests from customers
-              </CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Job Notifications
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {pendingRequests.map((request: ServiceRequest) => (
-                  <div key={request.id} className="border rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold">{request.title}</h3>
-                      <Badge variant="outline">{request.urgency}</Badge>
-                    </div>
-                    <p className="text-gray-600 mb-3">{request.description}</p>
-                    <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                      <span>{request.category} → {request.subcategory}</span>
-                      <span>{request.serviceType}</span>
-                      <span>${request.budget}</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm">Accept Request</Button>
-                      <Button size="sm" variant="outline">View Details</Button>
-                    </div>
-                  </div>
-                ))}
-                {pendingRequests.length === 0 && (
-                  <p className="text-gray-500 text-center py-8">No pending requests</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="jobs" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Active Jobs</CardTitle>
-              <CardDescription>
-                Manage your current job assignments
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {activeJobs.map((job: Job) => (
-                  <div key={job.id} className="border rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold">Job #{job.id}</h3>
-                      <Badge
-                        variant={
-                          job.status === "in_progress" ? "default" :
-                          job.status === "started" ? "secondary" : "outline"
-                        }
-                      >
-                        {job.status}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                      <span>${job.finalPrice}</span>
-                      {job.startedAt && (
-                        <span>Started: {new Date(job.startedAt).toLocaleDateString()}</span>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm">Update Status</Button>
-                      <Button size="sm" variant="outline">Add Update</Button>
-                      <Button size="sm" variant="outline">View Details</Button>
-                    </div>
-                  </div>
-                ))}
-                {activeJobs.length === 0 && (
-                  <p className="text-gray-500 text-center py-8">No active jobs</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="history" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Job History</CardTitle>
-              <CardDescription>
-                View your completed jobs and earnings
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {completedJobs.map((job: Job) => (
-                  <div key={job.id} className="border rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold">Job #{job.id}</h3>
-                      <div className="text-right">
-                        <p className="font-semibold text-green-600">${job.finalPrice}</p>
-                        {job.customerRating && (
-                          <div className="flex items-center gap-1">
-                            <Star className="h-3 w-3 text-yellow-500" />
-                            <span className="text-xs">{job.customerRating}/5</span>
-                          </div>
+                {mockNotifications.map((notification) => (
+                  <div key={notification.id} className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Badge variant={notification.type === 'new_job' ? 'default' : 'secondary'}>
+                          {notification.type === 'new_job' ? 'New Job' : 'Update'}
+                        </Badge>
+                        {!notification.isRead && (
+                          <div className="w-2 h-2 bg-blue-600 rounded-full" />
                         )}
                       </div>
+                      {notification.expiresAt && (
+                        <span className="text-sm text-red-600">
+                          Expires in {Math.round((new Date(notification.expiresAt).getTime() - Date.now()) / 60000)}m
+                        </span>
+                      )}
                     </div>
-                    {job.completedAt && (
-                      <p className="text-sm text-gray-500">
-                        Completed: {new Date(job.completedAt).toLocaleDateString()}
-                      </p>
-                    )}
-                    {job.customerFeedback && (
-                      <p className="text-sm text-gray-600 mt-2 italic">
-                        "{job.customerFeedback}"
-                      </p>
+                    <h3 className="font-semibold">{notification.title}</h3>
+                    <p className="text-gray-600 mb-3">{notification.message}</p>
+                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                      <span>{notification.serviceRequest.category}</span>
+                      <span>{notification.serviceRequest.location}</span>
+                      <span>${notification.serviceRequest.budget}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {notification.serviceRequest.urgency}
+                      </Badge>
+                    </div>
+                    {notification.type === 'new_job' && (
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          onClick={() => handleAcceptJob(notification.serviceRequest.id)}
+                          disabled={acceptJobMutation.isPending}
+                        >
+                          Accept Job
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => handleDeclineJob(notification.serviceRequest.id)}
+                          disabled={declineJobMutation.isPending}
+                        >
+                          Decline
+                        </Button>
+                      </div>
                     )}
                   </div>
                 ))}
-                {completedJobs.length === 0 && (
-                  <p className="text-gray-500 text-center py-8">No completed jobs yet</p>
-                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="profile" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Profile Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <Shield className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="font-medium">Verification Status</p>
+                    <p className="text-sm text-green-600">Verified Technician</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Star className="h-5 w-5 text-yellow-600" />
+                  <div>
+                    <p className="font-medium">Rating</p>
+                    <p className="text-sm text-gray-600">4.8 stars (47 reviews)</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Award className="h-5 w-5 text-purple-600" />
+                  <div>
+                    <p className="font-medium">Specialties</p>
+                    <p className="text-sm text-gray-600">Hardware Repair, Network Setup, Software Issues</p>
+                  </div>
+                </div>
+                <Button className="mt-4">Edit Profile</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Account Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Job Notifications</p>
+                    <p className="text-sm text-gray-600">Receive notifications for new jobs</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Email Updates</p>
+                    <p className="text-sm text-gray-600">Get weekly performance summaries</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Auto-Accept Jobs</p>
+                    <p className="text-sm text-gray-600">Automatically accept matching jobs</p>
+                  </div>
+                  <Switch />
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -50,6 +50,15 @@ export interface IStorage {
   createJobUpdate(update: InsertJobUpdate): Promise<JobUpdate>;
   getJobUpdates(jobId: number): Promise<JobUpdate[]>;
 
+  // Enhanced technician management
+  registerTechnician(technicianData: any): Promise<any>;
+  getTechnicianProfile(userId: number): Promise<any>;
+  updateTechnicianAvailability(technicianId: number, isAvailable: boolean): Promise<any>;
+  getTechnicianNotifications(technicianId: number): Promise<any[]>;
+  acceptJob(technicianId: number, serviceRequestId: number): Promise<any>;
+  declineJob(technicianId: number, serviceRequestId: number): Promise<any>;
+  getTechnicianEarnings(technicianId: number): Promise<any[]>;
+
   // Live support chat
   createSupportCase(supportCase: InsertSupportCase): Promise<SupportCase>;
   getSupportCase(id: number): Promise<SupportCase | undefined>;
@@ -625,6 +634,98 @@ class MemoryStorage implements IStorage {
     return Array.from(this.supportMessages.values())
       .filter(m => m.caseId === caseId && m.senderId !== userId && !m.isRead)
       .length;
+  }
+
+  // Enhanced technician methods
+  async registerTechnician(technicianData: any): Promise<any> {
+    const id = this.nextId++;
+    const technician = {
+      id,
+      userId: technicianData.userId || 1, // Default for demo
+      businessName: technicianData.businessName,
+      companyName: technicianData.companyName,
+      experience: technicianData.experience,
+      hourlyRate: technicianData.hourlyRate.toString(),
+      location: technicianData.location,
+      serviceRadius: technicianData.serviceRadius,
+      serviceAreas: technicianData.serviceAreas || [],
+      skills: technicianData.skills || [],
+      categories: technicianData.categories || [],
+      certifications: technicianData.certifications || [],
+      languages: technicianData.languages || ["English"],
+      availability: technicianData.availability || {},
+      profileDescription: technicianData.profileDescription,
+      rating: "5.00",
+      completedJobs: 0,
+      totalEarnings: "0.00",
+      responseTime: technicianData.responseTime || 60,
+      isActive: true,
+      isVerified: false,
+      verificationStatus: "pending",
+      stripeAccountId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    
+    this.technicians.set(id, technician);
+    return technician;
+  }
+
+  async getTechnicianProfile(userId: number): Promise<any> {
+    const technician = Array.from(this.technicians.values()).find(t => t.userId === userId);
+    return technician || null;
+  }
+
+  async updateTechnicianAvailability(technicianId: number, isAvailable: boolean): Promise<any> {
+    const technician = this.technicians.get(technicianId);
+    if (technician) {
+      technician.isActive = isAvailable;
+      technician.updatedAt = new Date();
+      this.technicians.set(technicianId, technician);
+      return technician;
+    }
+    throw new Error("Technician not found");
+  }
+
+  async getTechnicianNotifications(technicianId: number): Promise<any[]> {
+    // Mock notifications for demo
+    return [
+      {
+        id: 1,
+        title: "New Job Opportunity",
+        message: "Hardware repair needed in your area",
+        type: "new_job",
+        isRead: false,
+        expiresAt: new Date(Date.now() + 3600000).toISOString(),
+        serviceRequest: {
+          id: 123,
+          category: "Hardware Issues",
+          serviceType: "onsite",
+          location: "San Francisco, CA",
+          budget: 150,
+          urgency: "medium"
+        }
+      }
+    ];
+  }
+
+  async acceptJob(technicianId: number, serviceRequestId: number): Promise<any> {
+    // Mock job acceptance
+    return { success: true, message: "Job accepted successfully" };
+  }
+
+  async declineJob(technicianId: number, serviceRequestId: number): Promise<any> {
+    // Mock job decline
+    return { success: true, message: "Job declined successfully" };
+  }
+
+  async getTechnicianEarnings(technicianId: number): Promise<any[]> {
+    // Mock earnings data
+    return [
+      { month: "November", amount: 1200, jobs: 8 },
+      { month: "December", amount: 1650, jobs: 11 },
+      { month: "January", amount: 850, jobs: 5 }
+    ];
   }
 }
 

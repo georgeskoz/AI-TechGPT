@@ -19,13 +19,17 @@ export const users = pgTable("users", {
 export const technicians = pgTable("technicians", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
+  businessName: text("business_name"),
   companyName: text("company_name"),
   experience: text("experience"), // beginner, intermediate, advanced, expert
   hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
   location: text("location"),
   serviceRadius: integer("service_radius").default(25), // miles
+  serviceAreas: jsonb("service_areas").$type<string[]>(), // Array of service areas
   skills: jsonb("skills").$type<string[]>(), // Array of technical skills
+  categories: jsonb("categories").$type<string[]>(), // Array of service categories
   certifications: jsonb("certifications").$type<string[]>(), // Array of certifications
+  languages: jsonb("languages").$type<string[]>(), // Array of languages spoken
   availability: jsonb("availability").$type<{
     monday?: { start: string; end: string; available: boolean };
     tuesday?: { start: string; end: string; available: boolean };
@@ -35,10 +39,17 @@ export const technicians = pgTable("technicians", {
     saturday?: { start: string; end: string; available: boolean };
     sunday?: { start: string; end: string; available: boolean };
   }>(),
+  profileDescription: text("profile_description"),
   rating: decimal("rating", { precision: 3, scale: 2 }).default("5.00"),
   completedJobs: integer("completed_jobs").default(0),
+  totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0.00"),
+  responseTime: integer("response_time_minutes").default(60), // Average response time in minutes
   isActive: boolean("is_active").default(true),
+  isVerified: boolean("is_verified").default(false),
+  verificationStatus: text("verification_status").default("pending"), // pending, approved, rejected
+  stripeAccountId: text("stripe_account_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Service requests from customers
@@ -337,3 +348,26 @@ export type InsertSupportCase = z.infer<typeof insertSupportCaseSchema>;
 export type SupportCase = typeof supportCases.$inferSelect;
 export type InsertSupportMessage = z.infer<typeof insertSupportMessageSchema>;
 export type SupportMessage = typeof supportMessages.$inferSelect;
+
+// Enhanced technician schemas
+export const insertTechnicianEnhancedSchema = createInsertSchema(technicians).pick({
+  userId: true,
+  businessName: true,
+  companyName: true,
+  experience: true,
+  hourlyRate: true,
+  location: true,
+  serviceRadius: true,
+  serviceAreas: true,
+  skills: true,
+  categories: true,
+  certifications: true,
+  languages: true,
+  availability: true,
+  profileDescription: true,
+  responseTime: true,
+  stripeAccountId: true,
+});
+
+export type InsertTechnicianEnhanced = z.infer<typeof insertTechnicianEnhancedSchema>;
+export type TechnicianEnhanced = typeof technicians.$inferSelect;
