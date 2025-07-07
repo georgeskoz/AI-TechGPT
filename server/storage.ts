@@ -75,6 +75,36 @@ export interface IStorage {
   updateTechnicianEarningSettings(technicianId: number, settings: any): Promise<any>;
   bulkUpdateTechnicianEarningSettings(technicianIds: number[], settings: any): Promise<any>;
 
+  // Technician approval system
+  approveTechnician(technicianId: number, adminId: number, notes?: string): Promise<any>;
+  rejectTechnician(technicianId: number, adminId: number, reason: string): Promise<any>;
+  getTechnicianApprovalStatus(technicianId: number): Promise<any>;
+  getPendingTechnicianApprovals(): Promise<any[]>;
+  updateTechnicianApprovalStatus(technicianId: number, status: string, adminId: number, notes?: string): Promise<any>;
+
+  // Complaint management
+  createComplaint(complaint: any): Promise<any>;
+  getComplaint(id: number): Promise<any>;
+  getComplaintsByCustomer(customerId: number): Promise<any[]>;
+  getComplaintsByTechnician(technicianId: number): Promise<any[]>;
+  getAllComplaints(): Promise<any[]>;
+  updateComplaintStatus(id: number, status: string, adminId: number, notes?: string): Promise<any>;
+  assignComplaintInvestigator(id: number, investigatorId: number): Promise<any>;
+  resolveComplaint(id: number, resolution: string, adminId: number): Promise<any>;
+
+  // Transportation management
+  addTechnicianTransportation(transportation: any): Promise<any>;
+  getTechnicianTransportation(technicianId: number): Promise<any>;
+  updateTechnicianTransportation(technicianId: number, updates: any): Promise<any>;
+  verifyTechnicianTransportation(technicianId: number, adminId: number, notes?: string): Promise<any>;
+
+  // Background check management
+  createBackgroundCheck(backgroundCheck: any): Promise<any>;
+  getBackgroundCheck(id: number): Promise<any>;
+  getTechnicianBackgroundChecks(technicianId: number): Promise<any[]>;
+  updateBackgroundCheckStatus(id: number, status: string, result?: string, adminId?: number): Promise<any>;
+  getAllPendingBackgroundChecks(): Promise<any[]>;
+
   // Live support chat
   createSupportCase(supportCase: InsertSupportCase): Promise<SupportCase>;
   getSupportCase(id: number): Promise<SupportCase | undefined>;
@@ -1012,6 +1042,366 @@ class MemoryStorage implements IStorage {
       effectiveDate: new Date().toISOString(),
       lastModifiedBy: 1
     };
+  }
+
+  // Technician approval methods
+  async approveTechnician(technicianId: number, adminId: number, notes?: string): Promise<any> {
+    const technician = this.technicians.get(technicianId);
+    if (!technician) {
+      throw new Error("Technician not found");
+    }
+
+    technician.isVerified = true;
+    technician.updatedAt = new Date();
+    this.technicians.set(technicianId, technician);
+
+    return {
+      id: technicianId,
+      technicianId,
+      status: "approved",
+      reviewedBy: adminId,
+      reviewedAt: new Date(),
+      approvalNotes: notes,
+      success: true
+    };
+  }
+
+  async rejectTechnician(technicianId: number, adminId: number, reason: string): Promise<any> {
+    const technician = this.technicians.get(technicianId);
+    if (!technician) {
+      throw new Error("Technician not found");
+    }
+
+    technician.isVerified = false;
+    technician.updatedAt = new Date();
+    this.technicians.set(technicianId, technician);
+
+    return {
+      id: technicianId,
+      technicianId,
+      status: "rejected",
+      reviewedBy: adminId,
+      reviewedAt: new Date(),
+      rejectionReason: reason,
+      success: true
+    };
+  }
+
+  async getTechnicianApprovalStatus(technicianId: number): Promise<any> {
+    const technician = this.technicians.get(technicianId);
+    if (!technician) {
+      throw new Error("Technician not found");
+    }
+
+    return {
+      technicianId,
+      status: technician.isVerified ? "approved" : "pending",
+      technician
+    };
+  }
+
+  async getPendingTechnicianApprovals(): Promise<any[]> {
+    const pending = [];
+    for (const [id, technician] of this.technicians) {
+      if (!technician.isVerified) {
+        pending.push({
+          technicianId: id,
+          technician,
+          status: "pending",
+          createdAt: technician.createdAt
+        });
+      }
+    }
+    return pending;
+  }
+
+  async updateTechnicianApprovalStatus(technicianId: number, status: string, adminId: number, notes?: string): Promise<any> {
+    if (status === "approved") {
+      return this.approveTechnician(technicianId, adminId, notes);
+    } else if (status === "rejected") {
+      return this.rejectTechnician(technicianId, adminId, notes || "No reason provided");
+    }
+    throw new Error("Invalid status");
+  }
+
+  // Complaint management methods
+  async createComplaint(complaint: any): Promise<any> {
+    const id = Date.now();
+    const newComplaint = {
+      id,
+      ...complaint,
+      status: "pending",
+      reportedAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    return newComplaint;
+  }
+
+  async getComplaint(id: number): Promise<any> {
+    return {
+      id,
+      customerId: 1,
+      technicianId: 1,
+      jobId: 1,
+      category: "behavior",
+      title: "Unprofessional behavior",
+      description: "Technician was rude and unprofessional during the service call.",
+      severity: "medium",
+      status: "investigating",
+      priority: "high",
+      reportedAt: new Date(Date.now() - 86400000),
+      assignedTo: 1,
+      investigationNotes: "Initial investigation started. Gathering evidence.",
+      createdAt: new Date(Date.now() - 86400000),
+      updatedAt: new Date()
+    };
+  }
+
+  async getComplaintsByCustomer(customerId: number): Promise<any[]> {
+    return [
+      {
+        id: 1,
+        customerId,
+        technicianId: 1,
+        jobId: 1,
+        category: "behavior",
+        title: "Unprofessional behavior",
+        status: "investigating",
+        severity: "medium",
+        reportedAt: new Date(Date.now() - 86400000)
+      }
+    ];
+  }
+
+  async getComplaintsByTechnician(technicianId: number): Promise<any[]> {
+    return [
+      {
+        id: 1,
+        customerId: 1,
+        technicianId,
+        jobId: 1,
+        category: "behavior",
+        title: "Unprofessional behavior",
+        status: "investigating",
+        severity: "medium",
+        reportedAt: new Date(Date.now() - 86400000)
+      }
+    ];
+  }
+
+  async getAllComplaints(): Promise<any[]> {
+    return [
+      {
+        id: 1,
+        customerId: 1,
+        technicianId: 1,
+        jobId: 1,
+        category: "behavior",
+        title: "Unprofessional behavior",
+        description: "Technician was rude during service",
+        severity: "medium",
+        status: "investigating",
+        priority: "high",
+        reportedAt: new Date(Date.now() - 86400000),
+        assignedTo: 1,
+        customerName: "John Doe",
+        technicianName: "Tech Services Inc"
+      },
+      {
+        id: 2,
+        customerId: 2,
+        technicianId: 2,
+        jobId: 2,
+        category: "quality",
+        title: "Poor service quality",
+        description: "Work was not completed properly",
+        severity: "high",
+        status: "pending",
+        priority: "urgent",
+        reportedAt: new Date(Date.now() - 172800000),
+        customerName: "Jane Smith",
+        technicianName: "Pro Tech Solutions"
+      }
+    ];
+  }
+
+  async updateComplaintStatus(id: number, status: string, adminId: number, notes?: string): Promise<any> {
+    return {
+      id,
+      status,
+      updatedBy: adminId,
+      investigationNotes: notes,
+      updatedAt: new Date()
+    };
+  }
+
+  async assignComplaintInvestigator(id: number, investigatorId: number): Promise<any> {
+    return {
+      id,
+      assignedTo: investigatorId,
+      status: "investigating",
+      updatedAt: new Date()
+    };
+  }
+
+  async resolveComplaint(id: number, resolution: string, adminId: number): Promise<any> {
+    return {
+      id,
+      status: "resolved",
+      resolution,
+      resolvedAt: new Date(),
+      updatedBy: adminId,
+      updatedAt: new Date()
+    };
+  }
+
+  // Transportation management methods
+  async addTechnicianTransportation(transportation: any): Promise<any> {
+    const id = Date.now();
+    const newTransportation = {
+      id,
+      ...transportation,
+      isVerified: false,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    return newTransportation;
+  }
+
+  async getTechnicianTransportation(technicianId: number): Promise<any> {
+    return {
+      id: 1,
+      technicianId,
+      transportationMethod: "vehicle",
+      vehicleType: "car",
+      vehicleMake: "Toyota",
+      vehicleModel: "Camry",
+      vehicleYear: 2020,
+      vehicleColor: "Blue",
+      licensePlate: "ABC123",
+      insuranceProvider: "State Farm",
+      insurancePolicyNumber: "SF123456789",
+      insuranceExpiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      driversLicenseNumber: "DL123456789",
+      driversLicenseExpiryDate: new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000),
+      isVerified: false,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+
+  async updateTechnicianTransportation(technicianId: number, updates: any): Promise<any> {
+    return {
+      technicianId,
+      ...updates,
+      updatedAt: new Date()
+    };
+  }
+
+  async verifyTechnicianTransportation(technicianId: number, adminId: number, notes?: string): Promise<any> {
+    return {
+      technicianId,
+      isVerified: true,
+      verificationDate: new Date(),
+      verificationNotes: notes,
+      verifiedBy: adminId,
+      updatedAt: new Date()
+    };
+  }
+
+  // Background check methods
+  async createBackgroundCheck(backgroundCheck: any): Promise<any> {
+    const id = Date.now();
+    const newCheck = {
+      id,
+      ...backgroundCheck,
+      status: "pending",
+      requestedAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    return newCheck;
+  }
+
+  async getBackgroundCheck(id: number): Promise<any> {
+    return {
+      id,
+      technicianId: 1,
+      checkType: "criminal",
+      provider: "BackgroundCheck.com",
+      status: "completed",
+      result: "passed",
+      score: 95,
+      requestedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      completedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      details: {
+        criminalRecord: "None found",
+        creditCheck: "Excellent",
+        employmentHistory: "Verified"
+      },
+      reviewedBy: 1,
+      reviewedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date()
+    };
+  }
+
+  async getTechnicianBackgroundChecks(technicianId: number): Promise<any[]> {
+    return [
+      {
+        id: 1,
+        technicianId,
+        checkType: "criminal",
+        status: "completed",
+        result: "passed",
+        score: 95,
+        requestedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+        completedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+      },
+      {
+        id: 2,
+        technicianId,
+        checkType: "employment",
+        status: "pending",
+        requestedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+      }
+    ];
+  }
+
+  async updateBackgroundCheckStatus(id: number, status: string, result?: string, adminId?: number): Promise<any> {
+    return {
+      id,
+      status,
+      result,
+      reviewedBy: adminId,
+      reviewedAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+
+  async getAllPendingBackgroundChecks(): Promise<any[]> {
+    return [
+      {
+        id: 1,
+        technicianId: 1,
+        technicianName: "Tech Services Inc",
+        checkType: "criminal",
+        status: "pending",
+        requestedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+      },
+      {
+        id: 2,
+        technicianId: 2,
+        technicianName: "Pro Tech Solutions",
+        checkType: "employment",
+        status: "in_progress",
+        requestedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+      }
+    ];
   }
 }
 
