@@ -2,6 +2,7 @@ import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import { AuthProvider } from "@/components/UserAuthProvider";
 import NotFound from "@/pages/not-found";
 import ChatPage from "@/pages/ChatPage";
 import ProfilePage from "@/pages/ProfilePage";
@@ -12,6 +13,7 @@ import LiveSupportPage from "@/pages/LiveSupportPage";
 import TriagePage from "@/pages/TriagePage";
 import DiagnosticPage from "@/pages/DiagnosticPage";
 import ClientDashboard from "@/pages/ClientDashboard";
+import AuthTestPage from "@/components/AuthTestPage";
 import FloatingChatWidget from "@/components/FloatingChatWidget";
 
 function Router() {
@@ -26,6 +28,7 @@ function Router() {
       <Route path="/triage" component={TriagePage} />
       <Route path="/diagnostic" component={DiagnosticPage} />
       <Route path="/dashboard" component={ClientDashboard} />
+      <Route path="/auth-test" component={AuthTestPage} />
       <Route path="/:username/profile" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>
@@ -38,9 +41,13 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <FloatingChatWidget username={username} />
-      <Toaster />
+      <AuthProvider>
+        <div className="min-h-screen bg-gray-50">
+          <Router />
+          <FloatingChatWidget username={username} />
+        </div>
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
