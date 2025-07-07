@@ -69,6 +69,12 @@ export interface IStorage {
   updateTechnicianStatus(technicianId: number, status: string): Promise<any>;
   resolveDispute(disputeId: number, resolution: string): Promise<any>;
 
+  // Technician earning settings management
+  getTechnicianEarningSettings(): Promise<any[]>;
+  getTechnicianEarningSetting(technicianId: number): Promise<any>;
+  updateTechnicianEarningSettings(technicianId: number, settings: any): Promise<any>;
+  bulkUpdateTechnicianEarningSettings(technicianIds: number[], settings: any): Promise<any>;
+
   // Live support chat
   createSupportCase(supportCase: InsertSupportCase): Promise<SupportCase>;
   getSupportCase(id: number): Promise<SupportCase | undefined>;
@@ -917,6 +923,95 @@ class MemoryStorage implements IStorage {
   async resolveDispute(disputeId: number, resolution: string): Promise<any> {
     // Mock dispute resolution
     return { success: true, message: "Dispute resolved", resolution };
+  }
+
+  async getTechnicianEarningSettings(): Promise<any[]> {
+    // Mock data with realistic earning percentages
+    return [
+      {
+        id: 1,
+        technicianId: 1,
+        technicianName: "John Smith",
+        remoteEarningPercentage: 85.00,
+        phoneEarningPercentage: 85.00,
+        onsiteEarningPercentage: 85.00,
+        performanceBonus: 5.00,
+        loyaltyBonus: 2.00,
+        premiumServiceRate: 0.00,
+        adminNotes: "High performer, increased rates due to excellent reviews",
+        effectiveDate: "2025-01-01",
+        lastModifiedBy: 1,
+        isActive: true,
+        totalEarnings: 12500.00,
+        completedJobs: 45,
+        rating: 4.9
+      },
+      {
+        id: 2,
+        technicianId: 2,
+        technicianName: "Sarah Johnson",
+        remoteEarningPercentage: 80.00,
+        phoneEarningPercentage: 82.00,
+        onsiteEarningPercentage: 87.00,
+        performanceBonus: 0.00,
+        loyaltyBonus: 1.00,
+        premiumServiceRate: 3.00,
+        adminNotes: "Specialized in premium on-site services",
+        effectiveDate: "2025-01-01",
+        isActive: true,
+        totalEarnings: 8750.00,
+        completedJobs: 32,
+        rating: 4.7
+      },
+      {
+        id: 3,
+        technicianId: 3,
+        technicianName: "Mike Davis",
+        remoteEarningPercentage: 85.00,
+        phoneEarningPercentage: 85.00,
+        onsiteEarningPercentage: 85.00,
+        performanceBonus: 0.00,
+        loyaltyBonus: 0.00,
+        premiumServiceRate: 0.00,
+        adminNotes: "",
+        effectiveDate: "2025-01-01",
+        isActive: true,
+        totalEarnings: 5200.00,
+        completedJobs: 18,
+        rating: 4.5
+      }
+    ];
+  }
+
+  async getTechnicianEarningSetting(technicianId: number): Promise<any> {
+    const settings = await this.getTechnicianEarningSettings();
+    return settings.find(s => s.technicianId === technicianId);
+  }
+
+  async updateTechnicianEarningSettings(technicianId: number, settings: any): Promise<any> {
+    // In real implementation, this would update the database
+    console.log(`Updating earning settings for technician ${technicianId}:`, settings);
+    
+    return {
+      id: technicianId,
+      ...settings,
+      effectiveDate: new Date().toISOString(),
+      lastModifiedBy: 1, // Current admin user
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  async bulkUpdateTechnicianEarningSettings(technicianIds: number[], settings: any): Promise<any> {
+    // In real implementation, this would update multiple records
+    console.log(`Bulk updating earning settings for technicians ${technicianIds.join(", ")}:`, settings);
+    
+    return {
+      updatedCount: technicianIds.length,
+      technicianIds,
+      settings,
+      effectiveDate: new Date().toISOString(),
+      lastModifiedBy: 1
+    };
   }
 }
 
