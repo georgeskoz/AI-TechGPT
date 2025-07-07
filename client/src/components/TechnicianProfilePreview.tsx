@@ -212,7 +212,7 @@ export default function TechnicianProfilePreview({
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4">
           <p className="text-xs font-medium text-yellow-800 mb-1">💡 Tips to improve your profile:</p>
           <ul className="text-xs text-yellow-700 space-y-1">
-            {!formData.profileDescription && <li>• Add a compelling profile description</li>}
+            {!formData.profileDescription && <li>• Add a compelling profile description or upload your CV</li>}
             {selectedSkills.length < 5 && <li>• Add more relevant skills to increase visibility</li>}
             {selectedCategories.length < 3 && <li>• Select more service categories</li>}
             {!formData.location && <li>• Add your location to help customers find you</li>}
