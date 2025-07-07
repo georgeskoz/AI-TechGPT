@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { countries, getCountryByCode } from "@/data/locations";
 import { 
   Star, 
   MapPin, 
@@ -21,7 +22,9 @@ interface TechnicianProfilePreviewProps {
     companyName?: string;
     experience: string;
     hourlyRatePercentage: number;
-    location?: string;
+    country?: string;
+    state?: string;
+    city?: string;
     serviceRadius?: number;
     profileDescription?: string;
     responseTime?: number;
@@ -112,7 +115,16 @@ export default function TechnicianProfilePreview({
                 </div>
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
-                  <span>{formData.location || "Your Location"}</span>
+                  <span>
+                    {formData.city && formData.state && formData.country 
+                      ? (() => {
+                          const country = getCountryByCode(formData.country);
+                          const state = country?.states.find(s => s.code === formData.state);
+                          return `${formData.city}, ${state?.name}, ${country?.name}`;
+                        })()
+                      : "Your Location"
+                    }
+                  </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />

@@ -23,7 +23,11 @@ export const technicians = pgTable("technicians", {
   companyName: text("company_name"),
   experience: text("experience"), // beginner, intermediate, advanced, expert
   hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
-  location: text("location"),
+  // Geographic location
+  country: text("country"),
+  state: text("state"), // state for US, province for Canada
+  city: text("city"),
+  location: text("location"), // Combined location string for backward compatibility
   serviceRadius: integer("service_radius").default(25), // miles
   serviceAreas: jsonb("service_areas").$type<string[]>(), // Array of service areas
   skills: jsonb("skills").$type<string[]>(), // Array of technical skills

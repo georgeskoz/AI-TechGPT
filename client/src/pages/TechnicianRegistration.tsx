@@ -12,6 +12,7 @@ import Navigation from "@/components/Navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { countries, getCountryByCode, getCitiesByState } from "@/data/locations";
 import { 
   User, 
   Building, 
@@ -38,7 +39,9 @@ const technicianSchema = z.object({
   companyName: z.string().optional(), // Optional - company affiliation
   experience: z.enum(["beginner", "intermediate", "advanced", "expert"]),
   hourlyRatePercentage: z.number().min(70).max(95).default(85), // Admin-set percentage (70-95%)
-  location: z.string().min(1, "Location is required"),
+  country: z.string().min(1, "Country is required"),
+  state: z.string().min(1, "State/Province is required"),
+  city: z.string().min(1, "City is required"),
   serviceRadius: z.number().min(5, "Minimum service radius is 5 miles").max(100, "Maximum service radius is 100 miles"),
   profileDescription: z.string().min(50, "Profile description must be at least 50 characters"),
   responseTime: z.number().min(15, "Minimum response time is 15 minutes").max(240, "Maximum response time is 4 hours"),
@@ -82,6 +85,10 @@ export default function TechnicianRegistration() {
   const [newServiceArea, setNewServiceArea] = useState("");
   const [uploadedCV, setUploadedCV] = useState<File | null>(null);
   const [cvText, setCvText] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState<string>("");
+  const [selectedState, setSelectedState] = useState<string>("");
+  const [availableStates, setAvailableStates] = useState<any[]>([]);
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
   const [availability, setAvailability] = useState({
     monday: { start: "09:00", end: "17:00", available: true },
     tuesday: { start: "09:00", end: "17:00", available: true },
@@ -101,7 +108,9 @@ export default function TechnicianRegistration() {
       companyName: "",
       experience: "intermediate",
       hourlyRatePercentage: 85, // Default to 85% technician share
-      location: "",
+      country: "",
+      state: "",
+      city: "",
       serviceRadius: 25,
       profileDescription: "",
       responseTime: 60,
@@ -133,9 +142,35 @@ export default function TechnicianRegistration() {
     },
   });
 
+  const handleCountryChange = (countryCode: string) => {
+    setSelectedCountry(countryCode);
+    setSelectedState("");
+    form.setValue("country", countryCode);
+    form.setValue("state", "");
+    form.setValue("city", "");
+    
+    const country = getCountryByCode(countryCode);
+    setAvailableStates(country?.states || []);
+    setAvailableCities([]);
+  };
+
+  const handleStateChange = (stateCode: string) => {
+    setSelectedState(stateCode);
+    form.setValue("state", stateCode);
+    form.setValue("city", "");
+    
+    const cities = getCitiesByState(selectedCountry, stateCode);
+    setAvailableCities(cities);
+  };
+
+  const handleCityChange = (city: string) => {
+    form.setValue("city", city);
+  };
+
   const handleSubmit = (data: TechnicianFormData) => {
     const registrationData = {
       ...data,
+      location: `${data.city}, ${availableStates.find(s => s.code === data.state)?.name}, ${countries.find(c => c.code === data.country)?.name}`,
       skills: selectedSkills,
       categories: selectedCategories,
       languages: selectedLanguages,
@@ -412,18 +447,77 @@ export default function TechnicianRegistration() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="location">Primary Location *</Label>
-                  <Input
-                    id="location"
-                    {...form.register("location")}
-                    placeholder="City, State (e.g., San Francisco, CA)"
-                  />
-                  {form.formState.errors.location && (
-                    <p className="text-red-500 text-sm">{form.formState.errors.location.message}</p>
+                  <Label htmlFor="country">Country *</Label>
+                  <Select 
+                    value={form.watch("country")} 
+                    onValueChange={handleCountryChange}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries.map((country) => (
+                        <SelectItem key={country.code} value={country.code}>
+                          {country.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {form.formState.errors.country && (
+                    <p className="text-red-500 text-sm">{form.formState.errors.country.message}</p>
                   )}
                 </div>
+                
+                <div>
+                  <Label htmlFor="state">State/Province *</Label>
+                  <Select 
+                    value={form.watch("state")} 
+                    onValueChange={handleStateChange}
+                    disabled={!selectedCountry}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select state/province" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableStates.map((state) => (
+                        <SelectItem key={state.code} value={state.code}>
+                          {state.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {form.formState.errors.state && (
+                    <p className="text-red-500 text-sm">{form.formState.errors.state.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="city">City *</Label>
+                  <Select 
+                    value={form.watch("city")} 
+                    onValueChange={handleCityChange}
+                    disabled={!selectedState}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select city" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableCities.map((city) => (
+                        <SelectItem key={city} value={city}>
+                          {city}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {form.formState.errors.city && (
+                    <p className="text-red-500 text-sm">{form.formState.errors.city.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="serviceRadius">Service Radius (miles) *</Label>
                   <Input
@@ -437,6 +531,16 @@ export default function TechnicianRegistration() {
                   {form.formState.errors.serviceRadius && (
                     <p className="text-red-500 text-sm">{form.formState.errors.serviceRadius.message}</p>
                   )}
+                </div>
+                <div className="flex items-end">
+                  <div className="text-sm text-gray-600">
+                    <p>Selected Location:</p>
+                    <p className="font-medium">
+                      {form.watch("city") && form.watch("state") && form.watch("country") 
+                        ? `${form.watch("city")}, ${availableStates.find(s => s.code === form.watch("state"))?.name}, ${countries.find(c => c.code === form.watch("country"))?.name}`
+                        : "Please select location"}
+                    </p>
+                  </div>
                 </div>
               </div>
 
