@@ -11,6 +11,7 @@ import MarketplacePage from "@/pages/MarketplacePage";
 import LiveSupportPage from "@/pages/LiveSupportPage";
 import TriagePage from "@/pages/TriagePage";
 import DiagnosticPage from "@/pages/DiagnosticPage";
+import ClientDashboard from "@/pages/ClientDashboard";
 import FloatingChatWidget from "@/components/FloatingChatWidget";
 
 function Router() {
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/live-support" component={() => <LiveSupportPage username={localStorage.getItem("username") || "Guest"} />} />
       <Route path="/triage" component={TriagePage} />
       <Route path="/diagnostic" component={DiagnosticPage} />
+      <Route path="/dashboard" component={ClientDashboard} />
       <Route path="/:username/profile" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>
