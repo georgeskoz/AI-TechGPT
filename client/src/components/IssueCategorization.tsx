@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -144,17 +145,30 @@ const technicalCategories = {
       'Performance Problems'
     ]
   },
-  'Support Services': {
+  'Online Remote Support': {
     icon: Wrench,
     color: 'bg-gray-100 text-gray-800',
     subcategories: [
-      'Remote Support',
-      'On-site Technician',
+      'Phone Support - Basic Diagnosis',
+      'Phone Support - Technical Guidance', 
+      'Phone Support - Problem Solving',
+      'Phone Support - Configuration Support',
+      'Phone Support - Advanced Consultation',
+      'Phone Support - Emergency Response',
+      'Phone Support - Expert Architecture Review'
+    ]
+  },
+  'On-Site Support Services': {
+    icon: Wrench,
+    color: 'bg-purple-100 text-purple-800',
+    subcategories: [
+      'On-site Technician Visit',
       'Training & Documentation',
-      'Consulting Services',
-      'Emergency Support',
+      'Consulting Services', 
+      'Emergency On-site Support',
       'Maintenance Services',
-      'System Assessment'
+      'System Assessment',
+      'Installation Services'
     ]
   }
 };
@@ -167,6 +181,7 @@ const priorityConfig = {
 };
 
 export default function IssueCategorization({ onIssueCreated, onCategorySelected }: IssueCategorizationProps) {
+  const [, setLocation] = useLocation();
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
   const [selectedPriority, setSelectedPriority] = useState<'low' | 'medium' | 'high' | 'urgent'>('medium');
@@ -182,6 +197,12 @@ export default function IssueCategorization({ onIssueCreated, onCategorySelected
   const handleSubcategorySelect = (subcategory: string) => {
     setSelectedSubcategory(subcategory);
     onCategorySelected(selectedCategory, subcategory);
+    
+    // Navigate to phone support if a phone support subcategory is selected
+    if (subcategory.startsWith('Phone Support')) {
+      setLocation('/phone-support');
+      return;
+    }
   };
 
   const handleCreateIssue = () => {

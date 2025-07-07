@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 import ChatPage from "@/pages/ChatPage";
 import ProfilePage from "@/pages/ProfilePage";
 import IssueCategorizationPage from "@/pages/IssueCategorizationPage";
+import PhoneSupportPage from "@/pages/PhoneSupportPage";
 
 function Router() {
   return (
@@ -13,6 +14,7 @@ function Router() {
       <Route path="/" component={ChatPage} />
       <Route path="/chat" component={ChatPage} />
       <Route path="/issues" component={IssueCategorizationPage} />
+      <Route path="/phone-support" component={PhoneSupportPage} />
       <Route path="/:username/profile" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>
