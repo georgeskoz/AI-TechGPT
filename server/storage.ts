@@ -568,7 +568,62 @@ class MemoryStorage implements IStorage {
   
   // Technician management
   async createTechnician(insertTechnician: InsertTechnician): Promise<Technician> {
-    const technician = { id: this.nextId++, ...insertTechnician } as Technician;
+    const technician: Technician = {
+      id: this.nextId++,
+      userId: insertTechnician.userId,
+      // Personal Information
+      firstName: insertTechnician.firstName,
+      lastName: insertTechnician.lastName,
+      email: insertTechnician.email,
+      phoneNumber: insertTechnician.phoneNumber,
+      address: insertTechnician.address,
+      // Business Information
+      businessName: insertTechnician.businessName || "",
+      companyName: insertTechnician.companyName || "",
+      experience: insertTechnician.experience,
+      hourlyRate: insertTechnician.hourlyRate || "0",
+      // Geographic location
+      country: insertTechnician.country || "",
+      state: insertTechnician.state || "",
+      city: insertTechnician.city || "",
+      location: insertTechnician.location || "",
+      serviceRadius: insertTechnician.serviceRadius || 25,
+      serviceAreas: insertTechnician.serviceAreas || [],
+      // Vehicle Information
+      vehicleType: insertTechnician.vehicleType || null,
+      vehicleMake: insertTechnician.vehicleMake || null,
+      vehicleModel: insertTechnician.vehicleModel || null,
+      vehicleYear: insertTechnician.vehicleYear || null,
+      vehicleLicensePlate: insertTechnician.vehicleLicensePlate || null,
+      // Document URLs
+      backgroundCheckUrl: insertTechnician.backgroundCheckUrl || null,
+      driverLicenseUrl: insertTechnician.driverLicenseUrl || null,
+      insuranceUrl: insertTechnician.insuranceUrl || null,
+      // Skills and certifications
+      skills: insertTechnician.skills || [],
+      categories: insertTechnician.categories || [],
+      certifications: insertTechnician.certifications || [],
+      languages: insertTechnician.languages || ["English"],
+      availability: insertTechnician.availability || {},
+      profileDescription: insertTechnician.profileDescription || "",
+      responseTime: insertTechnician.responseTime || 60,
+      rating: "5.00",
+      completedJobs: 0,
+      totalEarnings: "0.00",
+      // Status and verification - default to false until admin approval
+      isActive: false,
+      isVerified: false,
+      verificationStatus: "pending",
+      adminNotes: null,
+      verifiedBy: null,
+      verifiedAt: null,
+      stripeAccountId: null,
+      remoteEarningPercentage: "85.00",
+      phoneEarningPercentage: "85.00",
+      onsiteEarningPercentage: "85.00",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
     this.technicians.set(technician.id, technician);
     return technician;
   }
@@ -772,6 +827,13 @@ class MemoryStorage implements IStorage {
     const technician = {
       id,
       userId: technicianData.userId || 1, // Default for demo
+      // Personal Information
+      firstName: technicianData.firstName,
+      lastName: technicianData.lastName,
+      email: technicianData.email,
+      phoneNumber: technicianData.phoneNumber,
+      address: technicianData.address,
+      // Business Information
       businessName: technicianData.businessName,
       companyName: technicianData.companyName,
       experience: technicianData.experience,
@@ -783,6 +845,17 @@ class MemoryStorage implements IStorage {
       location: technicianData.location, // Combined location string
       serviceRadius: technicianData.serviceRadius,
       serviceAreas: technicianData.serviceAreas || [],
+      // Vehicle Information
+      vehicleType: technicianData.vehicleType,
+      vehicleMake: technicianData.vehicleMake,
+      vehicleModel: technicianData.vehicleModel,
+      vehicleYear: technicianData.vehicleYear,
+      vehicleLicensePlate: technicianData.vehicleLicensePlate,
+      // Document URLs
+      backgroundCheckUrl: technicianData.backgroundCheckUrl,
+      driverLicenseUrl: technicianData.driverLicenseUrl,
+      insuranceUrl: technicianData.insuranceUrl,
+      // Skills and certifications
       skills: technicianData.skills || [],
       categories: technicianData.categories || [],
       certifications: technicianData.certifications || [],
@@ -793,7 +866,8 @@ class MemoryStorage implements IStorage {
       completedJobs: 0,
       totalEarnings: "0.00",
       responseTime: technicianData.responseTime || 60,
-      isActive: true,
+      // Status and verification - default to inactive until admin approval
+      isActive: false,
       isVerified: false,
       verificationStatus: "pending",
       stripeAccountId: null,
