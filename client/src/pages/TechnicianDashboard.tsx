@@ -22,8 +22,12 @@ import {
   MessageSquare,
   Settings,
   Shield,
-  Activity
+  Activity,
+  ArrowLeft,
+  Home,
+  X
 } from "lucide-react";
+import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -56,6 +60,7 @@ interface JobNotification {
 export default function TechnicianDashboard() {
   const [isAvailable, setIsAvailable] = useState(true);
   const [selectedTab, setSelectedTab] = useState("overview");
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   // Fetch technician profile and stats
@@ -221,25 +226,66 @@ export default function TechnicianDashboard() {
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-6xl">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Technician Dashboard</h1>
-          <p className="text-gray-600">Welcome back, {technicianData?.businessName || "Technician"}</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Available for Jobs</span>
-            <Switch
-              checked={isAvailable}
-              onCheckedChange={handleAvailabilityChange}
-            />
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation Header */}
+      <div className="sticky top-0 z-40 bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLocation("/technician-landing")}
+                className="flex items-center gap-1"
+              >
+                <ArrowLeft className="h-3 w-3" />
+                Back
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLocation("/")}
+                className="flex items-center gap-1"
+              >
+                <Home className="h-4 w-4" />
+                Home
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant={isAvailable ? "default" : "secondary"}>
+                {isAvailable ? "Available" : "Away"}
+              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLocation("/")}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <Badge variant={isAvailable ? "default" : "secondary"}>
-            {isAvailable ? "Available" : "Away"}
-          </Badge>
         </div>
       </div>
+
+      <div className="container mx-auto p-4 max-w-6xl">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Technician Dashboard</h1>
+            <p className="text-gray-600">Welcome back, {technicianData?.businessName || "Technician"}</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">Available for Jobs</span>
+              <Switch
+                checked={isAvailable}
+                onCheckedChange={handleAvailabilityChange}
+              />
+            </div>
+            <Badge variant={isAvailable ? "default" : "secondary"}>
+              {isAvailable ? "Available" : "Away"}
+            </Badge>
+          </div>
+        </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-6">
@@ -547,6 +593,7 @@ export default function TechnicianDashboard() {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 }
