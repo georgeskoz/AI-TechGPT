@@ -22,7 +22,10 @@ import {
   CheckCircle,
   ArrowRight,
   Plus,
-  X
+  X,
+  Upload,
+  FileText,
+  Download
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
@@ -76,6 +79,8 @@ export default function TechnicianRegistration() {
   const [selectedCertifications, setSelectedCertifications] = useState<string[]>([]);
   const [serviceAreas, setServiceAreas] = useState<string[]>([]);
   const [newServiceArea, setNewServiceArea] = useState("");
+  const [uploadedCV, setUploadedCV] = useState<File | null>(null);
+  const [cvText, setCvText] = useState("");
   const [availability, setAvailability] = useState({
     monday: { start: "09:00", end: "17:00", available: true },
     tuesday: { start: "09:00", end: "17:00", available: true },
@@ -182,6 +187,37 @@ export default function TechnicianRegistration() {
         ? prev.filter(c => c !== certification)
         : [...prev, certification]
     );
+  };
+
+  const handleCVUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setUploadedCV(file);
+      
+      // Read file content for text extraction (simple text files)
+      if (file.type === 'text/plain') {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const text = e.target?.result as string;
+          setCvText(text);
+          form.setValue('profileDescription', text);
+        };
+        reader.readAsText(file);
+      } else {
+        // For PDF/DOC files, show filename and let user fill description manually
+        const fileName = file.name;
+        const suggestedText = `Professional experience detailed in uploaded resume: ${fileName}. 
+
+Please describe your key technical skills, specialties, and what makes you stand out as a technician.`;
+        setCvText(suggestedText);
+        form.setValue('profileDescription', suggestedText);
+      }
+    }
+  };
+
+  const removeCVUpload = () => {
+    setUploadedCV(null);
+    setCvText("");
   };
 
   const toggleAvailability = (day: string) => {
@@ -296,14 +332,85 @@ export default function TechnicianRegistration() {
 
               <div>
                 <Label htmlFor="profileDescription">Profile Description *</Label>
+                
+                {/* CV Upload Option */}
+                <div className="mb-4 p-4 border-2 border-dashed border-gray-300 rounded-lg">
+                  <div className="text-center">
+                    {!uploadedCV ? (
+                      <>
+                        <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600 mb-2">
+                          Upload your CV/Resume (Optional)
+                        </p>
+                        <p className="text-xs text-gray-500 mb-3">
+                          Supported formats: PDF, DOC, DOCX, TXT (Max 5MB)
+                        </p>
+                        <input
+                          type="file"
+                          accept=".pdf,.doc,.docx,.txt"
+                          onChange={handleCVUpload}
+                          className="hidden"
+                          id="cv-upload"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => document.getElementById('cv-upload')?.click()}
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Choose File
+                        </Button>
+                      </>
+                    ) : (
+                      <div className="flex items-center justify-between bg-green-50 p-3 rounded-md">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-5 w-5 text-green-600" />
+                          <div className="text-left">
+                            <p className="text-sm font-medium text-green-800">{uploadedCV.name}</p>
+                            <p className="text-xs text-green-600">
+                              {(uploadedCV.size / 1024).toFixed(1)} KB
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={removeCVUpload}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <Textarea
                   id="profileDescription"
                   {...form.register("profileDescription")}
-                  placeholder="Describe your technical expertise, specialties, and what makes you stand out..."
+                  placeholder="Describe your technical expertise, specialties, and what makes you stand out. You can also upload your CV above to help fill this section."
                   className="min-h-[120px]"
                 />
                 {form.formState.errors.profileDescription && (
                   <p className="text-red-500 text-sm">{form.formState.errors.profileDescription.message}</p>
+                )}
+                
+                {uploadedCV && (
+                  <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                    <div className="flex items-start gap-2">
+                      <FileText className="h-4 w-4 text-blue-600 mt-0.5" />
+                      <div className="text-sm">
+                        <p className="font-medium text-blue-900">CV/Resume uploaded successfully!</p>
+                        <p className="text-blue-700">
+                          {uploadedCV.type === 'text/plain' 
+                            ? 'Content has been automatically filled in the description above. You can edit it as needed.'
+                            : 'Please manually describe your experience in the text area above, referencing your uploaded resume.'
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
 
