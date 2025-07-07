@@ -38,7 +38,15 @@ export default function TechGPTHeader({ username }: TechGPTHeaderProps) {
             <h1 className="text-xl font-bold text-gray-800">TechGPT</h1>
           </button>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-4">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => navigate('/marketplace')}
+            className="hidden md:inline-flex"
+          >
+            Find Technician
+          </Button>
           <div className="text-sm font-medium text-gray-600 mr-2">
             <span>{username}</span>
           </div>
