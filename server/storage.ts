@@ -1,8 +1,9 @@
 import { 
-  users, messages, technicians, serviceRequests, jobs, jobUpdates,
+  users, messages, technicians, serviceRequests, jobs, jobUpdates, supportCases, supportMessages,
   type User, type InsertUser, type UpdateProfile, type Message, type InsertMessage,
   type Technician, type InsertTechnician, type ServiceRequest, type InsertServiceRequest,
-  type Job, type InsertJob, type JobUpdate, type InsertJobUpdate
+  type Job, type InsertJob, type JobUpdate, type InsertJobUpdate,
+  type SupportCase, type InsertSupportCase, type SupportMessage, type InsertSupportMessage
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -47,6 +48,21 @@ export interface IStorage {
   // Job updates
   createJobUpdate(update: InsertJobUpdate): Promise<JobUpdate>;
   getJobUpdates(jobId: number): Promise<JobUpdate[]>;
+
+  // Live support chat
+  createSupportCase(supportCase: InsertSupportCase): Promise<SupportCase>;
+  getSupportCase(id: number): Promise<SupportCase | undefined>;
+  getSupportCasesByCustomer(customerId: number): Promise<SupportCase[]>;
+  getSupportCasesByTechnician(technicianId: number): Promise<SupportCase[]>;
+  updateSupportCase(id: number, updates: Partial<SupportCase>): Promise<SupportCase>;
+  assignTechnicianToCase(caseId: number, technicianId: number): Promise<SupportCase>;
+  closeSupportCase(caseId: number, totalDuration: number): Promise<SupportCase>;
+  
+  // Support messages
+  createSupportMessage(message: InsertSupportMessage): Promise<SupportMessage>;
+  getSupportMessages(caseId: number): Promise<SupportMessage[]>;
+  markMessageAsRead(messageId: number): Promise<void>;
+  getUnreadMessageCount(caseId: number, userId: number): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -241,6 +257,110 @@ export class DatabaseStorage implements IStorage {
       .from(jobUpdates)
       .where(eq(jobUpdates.jobId, jobId))
       .orderBy(jobUpdates.timestamp);
+  }
+
+  // Live support chat methods
+  async createSupportCase(insertCase: InsertSupportCase): Promise<SupportCase> {
+    const [supportCase] = await db
+      .insert(supportCases)
+      .values(insertCase)
+      .returning();
+    return supportCase;
+  }
+
+  async getSupportCase(id: number): Promise<SupportCase | undefined> {
+    const [supportCase] = await db.select().from(supportCases).where(eq(supportCases.id, id));
+    return supportCase || undefined;
+  }
+
+  async getSupportCasesByCustomer(customerId: number): Promise<SupportCase[]> {
+    return await db
+      .select()
+      .from(supportCases)
+      .where(eq(supportCases.customerId, customerId))
+      .orderBy(desc(supportCases.createdAt));
+  }
+
+  async getSupportCasesByTechnician(technicianId: number): Promise<SupportCase[]> {
+    return await db
+      .select()
+      .from(supportCases)
+      .where(eq(supportCases.technicianId, technicianId))
+      .orderBy(desc(supportCases.createdAt));
+  }
+
+  async updateSupportCase(id: number, updates: Partial<SupportCase>): Promise<SupportCase> {
+    const [supportCase] = await db
+      .update(supportCases)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(supportCases.id, id))
+      .returning();
+    return supportCase;
+  }
+
+  async assignTechnicianToCase(caseId: number, technicianId: number): Promise<SupportCase> {
+    const [supportCase] = await db
+      .update(supportCases)
+      .set({ 
+        technicianId, 
+        status: "assigned",
+        updatedAt: new Date()
+      })
+      .where(eq(supportCases.id, caseId))
+      .returning();
+    return supportCase;
+  }
+
+  async closeSupportCase(caseId: number, totalDuration: number): Promise<SupportCase> {
+    const [supportCase] = await db
+      .update(supportCases)
+      .set({ 
+        status: "closed",
+        endTime: new Date(),
+        totalDuration,
+        isFreeSupport: totalDuration <= 10, // Free if 10 minutes or less
+        updatedAt: new Date()
+      })
+      .where(eq(supportCases.id, caseId))
+      .returning();
+    return supportCase;
+  }
+
+  async createSupportMessage(insertMessage: InsertSupportMessage): Promise<SupportMessage> {
+    const [message] = await db
+      .insert(supportMessages)
+      .values(insertMessage)
+      .returning();
+    return message;
+  }
+
+  async getSupportMessages(caseId: number): Promise<SupportMessage[]> {
+    return await db
+      .select()
+      .from(supportMessages)
+      .where(eq(supportMessages.caseId, caseId))
+      .orderBy(supportMessages.timestamp);
+  }
+
+  async markMessageAsRead(messageId: number): Promise<void> {
+    await db
+      .update(supportMessages)
+      .set({ isRead: true })
+      .where(eq(supportMessages.id, messageId));
+  }
+
+  async getUnreadMessageCount(caseId: number, userId: number): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(supportMessages)
+      .where(
+        and(
+          eq(supportMessages.caseId, caseId),
+          eq(supportMessages.isRead, false),
+          sql`${supportMessages.senderId} != ${userId}`
+        )
+      );
+    return result[0]?.count || 0;
   }
 }
 

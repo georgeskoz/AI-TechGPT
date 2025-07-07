@@ -1,4 +1,4 @@
-import { pgTable, text, serial, boolean, timestamp, decimal, jsonb, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, timestamp, decimal, jsonb, integer, varchar } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -101,6 +101,35 @@ export const messages = pgTable("messages", {
   timestamp: timestamp("timestamp").notNull().defaultNow(),
 });
 
+// Live support chat system
+export const supportCases = pgTable("support_cases", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").references(() => users.id).notNull(),
+  technicianId: integer("technician_id").references(() => technicians.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  status: varchar("status", { length: 50 }).default("open").notNull(),
+  priority: varchar("priority", { length: 20 }).default("medium").notNull(),
+  category: varchar("category", { length: 100 }),
+  startTime: timestamp("start_time").defaultNow().notNull(),
+  endTime: timestamp("end_time"),
+  totalDuration: integer("total_duration").default(0), // in minutes
+  isFreeSupport: boolean("is_free_support").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const supportMessages = pgTable("support_messages", {
+  id: serial("id").primaryKey(),
+  caseId: integer("case_id").references(() => supportCases.id).notNull(),
+  senderId: integer("sender_id").references(() => users.id).notNull(),
+  senderType: varchar("sender_type", { length: 20 }).notNull(), // 'customer' or 'technician'
+  content: text("content").notNull(),
+  messageType: varchar("message_type", { length: 20 }).default("text").notNull(),
+  isRead: boolean("is_read").default(false),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+});
+
 export const usersRelations = relations(users, ({ many, one }) => ({
   messages: many(messages),
   technicianProfile: one(technicians, {
@@ -169,6 +198,29 @@ export const jobUpdatesRelations = relations(jobUpdates, ({ one }) => ({
   }),
   updatedBy: one(users, {
     fields: [jobUpdates.updatedBy],
+    references: [users.id],
+  }),
+}));
+
+export const supportCasesRelations = relations(supportCases, ({ one, many }) => ({
+  customer: one(users, {
+    fields: [supportCases.customerId],
+    references: [users.id],
+  }),
+  technician: one(technicians, {
+    fields: [supportCases.technicianId],
+    references: [technicians.id],
+  }),
+  messages: many(supportMessages),
+}));
+
+export const supportMessagesRelations = relations(supportMessages, ({ one }) => ({
+  case: one(supportCases, {
+    fields: [supportMessages.caseId],
+    references: [supportCases.id],
+  }),
+  sender: one(users, {
+    fields: [supportMessages.senderId],
     references: [users.id],
   }),
 }));
@@ -250,6 +302,24 @@ export const insertJobUpdateSchema = createInsertSchema(jobUpdates).pick({
   attachments: z.array(z.string()).optional(),
 });
 
+export const insertSupportCaseSchema = createInsertSchema(supportCases).pick({
+  customerId: true,
+  technicianId: true,
+  title: true,
+  description: true,
+  status: true,
+  priority: true,
+  category: true,
+});
+
+export const insertSupportMessageSchema = createInsertSchema(supportMessages).pick({
+  caseId: true,
+  senderId: true,
+  senderType: true,
+  content: true,
+  messageType: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpdateProfile = z.infer<typeof updateProfileSchema>;
 export type User = typeof users.$inferSelect;
@@ -263,3 +333,7 @@ export type InsertJob = z.infer<typeof insertJobSchema>;
 export type Job = typeof jobs.$inferSelect;
 export type InsertJobUpdate = z.infer<typeof insertJobUpdateSchema>;
 export type JobUpdate = typeof jobUpdates.$inferSelect;
+export type InsertSupportCase = z.infer<typeof insertSupportCaseSchema>;
+export type SupportCase = typeof supportCases.$inferSelect;
+export type InsertSupportMessage = z.infer<typeof insertSupportMessageSchema>;
+export type SupportMessage = typeof supportMessages.$inferSelect;
