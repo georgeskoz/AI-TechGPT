@@ -135,6 +135,7 @@ export default function TechnicianRegistration() {
       setStep(5);
     },
     onError: (error: any) => {
+      console.error("Registration error:", error);
       toast({
         title: "Registration Failed",
         description: error.message || "There was an error creating your profile.",
@@ -169,6 +170,9 @@ export default function TechnicianRegistration() {
   };
 
   const handleSubmit = (data: TechnicianFormData) => {
+    console.log("Form data:", data);
+    console.log("Form errors:", form.formState.errors);
+    
     const registrationData = {
       ...data,
       location: `${data.city}, ${availableStates.find(s => s.code === data.state)?.name}, ${countries.find(c => c.code === data.country)?.name}`,
@@ -181,6 +185,7 @@ export default function TechnicianRegistration() {
       availability,
     };
 
+    console.log("Registration data:", registrationData);
     registerMutation.mutate(registrationData);
   };
 
@@ -742,6 +747,12 @@ export default function TechnicianRegistration() {
                   type="submit" 
                   disabled={registerMutation.isPending}
                   className="flex items-center gap-2"
+                  onClick={() => {
+                    const errors = form.formState.errors;
+                    console.log("Form validation errors:", errors);
+                    console.log("Form is valid:", form.formState.isValid);
+                    console.log("Form values:", form.getValues());
+                  }}
                 >
                   {registerMutation.isPending ? "Registering..." : "Complete Registration"}
                   <CheckCircle className="h-4 w-4" />
