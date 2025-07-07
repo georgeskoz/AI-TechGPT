@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +21,10 @@ import {
   AlertCircle,
   Minimize2,
   Maximize2,
-  Users
+  Users,
+  ArrowLeft,
+  Home,
+  X
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -73,6 +77,7 @@ export default function LiveSupportChat({
   const [elapsedTime, setElapsedTime] = useState(0);
   const [aiMode, setAiMode] = useState(true);
   const [isAiResponding, setIsAiResponding] = useState(false);
+  const [, setLocation] = useLocation();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const queryClient = useQueryClient();
