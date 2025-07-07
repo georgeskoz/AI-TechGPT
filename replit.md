@@ -151,13 +151,21 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
   - **Admin Home Page (`/admin-home`)**: Purple-themed administrative control center with platform management, user oversight, analytics dashboard, and system monitoring
   - **Domain Selector (`/domains`)**: Interactive selection page allowing users to choose their appropriate platform with feature comparisons and quick access options
   - **Value-First Design**: Each home page showcases platform benefits, statistics, and clear call-to-action buttons for user engagement
-- **Instant Technician Profile Preview**: Real-time preview system showing technicians exactly how customers will see their profile
-  - **Live Form Updates**: Preview updates instantly as technicians type in form fields
+- **Instant Technician Profile Preview & Visibility System**: Complete profile visibility system showing technicians exactly how customers will see their profile
+  - **Live Form Updates**: Preview updates instantly as technicians type in form fields with real-time location formatting
   - **Professional Profile Display**: Shows complete technician card with avatar, ratings, service rates, and skills
   - **Revenue Calculations**: Displays actual earnings based on 85% revenue share across service types
   - **Optimization Tips**: Provides helpful suggestions to improve profile visibility and appeal
   - **CV/Resume Upload**: Option to upload CV/resume files (PDF, DOC, DOCX, TXT) to auto-populate or supplement profile description
   - **Side-by-Side Layout**: Sticky preview panel alongside registration form for constant visibility
+  - **Multi-View Profile Visibility**: Three distinct views showing how profiles appear in search results, detailed view, and competitive comparison
+  - **Visibility Score Calculator**: Real-time profile completeness scoring (0-100) with performance analytics
+  - **Competitive Analysis**: Shows technician ranking against local competitors with strengths and improvement areas
+  - **Profile Optimization Simulator**: Interactive tool to test profile changes and see instant impact on visibility
+  - **Customer Perspective Views**: Search result preview, full profile view, and side-by-side competitor comparison
+  - **Privacy Controls**: Toggle sensitive information display for testing different visibility levels
+  - **Performance Metrics Dashboard**: Profile views, contact requests, conversion rates, and local ranking analytics
+  - **Geographic Location Integration**: Dynamic location display using country/state/city structure for professional presentation
 - **Comprehensive Admin Dashboard**: Implemented full-featured admin panel for platform management and analytics
   - **User Management**: View all users, manage account status, track customer spending and activity
   - **Technician Management**: Monitor technician profiles, verification status, ratings, and earnings
