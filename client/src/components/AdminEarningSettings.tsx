@@ -34,8 +34,11 @@ import {
   X,
   Users,
   Calculator,
-  Crown
+  Crown,
+  ArrowLeft,
+  Home
 } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface TechnicianEarning {
   id: number;
@@ -82,6 +85,7 @@ export default function AdminEarningSettings() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   const { data: technicianEarnings = [], isLoading } = useQuery({
     queryKey: ["/api/admin/technician-earnings"],
@@ -208,6 +212,40 @@ export default function AdminEarningSettings() {
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
+      {/* Navigation Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setLocation("/admin")}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Admin
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setLocation("/")}
+            className="flex items-center gap-2"
+          >
+            <Home className="h-4 w-4" />
+            Home
+          </Button>
+        </div>
+        
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={() => setLocation("/admin")}
+          className="flex items-center gap-2 text-gray-500 hover:text-gray-700"
+        >
+          <X className="h-4 w-4" />
+          Close
+        </Button>
+      </div>
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Technician Earning Settings</h1>
         <p className="text-gray-600">Manage earning percentages and bonuses for each service provider</p>
