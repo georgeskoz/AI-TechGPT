@@ -27,7 +27,9 @@ import {
   X,
   Upload,
   FileText,
-  Download
+  Download,
+  Car,
+  IdCard
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
@@ -36,14 +38,33 @@ import TechnicianProfilePreview from "@/components/TechnicianProfilePreview";
 import TechnicianProfileVisibility from "@/components/TechnicianProfileVisibility";
 
 const technicianSchema = z.object({
-  businessName: z.string().optional(), // Optional - for technicians working with fleets
-  companyName: z.string().optional(), // Optional - company affiliation
+  // Personal Information (Required)
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  email: z.string().email("Valid email is required"),
+  phoneNumber: z.string().min(10, "Valid phone number is required"),
+  address: z.string().min(10, "Complete address is required"),
+  
+  // Business Information (Optional for individual contractors)
+  businessName: z.string().optional(),
+  companyName: z.string().optional(),
   experience: z.enum(["beginner", "intermediate", "advanced", "expert"]),
-  hourlyRatePercentage: z.number().min(70).max(95).default(85), // Admin-set percentage (70-95%)
+  hourlyRatePercentage: z.number().min(70).max(95).default(85),
+  
+  // Geographic location
   country: z.string().min(1, "Country is required"),
   state: z.string().min(1, "State/Province is required"),
   city: z.string().min(1, "City is required"),
   serviceRadius: z.number().min(5, "Minimum service radius is 5 miles").max(100, "Maximum service radius is 100 miles"),
+  
+  // Vehicle Information (Required for on-site services)
+  vehicleType: z.enum(["car", "truck", "van", "motorcycle", "bicycle", "none"]),
+  vehicleMake: z.string().optional(),
+  vehicleModel: z.string().optional(),
+  vehicleYear: z.number().optional(),
+  vehicleLicensePlate: z.string().optional(),
+  
+  // Profile
   profileDescription: z.string().min(50, "Profile description must be at least 50 characters"),
   responseTime: z.number().min(15, "Minimum response time is 15 minutes").max(240, "Maximum response time is 4 hours"),
 });
@@ -86,6 +107,9 @@ export default function TechnicianRegistration() {
   const [newServiceArea, setNewServiceArea] = useState("");
   const [uploadedCV, setUploadedCV] = useState<File | null>(null);
   const [cvText, setCvText] = useState("");
+  const [backgroundCheckFile, setBackgroundCheckFile] = useState<File | null>(null);
+  const [driverLicenseFile, setDriverLicenseFile] = useState<File | null>(null);
+  const [insuranceFile, setInsuranceFile] = useState<File | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [selectedState, setSelectedState] = useState<string>("");
   const [availableStates, setAvailableStates] = useState<any[]>([]);
@@ -105,14 +129,24 @@ export default function TechnicianRegistration() {
   const form = useForm<TechnicianFormData>({
     resolver: zodResolver(technicianSchema),
     defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phoneNumber: "",
+      address: "",
       businessName: "",
       companyName: "",
       experience: "intermediate",
-      hourlyRatePercentage: 85, // Default to 85% technician share
+      hourlyRatePercentage: 85,
       country: "",
       state: "",
       city: "",
       serviceRadius: 25,
+      vehicleType: "car",
+      vehicleMake: "",
+      vehicleModel: "",
+      vehicleYear: new Date().getFullYear(),
+      vehicleLicensePlate: "",
       profileDescription: "",
       responseTime: 60,
     },
@@ -174,9 +208,37 @@ export default function TechnicianRegistration() {
     console.log("Form errors:", form.formState.errors);
     
     const registrationData = {
-      ...data,
+      // Personal Information
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      phoneNumber: data.phoneNumber,
+      address: data.address,
+      // Business Information
+      businessName: data.businessName,
+      companyName: data.companyName,
+      experience: data.experience,
+      hourlyRate: data.hourlyRatePercentage.toString(), // Convert to string for backend
+      // Geographic location
+      country: data.country,
+      state: data.state,
+      city: data.city,
       location: `${data.city}, ${availableStates.find(s => s.code === data.state)?.name}, ${countries.find(c => c.code === data.country)?.name}`,
-      hourlyRate: data.hourlyRatePercentage, // Map the percentage to hourlyRate for backend compatibility
+      serviceRadius: data.serviceRadius,
+      // Vehicle Information
+      vehicleType: data.vehicleType,
+      vehicleMake: data.vehicleMake,
+      vehicleModel: data.vehicleModel,
+      vehicleYear: data.vehicleYear,
+      vehicleLicensePlate: data.vehicleLicensePlate,
+      // Document URLs (will be uploaded later via separate endpoint)
+      backgroundCheckUrl: null,
+      driverLicenseUrl: null,
+      insuranceUrl: null,
+      // Profile and settings
+      profileDescription: data.profileDescription,
+      responseTime: data.responseTime,
+      // Skills and categories from form state
       skills: selectedSkills,
       categories: selectedCategories,
       languages: selectedLanguages,
@@ -293,7 +355,105 @@ export default function TechnicianRegistration() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
-                Basic Information
+                Personal Information
+              </CardTitle>
+              <p className="text-sm text-gray-600">
+                Basic personal information required for verification and background checks
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="firstName">First Name *</Label>
+                  <Input
+                    id="firstName"
+                    {...form.register("firstName")}
+                    placeholder="John"
+                    className={form.formState.errors.firstName ? "border-red-500" : ""}
+                  />
+                  {form.formState.errors.firstName && (
+                    <p className="text-sm text-red-500 mt-1">{form.formState.errors.firstName.message}</p>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    {...form.register("lastName")}
+                    placeholder="Smith"
+                    className={form.formState.errors.lastName ? "border-red-500" : ""}
+                  />
+                  {form.formState.errors.lastName && (
+                    <p className="text-sm text-red-500 mt-1">{form.formState.errors.lastName.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="email">Email Address *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    {...form.register("email")}
+                    placeholder="john.smith@email.com"
+                    className={form.formState.errors.email ? "border-red-500" : ""}
+                  />
+                  {form.formState.errors.email && (
+                    <p className="text-sm text-red-500 mt-1">{form.formState.errors.email.message}</p>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="phoneNumber">Phone Number *</Label>
+                  <Input
+                    id="phoneNumber"
+                    {...form.register("phoneNumber")}
+                    placeholder="+1 (555) 123-4567"
+                    className={form.formState.errors.phoneNumber ? "border-red-500" : ""}
+                  />
+                  {form.formState.errors.phoneNumber && (
+                    <p className="text-sm text-red-500 mt-1">{form.formState.errors.phoneNumber.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="address">Complete Address *</Label>
+                <Textarea
+                  id="address"
+                  {...form.register("address")}
+                  placeholder="123 Main Street, Apartment 4B, City, Province/State, Postal/Zip Code"
+                  rows={3}
+                  className={form.formState.errors.address ? "border-red-500" : ""}
+                />
+                {form.formState.errors.address && (
+                  <p className="text-sm text-red-500 mt-1">{form.formState.errors.address.message}</p>
+                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  Complete address including street, city, province/state, and postal/zip code
+                </p>
+              </div>
+
+              <div className="flex justify-end">
+                <Button 
+                  type="button" 
+                  onClick={() => setStep(2)}
+                  className="flex items-center gap-2"
+                  disabled={!form.getValues("firstName") || !form.getValues("lastName") || !form.getValues("email") || !form.getValues("phoneNumber") || !form.getValues("address")}
+                >
+                  Next <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {step === 2 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building className="h-5 w-5" />
+                Business Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -437,7 +597,7 @@ export default function TechnicianRegistration() {
               </div>
 
               <div className="flex justify-end">
-                <Button type="button" onClick={() => setStep(2)} className="flex items-center gap-2">
+                <Button type="button" onClick={() => setStep(3)} className="flex items-center gap-2">
                   Next <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -446,6 +606,200 @@ export default function TechnicianRegistration() {
         )}
 
         {step === 2 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Car className="h-5 w-5" />
+                Vehicle Information
+              </CardTitle>
+              <p className="text-sm text-gray-600">
+                Vehicle details required for on-site service verification
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="vehicleType">Vehicle Type *</Label>
+                <Select onValueChange={(value) => form.setValue("vehicleType", value as any)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your vehicle type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="car">Car</SelectItem>
+                    <SelectItem value="truck">Truck</SelectItem>
+                    <SelectItem value="van">Van</SelectItem>
+                    <SelectItem value="motorcycle">Motorcycle</SelectItem>
+                    <SelectItem value="bicycle">Bicycle</SelectItem>
+                    <SelectItem value="none">No Vehicle (Remote/Phone Support Only)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {form.watch("vehicleType") !== "none" && form.watch("vehicleType") !== "bicycle" && (
+                <>
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="vehicleMake">Make</Label>
+                      <Input
+                        id="vehicleMake"
+                        {...form.register("vehicleMake")}
+                        placeholder="Toyota"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="vehicleModel">Model</Label>
+                      <Input
+                        id="vehicleModel"
+                        {...form.register("vehicleModel")}
+                        placeholder="Camry"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="vehicleYear">Year</Label>
+                      <Input
+                        id="vehicleYear"
+                        type="number"
+                        {...form.register("vehicleYear", { valueAsNumber: true })}
+                        placeholder="2020"
+                        min={1980}
+                        max={new Date().getFullYear() + 1}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="vehicleLicensePlate">License Plate</Label>
+                    <Input
+                      id="vehicleLicensePlate"
+                      {...form.register("vehicleLicensePlate")}
+                      placeholder="ABC-1234"
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="flex justify-between">
+                <Button type="button" onClick={() => setStep(1)} variant="outline">
+                  Back
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={() => setStep(4)}
+                  className="flex items-center gap-2"
+                >
+                  Next <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {step === 3 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <IdCard className="h-5 w-5" />
+                Document Upload
+              </CardTitle>
+              <p className="text-sm text-gray-600">
+                Upload required documents for verification and approval
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="backgroundCheck">Police Background Check *</Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <div className="text-sm text-gray-600">
+                    <label htmlFor="backgroundCheck" className="cursor-pointer">
+                      <span className="text-blue-600 font-medium hover:text-blue-500">
+                        Click to upload
+                      </span>
+                      {" "}or drag and drop
+                    </label>
+                    <input
+                      id="backgroundCheck"
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      className="hidden"
+                      onChange={(e) => setBackgroundCheckFile(e.target.files?.[0] || null)}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
+                  {backgroundCheckFile && (
+                    <p className="mt-2 text-sm text-green-600">✓ {backgroundCheckFile.name}</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="driverLicense">Driver's License (if applicable)</Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <div className="text-sm text-gray-600">
+                    <label htmlFor="driverLicense" className="cursor-pointer">
+                      <span className="text-blue-600 font-medium hover:text-blue-500">
+                        Click to upload
+                      </span>
+                      {" "}or drag and drop
+                    </label>
+                    <input
+                      id="driverLicense"
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      className="hidden"
+                      onChange={(e) => setDriverLicenseFile(e.target.files?.[0] || null)}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
+                  {driverLicenseFile && (
+                    <p className="mt-2 text-sm text-green-600">✓ {driverLicenseFile.name}</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="insurance">Vehicle Insurance (if applicable)</Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <div className="text-sm text-gray-600">
+                    <label htmlFor="insurance" className="cursor-pointer">
+                      <span className="text-blue-600 font-medium hover:text-blue-500">
+                        Click to upload
+                      </span>
+                      {" "}or drag and drop
+                    </label>
+                    <input
+                      id="insurance"
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      className="hidden"
+                      onChange={(e) => setInsuranceFile(e.target.files?.[0] || null)}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
+                  {insuranceFile && (
+                    <p className="mt-2 text-sm text-green-600">✓ {insuranceFile.name}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-between">
+                <Button type="button" onClick={() => setStep(2)} variant="outline">
+                  Back
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={() => setStep(5)}
+                  className="flex items-center gap-2"
+                >
+                  Next <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {step === 4 && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -592,10 +946,10 @@ export default function TechnicianRegistration() {
               </div>
 
               <div className="flex justify-between">
-                <Button type="button" onClick={() => setStep(1)} variant="outline">
+                <Button type="button" onClick={() => setStep(3)} variant="outline">
                   Back
                 </Button>
-                <Button type="button" onClick={() => setStep(3)} className="flex items-center gap-2">
+                <Button type="button" onClick={() => setStep(5)} className="flex items-center gap-2">
                   Next <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -603,7 +957,7 @@ export default function TechnicianRegistration() {
           </Card>
         )}
 
-        {step === 3 && (
+        {step === 5 && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

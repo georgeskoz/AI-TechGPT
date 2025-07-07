@@ -19,6 +19,13 @@ export const users = pgTable("users", {
 export const technicians = pgTable("technicians", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
+  // Personal Information
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email").notNull(),
+  phoneNumber: text("phone_number").notNull(),
+  address: text("address").notNull(),
+  // Business Information
   businessName: text("business_name"),
   companyName: text("company_name"),
   experience: text("experience"), // beginner, intermediate, advanced, expert
@@ -48,9 +55,23 @@ export const technicians = pgTable("technicians", {
   completedJobs: integer("completed_jobs").default(0),
   totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0.00"),
   responseTime: integer("response_time_minutes").default(60), // Average response time in minutes
-  isActive: boolean("is_active").default(true),
+  // Vehicle Information
+  vehicleType: text("vehicle_type"), // car, truck, van, motorcycle, bicycle, none
+  vehicleMake: text("vehicle_make"),
+  vehicleModel: text("vehicle_model"),
+  vehicleYear: integer("vehicle_year"),
+  vehicleLicensePlate: text("vehicle_license_plate"),
+  // Document Uploads
+  backgroundCheckUrl: text("background_check_url"),
+  driverLicenseUrl: text("driver_license_url"),
+  insuranceUrl: text("insurance_url"),
+  // Status and verification
+  isActive: boolean("is_active").default(false), // Default false until verified
   isVerified: boolean("is_verified").default(false),
   verificationStatus: text("verification_status").default("pending"), // pending, approved, rejected
+  adminNotes: text("admin_notes"),
+  verifiedBy: integer("verified_by"),
+  verifiedAt: timestamp("verified_at"),
   stripeAccountId: text("stripe_account_id"),
   
   // Admin-controlled earning percentages per service type
@@ -480,14 +501,42 @@ export const insertMessageSchema = createInsertSchema(messages).pick({
 
 export const insertTechnicianSchema = createInsertSchema(technicians).pick({
   userId: true,
+  // Personal Information
+  firstName: true,
+  lastName: true,
+  email: true,
+  phoneNumber: true,
+  address: true,
+  // Business Information
+  businessName: true,
   companyName: true,
   experience: true,
   hourlyRate: true,
+  // Geographic location
+  country: true,
+  state: true,
+  city: true,
   location: true,
   serviceRadius: true,
+  // Vehicle Information
+  vehicleType: true,
+  vehicleMake: true,
+  vehicleModel: true,
+  vehicleYear: true,
+  vehicleLicensePlate: true,
+  // Document URLs (will be populated after file uploads)
+  backgroundCheckUrl: true,
+  driverLicenseUrl: true,
+  insuranceUrl: true,
+  // Profile and settings
+  profileDescription: true,
+  responseTime: true,
 }).extend({
   skills: z.array(z.string()),
+  categories: z.array(z.string()),
   certifications: z.array(z.string()),
+  languages: z.array(z.string()),
+  serviceAreas: z.array(z.string()),
   availability: z.object({
     monday: z.object({ start: z.string(), end: z.string(), available: z.boolean() }).optional(),
     tuesday: z.object({ start: z.string(), end: z.string(), available: z.boolean() }).optional(),
