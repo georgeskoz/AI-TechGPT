@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLocation } from "wouter";
+import AuthModal from "@/components/AuthModal";
 import { 
   MessageSquare, 
   Phone, 
@@ -26,6 +28,8 @@ export default function SupportOptionsWidget({
   onOptionSelected 
 }: SupportOptionsWidgetProps) {
   const [, setLocation] = useLocation();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [selectedService, setSelectedService] = useState<any>(null);
 
   const supportOptions = [
     {
@@ -86,11 +90,35 @@ export default function SupportOptionsWidget({
   ];
 
   const handleOptionClick = (option: any) => {
-    if (onOptionSelected) {
-      onOptionSelected(option.id);
-    } else {
-      setLocation(option.route);
+    // For free services (AI chat, triage), no auth required
+    if (option.id === 'ai_chat' || option.id === 'triage') {
+      if (onOptionSelected) {
+        onOptionSelected(option.id);
+      } else {
+        setLocation(option.route);
+      }
+      return;
     }
+    
+    // For paid services (live chat, phone support, onsite), require authentication
+    setSelectedService(option);
+    setShowAuthModal(true);
+  };
+
+  const handleAuthSuccess = (user: any) => {
+    // Store user info in localStorage for now
+    localStorage.setItem('tech_user', JSON.stringify(user));
+    
+    // Navigate to the selected service
+    if (selectedService) {
+      if (onOptionSelected) {
+        onOptionSelected(selectedService.id);
+      } else {
+        setLocation(selectedService.route);
+      }
+    }
+    setShowAuthModal(false);
+    setSelectedService(null);
   };
 
   return (
@@ -157,6 +185,18 @@ export default function SupportOptionsWidget({
       <div className="text-center text-sm text-gray-600 mt-6">
         <p>Need help choosing? Try our <strong>AI Triage Analysis</strong> for personalized recommendations.</p>
       </div>
+
+      {/* Authentication Modal */}
+      <AuthModal 
+        isOpen={showAuthModal}
+        onClose={() => {
+          setShowAuthModal(false);
+          setSelectedService(null);
+        }}
+        onAuthSuccess={handleAuthSuccess}
+        selectedService={selectedService?.title}
+        serviceDetails={selectedService}
+      />
     </div>
   );
 }
