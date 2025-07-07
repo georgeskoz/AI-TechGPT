@@ -3,6 +3,7 @@ import { Message } from '@/lib/openai';
 import { Clipboard } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import DomainIndicator from './DomainIndicator';
 
 interface ChatAreaProps {
   messages: Message[];
@@ -137,6 +138,9 @@ export default function ChatArea({ messages, isLoading, username, typingMessage,
                 <span className={`text-sm font-semibold ${message.isUser ? '' : 'text-gray-800'}`}>
                   {message.isUser ? 'You' : 'TechGPT'}
                 </span>
+                {!message.isUser && message.domain && (
+                  <DomainIndicator domain={message.domain} className="ml-2" />
+                )}
                 {!message.isUser && (
                   <span className="text-xs text-gray-500 ml-2">{formatTimestamp(message.timestamp)}</span>
                 )}

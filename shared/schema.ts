@@ -19,6 +19,7 @@ export const messages = pgTable("messages", {
   username: text("username").notNull(),
   content: text("content").notNull(),
   isUser: boolean("is_user").notNull(),
+  domain: text("domain"),
   timestamp: timestamp("timestamp").notNull().defaultNow(),
 });
 
@@ -53,6 +54,7 @@ export const insertMessageSchema = createInsertSchema(messages).pick({
   username: true,
   content: true,
   isUser: true,
+  domain: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

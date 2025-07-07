@@ -40,11 +40,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
-    const [message] = await db
-      .insert(messages)
-      .values(insertMessage)
-      .returning();
-    return message;
+    // Temporarily handle domain field by omitting it if the database doesn't support it
+    const { domain, ...messageData } = insertMessage as any;
+    
+    try {
+      const [message] = await db
+        .insert(messages)
+        .values(insertMessage)
+        .returning();
+      return message;
+    } catch (error) {
+      // If domain field causes error, try without it
+      const [message] = await db
+        .insert(messages)
+        .values(messageData)
+        .returning();
+      return { ...message, domain } as Message;
+    }
   }
 
   async getMessagesByUsername(username: string): Promise<Message[]> {

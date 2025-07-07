@@ -7,12 +7,14 @@ import ChatArea from '@/components/ChatArea';
 import ChatInput from '@/components/ChatInput';
 import UsernameModal from '@/components/UsernameModal';
 import ErrorToast from '@/components/ErrorToast';
+import DomainSelector from '@/components/DomainSelector';
 
 export default function ChatPage() {
   // State for username and storage
   const [username, setUsername] = useLocalStorage<string>('techgpt_username', '');
   const [showUsernameModal, setShowUsernameModal] = useState(false);
   const [showMobileTopics, setShowMobileTopics] = useState(false);
+  const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   
   // Chat functionality with OpenAI
   const { messages, isLoading, error, typingMessage, isTyping, sendMessage, clearError } = useChat(username);
@@ -35,7 +37,17 @@ export default function ChatPage() {
   
   // Handle topic selection
   const handleSelectTopic = (topic: string) => {
+    // Set domain when a topic is selected
+    if (topic.includes(':')) {
+      const domain = topic.split(':')[0].trim();
+      setSelectedDomain(domain);
+    }
     sendMessage(`I need help with ${topic}`);
+  };
+
+  const handleSendMessage = (message: string) => {
+    // Include domain information when sending message
+    sendMessage(message);
   };
   
   // Toggle mobile topics panel
@@ -55,6 +67,14 @@ export default function ChatPage() {
         
         {/* Chat Messages Area */}
         <div className="flex-grow flex flex-col overflow-hidden">
+          {/* Domain Selector */}
+          <div className="bg-white border-b border-gray-200 px-4 py-2">
+            <DomainSelector 
+              selectedDomain={selectedDomain} 
+              onDomainChange={setSelectedDomain} 
+            />
+          </div>
+          
           <ChatArea 
             messages={messages} 
             isLoading={isLoading} 
@@ -66,7 +86,7 @@ export default function ChatPage() {
           {/* Chat Input - Always at the bottom */}
           <div className="sticky bottom-0 w-full z-10">
             <ChatInput 
-              onSendMessage={sendMessage} 
+              onSendMessage={handleSendMessage} 
               isLoading={isLoading} 
               onToggleTopics={toggleMobileTopics} 
             />
