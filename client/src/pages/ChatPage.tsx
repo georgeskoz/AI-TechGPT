@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Tag, List } from 'lucide-react';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useChat } from '@/hooks/useChat';
 import TechGPTHeader from '@/components/TechGPTHeader';
@@ -15,6 +18,7 @@ export default function ChatPage() {
   const [showUsernameModal, setShowUsernameModal] = useState(false);
   const [showMobileTopics, setShowMobileTopics] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
+  const [, setLocation] = useLocation();
   
   // Chat functionality with OpenAI
   const { messages, isLoading, error, typingMessage, isTyping, sendMessage, clearError } = useChat(username);
@@ -113,6 +117,18 @@ export default function ChatPage() {
       {error && (
         <ErrorToast message={error} onClose={clearError} />
       )}
+      
+      {/* Floating Action Button for Issue Categorization */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          onClick={() => setLocation('/issues')}
+          className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
+          size="lg"
+          title="Categorize Technical Issues"
+        >
+          <Tag className="h-6 w-6" />
+        </Button>
+      </div>
     </div>
   );
 }

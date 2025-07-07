@@ -104,6 +104,15 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
   - Created domain selector component for explicit domain selection
   - Enhanced AI responses with conversation context and domain-specific expertise
 
+- **Technical Issue Categorization System**: Comprehensive issue management and tracking capabilities
+  - Built interactive categorization interface with 9 technical categories and 63 subcategories
+  - Created issue tracking dashboard with status management (Open, In Progress, Resolved)
+  - Added priority-based classification (Low, Medium, High, Urgent) with estimated resolution times
+  - Integrated issue lifecycle management with automatic status updates
+  - Added floating action button for quick access from chat interface
+  - Created dedicated issue management page (/issues) with tabs for categorization and tracking
+  - Implemented local storage persistence for issue data and user preferences
+
 ### December 2024
 - **Enhanced Topic Sidebar**: Added expandable subtopics for each technical category
   - Each main topic now contains 7 relevant subtopics for more targeted assistance
