@@ -9,6 +9,7 @@ import IssueCategorizationPage from "@/pages/IssueCategorizationPage";
 import PhoneSupportPage from "@/pages/PhoneSupportPage";
 import MarketplacePage from "@/pages/MarketplacePage";
 import LiveSupportPage from "@/pages/LiveSupportPage";
+import TriagePage from "@/pages/TriagePage";
 import FloatingChatWidget from "@/components/FloatingChatWidget";
 
 function Router() {
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/issues" component={IssueCategorizationPage} />
       <Route path="/phone-support" component={PhoneSupportPage} />
       <Route path="/live-support" component={() => <LiveSupportPage username={localStorage.getItem("username") || "Guest"} />} />
+      <Route path="/triage" component={TriagePage} />
       <Route path="/:username/profile" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>
