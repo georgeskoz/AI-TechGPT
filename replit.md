@@ -103,6 +103,17 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
 ## Recent Changes
 
 ### January 7, 2025
+- **Live Support Chat System**: Implemented comprehensive bidirectional chat between users and technicians
+  - Created WebSocket-based real-time communication system with case management
+  - Built LiveSupportChat component with typing indicators, message history, and case tracking
+  - Added support case lifecycle: open → assigned → closed with time tracking
+  - Implemented free 10-minute support sessions with automatic billing transition
+  - Created dedicated LiveSupportPage with case history and multiple support types
+  - Added support for case opening/closing directly from chat interface
+  - Integrated live support into floating chat widget for easy access from all pages
+  - Developed comprehensive API endpoints for support cases and messages with WebSocket broadcasting
+  - Added real-time connection management and typing indicators for enhanced user experience
+  - Database schema extended with supportCases and supportMessages tables for conversation tracking
 - **Universal Interactive Pricing Calculator for All Categories**: Extended interactive pricing calculator to all technical issue categories and subcategories
   - Created comprehensive UniversalPricingCalculator component with dynamic pricing for all 9 technical categories and 63 subcategories
   - Implemented category-specific base pricing: Web Development ($45-85), Hardware Issues ($35-60), Network Troubleshooting ($30-95), Database Help ($50-90), Mobile Devices ($25-65), Security Questions ($35-85), System Administration ($35-95), Software Issues ($25-75)

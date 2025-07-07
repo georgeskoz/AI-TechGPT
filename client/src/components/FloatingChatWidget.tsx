@@ -35,18 +35,23 @@ export default function FloatingChatWidget({ username }: FloatingChatWidgetProps
   };
 
   const handleQuickAction = (action: string) => {
-    setMessage(action);
-    setLocation(`/chat?message=${encodeURIComponent(action)}&username=${encodeURIComponent(username)}`);
-    setIsOpen(false);
+    if (action === "Start Live Support Chat") {
+      setLocation("/live-support");
+      setIsOpen(false);
+    } else {
+      setMessage(action);
+      setLocation(`/chat?message=${encodeURIComponent(action)}&username=${encodeURIComponent(username)}`);
+      setIsOpen(false);
+    }
   };
 
   const quickActions = [
+    "Start Live Support Chat",
     "Help me troubleshoot a network connection issue",
     "I need help with software installation",
     "My computer is running slowly, what should I check?",
     "How do I set up email on my phone?",
-    "I'm having database connection problems",
-    "Need help with website deployment"
+    "I'm having database connection problems"
   ];
 
   if (!isOpen) {
