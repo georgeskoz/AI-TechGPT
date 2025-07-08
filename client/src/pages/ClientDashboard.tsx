@@ -37,6 +37,7 @@ export default function ClientDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -141,7 +142,7 @@ export default function ClientDashboard() {
                   <p className="text-sm text-gray-600 mb-4">
                     Get instant help with technical issues using our AI assistant
                   </p>
-                  <Button onClick={() => setLocation('/chat')} className="w-full">
+                  <Button onClick={() => setSelectedSection('chat')} className="w-full">
                     Start Chat
                   </Button>
                 </CardContent>
@@ -156,7 +157,7 @@ export default function ClientDashboard() {
                   <p className="text-sm text-gray-600 mb-4">
                     Connect with verified experts for complex technical problems
                   </p>
-                  <Button onClick={() => setLocation('/technician-matching')} variant="outline" className="w-full">
+                  <Button onClick={() => setSelectedSection('technicians')} variant="outline" className="w-full">
                     Find Experts
                   </Button>
                 </CardContent>
@@ -171,22 +172,108 @@ export default function ClientDashboard() {
                   <p className="text-sm text-gray-600 mb-4">
                     Categorize and track your technical support requests
                   </p>
-                  <Button onClick={() => setLocation('/issues')} variant="outline" className="w-full">
+                  <Button onClick={() => setSelectedSection('issues')} variant="outline" className="w-full">
                     Manage Issues
                   </Button>
                 </CardContent>
               </Card>
             </div>
             
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-blue-900 mb-2">Ready to Get Started?</h2>
-              <p className="text-blue-700 mb-4">
-                Create an account to track your support history, save preferences, and get personalized assistance.
-              </p>
-              <Button onClick={() => setLocation('/chat')} className="bg-blue-600 hover:bg-blue-700">
-                Get Started
-              </Button>
-            </div>
+            {/* Render Selected Section Content */}
+            {selectedSection && (
+              <div className="mt-8 bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      {selectedSection === 'chat' && 'AI Chat Support'}
+                      {selectedSection === 'technicians' && 'Find Technicians'}
+                      {selectedSection === 'issues' && 'Manage Issues'}
+                    </h2>
+                    <Button variant="outline" size="sm" onClick={() => setSelectedSection(null)}>
+                      Close
+                    </Button>
+                  </div>
+                  
+                  {selectedSection === 'chat' && (
+                    <div className="space-y-4">
+                      <p className="text-gray-600">
+                        Get instant help with technical issues using our AI assistant. Click the button below to start a chat session.
+                      </p>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h3 className="font-medium text-blue-900 mb-2">What can our AI help you with?</h3>
+                        <ul className="text-sm text-blue-800 space-y-1">
+                          <li>• Hardware troubleshooting</li>
+                          <li>• Software installation issues</li>
+                          <li>• Network connectivity problems</li>
+                          <li>• Performance optimization</li>
+                          <li>• Security questions</li>
+                        </ul>
+                      </div>
+                      <Button onClick={() => setLocation('/chat')} className="w-full sm:w-auto">
+                        Start AI Chat Now
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {selectedSection === 'technicians' && (
+                    <div className="space-y-4">
+                      <p className="text-gray-600">
+                        Connect with verified technicians for complex problems requiring human expertise.
+                      </p>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <h3 className="font-medium text-green-900 mb-2">Remote Support</h3>
+                          <p className="text-sm text-green-800 mb-2">Screen sharing and remote assistance</p>
+                          <p className="text-sm text-green-600">Starting at $25/hour</p>
+                        </div>
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <h3 className="font-medium text-green-900 mb-2">On-site Support</h3>
+                          <p className="text-sm text-green-800 mb-2">In-person technical assistance</p>
+                          <p className="text-sm text-green-600">Starting at $50/hour</p>
+                        </div>
+                      </div>
+                      <Button onClick={() => setLocation('/technician-matching')} className="w-full sm:w-auto">
+                        Find Technicians Now
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {selectedSection === 'issues' && (
+                    <div className="space-y-4">
+                      <p className="text-gray-600">
+                        Categorize and track your technical support requests for better organization.
+                      </p>
+                      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <h3 className="font-medium text-purple-900 mb-2">Issue Categories</h3>
+                        <div className="grid grid-cols-2 gap-2 text-sm text-purple-800">
+                          <div>• Hardware Issues</div>
+                          <div>• Software Problems</div>
+                          <div>• Network Troubleshooting</div>
+                          <div>• Database Help</div>
+                          <div>• Security Questions</div>
+                          <div>• Mobile Devices</div>
+                        </div>
+                      </div>
+                      <Button onClick={() => setLocation('/issues')} className="w-full sm:w-auto">
+                        Manage Issues Now
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {!selectedSection && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h2 className="text-xl font-semibold text-blue-900 mb-2">Ready to Get Started?</h2>
+                <p className="text-blue-700 mb-4">
+                  Create an account to track your support history, save preferences, and get personalized assistance.
+                </p>
+                <Button onClick={() => setLocation('/chat')} className="bg-blue-600 hover:bg-blue-700">
+                  Get Started
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
