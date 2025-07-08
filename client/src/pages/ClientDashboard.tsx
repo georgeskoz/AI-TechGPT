@@ -42,7 +42,7 @@ export default function ClientDashboard() {
     // Load user from localStorage
     const userStr = localStorage.getItem('tech_user');
     if (!userStr) {
-      setLocation('/chat');
+      setIsLoading(false);
       return;
     }
     
@@ -122,12 +122,71 @@ export default function ClientDashboard() {
 
   if (!currentUser) {
     return (
-      <div className="container mx-auto p-4 max-w-4xl">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Please log in to access your dashboard</h1>
-          <Button onClick={() => setLocation('/chat')}>
-            Go to Login
-          </Button>
+      <div className="container mx-auto p-4 max-w-6xl">
+        <Navigation title="Client Dashboard" backTo="/customer-home" />
+        <div className="text-center py-12">
+          <div className="max-w-2xl mx-auto">
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Welcome to Your Dashboard</h1>
+            <p className="text-gray-600 mb-8">
+              Create an account or log in to access your support history, manage service requests, and track your technical support needs.
+            </p>
+            <div className="grid md:grid-cols-3 gap-6 mb-8">
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="text-center">
+                  <MessageSquare className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                  <CardTitle className="text-lg">Free AI Support</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Get instant help with technical issues using our AI assistant
+                  </p>
+                  <Button onClick={() => setLocation('/chat')} className="w-full">
+                    Start Chat
+                  </Button>
+                </CardContent>
+              </Card>
+              
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="text-center">
+                  <Users className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                  <CardTitle className="text-lg">Find Technicians</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Connect with verified experts for complex technical problems
+                  </p>
+                  <Button onClick={() => setLocation('/technician-matching')} variant="outline" className="w-full">
+                    Find Experts
+                  </Button>
+                </CardContent>
+              </Card>
+              
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="text-center">
+                  <Settings className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                  <CardTitle className="text-lg">Manage Issues</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Categorize and track your technical support requests
+                  </p>
+                  <Button onClick={() => setLocation('/issues')} variant="outline" className="w-full">
+                    Manage Issues
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+              <h2 className="text-xl font-semibold text-blue-900 mb-2">Ready to Get Started?</h2>
+              <p className="text-blue-700 mb-4">
+                Create an account to track your support history, save preferences, and get personalized assistance.
+              </p>
+              <Button onClick={() => setLocation('/chat')} className="bg-blue-600 hover:bg-blue-700">
+                Get Started
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     );
