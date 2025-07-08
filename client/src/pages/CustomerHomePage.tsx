@@ -67,6 +67,18 @@ export default function CustomerHomePage() {
     { id: 2, type: 'card', last4: '5678', brand: 'Mastercard', expiry: '08/25', isDefault: false }
   ]);
 
+  const [accountStatus, setAccountStatus] = useState({
+    accountType: 'Standard Customer',
+    memberSince: 'January 2025',
+    emailVerified: true,
+    phoneVerified: true,
+    identityVerified: false,
+    profileComplete: 85,
+    lastLogin: '2 hours ago',
+    totalServices: 12,
+    accountActive: true
+  });
+
   const handleProfileUpdate = () => {
     // Validate required fields
     if (!profileData.fullName || !profileData.email || !profileData.username) {
@@ -196,6 +208,29 @@ export default function CustomerHomePage() {
         alert('Account deletion initiated. You will receive a confirmation email within 24 hours.');
       }
     }
+  };
+
+  const handleVerifyEmail = () => {
+    alert('Verification email sent! Check your inbox and click the verification link.');
+    setAccountStatus(prev => ({ ...prev, emailVerified: true }));
+  };
+
+  const handleVerifyPhone = () => {
+    const phone = prompt('Enter your phone number to receive verification code:');
+    if (phone) {
+      alert(`Verification code sent to ${phone}. Enter the code to verify your phone number.`);
+      setAccountStatus(prev => ({ ...prev, phoneVerified: true }));
+    }
+  };
+
+  const handleVerifyIdentity = () => {
+    alert('Identity verification initiated. You will be redirected to our secure verification partner.');
+    setAccountStatus(prev => ({ ...prev, identityVerified: true }));
+  };
+
+  const handleUpgradeAccount = () => {
+    alert('Account upgrade initiated. You will receive premium features and priority support.');
+    setAccountStatus(prev => ({ ...prev, accountType: 'Premium Customer' }));
   };
 
   const features = [
@@ -344,22 +379,113 @@ export default function CustomerHomePage() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                              <span>Account Type</span>
-                              <Badge variant="outline">Standard Customer</Badge>
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                              <div>
+                                <p className="font-medium">Account Type</p>
+                                <p className="text-sm text-gray-600">Current subscription level</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge variant={accountStatus.accountType === 'Premium Customer' ? 'default' : 'outline'}>
+                                  {accountStatus.accountType}
+                                </Badge>
+                                {accountStatus.accountType === 'Standard Customer' && (
+                                  <Button size="sm" onClick={handleUpgradeAccount}>
+                                    Upgrade
+                                  </Button>
+                                )}
+                              </div>
                             </div>
-                            <div className="flex items-center justify-between">
-                              <span>Member Since</span>
-                              <span className="text-sm text-gray-600">January 2025</span>
+                            
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div>
+                                <p className="font-medium">Member Since</p>
+                                <p className="text-sm text-gray-600">Account creation date</p>
+                              </div>
+                              <span className="text-sm text-gray-600">{accountStatus.memberSince}</span>
                             </div>
-                            <div className="flex items-center justify-between">
-                              <span>Email Verified</span>
-                              <CheckCircle className="h-4 w-4 text-green-600" />
+                            
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div>
+                                <p className="font-medium">Email Verification</p>
+                                <p className="text-sm text-gray-600">Secure your account</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {accountStatus.emailVerified ? (
+                                  <CheckCircle className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <Button size="sm" onClick={handleVerifyEmail}>
+                                    Verify
+                                  </Button>
+                                )}
+                              </div>
                             </div>
-                            <div className="flex items-center justify-between">
-                              <span>Phone Verified</span>
-                              <CheckCircle className="h-4 w-4 text-green-600" />
+                            
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div>
+                                <p className="font-medium">Phone Verification</p>
+                                <p className="text-sm text-gray-600">Two-factor authentication</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {accountStatus.phoneVerified ? (
+                                  <CheckCircle className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <Button size="sm" onClick={handleVerifyPhone}>
+                                    Verify
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div>
+                                <p className="font-medium">Identity Verification</p>
+                                <p className="text-sm text-gray-600">Enhanced security level</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {accountStatus.identityVerified ? (
+                                  <CheckCircle className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <Button size="sm" onClick={handleVerifyIdentity}>
+                                    Verify
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="p-3 bg-blue-50 rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <p className="font-medium">Profile Completion</p>
+                                <span className="text-sm text-blue-600">{accountStatus.profileComplete}%</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div 
+                                  className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                  style={{ width: `${accountStatus.profileComplete}%` }}
+                                ></div>
+                              </div>
+                              <p className="text-xs text-gray-600 mt-1">Complete your profile to unlock all features</p>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="p-3 border rounded-lg text-center">
+                                <p className="text-2xl font-bold text-blue-600">{accountStatus.totalServices}</p>
+                                <p className="text-sm text-gray-600">Total Services</p>
+                              </div>
+                              <div className="p-3 border rounded-lg text-center">
+                                <p className="text-sm text-gray-600">Last Login</p>
+                                <p className="font-medium">{accountStatus.lastLogin}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                              <div>
+                                <p className="font-medium text-green-800">Account Status</p>
+                                <p className="text-sm text-green-600">Your account is active and secure</p>
+                              </div>
+                              <Badge variant="default" className="bg-green-600">
+                                {accountStatus.accountActive ? 'Active' : 'Inactive'}
+                              </Badge>
                             </div>
                           </div>
                         </CardContent>
