@@ -250,7 +250,7 @@ export default function DomainSelector() {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => setLocation("/technician-matching")}
+                  onClick={() => setLocation("/find-expert")}
                   className="w-full"
                 >
                   Find Expert
