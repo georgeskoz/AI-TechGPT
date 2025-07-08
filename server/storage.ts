@@ -1,10 +1,12 @@
 import { 
   users, messages, technicians, serviceRequests, jobs, jobUpdates, supportCases, supportMessages, issueCategories,
+  bookingSettings, serviceBookings,
   type User, type InsertUser, type UpdateProfile, type Message, type InsertMessage,
   type Technician, type InsertTechnician, type ServiceRequest, type InsertServiceRequest,
   type Job, type InsertJob, type JobUpdate, type InsertJobUpdate,
   type SupportCase, type InsertSupportCase, type SupportMessage, type InsertSupportMessage,
-  type IssueCategory, type InsertIssueCategory
+  type IssueCategory, type InsertIssueCategory, type BookingSettings, type InsertBookingSettings,
+  type ServiceBooking, type InsertServiceBooking
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -120,6 +122,16 @@ export interface IStorage {
   getSupportMessages(caseId: number): Promise<SupportMessage[]>;
   markMessageAsRead(messageId: number): Promise<void>;
   getUnreadMessageCount(caseId: number, userId: number): Promise<number>;
+
+  // Booking settings management
+  getBookingSettings(): Promise<BookingSettings>;
+  updateBookingSettings(settings: Partial<InsertBookingSettings>): Promise<BookingSettings>;
+
+  // Service bookings management
+  createServiceBooking(booking: InsertServiceBooking): Promise<ServiceBooking>;
+  getServiceBooking(id: number): Promise<ServiceBooking | undefined>;
+  getServiceBookingsByCustomer(customerId: number): Promise<ServiceBooking[]>;
+  updateServiceBooking(id: number, updates: Partial<ServiceBooking>): Promise<ServiceBooking>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -436,6 +448,7 @@ class MemoryStorage implements IStorage {
   private jobUpdates: Map<number, JobUpdate> = new Map();
   private supportCases: Map<number, SupportCase> = new Map();
   private supportMessages: Map<number, SupportMessage> = new Map();
+  private serviceBookings: Map<number, ServiceBooking> = new Map();
   
   private nextId = 1;
 
@@ -820,6 +833,82 @@ class MemoryStorage implements IStorage {
     return Array.from(this.supportMessages.values())
       .filter(m => m.caseId === caseId && m.senderId !== userId && !m.isRead)
       .length;
+  }
+
+  // Booking settings management
+  async getBookingSettings(): Promise<BookingSettings> {
+    // Return default settings if not configured
+    return {
+      id: 1,
+      sameDayFee: "20.00",
+      futureDayFee: "30.00",
+      immediateWorkAllowed: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  async updateBookingSettings(settings: Partial<InsertBookingSettings>): Promise<BookingSettings> {
+    const existing = await this.getBookingSettings();
+    return {
+      ...existing,
+      ...settings,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  // Service bookings management
+  async createServiceBooking(booking: InsertServiceBooking): Promise<ServiceBooking> {
+    const newBooking: ServiceBooking = {
+      id: this.nextId++,
+      customerId: booking.customerId,
+      technicianId: booking.technicianId || null,
+      categoryId: booking.categoryId,
+      description: booking.description,
+      deviceType: booking.deviceType || null,
+      previousAttempts: booking.previousAttempts || null,
+      expectedBehavior: booking.expectedBehavior || null,
+      urgency: booking.urgency || "medium",
+      serviceType: booking.serviceType || "onsite",
+      scheduledDate: booking.scheduledDate || null,
+      location: booking.location || null,
+      status: "pending",
+      bookingFee: booking.bookingFee || "0.00",
+      estimatedCost: booking.estimatedCost || null,
+      actualCost: null,
+      aiAnalysis: booking.aiAnalysis || null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    this.serviceBookings.set(newBooking.id, newBooking);
+    return newBooking;
+  }
+
+  async getServiceBooking(id: number): Promise<ServiceBooking | undefined> {
+    return this.serviceBookings.get(id);
+  }
+
+  async getServiceBookingsByCustomer(customerId: number): Promise<ServiceBooking[]> {
+    return Array.from(this.serviceBookings.values()).filter(
+      booking => booking.customerId === customerId
+    );
+  }
+
+  async updateServiceBooking(id: number, updates: Partial<ServiceBooking>): Promise<ServiceBooking> {
+    const existing = this.serviceBookings.get(id);
+    if (!existing) {
+      throw new Error("Booking not found");
+    }
+
+    const updated = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+
+    this.serviceBookings.set(id, updated);
+    return updated;
   }
 
   // Enhanced technician methods

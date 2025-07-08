@@ -954,6 +954,98 @@ export const insertTechnicianApprovalSchema = createInsertSchema(technicianAppro
 });
 
 // Types for new tables
+// Booking settings and service bookings
+export const bookingSettings = pgTable("booking_settings", {
+  id: serial("id").primaryKey(),
+  sameDayFee: decimal("same_day_fee", { precision: 10, scale: 2 }).default("20.00"),
+  futureDayFee: decimal("future_day_fee", { precision: 10, scale: 2 }).default("30.00"),
+  immediateWorkAllowed: boolean("immediate_work_allowed").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const serviceBookings = pgTable("service_bookings", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").references(() => users.id).notNull(),
+  technicianId: integer("technician_id").references(() => technicians.id),
+  categoryId: integer("category_id").references(() => issueCategories.id).notNull(),
+  description: text("description").notNull(),
+  deviceType: varchar("device_type", { length: 100 }),
+  previousAttempts: text("previous_attempts"),
+  expectedBehavior: text("expected_behavior"),
+  urgency: varchar("urgency", { length: 20 }).default("medium"),
+  serviceType: varchar("service_type", { length: 20 }).default("onsite"), // onsite, phone, remote
+  scheduledDate: timestamp("scheduled_date"),
+  location: text("location"),
+  status: varchar("status", { length: 20 }).default("pending"), // pending, confirmed, in_progress, completed, cancelled
+  bookingFee: decimal("booking_fee", { precision: 10, scale: 2 }).default("0.00"),
+  estimatedCost: decimal("estimated_cost", { precision: 10, scale: 2 }),
+  actualCost: decimal("actual_cost", { precision: 10, scale: 2 }),
+  aiAnalysis: jsonb("ai_analysis"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Relations for booking tables
+export const bookingSettingsRelations = relations(bookingSettings, ({ many }) => ({
+  bookings: many(serviceBookings),
+}));
+
+export const serviceBookingsRelations = relations(serviceBookings, ({ one }) => ({
+  customer: one(users, {
+    fields: [serviceBookings.customerId],
+    references: [users.id],
+  }),
+  technician: one(technicians, {
+    fields: [serviceBookings.technicianId],
+    references: [technicians.id],
+  }),
+  category: one(issueCategories, {
+    fields: [serviceBookings.categoryId],
+    references: [issueCategories.id],
+  }),
+}));
+
+// Insert schemas for booking tables
+export const insertBookingSettingsSchema = createInsertSchema(bookingSettings).pick({
+  sameDayFee: true,
+  futureDayFee: true,
+  immediateWorkAllowed: true,
+});
+
+export const insertServiceBookingSchema = createInsertSchema(serviceBookings).pick({
+  customerId: true,
+  technicianId: true,
+  categoryId: true,
+  description: true,
+  deviceType: true,
+  previousAttempts: true,
+  expectedBehavior: true,
+  urgency: true,
+  serviceType: true,
+  scheduledDate: true,
+  location: true,
+  bookingFee: true,
+  estimatedCost: true,
+}).extend({
+  aiAnalysis: z.object({
+    category: z.string().optional(),
+    complexity: z.string().optional(),
+    urgency: z.string().optional(),
+    estimatedDuration: z.number().optional(),
+    requiredSkills: z.array(z.string()).optional(),
+    confidence: z.number().optional(),
+    recommendedSupportType: z.string().optional(),
+    reasoning: z.string().optional(),
+  }).optional(),
+});
+
+// Types for booking tables
+export type BookingSettings = typeof bookingSettings.$inferSelect;
+export type ServiceBooking = typeof serviceBookings.$inferSelect;
+export type InsertBookingSettings = z.infer<typeof insertBookingSettingsSchema>;
+export type InsertServiceBooking = z.infer<typeof insertServiceBookingSchema>;
+
 export type InsertComplaint = z.infer<typeof insertComplaintSchema>;
 export type Complaint = typeof complaints.$inferSelect;
 export type InsertTechnicianTransportation = z.infer<typeof insertTechnicianTransportationSchema>;
