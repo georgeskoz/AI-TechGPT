@@ -88,7 +88,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
-      <Navigation title="AI Chat Support" backTo="/" />
+      <Navigation title="AI Chat Support" backTo="/customer-home" />
       {/* App Header */}
       <TechGPTHeader username={username || 'User'} />
       
