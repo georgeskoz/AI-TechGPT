@@ -34,6 +34,52 @@ import { useLocation } from "wouter";
 export default function CustomerHomePage() {
   const [, setLocation] = useLocation();
   const [selectedAccountSection, setSelectedAccountSection] = useState('profile');
+  const [profileData, setProfileData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    username: '',
+    address: '',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+
+  const handleProfileUpdate = () => {
+    // Validate required fields
+    if (!profileData.fullName || !profileData.email || !profileData.username) {
+      alert('Please fill in all required fields (Full Name, Email, Username)');
+      return;
+    }
+
+    // Simulate profile update
+    alert('Profile updated successfully!');
+    console.log('Profile data:', profileData);
+  };
+
+  const handlePasswordChange = () => {
+    if (!profileData.currentPassword || !profileData.newPassword || !profileData.confirmPassword) {
+      alert('Please fill in all password fields');
+      return;
+    }
+
+    if (profileData.newPassword !== profileData.confirmPassword) {
+      alert('New passwords do not match');
+      return;
+    }
+
+    if (profileData.newPassword.length < 8) {
+      alert('New password must be at least 8 characters long');
+      return;
+    }
+
+    alert('Password changed successfully!');
+    setProfileData(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setProfileData(prev => ({ ...prev, [field]: value }));
+  };
 
   const features = [
     {
@@ -125,28 +171,50 @@ export default function CustomerHomePage() {
                         <CardContent>
                           <div className="grid md:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-sm font-medium mb-1">Full Name</label>
-                              <Input placeholder="Enter your full name" />
+                              <label className="block text-sm font-medium mb-1">Full Name *</label>
+                              <Input 
+                                placeholder="Enter your full name" 
+                                value={profileData.fullName}
+                                onChange={(e) => handleInputChange('fullName', e.target.value)}
+                              />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium mb-1">Email Address</label>
-                              <Input type="email" placeholder="Enter your email" />
+                              <label className="block text-sm font-medium mb-1">Email Address *</label>
+                              <Input 
+                                type="email" 
+                                placeholder="Enter your email" 
+                                value={profileData.email}
+                                onChange={(e) => handleInputChange('email', e.target.value)}
+                              />
                             </div>
                             <div>
                               <label className="block text-sm font-medium mb-1">Phone Number</label>
-                              <Input type="tel" placeholder="Enter your phone number" />
+                              <Input 
+                                type="tel" 
+                                placeholder="Enter your phone number" 
+                                value={profileData.phone}
+                                onChange={(e) => handleInputChange('phone', e.target.value)}
+                              />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium mb-1">Username</label>
-                              <Input placeholder="Choose a username" />
+                              <label className="block text-sm font-medium mb-1">Username *</label>
+                              <Input 
+                                placeholder="Choose a username" 
+                                value={profileData.username}
+                                onChange={(e) => handleInputChange('username', e.target.value)}
+                              />
                             </div>
                             <div className="md:col-span-2">
                               <label className="block text-sm font-medium mb-1">Address</label>
-                              <Input placeholder="Enter your address (for onsite services)" />
+                              <Input 
+                                placeholder="Enter your address (for onsite services)" 
+                                value={profileData.address}
+                                onChange={(e) => handleInputChange('address', e.target.value)}
+                              />
                             </div>
                           </div>
                           <div className="mt-4">
-                            <Button>Update Profile</Button>
+                            <Button onClick={handleProfileUpdate}>Update Profile</Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -193,17 +261,32 @@ export default function CustomerHomePage() {
                           <div className="space-y-4">
                             <div>
                               <label className="block text-sm font-medium mb-1">Current Password</label>
-                              <Input type="password" placeholder="Enter current password" />
+                              <Input 
+                                type="password" 
+                                placeholder="Enter current password" 
+                                value={profileData.currentPassword}
+                                onChange={(e) => handleInputChange('currentPassword', e.target.value)}
+                              />
                             </div>
                             <div>
                               <label className="block text-sm font-medium mb-1">New Password</label>
-                              <Input type="password" placeholder="Enter new password" />
+                              <Input 
+                                type="password" 
+                                placeholder="Enter new password (min 8 characters)" 
+                                value={profileData.newPassword}
+                                onChange={(e) => handleInputChange('newPassword', e.target.value)}
+                              />
                             </div>
                             <div>
                               <label className="block text-sm font-medium mb-1">Confirm New Password</label>
-                              <Input type="password" placeholder="Confirm new password" />
+                              <Input 
+                                type="password" 
+                                placeholder="Confirm new password" 
+                                value={profileData.confirmPassword}
+                                onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                              />
                             </div>
-                            <Button>Change Password</Button>
+                            <Button onClick={handlePasswordChange}>Change Password</Button>
                           </div>
                         </CardContent>
                       </Card>
