@@ -132,7 +132,7 @@ export default function ClientDashboard() {
             <p className="text-gray-600 mb-8">
               Create an account or log in to access your support history, manage service requests, and track your technical support needs.
             </p>
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <div className="grid md:grid-cols-4 gap-6 mb-8">
               <Card className="hover:shadow-lg transition-shadow">
                 <CardHeader className="text-center">
                   <MessageSquare className="h-8 w-8 text-blue-600 mx-auto mb-2" />
@@ -177,6 +177,21 @@ export default function ClientDashboard() {
                   </Button>
                 </CardContent>
               </Card>
+              
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="text-center">
+                  <User className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+                  <CardTitle className="text-lg">Profile & Settings</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Create account, edit profile, and manage your settings
+                  </p>
+                  <Button onClick={() => setSelectedSection('profile')} variant="outline" className="w-full">
+                    Edit Profile
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
             
             {/* Render Selected Section Content */}
@@ -188,6 +203,7 @@ export default function ClientDashboard() {
                       {selectedSection === 'chat' && 'AI Chat Support'}
                       {selectedSection === 'technicians' && 'Find Technicians'}
                       {selectedSection === 'issues' && 'Manage Issues'}
+                      {selectedSection === 'profile' && 'Profile & Settings'}
                     </h2>
                     <Button variant="outline" size="sm" onClick={() => setSelectedSection(null)}>
                       Close
@@ -257,6 +273,72 @@ export default function ClientDashboard() {
                       <Button onClick={() => setLocation('/issues')} className="w-full sm:w-auto">
                         Manage Issues Now
                       </Button>
+                    </div>
+                  )}
+                  
+                  {selectedSection === 'profile' && (
+                    <div className="space-y-6">
+                      <p className="text-gray-600">
+                        Create your account to unlock personalized support, track service history, and save your preferences.
+                      </p>
+                      
+                      <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
+                        <h3 className="font-medium text-orange-900 mb-4">Create New Account</h3>
+                        <form className="space-y-4">
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                              <Input placeholder="Enter your full name" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                              <Input type="email" placeholder="Enter your email" />
+                            </div>
+                          </div>
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                              <Input type="tel" placeholder="Enter your phone number" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                              <Input placeholder="Choose a username" />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                            <Input placeholder="Enter your address (for onsite services)" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <Input type="password" placeholder="Create a password" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                            <Input type="password" placeholder="Confirm your password" />
+                          </div>
+                        </form>
+                      </div>
+                      
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h3 className="font-medium text-blue-900 mb-2">Account Benefits</h3>
+                        <ul className="text-sm text-blue-800 space-y-1">
+                          <li>• Save your service history and preferences</li>
+                          <li>• Track support requests and their progress</li>
+                          <li>• Get personalized recommendations</li>
+                          <li>• Access premium support features</li>
+                          <li>• Receive notifications about your requests</li>
+                        </ul>
+                      </div>
+                      
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <Button className="bg-orange-600 hover:bg-orange-700">
+                          Create Account
+                        </Button>
+                        <Button variant="outline">
+                          Sign In to Existing Account
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>
