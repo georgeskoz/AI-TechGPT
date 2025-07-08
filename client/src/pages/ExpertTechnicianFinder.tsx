@@ -303,8 +303,24 @@ export default function ExpertTechnicianFinder() {
 
   const bookingMutation = useMutation({
     mutationFn: async (data: BookingData) => {
-      const response = await apiRequest('POST', '/api/service-bookings', data);
-      return response.json();
+      console.log('Booking data:', data);
+      try {
+        const response = await apiRequest('POST', '/api/service-bookings', data);
+        const result = await response.json();
+        console.log('Booking response:', result);
+        return result;
+      } catch (error) {
+        console.error('Booking error:', error);
+        throw error;
+      }
+    },
+    onError: (error) => {
+      console.error('Booking mutation error:', error);
+      toast({
+        title: "Booking Failed",
+        description: error.message || "An error occurred while booking",
+        variant: "destructive",
+      });
     }
   });
 
