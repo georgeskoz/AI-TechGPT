@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Navigation from "@/components/Navigation";
+import { useAuth } from "@/components/UserAuthProvider";
+import AuthModal from "@/components/AuthModal";
 import { 
   Search, 
   Zap, 
@@ -158,7 +160,9 @@ const timelineOptions = [
 export default function ExpertTechnicianFinder() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { user: authUser } = useAuth();
   const [hasError, setHasError] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [currentStep, setCurrentStep] = useState(1);
@@ -168,7 +172,6 @@ export default function ExpertTechnicianFinder() {
   const [assessmentResult, setAssessmentResult] = useState<AssessmentResult | null>(null);
   const [imageAnalysis, setImageAnalysis] = useState<ImageAnalysis | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [currentUser, setCurrentUser] = useState<any>(null);
   const [bookingSettings, setBookingSettings] = useState<BookingSettings>({ sameDayFee: "20.00", futureDayFee: "30.00" });
   const [bookingData, setBookingData] = useState<BookingData | null>(null);
   
@@ -188,24 +191,12 @@ export default function ExpertTechnicianFinder() {
     preferredDate: ''
   });
 
-  // Fetch current user for location auto-fill
+  // Auto-fill location if user has address
   useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const response = await apiRequest('GET', '/api/user');
-        const user = await response.json();
-        setCurrentUser(user);
-        
-        // Auto-fill location if user has address
-        if (user.address) {
-          setAssessment(prev => ({ ...prev, location: user.address }));
-        }
-      } catch (error) {
-        console.log('No current user found');
-      }
-    };
-    fetchCurrentUser();
-  }, []);
+    if (authUser && authUser.address) {
+      setAssessment(prev => ({ ...prev, location: authUser.address }));
+    }
+  }, [authUser]);
 
   // Fetch booking settings
   const { data: settings } = useQuery({
@@ -412,13 +403,28 @@ export default function ExpertTechnicianFinder() {
   };
 
   const handleBookingConfirmation = () => {
-    if (!currentUser) {
+    // Check if user is logged in
+    if (!authUser) {
+      setShowAuthModal(true);
+      return;
+    }
+
+    // Validate required fields
+    if (!assessment.category || !assessment.description) {
       toast({
-        title: "Authentication Required",
-        description: "Please log in to book a service",
+        title: "Missing Information",
+        description: "Please select a category and provide a description",
         variant: "destructive",
       });
-      navigate('/auth');
+      return;
+    }
+
+    if (!assessment.location) {
+      toast({
+        title: "Missing Location",
+        description: "Please provide your location for the service",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -434,20 +440,21 @@ export default function ExpertTechnicianFinder() {
 
     const bookingFee = calculateBookingFee();
     const booking: BookingData = {
-      customerId: currentUser.id,
+      customerId: authUser.id,
       categoryId: selectedCategory.id,
       description: assessment.description,
-      deviceType: assessment.deviceType,
-      previousAttempts: assessment.previousAttempts,
+      deviceType: assessment.deviceType || null,
+      previousAttempts: assessment.previousAttempts || null,
       urgency: assessment.urgency,
       serviceType: assessment.serviceType,
-      scheduledDate: assessment.preferredDate,
+      scheduledDate: assessment.preferredDate || null,
       location: assessment.location,
       bookingFee: bookingFee.toString(),
-      estimatedCost: assessmentResult?.estimatedCost,
-      aiAnalysis: assessmentResult?.aiAnalysis,
+      estimatedCost: assessmentResult?.estimatedCost || null,
+      aiAnalysis: assessmentResult?.aiAnalysis || null,
     };
 
+    console.log('Submitting booking:', booking);
     setBookingData(booking);
     bookingMutation.mutate(booking);
   };
@@ -1115,6 +1122,17 @@ export default function ExpertTechnicianFinder() {
             </div>
           </DialogContent>
         </Dialog>
+        
+        {/* Auth Modal */}
+        <AuthModal 
+          isOpen={showAuthModal} 
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={() => {
+            setShowAuthModal(false);
+            // Try booking again after successful authentication
+            handleBookingConfirmation();
+          }}
+        />
       </div>
     </div>
   );
