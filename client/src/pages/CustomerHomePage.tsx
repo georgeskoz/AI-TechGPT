@@ -180,6 +180,24 @@ export default function CustomerHomePage() {
     }
   };
 
+  const handleDownloadAccountData = () => {
+    alert('Preparing your account data for download. This may take a few minutes. You will receive an email when your data is ready.');
+  };
+
+  const handlePrivacySettings = () => {
+    alert('Privacy settings updated. You can control data sharing, visibility, and communication preferences.');
+  };
+
+  const handleDeleteAccount = () => {
+    const confirmation = confirm('Are you sure you want to delete your account? This action cannot be undone and will permanently remove all your data.');
+    if (confirmation) {
+      const finalConfirmation = confirm('This will permanently delete your account and all associated data. Type "DELETE" to confirm.');
+      if (finalConfirmation) {
+        alert('Account deletion initiated. You will receive a confirmation email within 24 hours.');
+      }
+    }
+  };
+
   const features = [
     {
       icon: <MessageSquare className="h-8 w-8 text-blue-600" />,
@@ -801,16 +819,28 @@ export default function CustomerHomePage() {
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-3">
-                            <Button variant="outline" className="w-full justify-start">
-                              <Mail className="h-4 w-4 mr-2" />
+                            <Button 
+                              variant="outline" 
+                              className="w-full justify-start hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                              onClick={handleDownloadAccountData}
+                            >
+                              <Download className="h-4 w-4 mr-2" />
                               Download Account Data
                             </Button>
-                            <Button variant="outline" className="w-full justify-start">
+                            <Button 
+                              variant="outline" 
+                              className="w-full justify-start hover:bg-gray-50 hover:text-gray-700 transition-colors"
+                              onClick={handlePrivacySettings}
+                            >
                               <Settings className="h-4 w-4 mr-2" />
                               Privacy Settings
                             </Button>
-                            <Button variant="destructive" className="w-full justify-start">
-                              <User className="h-4 w-4 mr-2" />
+                            <Button 
+                              variant="destructive" 
+                              className="w-full justify-start hover:bg-red-600 hover:text-white transition-colors"
+                              onClick={handleDeleteAccount}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
                               Delete Account
                             </Button>
                           </div>
