@@ -483,7 +483,7 @@ export default function TechnicianRegistration() {
                 <div>
                   <Label htmlFor="experience">Experience Level *</Label>
                   <Select onValueChange={(value) => form.setValue("experience", value as any)}>
-                    <SelectTrigger>
+                    <SelectTrigger className={form.formState.errors.experience ? "border-red-500" : ""}>
                       <SelectValue placeholder="Select experience level" />
                     </SelectTrigger>
                     <SelectContent>
@@ -493,6 +493,9 @@ export default function TechnicianRegistration() {
                       <SelectItem value="expert">Expert (10+ years)</SelectItem>
                     </SelectContent>
                   </Select>
+                  {form.formState.errors.experience && (
+                    <p className="text-red-500 text-sm">{form.formState.errors.experience.message}</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="hourlyRatePercentage">Revenue Share (%) *</Label>
@@ -539,7 +542,7 @@ export default function TechnicianRegistration() {
                   id="profileDescription"
                   {...form.register("profileDescription")}
                   placeholder="Example: I'm a certified network engineer with 8+ years of experience in troubleshooting complex IT issues. I specialize in network security, hardware diagnostics, and system optimization. What sets me apart is my ability to explain technical concepts in simple terms while providing fast, reliable solutions..."
-                  className="min-h-[140px]"
+                  className={`min-h-[140px] ${form.formState.errors.profileDescription ? "border-red-500" : ""}`}
                 />
                 {form.formState.errors.profileDescription && (
                   <p className="text-red-500 text-sm">{form.formState.errors.profileDescription.message}</p>
@@ -620,7 +623,7 @@ export default function TechnicianRegistration() {
               <div>
                 <Label htmlFor="vehicleType">Vehicle Type *</Label>
                 <Select onValueChange={(value) => form.setValue("vehicleType", value as any)}>
-                  <SelectTrigger>
+                  <SelectTrigger className={form.formState.errors.vehicleType ? "border-red-500" : ""}>
                     <SelectValue placeholder="Select your vehicle type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -808,6 +811,20 @@ export default function TechnicianRegistration() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Validation Error Summary */}
+              {Object.keys(form.formState.errors).length > 0 && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg mb-4">
+                  <h4 className="font-medium text-red-800 mb-2">⚠️ Please fix the following errors:</h4>
+                  <ul className="list-disc list-inside text-sm text-red-700 space-y-1">
+                    {Object.entries(form.formState.errors).map(([field, error]) => (
+                      <li key={field}>
+                        <strong>{field.charAt(0).toUpperCase() + field.slice(1)}:</strong> {error?.message}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
                 <p className="text-sm text-blue-800 font-medium mb-2">
                   📍 Please select your service location to continue with registration
@@ -922,6 +939,7 @@ export default function TechnicianRegistration() {
                     placeholder="25"
                     min="5"
                     max="100"
+                    className={form.formState.errors.serviceRadius ? "border-red-500" : ""}
                   />
                   {form.formState.errors.serviceRadius && (
                     <p className="text-red-500 text-sm">{form.formState.errors.serviceRadius.message}</p>
@@ -973,6 +991,7 @@ export default function TechnicianRegistration() {
                   placeholder="60"
                   min="15"
                   max="240"
+                  className={form.formState.errors.responseTime ? "border-red-500" : ""}
                 />
                 {form.formState.errors.responseTime && (
                   <p className="text-red-500 text-sm">{form.formState.errors.responseTime.message}</p>
@@ -1133,13 +1152,29 @@ export default function TechnicianRegistration() {
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={registerMutation.isPending}
+                  disabled={registerMutation.isPending || !form.formState.isValid}
                   className="flex items-center gap-2"
-                  onClick={() => {
+                  onClick={async () => {
                     const errors = form.formState.errors;
+                    const values = form.getValues();
                     console.log("Form validation errors:", errors);
                     console.log("Form is valid:", form.formState.isValid);
-                    console.log("Form values:", form.getValues());
+                    console.log("Form values:", values);
+                    
+                    // Force validation to show all errors
+                    const isValid = await form.trigger();
+                    
+                    // If form is still invalid after trigger, don't submit and show toast
+                    if (!isValid) {
+                      console.log("Form is invalid, preventing submission");
+                      const errorCount = Object.keys(form.formState.errors).length;
+                      toast({
+                        title: "Form Validation Failed",
+                        description: `Please fix ${errorCount} error${errorCount > 1 ? 's' : ''} before submitting.`,
+                        variant: "destructive",
+                      });
+                      return;
+                    }
                   }}
                 >
                   {registerMutation.isPending ? "Registering..." : "Complete Registration"}
