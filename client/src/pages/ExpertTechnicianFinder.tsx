@@ -257,6 +257,14 @@ export default function ExpertTechnicianFinder() {
     mutationFn: async ({ image, description }: { image: string; description: string }) => {
       const response = await apiRequest('POST', '/api/analyze-image', { image, description });
       return response.json();
+    },
+    onError: (error) => {
+      console.error("Image analysis error:", error);
+      toast({
+        title: "Image Analysis Failed",
+        description: "Unable to analyze the image. Please try again or continue without image analysis.",
+        variant: "destructive",
+      });
     }
   });
 
@@ -267,18 +275,32 @@ export default function ExpertTechnicianFinder() {
       setImageAnalysis(result);
       setShowImageAnalysis(true);
       
-      // Auto-populate description with AI analysis
-      if (result.detectedIssue) {
+      // Auto-populate description with AI analysis (only if successful)
+      if (result.success && result.detectedIssue && result.detectedIssue !== "Unable to identify specific issue") {
         let enhancedDescription = assessment.description + 
           (assessment.description ? '\n\n' : '') + 
           `AI Analysis: ${result.detectedIssue}`;
-        if (result.errorMessages.length > 0) {
+        if (result.errorMessages && result.errorMessages.length > 0) {
           enhancedDescription += `\nError Messages: ${result.errorMessages.join(', ')}`;
         }
         setAssessment(prev => ({ ...prev, description: enhancedDescription }));
       }
+      
+      // Show success or failure toast
+      if (result.success) {
+        toast({
+          title: "Image Analysis Complete",
+          description: "The image has been analyzed and findings have been added to your description.",
+        });
+      } else {
+        toast({
+          title: "Image Analysis Failed",
+          description: result.error || "Unable to analyze the image",
+          variant: "destructive",
+        });
+      }
     }
-  }, [imageAnalysisMutation.isSuccess, imageAnalysisMutation.data, assessment.description]);
+  }, [imageAnalysisMutation.isSuccess, imageAnalysisMutation.data, assessment.description, toast]);
 
   // Handle image analysis errors
   useEffect(() => {
