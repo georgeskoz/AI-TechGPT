@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useState, useRef } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,12 @@ import {
   Wrench,
   Settings,
   Loader2,
-  ArrowRight
+  ArrowRight,
+  Upload,
+  Camera,
+  Image,
+  X,
+  Eye
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -75,11 +80,26 @@ interface AssessmentResult {
   };
 }
 
+interface ImageAnalysis {
+  detectedIssue: string;
+  errorMessages: string[];
+  troubleshootingSteps: string[];
+  recommendedSupportType: string;
+  difficultyLevel: string;
+  confidence: number;
+}
+
 export default function ExpertTechnicianFinder() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [showResults, setShowResults] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [imageAnalysis, setImageAnalysis] = useState<ImageAnalysis | null>(null);
+  const [showImageAnalysis, setShowImageAnalysis] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  
   const [assessment, setAssessment] = useState<IssueAssessment>({
     category: '',
     subcategory: '',
@@ -95,16 +115,29 @@ export default function ExpertTechnicianFinder() {
   });
   const [assessmentResult, setAssessmentResult] = useState<AssessmentResult | null>(null);
 
-  const categories = [
-    { id: 'hardware', name: 'Hardware Issues', icon: Wrench },
-    { id: 'software', name: 'Software Problems', icon: Monitor },
-    { id: 'network', name: 'Network & Internet', icon: Settings },
-    { id: 'security', name: 'Security & Privacy', icon: AlertCircle },
-    { id: 'mobile', name: 'Mobile Devices', icon: Phone },
-    { id: 'database', name: 'Database Help', icon: Settings },
-    { id: 'webdev', name: 'Web Development', icon: Monitor },
-    { id: 'system', name: 'System Administration', icon: Settings }
-  ];
+  // Fetch categories from API
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ['/api/issue-categories'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/issue-categories');
+      return response.json();
+    }
+  });
+
+  // Convert categories to the format expected by the component
+  const formattedCategories = categories.map((cat: any) => ({
+    id: cat.id.toString(),
+    name: cat.name,
+    icon: cat.icon === 'wrench' ? Wrench : 
+          cat.icon === 'monitor' ? Monitor :
+          cat.icon === 'wifi' ? Settings :
+          cat.icon === 'shield' ? Settings :
+          cat.icon === 'smartphone' ? Phone :
+          cat.icon === 'mail' ? Settings :
+          cat.icon === 'printer' ? Settings :
+          cat.icon === 'hard-drive' ? Settings :
+          Settings
+  }));
 
   const urgencyLevels = [
     { value: 'low', label: 'Low - Within a week', color: 'bg-green-100 text-green-800' },
@@ -142,6 +175,36 @@ export default function ExpertTechnicianFinder() {
     },
   });
 
+  const imageAnalysisMutation = useMutation({
+    mutationFn: async ({ image, description }: { image: string; description: string }) => {
+      const response = await apiRequest('POST', '/api/analyze-image', { image, description });
+      return response.json();
+    },
+    onSuccess: (result: ImageAnalysis) => {
+      setImageAnalysis(result);
+      setShowImageAnalysis(true);
+      
+      // Auto-populate description with AI analysis
+      if (result.detectedIssue) {
+        let enhancedDescription = assessment.description + 
+          (assessment.description ? '\n\n' : '') + 
+          `AI Analysis: ${result.detectedIssue}`;
+        if (result.errorMessages.length > 0) {
+          enhancedDescription += `\nError Messages: ${result.errorMessages.join(', ')}`;
+        }
+        setAssessment(prev => ({ ...prev, description: enhancedDescription }));
+      }
+    },
+    onError: (error: Error) => {
+      console.error('Image analysis error:', error);
+      toast({
+        title: "Image Analysis Failed",
+        description: "Unable to analyze the image. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
   const handleInputChange = (field: keyof IssueAssessment, value: string | string[]) => {
     setAssessment(prev => ({ ...prev, [field]: value }));
   };
@@ -153,6 +216,48 @@ export default function ExpertTechnicianFinder() {
         ? prev.symptoms.filter(s => s !== symptom)
         : [...prev.symptoms, symptom]
     }));
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageDataUrl = e.target?.result as string;
+        setUploadedImage(imageDataUrl);
+        
+        // Analyze image with AI
+        imageAnalysisMutation.mutate({
+          image: imageDataUrl,
+          description: assessment.description
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCameraCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageDataUrl = e.target?.result as string;
+        setUploadedImage(imageDataUrl);
+        
+        // Analyze image with AI
+        imageAnalysisMutation.mutate({
+          image: imageDataUrl,
+          description: assessment.description
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setUploadedImage(null);
+    setImageAnalysis(null);
+    setShowImageAnalysis(false);
   };
 
   const handleNextStep = () => {
@@ -180,23 +285,30 @@ export default function ExpertTechnicianFinder() {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {categories.map((category) => {
-          const Icon = category.icon;
-          return (
-            <Card 
-              key={category.id}
-              className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                assessment.category === category.id ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:bg-gray-50'
-              }`}
-              onClick={() => handleInputChange('category', category.id)}
-            >
-              <CardContent className="p-4 flex items-center gap-3">
-                <Icon className="h-6 w-6 text-blue-600" />
-                <span className="font-medium">{category.name}</span>
-              </CardContent>
-            </Card>
-          );
-        })}
+        {categoriesLoading ? (
+          <div className="col-span-2 text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+            <p>Loading categories...</p>
+          </div>
+        ) : (
+          formattedCategories.map((category) => {
+            const Icon = category.icon;
+            return (
+              <Card 
+                key={category.id}
+                className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                  assessment.category === category.id ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:bg-gray-50'
+                }`}
+                onClick={() => handleInputChange('category', category.id)}
+              >
+                <CardContent className="p-4 flex items-center gap-3">
+                  <Icon className="h-6 w-6 text-blue-600" />
+                  <span className="font-medium">{category.name}</span>
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
       </div>
     </div>
   );
@@ -218,6 +330,120 @@ export default function ExpertTechnicianFinder() {
             onChange={(e) => handleInputChange('description', e.target.value)}
             className="min-h-[100px]"
           />
+        </div>
+
+        {/* Image Upload Section */}
+        <div className="space-y-4">
+          <label className="block text-sm font-medium mb-2">Upload Error Screenshot or Photo</label>
+          <p className="text-sm text-gray-600 mb-3">
+            Upload a photo of error messages or take a picture with your camera for AI analysis
+          </p>
+          
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              Upload Image
+            </Button>
+            
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => cameraInputRef.current?.click()}
+              className="flex items-center gap-2"
+            >
+              <Camera className="h-4 w-4" />
+              Take Photo
+            </Button>
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+          
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleCameraCapture}
+            className="hidden"
+          />
+
+          {/* Image Preview */}
+          {uploadedImage && (
+            <div className="relative">
+              <img
+                src={uploadedImage}
+                alt="Uploaded screenshot"
+                className="max-w-full h-auto max-h-64 rounded-lg border"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={removeImage}
+                className="absolute top-2 right-2"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+
+          {/* AI Analysis Results */}
+          {imageAnalysisMutation.isPending && (
+            <div className="flex items-center gap-2 text-blue-600">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Analyzing image...</span>
+            </div>
+          )}
+
+          {showImageAnalysis && imageAnalysis && (
+            <Card className="bg-blue-50 border-blue-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-blue-800">
+                  <Eye className="h-5 w-5" />
+                  AI Image Analysis
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div>
+                  <p className="text-sm font-medium text-blue-900">Detected Issue:</p>
+                  <p className="text-sm text-blue-800">{imageAnalysis.detectedIssue}</p>
+                </div>
+                
+                {imageAnalysis.errorMessages.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-blue-900">Error Messages:</p>
+                    <ul className="text-sm text-blue-800 list-disc pl-5">
+                      {imageAnalysis.errorMessages.map((msg, idx) => (
+                        <li key={idx}>{msg}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                <div>
+                  <p className="text-sm font-medium text-blue-900">Recommended Support Type:</p>
+                  <Badge variant="secondary" className="text-blue-800">
+                    {imageAnalysis.recommendedSupportType}
+                  </Badge>
+                </div>
+                
+                <div>
+                  <p className="text-sm font-medium text-blue-900">Confidence: {imageAnalysis.confidence}%</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
         
         <div>
