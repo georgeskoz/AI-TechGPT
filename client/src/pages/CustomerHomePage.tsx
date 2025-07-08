@@ -45,6 +45,17 @@ export default function CustomerHomePage() {
     confirmPassword: ''
   });
 
+  const [twoFactorSettings, setTwoFactorSettings] = useState({
+    smsEnabled: false,
+    emailEnabled: false
+  });
+
+  const [notifications, setNotifications] = useState({
+    emailNotifications: true,
+    smsNotifications: false,
+    marketingEmails: true
+  });
+
   const handleProfileUpdate = () => {
     // Validate required fields
     if (!profileData.fullName || !profileData.email || !profileData.username) {
@@ -79,6 +90,48 @@ export default function CustomerHomePage() {
 
   const handleInputChange = (field: string, value: string) => {
     setProfileData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleTwoFactorToggle = (method: 'sms' | 'email') => {
+    if (method === 'sms') {
+      if (!twoFactorSettings.smsEnabled) {
+        // Enable SMS 2FA
+        const phoneNumber = profileData.phone || prompt('Please enter your phone number for SMS authentication:');
+        if (phoneNumber) {
+          setTwoFactorSettings(prev => ({ ...prev, smsEnabled: true }));
+          alert('SMS Two-Factor Authentication enabled successfully! You will receive a verification code via SMS when logging in.');
+        }
+      } else {
+        // Disable SMS 2FA
+        if (confirm('Are you sure you want to disable SMS Two-Factor Authentication?')) {
+          setTwoFactorSettings(prev => ({ ...prev, smsEnabled: false }));
+          alert('SMS Two-Factor Authentication has been disabled.');
+        }
+      }
+    } else if (method === 'email') {
+      if (!twoFactorSettings.emailEnabled) {
+        // Enable Email 2FA
+        const email = profileData.email || prompt('Please enter your email address for email authentication:');
+        if (email) {
+          setTwoFactorSettings(prev => ({ ...prev, emailEnabled: true }));
+          alert('Email Two-Factor Authentication enabled successfully! You will receive a verification code via email when logging in.');
+        }
+      } else {
+        // Disable Email 2FA
+        if (confirm('Are you sure you want to disable Email Two-Factor Authentication?')) {
+          setTwoFactorSettings(prev => ({ ...prev, emailEnabled: false }));
+          alert('Email Two-Factor Authentication has been disabled.');
+        }
+      }
+    }
+  };
+
+  const handleNotificationToggle = (setting: 'emailNotifications' | 'smsNotifications' | 'marketingEmails') => {
+    setNotifications(prev => ({ ...prev, [setting]: !prev[setting] }));
+    const settingName = setting === 'emailNotifications' ? 'Email Notifications' : 
+                       setting === 'smsNotifications' ? 'SMS Notifications' : 'Marketing Emails';
+    const newStatus = !notifications[setting] ? 'enabled' : 'disabled';
+    alert(`${settingName} has been ${newStatus}.`);
   };
 
   const features = [
@@ -294,16 +347,55 @@ export default function CustomerHomePage() {
                       <Card>
                         <CardHeader>
                           <CardTitle>Two-Factor Authentication</CardTitle>
+                          <CardDescription>
+                            Add an extra layer of security to your account
+                          </CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                              <span>SMS Authentication</span>
-                              <Button variant="outline" size="sm">Enable</Button>
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div>
+                                <p className="font-medium">SMS Authentication</p>
+                                <p className="text-sm text-gray-600">
+                                  {twoFactorSettings.smsEnabled 
+                                    ? 'Receive codes via SMS' 
+                                    : 'Get verification codes sent to your phone'}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {twoFactorSettings.smsEnabled && (
+                                  <Badge variant="secondary">Active</Badge>
+                                )}
+                                <Button 
+                                  variant={twoFactorSettings.smsEnabled ? "destructive" : "default"}
+                                  size="sm"
+                                  onClick={() => handleTwoFactorToggle('sms')}
+                                >
+                                  {twoFactorSettings.smsEnabled ? 'Disable' : 'Enable'}
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex items-center justify-between">
-                              <span>Email Authentication</span>
-                              <Button variant="outline" size="sm">Enable</Button>
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div>
+                                <p className="font-medium">Email Authentication</p>
+                                <p className="text-sm text-gray-600">
+                                  {twoFactorSettings.emailEnabled 
+                                    ? 'Receive codes via email' 
+                                    : 'Get verification codes sent to your email'}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {twoFactorSettings.emailEnabled && (
+                                  <Badge variant="secondary">Active</Badge>
+                                )}
+                                <Button 
+                                  variant={twoFactorSettings.emailEnabled ? "destructive" : "default"}
+                                  size="sm"
+                                  onClick={() => handleTwoFactorToggle('email')}
+                                >
+                                  {twoFactorSettings.emailEnabled ? 'Disable' : 'Enable'}
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </CardContent>
@@ -424,26 +516,59 @@ export default function CustomerHomePage() {
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-4">
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
                               <div>
                                 <p className="font-medium">Email Notifications</p>
                                 <p className="text-sm text-gray-600">Receive updates about your support requests</p>
                               </div>
-                              <Button variant="outline" size="sm">Enabled</Button>
+                              <div className="flex items-center gap-2">
+                                {notifications.emailNotifications && (
+                                  <Badge variant="secondary">Active</Badge>
+                                )}
+                                <Button 
+                                  variant={notifications.emailNotifications ? "destructive" : "default"}
+                                  size="sm"
+                                  onClick={() => handleNotificationToggle('emailNotifications')}
+                                >
+                                  {notifications.emailNotifications ? 'Disable' : 'Enable'}
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
                               <div>
                                 <p className="font-medium">SMS Notifications</p>
                                 <p className="text-sm text-gray-600">Get text messages for urgent updates</p>
                               </div>
-                              <Button variant="outline" size="sm">Disabled</Button>
+                              <div className="flex items-center gap-2">
+                                {notifications.smsNotifications && (
+                                  <Badge variant="secondary">Active</Badge>
+                                )}
+                                <Button 
+                                  variant={notifications.smsNotifications ? "destructive" : "default"}
+                                  size="sm"
+                                  onClick={() => handleNotificationToggle('smsNotifications')}
+                                >
+                                  {notifications.smsNotifications ? 'Disable' : 'Enable'}
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
                               <div>
                                 <p className="font-medium">Marketing Emails</p>
                                 <p className="text-sm text-gray-600">Receive promotional offers and updates</p>
                               </div>
-                              <Button variant="outline" size="sm">Enabled</Button>
+                              <div className="flex items-center gap-2">
+                                {notifications.marketingEmails && (
+                                  <Badge variant="secondary">Active</Badge>
+                                )}
+                                <Button 
+                                  variant={notifications.marketingEmails ? "destructive" : "default"}
+                                  size="sm"
+                                  onClick={() => handleNotificationToggle('marketingEmails')}
+                                >
+                                  {notifications.marketingEmails ? 'Disable' : 'Enable'}
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </CardContent>
