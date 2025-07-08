@@ -158,6 +158,7 @@ const timelineOptions = [
 export default function ExpertTechnicianFinder() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const [hasError, setHasError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [currentStep, setCurrentStep] = useState(1);
@@ -212,11 +213,15 @@ export default function ExpertTechnicianFinder() {
     queryFn: async () => {
       const response = await apiRequest('GET', '/api/booking-settings');
       return response.json();
-    },
-    onSuccess: (data) => {
-      setBookingSettings(data);
     }
   });
+
+  // Update booking settings when data changes
+  useEffect(() => {
+    if (settings) {
+      setBookingSettings(settings);
+    }
+  }, [settings]);
 
   // Fetch issue categories
   const { data: categories = [] } = useQuery({
@@ -231,30 +236,43 @@ export default function ExpertTechnicianFinder() {
     mutationFn: async (data: IssueAssessment) => {
       const response = await apiRequest('POST', '/api/assess-issue', data);
       return response.json();
-    },
-    onSuccess: (result: AssessmentResult) => {
-      setAssessmentResult(result);
+    }
+  });
+
+  // Handle assessment results
+  useEffect(() => {
+    if (assessmentMutation.isSuccess && assessmentMutation.data) {
+      setAssessmentResult(assessmentMutation.data);
       setShowResults(true);
       toast({
         title: "Assessment Complete",
-        description: `Found ${result.matchedTechnicians.length} matching technicians`,
+        description: `Found ${assessmentMutation.data.matchedTechnicians.length} matching technicians`,
       });
-    },
-    onError: (error: Error) => {
+    }
+  }, [assessmentMutation.isSuccess, assessmentMutation.data, toast]);
+
+  // Handle assessment errors
+  useEffect(() => {
+    if (assessmentMutation.isError) {
       toast({
         title: "Assessment Failed",
-        description: error.message,
+        description: assessmentMutation.error?.message || "An error occurred",
         variant: "destructive",
       });
-    },
-  });
+    }
+  }, [assessmentMutation.isError, assessmentMutation.error, toast]);
 
   const imageAnalysisMutation = useMutation({
     mutationFn: async ({ image, description }: { image: string; description: string }) => {
       const response = await apiRequest('POST', '/api/analyze-image', { image, description });
       return response.json();
-    },
-    onSuccess: (result: ImageAnalysis) => {
+    }
+  });
+
+  // Handle image analysis results
+  useEffect(() => {
+    if (imageAnalysisMutation.isSuccess && imageAnalysisMutation.data) {
+      const result = imageAnalysisMutation.data;
       setImageAnalysis(result);
       setShowImageAnalysis(true);
       
@@ -268,37 +286,49 @@ export default function ExpertTechnicianFinder() {
         }
         setAssessment(prev => ({ ...prev, description: enhancedDescription }));
       }
-    },
-    onError: (error: Error) => {
-      console.error('Image analysis error:', error);
+    }
+  }, [imageAnalysisMutation.isSuccess, imageAnalysisMutation.data, assessment.description]);
+
+  // Handle image analysis errors
+  useEffect(() => {
+    if (imageAnalysisMutation.isError) {
+      console.error('Image analysis error:', imageAnalysisMutation.error);
       toast({
         title: "Image Analysis Failed",
         description: "Unable to analyze the image. Please try again.",
         variant: "destructive",
       });
     }
-  });
+  }, [imageAnalysisMutation.isError, imageAnalysisMutation.error, toast]);
 
   const bookingMutation = useMutation({
     mutationFn: async (data: BookingData) => {
       const response = await apiRequest('POST', '/api/service-bookings', data);
       return response.json();
-    },
-    onSuccess: (result) => {
+    }
+  });
+
+  // Handle booking results
+  useEffect(() => {
+    if (bookingMutation.isSuccess) {
       setShowBookingConfirmation(true);
       toast({
         title: "Booking Confirmed",
         description: "Your service request has been submitted successfully",
       });
-    },
-    onError: (error: Error) => {
+    }
+  }, [bookingMutation.isSuccess, toast]);
+
+  // Handle booking errors
+  useEffect(() => {
+    if (bookingMutation.isError) {
       toast({
         title: "Booking Failed",
-        description: error.message,
+        description: bookingMutation.error?.message || "An error occurred",
         variant: "destructive",
       });
-    },
-  });
+    }
+  }, [bookingMutation.isError, bookingMutation.error, toast]);
 
   const handleInputChange = (field: keyof IssueAssessment, value: string | string[]) => {
     setAssessment(prev => ({ ...prev, [field]: value }));
@@ -406,9 +436,26 @@ export default function ExpertTechnicianFinder() {
     bookingMutation.mutate(booking);
   };
 
-  const selectedCategory = categories.find(cat => cat.name === assessment.category);
+  const selectedCategory = categories?.find(cat => cat.name === assessment.category);
   const availableSymptoms = selectedCategory?.commonSymptoms || [];
   const progress = (currentStep / steps.length) * 100;
+
+  // Show loading state while fetching data
+  if (!categories || categories.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+        <Navigation />
+        <div className="max-w-4xl mx-auto p-6 pt-20">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+              <p className="text-gray-600">Loading technician categories...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
@@ -462,11 +509,17 @@ export default function ExpertTechnicianFinder() {
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category: IssueCategory) => (
-                      <SelectItem key={category.id} value={category.name}>
-                        {category.name}
+                    {categories && categories.length > 0 ? (
+                      categories.map((category: IssueCategory) => (
+                        <SelectItem key={category.id} value={category.name}>
+                          {category.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="loading" disabled>
+                        Loading categories...
                       </SelectItem>
-                    ))}
+                    )}
                   </SelectContent>
                 </Select>
               </div>
