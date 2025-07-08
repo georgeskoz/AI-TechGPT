@@ -1,9 +1,10 @@
 import { 
-  users, messages, technicians, serviceRequests, jobs, jobUpdates, supportCases, supportMessages,
+  users, messages, technicians, serviceRequests, jobs, jobUpdates, supportCases, supportMessages, issueCategories,
   type User, type InsertUser, type UpdateProfile, type Message, type InsertMessage,
   type Technician, type InsertTechnician, type ServiceRequest, type InsertServiceRequest,
   type Job, type InsertJob, type JobUpdate, type InsertJobUpdate,
-  type SupportCase, type InsertSupportCase, type SupportMessage, type InsertSupportMessage
+  type SupportCase, type InsertSupportCase, type SupportMessage, type InsertSupportMessage,
+  type IssueCategory, type InsertIssueCategory
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -1484,6 +1485,48 @@ class MemoryStorage implements IStorage {
         requestedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
       }
     ];
+  }
+
+  // Issue categories management
+  async getIssueCategories(): Promise<IssueCategory[]> {
+    return [
+      { id: 1, name: 'Hardware Issues', description: 'Computer, laptop, and device hardware problems', icon: 'wrench', isActive: true, sortOrder: 1, createdAt: new Date(), updatedAt: new Date() },
+      { id: 2, name: 'Software Problems', description: 'Application and software troubleshooting', icon: 'monitor', isActive: true, sortOrder: 2, createdAt: new Date(), updatedAt: new Date() },
+      { id: 3, name: 'Network Issues', description: 'Internet, WiFi, and network connectivity problems', icon: 'wifi', isActive: true, sortOrder: 3, createdAt: new Date(), updatedAt: new Date() },
+      { id: 4, name: 'Security Questions', description: 'Cybersecurity and data protection issues', icon: 'shield', isActive: true, sortOrder: 4, createdAt: new Date(), updatedAt: new Date() },
+      { id: 5, name: 'Mobile Device Help', description: 'Smartphone and tablet support', icon: 'smartphone', isActive: true, sortOrder: 5, createdAt: new Date(), updatedAt: new Date() },
+      { id: 6, name: 'Email & Communication', description: 'Email setup and communication tools', icon: 'mail', isActive: true, sortOrder: 6, createdAt: new Date(), updatedAt: new Date() },
+      { id: 7, name: 'Printer Support', description: 'Printer setup and troubleshooting', icon: 'printer', isActive: true, sortOrder: 7, createdAt: new Date(), updatedAt: new Date() },
+      { id: 8, name: 'Data Recovery', description: 'File recovery and data backup assistance', icon: 'hard-drive', isActive: true, sortOrder: 8, createdAt: new Date(), updatedAt: new Date() },
+      { id: 9, name: 'General Tech Support', description: 'Other technical issues and questions', icon: 'help-circle', isActive: true, sortOrder: 9, createdAt: new Date(), updatedAt: new Date() }
+    ];
+  }
+
+  async createIssueCategory(category: InsertIssueCategory): Promise<IssueCategory> {
+    const newCategory = {
+      id: this.nextId++,
+      ...category,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as IssueCategory;
+    return newCategory;
+  }
+
+  async updateIssueCategory(id: number, category: Partial<InsertIssueCategory>): Promise<IssueCategory> {
+    const categories = await this.getIssueCategories();
+    const existingCategory = categories.find(c => c.id === id);
+    if (!existingCategory) throw new Error('Category not found');
+    
+    const updatedCategory = {
+      ...existingCategory,
+      ...category,
+      updatedAt: new Date()
+    };
+    return updatedCategory;
+  }
+
+  async deleteIssueCategory(id: number): Promise<boolean> {
+    return true; // Mock implementation
   }
 }
 

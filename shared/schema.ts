@@ -15,6 +15,18 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Admin-managed categories for issue assessment
+export const issueCategories = pgTable("issue_categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  icon: text("icon").notNull().default("wrench"),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Technician profiles with skills and availability
 export const technicians = pgTable("technicians", {
   id: serial("id").primaryKey(),
@@ -491,6 +503,14 @@ export const updateProfileSchema = createInsertSchema(users).pick({
   avatar: true,
 });
 
+export const insertIssueCategorySchema = createInsertSchema(issueCategories).pick({
+  name: true,
+  description: true,
+  icon: true,
+  isActive: true,
+  sortOrder: true,
+});
+
 export const insertMessageSchema = createInsertSchema(messages).pick({
   username: true,
   content: true,
@@ -702,6 +722,8 @@ export type InsertStatement = z.infer<typeof insertStatementSchema>;
 export type Statement = typeof statements.$inferSelect;
 export type InsertTechnicianEarningSettings = z.infer<typeof insertTechnicianEarningSettingsSchema>;
 export type TechnicianEarningSettings = typeof technicianEarningSettings.$inferSelect;
+export type InsertIssueCategory = z.infer<typeof insertIssueCategorySchema>;
+export type IssueCategory = typeof issueCategories.$inferSelect;
 
 // Enhanced technician schemas
 export const insertTechnicianEnhancedSchema = createInsertSchema(technicians).pick({
