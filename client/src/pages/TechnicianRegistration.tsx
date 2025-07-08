@@ -808,6 +808,40 @@ export default function TechnicianRegistration() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
+                <p className="text-sm text-blue-800 font-medium mb-2">
+                  📍 Please select your service location to continue with registration
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      handleCountryChange("US");
+                      setTimeout(() => handleStateChange("CA"), 100);
+                      setTimeout(() => handleCityChange("Los Angeles"), 200);
+                    }}
+                    className="text-xs"
+                  >
+                    Quick: US - California - Los Angeles
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      handleCountryChange("CA");
+                      setTimeout(() => handleStateChange("QC"), 100);
+                      setTimeout(() => handleCityChange("Gatineau"), 200);
+                    }}
+                    className="text-xs"
+                  >
+                    Quick: Canada - Quebec - Gatineau
+                  </Button>
+                </div>
+              </div>
+              
               <div className="grid md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="country">Country *</Label>
@@ -815,7 +849,7 @@ export default function TechnicianRegistration() {
                     value={form.watch("country")} 
                     onValueChange={handleCountryChange}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className={form.formState.errors.country ? "border-red-500" : ""}>
                       <SelectValue placeholder="Select country" />
                     </SelectTrigger>
                     <SelectContent>
@@ -838,8 +872,8 @@ export default function TechnicianRegistration() {
                     onValueChange={handleStateChange}
                     disabled={!selectedCountry}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select state/province" />
+                    <SelectTrigger className={form.formState.errors.state ? "border-red-500" : ""}>
+                      <SelectValue placeholder={selectedCountry ? "Select state/province" : "Select country first"} />
                     </SelectTrigger>
                     <SelectContent>
                       {availableStates.map((state) => (
@@ -861,8 +895,8 @@ export default function TechnicianRegistration() {
                     onValueChange={handleCityChange}
                     disabled={!selectedState}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select city" />
+                    <SelectTrigger className={form.formState.errors.city ? "border-red-500" : ""}>
+                      <SelectValue placeholder={selectedState ? "Select city" : "Select state first"} />
                     </SelectTrigger>
                     <SelectContent>
                       {availableCities.map((city) => (
