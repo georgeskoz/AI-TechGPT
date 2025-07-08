@@ -1015,7 +1015,7 @@ export default function CustomerHomePage() {
               <Button 
                 size="lg" 
                 variant="outline" 
-                onClick={() => setLocation("/technician-matching")}
+                onClick={() => setLocation("/find-expert")}
                 className="text-lg px-8"
               >
                 <Users className="h-5 w-5 mr-2" />
