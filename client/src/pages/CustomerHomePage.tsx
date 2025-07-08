@@ -413,30 +413,130 @@ export default function CustomerHomePage() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="space-y-3">
-                            <div className="border rounded-lg p-3">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="font-medium">Hardware Troubleshooting</span>
-                                <Badge variant="outline">Completed</Badge>
+                          <div className="space-y-4">
+                            <div className="border rounded-lg p-4 bg-gray-50">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <Monitor className="h-5 w-5 text-blue-600" />
+                                  <span className="font-semibold text-lg">Hardware Troubleshooting</span>
+                                </div>
+                                <Badge variant="outline" className="bg-green-100 text-green-800">Completed</Badge>
                               </div>
-                              <p className="text-sm text-gray-600">Computer not starting - resolved with power supply replacement</p>
-                              <p className="text-xs text-gray-500 mt-1">January 5, 2025 • Duration: 45 minutes • Cost: $65</p>
+                              <div className="space-y-2">
+                                <p className="text-sm text-gray-700 font-medium">Issue: Computer not starting - resolved with power supply replacement</p>
+                                <p className="text-sm text-gray-600">
+                                  <strong>Details:</strong> Customer reported desktop computer wouldn't power on. Diagnosed faulty power supply unit (PSU) after testing with multimeter. Replaced 650W PSU with new 750W unit. Verified all components working properly. Tested system stability for 15 minutes.
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  <strong>Technician:</strong> Mike Johnson • <strong>Service Type:</strong> On-site
+                                </p>
+                                <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
+                                  <span>📅 January 5, 2025</span>
+                                  <span>⏱️ Duration: 45 minutes</span>
+                                  <span>💰 Cost: $65.00</span>
+                                  <span>⭐ Rating: 5/5</span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="border rounded-lg p-3">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="font-medium">Software Installation</span>
-                                <Badge variant="outline">Completed</Badge>
+                            
+                            <div className="border rounded-lg p-4 bg-gray-50">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <Settings className="h-5 w-5 text-purple-600" />
+                                  <span className="font-semibold text-lg">Software Installation</span>
+                                </div>
+                                <Badge variant="outline" className="bg-green-100 text-green-800">Completed</Badge>
                               </div>
-                              <p className="text-sm text-gray-600">Installing and configuring development environment</p>
-                              <p className="text-xs text-gray-500 mt-1">December 28, 2024 • Duration: 30 minutes • Cost: $45</p>
+                              <div className="space-y-2">
+                                <p className="text-sm text-gray-700 font-medium">Issue: Installing and configuring development environment</p>
+                                <p className="text-sm text-gray-600">
+                                  <strong>Details:</strong> Set up complete web development environment including Node.js, VS Code, Git, and Docker. Configured development server, installed necessary extensions, and created project templates. Provided documentation and quick start guide.
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  <strong>Technician:</strong> Sarah Chen • <strong>Service Type:</strong> Remote
+                                </p>
+                                <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
+                                  <span>📅 December 28, 2024</span>
+                                  <span>⏱️ Duration: 30 minutes</span>
+                                  <span>💰 Cost: $45.00</span>
+                                  <span>⭐ Rating: 4/5</span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="border rounded-lg p-3">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="font-medium">Network Setup</span>
-                                <Badge variant="outline">Completed</Badge>
+                            
+                            <div className="border rounded-lg p-4 bg-gray-50">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="h-5 w-5 text-green-600" />
+                                  <span className="font-semibold text-lg">Network Setup</span>
+                                </div>
+                                <Badge variant="outline" className="bg-green-100 text-green-800">Completed</Badge>
                               </div>
-                              <p className="text-sm text-gray-600">Wi-Fi configuration and router setup</p>
-                              <p className="text-xs text-gray-500 mt-1">December 20, 2024 • Duration: 60 minutes • Cost: $85</p>
+                              <div className="space-y-2">
+                                <p className="text-sm text-gray-700 font-medium">Issue: Wi-Fi configuration and router setup</p>
+                                <p className="text-sm text-gray-600">
+                                  <strong>Details:</strong> Configured new mesh Wi-Fi system covering 3000 sq ft home. Set up main router and 2 satellite units. Optimized channel settings for minimal interference. Configured guest network and parental controls. Speed test showed 95% of ISP bandwidth throughout home.
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  <strong>Technician:</strong> David Martinez • <strong>Service Type:</strong> On-site
+                                </p>
+                                <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
+                                  <span>📅 December 20, 2024</span>
+                                  <span>⏱️ Duration: 60 minutes</span>
+                                  <span>💰 Cost: $85.00</span>
+                                  <span>⭐ Rating: 5/5</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="border rounded-lg p-4 bg-gray-50">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <Shield className="h-5 w-5 text-red-600" />
+                                  <span className="font-semibold text-lg">Security Audit</span>
+                                </div>
+                                <Badge variant="outline" className="bg-green-100 text-green-800">Completed</Badge>
+                              </div>
+                              <div className="space-y-2">
+                                <p className="text-sm text-gray-700 font-medium">Issue: Comprehensive security assessment and hardening</p>
+                                <p className="text-sm text-gray-600">
+                                  <strong>Details:</strong> Performed full security audit of home network and devices. Updated router firmware, changed default passwords, enabled WPA3 encryption. Installed antivirus on all devices, configured firewalls, and set up automatic security updates. Provided security best practices guide.
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  <strong>Technician:</strong> Alex Thompson • <strong>Service Type:</strong> Remote + On-site
+                                </p>
+                                <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
+                                  <span>📅 December 15, 2024</span>
+                                  <span>⏱️ Duration: 90 minutes</span>
+                                  <span>💰 Cost: $120.00</span>
+                                  <span>⭐ Rating: 5/5</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="border rounded-lg p-4 bg-gray-50">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <Phone className="h-5 w-5 text-orange-600" />
+                                  <span className="font-semibold text-lg">Phone Support Session</span>
+                                </div>
+                                <Badge variant="outline" className="bg-green-100 text-green-800">Completed</Badge>
+                              </div>
+                              <div className="space-y-2">
+                                <p className="text-sm text-gray-700 font-medium">Issue: Email client configuration and troubleshooting</p>
+                                <p className="text-sm text-gray-600">
+                                  <strong>Details:</strong> Guided customer through Outlook setup with new email provider. Configured IMAP settings, SSL encryption, and folder synchronization. Resolved sending issues by updating SMTP port settings. Tested email functionality and set up mobile sync.
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  <strong>Technician:</strong> Lisa Rodriguez • <strong>Service Type:</strong> Phone Support
+                                </p>
+                                <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
+                                  <span>📅 December 10, 2024</span>
+                                  <span>⏱️ Duration: 25 minutes</span>
+                                  <span>💰 Cost: $35.00</span>
+                                  <span>⭐ Rating: 4/5</span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </CardContent>
