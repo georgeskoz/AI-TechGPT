@@ -27,7 +27,13 @@ import {
   Phone,
   Home,
   Calendar,
-  Lock
+  Lock,
+  Plus,
+  Trash2,
+  Download,
+  Send,
+  Apple,
+  Smartphone
 } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -55,6 +61,11 @@ export default function CustomerHomePage() {
     smsNotifications: false,
     marketingEmails: true
   });
+
+  const [paymentMethods, setPaymentMethods] = useState([
+    { id: 1, type: 'card', last4: '1234', brand: 'Visa', expiry: '12/26', isDefault: true },
+    { id: 2, type: 'card', last4: '5678', brand: 'Mastercard', expiry: '08/25', isDefault: false }
+  ]);
 
   const handleProfileUpdate = () => {
     // Validate required fields
@@ -132,6 +143,41 @@ export default function CustomerHomePage() {
                        setting === 'smsNotifications' ? 'SMS Notifications' : 'Marketing Emails';
     const newStatus = !notifications[setting] ? 'enabled' : 'disabled';
     alert(`${settingName} has been ${newStatus}.`);
+  };
+
+  const handleRemoveCard = (cardId: number) => {
+    if (confirm('Are you sure you want to remove this payment method?')) {
+      setPaymentMethods(prev => prev.filter(card => card.id !== cardId));
+      alert('Payment method removed successfully.');
+    }
+  };
+
+  const handleAddCard = () => {
+    const newCard = {
+      id: Date.now(),
+      type: 'card',
+      last4: '9999',
+      brand: 'Visa',
+      expiry: '12/27',
+      isDefault: false
+    };
+    setPaymentMethods(prev => [...prev, newCard]);
+    alert('New payment method added successfully.');
+  };
+
+  const handleApplePay = () => {
+    alert('Apple Pay setup initiated. Please complete the setup on your device.');
+  };
+
+  const handleExportPDF = (invoice: any) => {
+    alert(`Exporting invoice for ${invoice.service} (${invoice.date}) to PDF...`);
+  };
+
+  const handleEmailInvoice = (invoice: any) => {
+    const email = prompt('Enter email address to send invoice:');
+    if (email) {
+      alert(`Invoice for ${invoice.service} sent to ${email}`);
+    }
   };
 
   const features = [
@@ -552,26 +598,78 @@ export default function CustomerHomePage() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="space-y-4">
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Card Number</label>
-                              <Input placeholder="**** **** **** 1234" />
+                          <div className="space-y-6">
+                            <div className="space-y-4">
+                              <h3 className="font-medium text-gray-900 mb-3">Saved Payment Methods</h3>
+                              {paymentMethods.map((method) => (
+                                <div key={method.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                  <div className="flex items-center gap-3">
+                                    <CreditCard className="h-5 w-5 text-gray-600" />
+                                    <div>
+                                      <p className="font-medium">{method.brand} •••• {method.last4}</p>
+                                      <p className="text-sm text-gray-600">Expires {method.expiry}</p>
+                                    </div>
+                                    {method.isDefault && (
+                                      <Badge variant="secondary">Default</Badge>
+                                    )}
+                                  </div>
+                                  <Button 
+                                    variant="destructive" 
+                                    size="sm"
+                                    onClick={() => handleRemoveCard(method.id)}
+                                    className="flex items-center gap-1"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    Remove
+                                  </Button>
+                                </div>
+                              ))}
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            
+                            <div className="space-y-3">
+                              <h3 className="font-medium text-gray-900">Add New Payment Method</h3>
+                              <div className="grid grid-cols-2 gap-3">
+                                <Button 
+                                  variant="outline" 
+                                  onClick={handleAddCard}
+                                  className="flex items-center gap-2"
+                                >
+                                  <Plus className="h-4 w-4" />
+                                  Add Card
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  onClick={handleApplePay}
+                                  className="flex items-center gap-2"
+                                >
+                                  <Apple className="h-4 w-4" />
+                                  Apple Pay
+                                </Button>
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-4 pt-4 border-t">
+                              <h3 className="font-medium text-gray-900">Add New Card</h3>
                               <div>
-                                <label className="block text-sm font-medium mb-1">Expiry Date</label>
-                                <Input placeholder="MM/YY" />
+                                <label className="block text-sm font-medium mb-1">Card Number</label>
+                                <Input placeholder="1234 5678 9012 3456" />
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-sm font-medium mb-1">Expiry Date</label>
+                                  <Input placeholder="MM/YY" />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium mb-1">CVV</label>
+                                  <Input placeholder="123" />
+                                </div>
                               </div>
                               <div>
-                                <label className="block text-sm font-medium mb-1">CVV</label>
-                                <Input placeholder="123" />
+                                <label className="block text-sm font-medium mb-1">Billing Address</label>
+                                <Input placeholder="Enter billing address" />
                               </div>
+                              <Button className="w-full">Add Payment Method</Button>
                             </div>
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Billing Address</label>
-                              <Input placeholder="Enter billing address" />
-                            </div>
-                            <Button>Update Payment Method</Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -581,28 +679,46 @@ export default function CustomerHomePage() {
                           <CardTitle>Billing History</CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between border-b pb-2">
-                              <div>
-                                <p className="font-medium">Hardware Support</p>
-                                <p className="text-sm text-gray-600">January 5, 2025</p>
+                          <div className="space-y-4">
+                            {[
+                              { id: 1, service: 'Hardware Support', date: 'January 5, 2025', amount: '$65.00', invoice: 'INV-2025-001' },
+                              { id: 2, service: 'Software Installation', date: 'December 28, 2024', amount: '$45.00', invoice: 'INV-2024-089' },
+                              { id: 3, service: 'Network Setup', date: 'December 20, 2024', amount: '$85.00', invoice: 'INV-2024-088' },
+                              { id: 4, service: 'Security Audit', date: 'December 15, 2024', amount: '$120.00', invoice: 'INV-2024-087' },
+                              { id: 5, service: 'Phone Support', date: 'December 10, 2024', amount: '$35.00', invoice: 'INV-2024-086' }
+                            ].map((invoice) => (
+                              <div key={invoice.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="font-medium">{invoice.service}</p>
+                                      <p className="text-sm text-gray-600">{invoice.date} • {invoice.invoice}</p>
+                                    </div>
+                                    <span className="font-medium text-lg">{invoice.amount}</span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2 ml-4">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => handleExportPDF(invoice)}
+                                    className="flex items-center gap-1"
+                                  >
+                                    <Download className="h-4 w-4" />
+                                    PDF
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => handleEmailInvoice(invoice)}
+                                    className="flex items-center gap-1"
+                                  >
+                                    <Send className="h-4 w-4" />
+                                    Email
+                                  </Button>
+                                </div>
                               </div>
-                              <span className="font-medium">$65.00</span>
-                            </div>
-                            <div className="flex items-center justify-between border-b pb-2">
-                              <div>
-                                <p className="font-medium">Software Installation</p>
-                                <p className="text-sm text-gray-600">December 28, 2024</p>
-                              </div>
-                              <span className="font-medium">$45.00</span>
-                            </div>
-                            <div className="flex items-center justify-between border-b pb-2">
-                              <div>
-                                <p className="font-medium">Network Setup</p>
-                                <p className="text-sm text-gray-600">December 20, 2024</p>
-                              </div>
-                              <span className="font-medium">$85.00</span>
-                            </div>
+                            ))}
                           </div>
                         </CardContent>
                       </Card>
