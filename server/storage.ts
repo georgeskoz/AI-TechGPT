@@ -1579,15 +1579,123 @@ class MemoryStorage implements IStorage {
   // Issue categories management
   async getIssueCategories(): Promise<IssueCategory[]> {
     return [
-      { id: 1, name: 'Hardware Issues', description: 'Computer, laptop, and device hardware problems', icon: 'wrench', isActive: true, sortOrder: 1, createdAt: new Date(), updatedAt: new Date() },
-      { id: 2, name: 'Software Problems', description: 'Application and software troubleshooting', icon: 'monitor', isActive: true, sortOrder: 2, createdAt: new Date(), updatedAt: new Date() },
-      { id: 3, name: 'Network Issues', description: 'Internet, WiFi, and network connectivity problems', icon: 'wifi', isActive: true, sortOrder: 3, createdAt: new Date(), updatedAt: new Date() },
-      { id: 4, name: 'Security Questions', description: 'Cybersecurity and data protection issues', icon: 'shield', isActive: true, sortOrder: 4, createdAt: new Date(), updatedAt: new Date() },
-      { id: 5, name: 'Mobile Device Help', description: 'Smartphone and tablet support', icon: 'smartphone', isActive: true, sortOrder: 5, createdAt: new Date(), updatedAt: new Date() },
-      { id: 6, name: 'Email & Communication', description: 'Email setup and communication tools', icon: 'mail', isActive: true, sortOrder: 6, createdAt: new Date(), updatedAt: new Date() },
-      { id: 7, name: 'Printer Support', description: 'Printer setup and troubleshooting', icon: 'printer', isActive: true, sortOrder: 7, createdAt: new Date(), updatedAt: new Date() },
-      { id: 8, name: 'Data Recovery', description: 'File recovery and data backup assistance', icon: 'hard-drive', isActive: true, sortOrder: 8, createdAt: new Date(), updatedAt: new Date() },
-      { id: 9, name: 'General Tech Support', description: 'Other technical issues and questions', icon: 'help-circle', isActive: true, sortOrder: 9, createdAt: new Date(), updatedAt: new Date() }
+      { 
+        id: 1, 
+        name: 'Hardware Issues', 
+        description: 'Computer, laptop, and device hardware problems', 
+        subcategories: ['Computer not starting', 'Overheating', 'Hardware failure', 'Peripheral issues', 'Memory problems', 'Hard drive issues', 'Graphics card problems'],
+        commonSymptoms: ['Blue screen', 'Slow performance', 'Overheating', 'Strange noises', 'Hardware not recognized', 'System crashes', 'Boot failures'],
+        estimatedDuration: '1-3 hours',
+        difficulty: 'intermediate',
+        basePrice: '$50-150',
+        isActive: true, 
+        createdAt: new Date().toISOString(), 
+        updatedAt: new Date().toISOString() 
+      },
+      { 
+        id: 2, 
+        name: 'Software Problems', 
+        description: 'Application and software troubleshooting', 
+        subcategories: ['Software installation', 'Application crashes', 'Performance issues', 'Compatibility problems', 'License issues', 'Updates failing', 'Configuration problems'],
+        commonSymptoms: ['Application crashes', 'Slow performance', 'Error messages', 'Installation failures', 'Compatibility issues', 'Update problems', 'Settings not saving'],
+        estimatedDuration: '30 minutes - 2 hours',
+        difficulty: 'basic',
+        basePrice: '$30-80',
+        isActive: true, 
+        createdAt: new Date().toISOString(), 
+        updatedAt: new Date().toISOString() 
+      },
+      { 
+        id: 3, 
+        name: 'Network Issues', 
+        description: 'Internet, WiFi, and network connectivity problems', 
+        subcategories: ['WiFi connection', 'Internet slow', 'Network setup', 'Router problems', 'VPN issues', 'Firewall configuration', 'Network sharing'],
+        commonSymptoms: ['No internet connection', 'Slow speeds', 'Connection drops', 'Cannot connect to WiFi', 'Network not found', 'DNS errors', 'Timeout errors'],
+        estimatedDuration: '30 minutes - 2 hours',
+        difficulty: 'intermediate',
+        basePrice: '$40-100',
+        isActive: true, 
+        createdAt: new Date().toISOString(), 
+        updatedAt: new Date().toISOString() 
+      },
+      { 
+        id: 4, 
+        name: 'Security Questions', 
+        description: 'Cybersecurity and data protection issues', 
+        subcategories: ['Virus removal', 'Malware cleanup', 'Password recovery', 'Security setup', 'Data encryption', 'Privacy settings', 'Identity protection'],
+        commonSymptoms: ['Slow performance', 'Pop-up ads', 'Suspicious activity', 'Account compromised', 'Files encrypted', 'Unusual network activity', 'Security warnings'],
+        estimatedDuration: '1-4 hours',
+        difficulty: 'advanced',
+        basePrice: '$60-200',
+        isActive: true, 
+        createdAt: new Date().toISOString(), 
+        updatedAt: new Date().toISOString() 
+      },
+      { 
+        id: 5, 
+        name: 'Mobile Device Help', 
+        description: 'Smartphone and tablet support', 
+        subcategories: ['Device setup', 'App problems', 'Battery issues', 'Storage full', 'Update problems', 'Sync issues', 'Performance optimization'],
+        commonSymptoms: ['Battery draining fast', 'Apps crashing', 'Storage full', 'Slow performance', 'Sync problems', 'Update failures', 'Connection issues'],
+        estimatedDuration: '30 minutes - 1 hour',
+        difficulty: 'basic',
+        basePrice: '$25-60',
+        isActive: true, 
+        createdAt: new Date().toISOString(), 
+        updatedAt: new Date().toISOString() 
+      },
+      { 
+        id: 6, 
+        name: 'Email & Communication', 
+        description: 'Email setup and communication tools', 
+        subcategories: ['Email setup', 'Email not working', 'Spam issues', 'Calendar sync', 'Contacts sync', 'Video calling', 'Messaging apps'],
+        commonSymptoms: ['Cannot send emails', 'Not receiving emails', 'Sync problems', 'Login issues', 'Spam emails', 'Calendar not updating', 'Connection problems'],
+        estimatedDuration: '30 minutes - 1 hour',
+        difficulty: 'basic',
+        basePrice: '$30-70',
+        isActive: true, 
+        createdAt: new Date().toISOString(), 
+        updatedAt: new Date().toISOString() 
+      },
+      { 
+        id: 7, 
+        name: 'Printer Support', 
+        description: 'Printer setup and troubleshooting', 
+        subcategories: ['Printer setup', 'Print quality issues', 'Connection problems', 'Driver installation', 'Paper jams', 'Ink/toner issues', 'Wireless printing'],
+        commonSymptoms: ['Printer not found', 'Poor print quality', 'Paper jams', 'Ink errors', 'Connection issues', 'Driver problems', 'Print jobs stuck'],
+        estimatedDuration: '30 minutes - 1.5 hours',
+        difficulty: 'basic',
+        basePrice: '$35-80',
+        isActive: true, 
+        createdAt: new Date().toISOString(), 
+        updatedAt: new Date().toISOString() 
+      },
+      { 
+        id: 8, 
+        name: 'Data Recovery', 
+        description: 'File recovery and data backup assistance', 
+        subcategories: ['Deleted files', 'Corrupted files', 'Hard drive failure', 'Backup setup', 'Cloud storage', 'File transfer', 'Data migration'],
+        commonSymptoms: ['Files missing', 'Cannot access files', 'Corrupted data', 'Hard drive not recognized', 'Backup failures', 'Cloud sync issues', 'Data loss'],
+        estimatedDuration: '1-6 hours',
+        difficulty: 'advanced',
+        basePrice: '$80-300',
+        isActive: true, 
+        createdAt: new Date().toISOString(), 
+        updatedAt: new Date().toISOString() 
+      },
+      { 
+        id: 9, 
+        name: 'General Tech Support', 
+        description: 'Other technical issues and questions', 
+        subcategories: ['General questions', 'Device recommendations', 'Software recommendations', 'Setup assistance', 'Training', 'Consultation', 'Other issues'],
+        commonSymptoms: ['Need guidance', 'Want recommendations', 'Setup help needed', 'Training required', 'General questions', 'Consultation needed', 'Other problems'],
+        estimatedDuration: '30 minutes - 2 hours',
+        difficulty: 'basic',
+        basePrice: '$25-100',
+        isActive: true, 
+        createdAt: new Date().toISOString(), 
+        updatedAt: new Date().toISOString() 
+      }
     ];
   }
 
