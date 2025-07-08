@@ -369,9 +369,10 @@ export default function CustomerHomePage() {
                                 <Button 
                                   variant={twoFactorSettings.smsEnabled ? "destructive" : "default"}
                                   size="sm"
+                                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
                                   onClick={() => handleTwoFactorToggle('sms')}
                                 >
-                                  {twoFactorSettings.smsEnabled ? 'Disable' : 'Enable'}
+                                  {twoFactorSettings.smsEnabled ? '🔓 Disable' : '🔒 Enable'}
                                 </Button>
                               </div>
                             </div>
@@ -391,9 +392,10 @@ export default function CustomerHomePage() {
                                 <Button 
                                   variant={twoFactorSettings.emailEnabled ? "destructive" : "default"}
                                   size="sm"
+                                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
                                   onClick={() => handleTwoFactorToggle('email')}
                                 >
-                                  {twoFactorSettings.emailEnabled ? 'Disable' : 'Enable'}
+                                  {twoFactorSettings.emailEnabled ? '🔓 Disable' : '🔒 Enable'}
                                 </Button>
                               </div>
                             </div>
@@ -528,9 +530,10 @@ export default function CustomerHomePage() {
                                 <Button 
                                   variant={notifications.emailNotifications ? "destructive" : "default"}
                                   size="sm"
+                                  className="bg-green-600 hover:bg-green-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
                                   onClick={() => handleNotificationToggle('emailNotifications')}
                                 >
-                                  {notifications.emailNotifications ? 'Disable' : 'Enable'}
+                                  {notifications.emailNotifications ? '🔕 Disable' : '🔔 Enable'}
                                 </Button>
                               </div>
                             </div>
@@ -546,9 +549,10 @@ export default function CustomerHomePage() {
                                 <Button 
                                   variant={notifications.smsNotifications ? "destructive" : "default"}
                                   size="sm"
+                                  className="bg-green-600 hover:bg-green-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
                                   onClick={() => handleNotificationToggle('smsNotifications')}
                                 >
-                                  {notifications.smsNotifications ? 'Disable' : 'Enable'}
+                                  {notifications.smsNotifications ? '🔕 Disable' : '🔔 Enable'}
                                 </Button>
                               </div>
                             </div>
@@ -564,9 +568,10 @@ export default function CustomerHomePage() {
                                 <Button 
                                   variant={notifications.marketingEmails ? "destructive" : "default"}
                                   size="sm"
+                                  className="bg-green-600 hover:bg-green-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
                                   onClick={() => handleNotificationToggle('marketingEmails')}
                                 >
-                                  {notifications.marketingEmails ? 'Disable' : 'Enable'}
+                                  {notifications.marketingEmails ? '🔕 Disable' : '🔔 Enable'}
                                 </Button>
                               </div>
                             </div>
