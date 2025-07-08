@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navigation from "@/components/Navigation";
 import { 
   MessageSquare, 
@@ -14,12 +17,23 @@ import {
   Headphones,
   Monitor,
   MapPin,
-  CheckCircle
+  CheckCircle,
+  User,
+  Settings,
+  CreditCard,
+  History,
+  Bell,
+  Mail,
+  Phone,
+  Home,
+  Calendar,
+  Lock
 } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function CustomerHomePage() {
   const [, setLocation] = useLocation();
+  const [selectedAccountSection, setSelectedAccountSection] = useState('profile');
 
   const features = [
     {
@@ -80,6 +94,304 @@ export default function CustomerHomePage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Customer Account
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Customer Account Management</DialogTitle>
+                  </DialogHeader>
+                  <Tabs value={selectedAccountSection} onValueChange={setSelectedAccountSection}>
+                    <TabsList className="grid w-full grid-cols-5">
+                      <TabsTrigger value="profile">Profile</TabsTrigger>
+                      <TabsTrigger value="security">Security</TabsTrigger>
+                      <TabsTrigger value="history">History</TabsTrigger>
+                      <TabsTrigger value="billing">Billing</TabsTrigger>
+                      <TabsTrigger value="settings">Settings</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="profile" className="space-y-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <User className="h-5 w-5" />
+                            Personal Information
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Full Name</label>
+                              <Input placeholder="Enter your full name" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Email Address</label>
+                              <Input type="email" placeholder="Enter your email" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Phone Number</label>
+                              <Input type="tel" placeholder="Enter your phone number" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Username</label>
+                              <Input placeholder="Choose a username" />
+                            </div>
+                            <div className="md:col-span-2">
+                              <label className="block text-sm font-medium mb-1">Address</label>
+                              <Input placeholder="Enter your address (for onsite services)" />
+                            </div>
+                          </div>
+                          <div className="mt-4">
+                            <Button>Update Profile</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Settings className="h-5 w-5" />
+                            Account Status
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span>Account Type</span>
+                              <Badge variant="outline">Standard Customer</Badge>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span>Member Since</span>
+                              <span className="text-sm text-gray-600">January 2025</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span>Email Verified</span>
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span>Phone Verified</span>
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                    
+                    <TabsContent value="security" className="space-y-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Lock className="h-5 w-5" />
+                            Password & Security
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Current Password</label>
+                              <Input type="password" placeholder="Enter current password" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">New Password</label>
+                              <Input type="password" placeholder="Enter new password" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Confirm New Password</label>
+                              <Input type="password" placeholder="Confirm new password" />
+                            </div>
+                            <Button>Change Password</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Two-Factor Authentication</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span>SMS Authentication</span>
+                              <Button variant="outline" size="sm">Enable</Button>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span>Email Authentication</span>
+                              <Button variant="outline" size="sm">Enable</Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                    
+                    <TabsContent value="history" className="space-y-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <History className="h-5 w-5" />
+                            Service History
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="border rounded-lg p-3">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium">Hardware Troubleshooting</span>
+                                <Badge variant="outline">Completed</Badge>
+                              </div>
+                              <p className="text-sm text-gray-600">Computer not starting - resolved with power supply replacement</p>
+                              <p className="text-xs text-gray-500 mt-1">January 5, 2025 • Duration: 45 minutes • Cost: $65</p>
+                            </div>
+                            <div className="border rounded-lg p-3">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium">Software Installation</span>
+                                <Badge variant="outline">Completed</Badge>
+                              </div>
+                              <p className="text-sm text-gray-600">Installing and configuring development environment</p>
+                              <p className="text-xs text-gray-500 mt-1">December 28, 2024 • Duration: 30 minutes • Cost: $45</p>
+                            </div>
+                            <div className="border rounded-lg p-3">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium">Network Setup</span>
+                                <Badge variant="outline">Completed</Badge>
+                              </div>
+                              <p className="text-sm text-gray-600">Wi-Fi configuration and router setup</p>
+                              <p className="text-xs text-gray-500 mt-1">December 20, 2024 • Duration: 60 minutes • Cost: $85</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                    
+                    <TabsContent value="billing" className="space-y-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <CreditCard className="h-5 w-5" />
+                            Payment Information
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Card Number</label>
+                              <Input placeholder="**** **** **** 1234" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-medium mb-1">Expiry Date</label>
+                                <Input placeholder="MM/YY" />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium mb-1">CVV</label>
+                                <Input placeholder="123" />
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Billing Address</label>
+                              <Input placeholder="Enter billing address" />
+                            </div>
+                            <Button>Update Payment Method</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Billing History</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between border-b pb-2">
+                              <div>
+                                <p className="font-medium">Hardware Support</p>
+                                <p className="text-sm text-gray-600">January 5, 2025</p>
+                              </div>
+                              <span className="font-medium">$65.00</span>
+                            </div>
+                            <div className="flex items-center justify-between border-b pb-2">
+                              <div>
+                                <p className="font-medium">Software Installation</p>
+                                <p className="text-sm text-gray-600">December 28, 2024</p>
+                              </div>
+                              <span className="font-medium">$45.00</span>
+                            </div>
+                            <div className="flex items-center justify-between border-b pb-2">
+                              <div>
+                                <p className="font-medium">Network Setup</p>
+                                <p className="text-sm text-gray-600">December 20, 2024</p>
+                              </div>
+                              <span className="font-medium">$85.00</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                    
+                    <TabsContent value="settings" className="space-y-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Bell className="h-5 w-5" />
+                            Notification Preferences
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-medium">Email Notifications</p>
+                                <p className="text-sm text-gray-600">Receive updates about your support requests</p>
+                              </div>
+                              <Button variant="outline" size="sm">Enabled</Button>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-medium">SMS Notifications</p>
+                                <p className="text-sm text-gray-600">Get text messages for urgent updates</p>
+                              </div>
+                              <Button variant="outline" size="sm">Disabled</Button>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-medium">Marketing Emails</p>
+                                <p className="text-sm text-gray-600">Receive promotional offers and updates</p>
+                              </div>
+                              <Button variant="outline" size="sm">Enabled</Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Account Actions</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <Button variant="outline" className="w-full justify-start">
+                              <Mail className="h-4 w-4 mr-2" />
+                              Download Account Data
+                            </Button>
+                            <Button variant="outline" className="w-full justify-start">
+                              <Settings className="h-4 w-4 mr-2" />
+                              Privacy Settings
+                            </Button>
+                            <Button variant="destructive" className="w-full justify-start">
+                              <User className="h-4 w-4 mr-2" />
+                              Delete Account
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                  </Tabs>
+                </DialogContent>
+              </Dialog>
+              
               <Button variant="outline" onClick={() => setLocation("/dashboard")}>
                 Dashboard
               </Button>
