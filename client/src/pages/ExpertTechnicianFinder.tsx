@@ -183,6 +183,7 @@ export default function ExpertTechnicianFinder() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [bookingSettings, setBookingSettings] = useState<BookingSettings>({ sameDayFee: "20.00", futureDayFee: "30.00" });
   const [bookingData, setBookingData] = useState<BookingData | null>(null);
+  const [selectedTechnician, setSelectedTechnician] = useState<TechnicianMatch | null>(null);
   
   const [assessment, setAssessment] = useState<IssueAssessment>({
     category: '',
@@ -472,6 +473,7 @@ export default function ExpertTechnicianFinder() {
     const bookingFee = calculateBookingFee();
     const booking: BookingData = {
       customerId: authUser.id,
+      technicianId: selectedTechnician?.id || undefined,
       categoryId: selectedCategory.id,
       description: assessment.description,
       deviceType: assessment.deviceType || null,
@@ -487,7 +489,7 @@ export default function ExpertTechnicianFinder() {
         complexity: assessment.urgency,
         urgency: assessment.urgency,
         estimatedDuration: 3,
-        requiredSkills: [],
+        requiredSkills: selectedTechnician?.skills || [],
         confidence: 75,
         recommendedSupportType: assessment.serviceType,
         reasoning: assessmentResult.aiAnalysis
@@ -926,32 +928,38 @@ export default function ExpertTechnicianFinder() {
                 </div>
               )}
 
-              {/* Matched Technicians */}
-              {assessmentResult.matchedTechnicians.length > 0 && (
-                <div>
-                  <h3 className="font-semibold mb-3">Available Technicians</h3>
-                  <div className="space-y-3">
-                    {assessmentResult.matchedTechnicians.slice(0, 3).map((tech) => (
-                      <div key={tech.id} className="border rounded-lg p-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                              <User className="h-5 w-5 text-blue-600" />
-                            </div>
-                            <div>
-                              <div className="font-medium">{tech.name}</div>
-                              <div className="text-sm text-gray-500">
-                                {tech.rating} stars • {tech.completedJobs} jobs • {tech.distance}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-medium">{tech.priceRange}</div>
-                            <div className="text-sm text-gray-500">{tech.estimatedArrival}</div>
-                          </div>
+              {/* Selected Technician */}
+              {selectedTechnician && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-blue-500" />
+                    Selected Technician
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <User className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <div className="font-medium">{selectedTechnician.name}</div>
+                        <div className="text-sm text-gray-600 flex items-center gap-2">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          {selectedTechnician.rating} ({selectedTechnician.completedJobs} jobs)
                         </div>
                       </div>
-                    ))}
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium">{selectedTechnician.priceRange}</div>
+                      <div className="text-sm text-gray-500">{selectedTechnician.estimatedArrival}</div>
+                    </div>
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-600">Distance:</span> {selectedTechnician.distance}
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Response Time:</span> {selectedTechnician.responseTime}
+                    </div>
                   </div>
                 </div>
               )}
@@ -1037,7 +1045,15 @@ export default function ExpertTechnicianFinder() {
                   <CardContent>
                     <div className="space-y-4">
                       {assessmentResult.matchedTechnicians.map((tech) => (
-                        <div key={tech.id} className="border rounded-lg p-4">
+                        <div 
+                          key={tech.id} 
+                          className={`border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md ${
+                            selectedTechnician?.id === tech.id 
+                              ? 'border-blue-500 bg-blue-50' 
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                          onClick={() => setSelectedTechnician(tech)}
+                        >
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">
                               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
@@ -1054,6 +1070,9 @@ export default function ExpertTechnicianFinder() {
                             <div className="text-right">
                               <div className="font-medium">{tech.priceRange}</div>
                               <div className="text-sm text-gray-500">{tech.estimatedArrival}</div>
+                              {selectedTechnician?.id === tech.id && (
+                                <CheckCircle className="h-5 w-5 text-blue-500 mt-1" />
+                              )}
                             </div>
                           </div>
                           <div className="grid grid-cols-2 gap-4 text-sm">
@@ -1081,8 +1100,11 @@ export default function ExpertTechnicianFinder() {
                 </Card>
 
                 <div className="flex justify-end">
-                  <Button onClick={() => { setShowResults(false); setCurrentStep(3); }}>
-                    Continue to Booking
+                  <Button 
+                    onClick={() => { setShowResults(false); setCurrentStep(3); }}
+                    disabled={!selectedTechnician}
+                  >
+                    {selectedTechnician ? 'Continue to Booking' : 'Select a Technician'}
                   </Button>
                 </div>
               </div>
