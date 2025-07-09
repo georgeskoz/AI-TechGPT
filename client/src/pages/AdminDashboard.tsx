@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,9 +27,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import Navigation from "@/components/Navigation";
 import { 
   Users, 
   Settings, 
@@ -40,9 +42,6 @@ import {
   Shield,
   Clock,
   Star,
-  MapPin,
-  Phone,
-  Mail,
   Search,
   Filter,
   MoreHorizontal,
@@ -58,1038 +57,600 @@ import {
   Target,
   Zap,
   Award,
-  Globe
+  Globe,
+  UserPlus,
+  MessageSquare,
+  Bell,
+  LogOut,
+  ChevronDown,
+  Plus,
+  Download,
+  Upload,
+  RefreshCw,
+  FileText,
+  Headphones,
+  Wrench,
+  CreditCard,
+  Building,
+  PhoneCall,
+  Mail,
+  MapPin,
+  Wifi,
+  Database,
+  Server,
+  Moon,
+  Sun,
+  Menu,
+  X
 } from "lucide-react";
+
+interface AdminUser {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  department: string;
+  avatar?: string;
+  isActive: boolean;
+  lastLogin: string;
+  permissions: string[];
+}
 
 interface DashboardStats {
   totalUsers: number;
-  activeTechnicians: number;
+  totalServiceProviders?: number;
+  totalTechnicians?: number;
+  activeJobs: number;
   completedJobs: number;
   totalRevenue: number;
-  pendingDisputes: number;
-  averageRating: number;
-  responseTime: string;
-  uptime: string;
+  pendingDisputes?: number;
+  disputesClosed?: number;
+  averageRating?: number;
+  avgRating?: number;
+  responseTime?: string;
+  systemUptime?: string;
+  monthlyGrowth?: number;
 }
 
-interface User {
-  id: number;
-  username: string;
-  email: string;
-  fullName?: string;
-  status?: string;
-  joinDate?: string;
-  totalSpent?: number;
-  completedJobs?: number;
-  createdAt?: string;
+interface SystemMetrics {
+  cpu: number;
+  memory: number;
+  disk: number;
+  network: number;
+  activeConnections: number;
+  totalRequests: number;
+  errorRate: number;
 }
 
-interface Technician {
+interface RecentActivity {
   id: number;
-  businessName?: string;
-  contactPerson?: string;
-  email: string;
-  skills?: string[];
-  specialties?: string[];
-  rating?: number;
-  completedJobs?: number;
-  earnings?: number;
-  isActive?: boolean;
-  status?: string;
-  serviceArea?: string;
-  location?: string;
-  joinDate?: string;
-  verification?: string;
-  createdAt?: string;
-}
-
-interface Job {
-  id: number;
-  customerName: string;
-  technicianName: string;
-  category: string;
+  type: string;
+  description: string;
+  timestamp: string;
+  user: string;
   status: string;
-  amount: number;
-  createdAt: string;
-  completedAt?: string;
-  rating?: number;
-}
-
-interface Dispute {
-  id: number;
-  jobId: number;
-  customerName: string;
-  technicianName: string;
-  issue: string;
-  status: string;
-  createdAt: string;
-  priority: string;
 }
 
 export default function AdminDashboard() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentAdmin, setCurrentAdmin] = useState<AdminUser | null>(null);
+  const [activeTab, setActiveTab] = useState("overview");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [selectedTechnician, setSelectedTechnician] = useState<Technician | null>(null);
-  const [, setLocation] = useLocation();
+  const [darkMode, setDarkMode] = useState(false);
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
 
-  // Fetch dashboard stats
-  const { data: stats } = useQuery<DashboardStats>({
+  // Mock current admin user - in real app, this would come from auth
+  useEffect(() => {
+    setCurrentAdmin({
+      id: 1,
+      firstName: "Sarah",
+      lastName: "Johnson",
+      email: "sarah.johnson@techgpt.com",
+      role: "super_admin",
+      department: "operations",
+      avatar: "/api/placeholder/40/40",
+      isActive: true,
+      lastLogin: new Date().toISOString(),
+      permissions: ["all"]
+    });
+  }, []);
+
+  // Fetch dashboard data
+  const { data: dashboardStats, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/admin/dashboard"],
-    queryFn: async () => {
-      const response = await fetch("/api/admin/dashboard");
-      const data = await response.json();
-      return data.stats;
-    }
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
-  // Fetch users
-  const { data: users = [] } = useQuery<User[]>({
+  const { data: systemMetrics, isLoading: metricsLoading } = useQuery({
+    queryKey: ["/api/admin/system-metrics"],
+    refetchInterval: 5000, // Refresh every 5 seconds
+  });
+
+  const { data: recentActivity, isLoading: activityLoading } = useQuery({
+    queryKey: ["/api/admin/recent-activity"],
+    refetchInterval: 10000, // Refresh every 10 seconds
+  });
+
+  const { data: adminUsers, isLoading: adminUsersLoading } = useQuery({
     queryKey: ["/api/admin/users"],
   });
 
-  // Fetch technicians
-  const { data: technicians = [] } = useQuery<Technician[]>({
-    queryKey: ["/api/admin/technicians"],
-  });
-
-  // Fetch jobs
-  const { data: jobs = [] } = useQuery<Job[]>({
-    queryKey: ["/api/admin/jobs"],
-  });
-
-  // Fetch disputes
-  const { data: disputes = [] } = useQuery<Dispute[]>({
-    queryKey: ["/api/admin/disputes"],
-  });
-
-  // Fetch complaints
-  const { data: complaints = [] } = useQuery({
-    queryKey: ["/api/admin/complaints"],
-  });
-
-  // Fetch pending technician approvals
-  const { data: pendingApprovals = [] } = useQuery({
-    queryKey: ["/api/admin/technicians/pending-approvals"],
-  });
-
-  // Fetch pending background checks
-  const { data: pendingBackgroundChecks = [] } = useQuery({
-    queryKey: ["/api/admin/background-checks/pending"],
-  });
-
-  // Update user status mutation
-  const updateUserStatusMutation = useMutation({
-    mutationFn: async ({ userId, status }: { userId: number; status: string }) => {
-      const response = await fetch(`/api/admin/users/${userId}/status`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status })
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
-      toast({ title: "Success", description: "User status updated successfully" });
-    }
-  });
-
-  // Update technician status mutation
-  const updateTechnicianStatusMutation = useMutation({
-    mutationFn: async ({ technicianId, status }: { technicianId: number; status: string }) => {
-      const response = await fetch(`/api/admin/technicians/${technicianId}/status`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status })
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/technicians"] });
-      toast({ title: "Success", description: "Technician status updated successfully" });
-    }
-  });
-
-  // Approve technician mutation
-  const approveTechnicianMutation = useMutation({
-    mutationFn: async ({ technicianId, notes }: { technicianId: number; notes?: string }) => {
-      const response = await fetch(`/api/admin/technicians/${technicianId}/approve`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ notes })
-      });
-      if (!response.ok) throw new Error("Failed to approve technician");
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/technicians"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/technicians/pending-approvals"] });
-      toast({ 
-        title: "Success", 
-        description: "Technician approved successfully",
-        variant: "default"
-      });
-    },
-    onError: (error: Error) => {
-      toast({ 
-        title: "Error", 
-        description: error.message || "Failed to approve technician",
-        variant: "destructive"
-      });
-    }
-  });
-
-  // Reject technician mutation
-  const rejectTechnicianMutation = useMutation({
-    mutationFn: async ({ technicianId, reason }: { technicianId: number; reason: string }) => {
-      const response = await fetch(`/api/admin/technicians/${technicianId}/reject`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reason })
-      });
-      if (!response.ok) throw new Error("Failed to reject technician");
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/technicians"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/technicians/pending-approvals"] });
-      toast({ 
-        title: "Success", 
-        description: "Technician rejected",
-        variant: "default"
-      });
-    },
-    onError: (error: Error) => {
-      toast({ 
-        title: "Error", 
-        description: error.message || "Failed to reject technician",
-        variant: "destructive"
-      });
-    }
-  });
-
-  // Update complaint status mutation
-  const updateComplaintStatusMutation = useMutation({
-    mutationFn: async ({ complaintId, status, notes }: { complaintId: number; status: string; notes?: string }) => {
-      const response = await fetch(`/api/admin/complaints/${complaintId}/status`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status, notes })
-      });
-      if (!response.ok) throw new Error("Failed to update complaint status");
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/complaints"] });
-      toast({ 
-        title: "Success", 
-        description: "Complaint status updated successfully",
-        variant: "default"
-      });
-    }
-  });
-
-  // Resolve complaint mutation
-  const resolveComplaintMutation = useMutation({
-    mutationFn: async ({ complaintId, resolution }: { complaintId: number; resolution: string }) => {
-      const response = await fetch(`/api/admin/complaints/${complaintId}/resolve`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resolution })
-      });
-      if (!response.ok) throw new Error("Failed to resolve complaint");
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/complaints"] });
-      toast({ 
-        title: "Success", 
-        description: "Complaint resolved successfully",
-        variant: "default"
-      });
-    }
-  });
-
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      active: "bg-green-100 text-green-800",
-      inactive: "bg-gray-100 text-gray-800",
-      suspended: "bg-red-100 text-red-800",
-      pending: "bg-yellow-100 text-yellow-800",
-      verified: "bg-blue-100 text-blue-800",
-    };
-    return variants[status as keyof typeof variants] || "bg-gray-100 text-gray-800";
+  // Mock data for demonstration
+  const mockStats: DashboardStats = {
+    totalUsers: 2847,
+    totalServiceProviders: 342,
+    activeJobs: 28,
+    completedJobs: 1593,
+    totalRevenue: 284750,
+    pendingDisputes: 3,
+    averageRating: 4.8,
+    responseTime: "2.3 min",
+    systemUptime: "99.9%",
+    monthlyGrowth: 12.5
   };
 
-  const filteredUsers = users.filter(user => {
-    const status = user.status || "active";
-    const fullName = user.fullName || "Unknown";
-    
-    return (filterStatus === "all" || status === filterStatus) &&
-      (user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       fullName.toLowerCase().includes(searchTerm.toLowerCase()));
-  });
+  const mockMetrics: SystemMetrics = {
+    cpu: 45,
+    memory: 62,
+    disk: 38,
+    network: 73,
+    activeConnections: 1247,
+    totalRequests: 45782,
+    errorRate: 0.02
+  };
 
-  const filteredTechnicians = technicians.filter(tech => {
-    const name = tech.businessName || tech.contactPerson || "Unknown";
-    const status = tech.status || (tech.isActive ? "active" : "inactive");
-    const skills = tech.skills || tech.specialties || [];
-    
-    return (filterStatus === "all" || status === filterStatus) &&
-      (name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       tech.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase())));
-  });
+  const mockActivity: RecentActivity[] = [
+    {
+      id: 1,
+      type: "user_registration",
+      description: "New customer registration: john.smith@email.com",
+      timestamp: "2 minutes ago",
+      user: "System",
+      status: "success"
+    },
+    {
+      id: 2,
+      type: "service_provider_approved",
+      description: "Service provider approved: TechFix Solutions",
+      timestamp: "5 minutes ago",
+      user: "Admin Sarah",
+      status: "success"
+    },
+    {
+      id: 3,
+      type: "payment_processed",
+      description: "Payment processed: $85.00 for Job #1847",
+      timestamp: "12 minutes ago",
+      user: "System",
+      status: "success"
+    },
+    {
+      id: 4,
+      type: "dispute_created",
+      description: "New dispute created for Job #1823",
+      timestamp: "18 minutes ago",
+      user: "Customer",
+      status: "warning"
+    },
+    {
+      id: 5,
+      type: "system_backup",
+      description: "Daily system backup completed",
+      timestamp: "1 hour ago",
+      user: "System",
+      status: "success"
+    }
+  ];
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation 
-        title="Admin Dashboard" 
-        backTo="/admin-home" 
-      />
-      
-      {/* Admin Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold text-gray-900">Platform Management</h1>
-              <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                <Shield className="h-3 w-3 mr-1" />
-                Administrator
+  const stats = dashboardStats?.stats || mockStats;
+  const metrics = systemMetrics || mockMetrics;
+  const activities = recentActivity || mockActivity;
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "success": return "bg-green-100 text-green-800";
+      case "warning": return "bg-yellow-100 text-yellow-800";
+      case "error": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "user_registration": return <UserPlus className="h-4 w-4" />;
+      case "service_provider_approved": return <CheckCircle className="h-4 w-4" />;
+      case "payment_processed": return <CreditCard className="h-4 w-4" />;
+      case "dispute_created": return <AlertTriangle className="h-4 w-4" />;
+      case "system_backup": return <Database className="h-4 w-4" />;
+      default: return <Activity className="h-4 w-4" />;
+    }
+  };
+
+  const sidebarItems = [
+    { id: "overview", label: "Overview", icon: BarChart3 },
+    { id: "users", label: "Users", icon: Users },
+    { id: "service-providers", label: "Service Providers", icon: Wrench },
+    { id: "jobs", label: "Jobs", icon: Briefcase },
+    { id: "disputes", label: "Disputes", icon: AlertTriangle },
+    { id: "payments", label: "Payments", icon: CreditCard },
+    { id: "system", label: "System", icon: Server },
+    { id: "settings", label: "Settings", icon: Settings },
+  ];
+
+  const QuickActions = () => (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <Button onClick={() => setActiveTab("users")} className="h-20 flex-col gap-2">
+        <Users className="h-6 w-6" />
+        <span className="text-sm">Manage Users</span>
+      </Button>
+      <Button onClick={() => setActiveTab("service-providers")} className="h-20 flex-col gap-2" variant="outline">
+        <Wrench className="h-6 w-6" />
+        <span className="text-sm">Service Providers</span>
+      </Button>
+      <Button onClick={() => setActiveTab("jobs")} className="h-20 flex-col gap-2" variant="outline">
+        <Briefcase className="h-6 w-6" />
+        <span className="text-sm">Active Jobs</span>
+      </Button>
+      <Button onClick={() => setActiveTab("disputes")} className="h-20 flex-col gap-2" variant="outline">
+        <AlertTriangle className="h-6 w-6" />
+        <span className="text-sm">Resolve Disputes</span>
+      </Button>
+    </div>
+  );
+
+  const StatsCards = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-600 text-sm font-medium">Total Users</p>
+              <p className="text-3xl font-bold text-blue-900">{(stats.totalUsers || 0).toLocaleString()}</p>
+              <p className="text-xs text-blue-600 mt-1">+{(stats.monthlyGrowth || 12.5)}% this month</p>
+            </div>
+            <div className="p-3 bg-blue-500 rounded-full">
+              <Users className="h-6 w-6 text-white" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-600 text-sm font-medium">Service Providers</p>
+              <p className="text-3xl font-bold text-green-900">{(stats.totalServiceProviders || stats.totalTechnicians || 0).toLocaleString()}</p>
+              <p className="text-xs text-green-600 mt-1">Active service providers</p>
+            </div>
+            <div className="p-3 bg-green-500 rounded-full">
+              <Wrench className="h-6 w-6 text-white" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-purple-600 text-sm font-medium">Revenue</p>
+              <p className="text-3xl font-bold text-purple-900">${(stats.totalRevenue || 0).toLocaleString()}</p>
+              <p className="text-xs text-purple-600 mt-1">Monthly total</p>
+            </div>
+            <div className="p-3 bg-purple-500 rounded-full">
+              <DollarSign className="h-6 w-6 text-white" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-orange-600 text-sm font-medium">Completed Jobs</p>
+              <p className="text-3xl font-bold text-orange-900">{(stats.completedJobs || 0).toLocaleString()}</p>
+              <p className="text-xs text-orange-600 mt-1">★ {(stats.averageRating || stats.avgRating || 4.8)} avg rating</p>
+            </div>
+            <div className="p-3 bg-orange-500 rounded-full">
+              <Briefcase className="h-6 w-6 text-white" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  const SystemHealth = () => (
+    <Card className="mb-8">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Activity className="h-5 w-5" />
+          System Health
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">CPU Usage</span>
+              <span className="text-sm text-gray-600">{metrics.cpu}%</span>
+            </div>
+            <Progress value={metrics.cpu} className="h-2" />
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Memory</span>
+              <span className="text-sm text-gray-600">{metrics.memory}%</span>
+            </div>
+            <Progress value={metrics.memory} className="h-2" />
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Disk Space</span>
+              <span className="text-sm text-gray-600">{metrics.disk}%</span>
+            </div>
+            <Progress value={metrics.disk} className="h-2" />
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Network</span>
+              <span className="text-sm text-gray-600">{metrics.network}%</span>
+            </div>
+            <Progress value={metrics.network} className="h-2" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-green-600">{metrics.activeConnections.toLocaleString()}</p>
+            <p className="text-sm text-gray-600">Active Connections</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-bold text-blue-600">{metrics.totalRequests.toLocaleString()}</p>
+            <p className="text-sm text-gray-600">Total Requests</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-bold text-red-600">{metrics.errorRate}%</p>
+            <p className="text-sm text-gray-600">Error Rate</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const RecentActivityCard = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Clock className="h-5 w-5" />
+          Recent Activity
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {activities.map((activity) => (
+            <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50">
+              <div className={`p-2 rounded-full ${getStatusColor(activity.status)}`}>
+                {getActivityIcon(activity.type)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900">{activity.description}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-gray-500">{activity.user}</span>
+                  <span className="text-xs text-gray-400">•</span>
+                  <span className="text-xs text-gray-500">{activity.timestamp}</span>
+                </div>
+              </div>
+              <Badge variant="outline" className={getStatusColor(activity.status)}>
+                {activity.status}
               </Badge>
             </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="lg:hidden"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-blue-600 rounded-lg">
+                <Shield className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">TechGPT Admin</h1>
+                <p className="text-sm text-gray-600">Platform Management Console</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-2 text-sm">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span className="text-gray-600">System Status: </span>
+              <span className="font-medium text-green-600">Operational</span>
+            </div>
             
-            <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm">
+              <Bell className="h-4 w-4" />
+            </Button>
+            
+            <Button variant="ghost" size="sm" onClick={() => setDarkMode(!darkMode)}>
+              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+
+            <div className="flex items-center gap-2">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={currentAdmin?.avatar} />
+                <AvatarFallback>
+                  {currentAdmin?.firstName?.[0]}{currentAdmin?.lastName?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div className="hidden md:block">
+                <p className="text-sm font-medium">{currentAdmin?.firstName} {currentAdmin?.lastName}</p>
+                <p className="text-xs text-gray-600 capitalize">{currentAdmin?.role?.replace('_', ' ')}</p>
+              </div>
+              <ChevronDown className="h-4 w-4 text-gray-400" />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="flex">
+        {/* Sidebar */}
+        <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <div className="flex flex-col h-full">
+            <div className="p-6 border-b border-gray-700">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-white">Admin Panel</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="lg:hidden text-white"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            
+            <nav className="flex-1 px-4 py-6 space-y-2">
+              {sidebarItems.map((item) => (
+                <Button
+                  key={item.id}
+                  variant={activeTab === item.id ? "secondary" : "ghost"}
+                  className={`w-full justify-start ${
+                    activeTab === item.id 
+                      ? 'bg-gray-800 text-white' 
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                  }`}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setSidebarOpen(false);
+                  }}
+                >
+                  <item.icon className="h-4 w-4 mr-3" />
+                  {item.label}
+                </Button>
+              ))}
+            </nav>
+
+            <div className="p-4 border-t border-gray-700">
               <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setLocation("/admin-earnings")}
-                className="flex items-center gap-2"
+                variant="ghost" 
+                className="w-full justify-start text-gray-300 hover:bg-gray-800 hover:text-white"
+                onClick={() => setLocation("/")}
               >
-                <DollarSign className="h-4 w-4" />
+                <Home className="h-4 w-4 mr-3" />
+                Back to Home
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-gray-300 hover:bg-gray-800 hover:text-white"
+                onClick={() => setLocation("/admin-earnings")}
+              >
+                <DollarSign className="h-4 w-4 mr-3" />
                 Earnings Settings
               </Button>
             </div>
           </div>
-        </div>
-      </div>
+        </aside>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-100 text-sm font-medium">Total Users</p>
-                  <p className="text-3xl font-bold">{stats?.totalUsers || 0}</p>
-                </div>
-                <div className="bg-blue-400 p-3 rounded-lg">
-                  <Users className="h-6 w-6" />
-                </div>
+        {/* Main Content */}
+        <main className="flex-1 p-6 lg:ml-0">
+          {activeTab === "overview" && (
+            <div>
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Dashboard Overview</h2>
+                <p className="text-gray-600">Welcome back, {currentAdmin?.firstName}! Here's what's happening with your platform.</p>
               </div>
-            </CardContent>
-          </Card>
 
-          <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-100 text-sm font-medium">Active Technicians</p>
-                  <p className="text-3xl font-bold">{stats?.activeTechnicians || 0}</p>
-                </div>
-                <div className="bg-green-400 p-3 rounded-lg">
-                  <Settings className="h-6 w-6" />
-                </div>
+              <QuickActions />
+              <StatsCards />
+              <SystemHealth />
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <RecentActivityCard />
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5" />
+                      Quick Stats
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Active Jobs</span>
+                        <Badge variant="outline">{stats.activeJobs || 0}</Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Pending Disputes</span>
+                        <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
+                          {stats.pendingDisputes || stats.disputesClosed || 0}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Average Response Time</span>
+                        <Badge variant="outline">{stats.responseTime || "2.3 min"}</Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">System Uptime</span>
+                        <Badge variant="outline" className="bg-green-100 text-green-800">
+                          {stats.systemUptime || "99.9%"}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-purple-100 text-sm font-medium">Completed Jobs</p>
-                  <p className="text-3xl font-bold">{stats?.completedJobs || 0}</p>
-                </div>
-                <div className="bg-purple-400 p-3 rounded-lg">
-                  <Briefcase className="h-6 w-6" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-orange-100 text-sm font-medium">Total Revenue</p>
-                  <p className="text-3xl font-bold">${(stats?.totalRevenue || 0).toLocaleString()}</p>
-                </div>
-                <div className="bg-orange-400 p-3 rounded-lg">
-                  <DollarSign className="h-6 w-6" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="flex items-center justify-center mb-2">
-                <div className="bg-red-100 p-3 rounded-lg">
-                  <AlertTriangle className="h-6 w-6 text-red-600" />
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-red-600">{stats?.pendingDisputes || 0}</p>
-              <p className="text-sm text-gray-600">Pending Disputes</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="flex items-center justify-center mb-2">
-                <div className="bg-yellow-100 p-3 rounded-lg">
-                  <Star className="h-6 w-6 text-yellow-600" />
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-yellow-600">{stats?.averageRating || 0}</p>
-              <p className="text-sm text-gray-600">Average Rating</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="flex items-center justify-center mb-2">
-                <div className="bg-blue-100 p-3 rounded-lg">
-                  <Clock className="h-6 w-6 text-blue-600" />
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-blue-600">{stats?.responseTime || "2m"}</p>
-              <p className="text-sm text-gray-600">Avg Response Time</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="flex items-center justify-center mb-2">
-                <div className="bg-green-100 p-3 rounded-lg">
-                  <Activity className="h-6 w-6 text-green-600" />
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-green-600">{stats?.uptime || "99.9%"}</p>
-              <p className="text-sm text-gray-600">System Uptime</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Content Tabs */}
-        <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="users" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Users
-            </TabsTrigger>
-            <TabsTrigger value="technicians" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Technicians
-              {pendingApprovals.length > 0 && (
-                <Badge variant="destructive" className="ml-1 text-xs">
-                  {pendingApprovals.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="jobs" className="flex items-center gap-2">
-              <Briefcase className="h-4 w-4" />
-              Jobs
-            </TabsTrigger>
-            <TabsTrigger value="complaints" className="flex items-center gap-2">
-              <Shield className="h-4 w-4" />
-              Complaints
-              {complaints.filter((c: any) => c.status === 'pending').length > 0 && (
-                <Badge variant="destructive" className="ml-1 text-xs">
-                  {complaints.filter((c: any) => c.status === 'pending').length}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="disputes" className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4" />
-              Disputes
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Search and Filter Bar */}
-          <div className="flex items-center gap-4 bg-white p-4 rounded-lg border">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search users, technicians, or jobs..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
             </div>
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-48">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="suspended">Suspended</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="verified">Verified</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          )}
 
-          {/* Users Tab */}
-          <TabsContent value="users">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    User Management
-                  </span>
-                  <Badge variant="outline">{filteredUsers.length} users</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>User</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Jobs Completed</TableHead>
-                        <TableHead>Total Spent</TableHead>
-                        <TableHead>Join Date</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredUsers.map((user) => {
-                        const fullName = user.fullName || user.username || "Unknown";
-                        const status = user.status || "active";
-                        const completedJobs = user.completedJobs || 0;
-                        const totalSpent = user.totalSpent || 0;
-                        const joinDate = user.joinDate || user.createdAt || "Unknown";
-                        
-                        return (
-                          <TableRow key={user.id}>
-                            <TableCell>
-                              <div>
-                                <div className="font-medium">{fullName}</div>
-                                <div className="text-sm text-gray-500">{user.email}</div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge className={getStatusBadge(status)}>
-                                {status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{completedJobs}</TableCell>
-                            <TableCell>${totalSpent.toLocaleString()}</TableCell>
-                            <TableCell>{joinDate}</TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Button size="sm" variant="outline">
-                                      <Eye className="h-4 w-4" />
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent>
-                                    <DialogHeader>
-                                      <DialogTitle>User Details</DialogTitle>
-                                    </DialogHeader>
-                                    <div className="space-y-4">
-                                      <div>
-                                        <label className="text-sm font-medium">Full Name</label>
-                                        <p className="text-sm text-gray-600">{fullName}</p>
-                                      </div>
-                                      <div>
-                                        <label className="text-sm font-medium">Username</label>
-                                        <p className="text-sm text-gray-600">{user.username}</p>
-                                      </div>
-                                      <div>
-                                        <label className="text-sm font-medium">Email</label>
-                                        <p className="text-sm text-gray-600">{user.email}</p>
-                                      </div>
-                                      <div>
-                                        <label className="text-sm font-medium">Status</label>
-                                        <Badge className={getStatusBadge(status)}>
-                                          {status}
-                                        </Badge>
-                                      </div>
-                                    </div>
-                                  </DialogContent>
-                                </Dialog>
-                                
-                                <Select
-                                  value={status}
-                                  onValueChange={(newStatus) => 
-                                    updateUserStatusMutation.mutate({ userId: user.id, status: newStatus })
-                                  }
-                                >
-                                  <SelectTrigger className="w-32">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="inactive">Inactive</SelectItem>
-                                    <SelectItem value="suspended">Suspended</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Technicians Tab */}
-          <TabsContent value="technicians">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Settings className="h-5 w-5" />
-                    Technician Management
-                  </span>
-                  <Badge variant="outline">{filteredTechnicians.length} technicians</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Technician</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Rating</TableHead>
-                        <TableHead>Completed Jobs</TableHead>
-                        <TableHead>Earnings</TableHead>
-                        <TableHead>Skills</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredTechnicians.map((technician) => {
-                        const name = technician.businessName || technician.contactPerson || "Unknown";
-                        const status = technician.status || (technician.isActive ? "active" : "inactive");
-                        const location = technician.serviceArea || technician.location || "Not specified";
-                        const skills = technician.skills || technician.specialties || [];
-                        const rating = technician.rating || 0;
-                        const completedJobs = technician.completedJobs || 0;
-                        const earnings = technician.earnings || 0;
-                        
-                        return (
-                          <TableRow key={technician.id}>
-                            <TableCell>
-                              <div>
-                                <div className="font-medium">{name}</div>
-                                <div className="text-sm text-gray-500 flex items-center gap-1">
-                                  <MapPin className="h-3 w-3" />
-                                  {location}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge className={getStatusBadge(status)}>
-                                {status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1">
-                                <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                                {typeof rating === 'number' ? rating.toFixed(1) : '0.0'}
-                              </div>
-                            </TableCell>
-                            <TableCell>{completedJobs}</TableCell>
-                            <TableCell>${earnings.toLocaleString()}</TableCell>
-                            <TableCell>
-                              <div className="flex flex-wrap gap-1">
-                                {skills.slice(0, 2).map((skill, index) => (
-                                  <Badge key={index} variant="outline" className="text-xs">
-                                    {skill}
-                                  </Badge>
-                                ))}
-                                {skills.length > 2 && (
-                                  <Badge variant="outline" className="text-xs">
-                                    +{skills.length - 2}
-                                  </Badge>
-                                )}
-                                {skills.length === 0 && (
-                                  <Badge variant="outline" className="text-xs text-gray-400">
-                                    No skills listed
-                                  </Badge>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Button size="sm" variant="outline">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                                
-                                <Select
-                                  value={status}
-                                  onValueChange={(newStatus) => 
-                                    updateTechnicianStatusMutation.mutate({ 
-                                      technicianId: technician.id, 
-                                      status: newStatus 
-                                    })
-                                  }
-                                >
-                                  <SelectTrigger className="w-32">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="inactive">Inactive</SelectItem>
-                                    <SelectItem value="suspended">Suspended</SelectItem>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="verified">Verified</SelectItem>
-                                    <SelectItem value="approved">Approved</SelectItem>
-                                    <SelectItem value="rejected">Rejected</SelectItem>
-                                  </SelectContent>
-                                </Select>
-
-                                {/* Approval/Rejection Actions */}
-                                {status === 'pending' && (
-                                  <>
-                                    <Button
-                                      size="sm"
-                                      variant="default"
-                                      onClick={() => approveTechnicianMutation.mutate({ 
-                                        technicianId: technician.id, 
-                                        notes: "Approved by admin" 
-                                      })}
-                                      disabled={approveTechnicianMutation.isPending}
-                                      className="bg-green-600 hover:bg-green-700"
-                                    >
-                                      <CheckCircle className="h-4 w-4 mr-1" />
-                                      Approve
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="destructive"
-                                      onClick={() => rejectTechnicianMutation.mutate({ 
-                                        technicianId: technician.id, 
-                                        reason: "Rejected by admin" 
-                                      })}
-                                      disabled={rejectTechnicianMutation.isPending}
-                                    >
-                                      <XCircle className="h-4 w-4 mr-1" />
-                                      Reject
-                                    </Button>
-                                  </>
-                                )}
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Jobs Tab */}
-          <TabsContent value="jobs">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Briefcase className="h-5 w-5" />
-                    Job Management
-                  </span>
-                  <Badge variant="outline">{jobs.length} jobs</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Job ID</TableHead>
-                        <TableHead>Customer</TableHead>
-                        <TableHead>Technician</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Created</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {jobs.map((job) => (
-                        <TableRow key={job.id}>
-                          <TableCell>#{job.id}</TableCell>
-                          <TableCell>{job.customerName}</TableCell>
-                          <TableCell>{job.technicianName}</TableCell>
-                          <TableCell>{job.category}</TableCell>
-                          <TableCell>
-                            <Badge className={getStatusBadge(job.status)}>
-                              {job.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>${job.amount}</TableCell>
-                          <TableCell>{job.createdAt}</TableCell>
-                          <TableCell>
-                            <Button size="sm" variant="outline">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Complaints Tab */}
-          <TabsContent value="complaints">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Shield className="h-5 w-5" />
-                    Complaint Management
-                  </span>
-                  <Badge variant="outline" className="bg-orange-50 text-orange-700">
-                    {complaints.length} complaints
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-4 flex items-center gap-4">
-                  <div className="flex-1">
-                    <Input
-                      placeholder="Search complaints..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="max-w-sm"
-                    />
-                  </div>
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Filter by status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Statuses</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="investigating">Investigating</SelectItem>
-                      <SelectItem value="resolved">Resolved</SelectItem>
-                      <SelectItem value="closed">Closed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Complaint ID</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Complainant</TableHead>
-                        <TableHead>Against</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Priority</TableHead>
-                        <TableHead>Created</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {complaints.map((complaint: any) => (
-                        <TableRow key={complaint.id}>
-                          <TableCell>#{complaint.id}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{complaint.complaintType}</Badge>
-                          </TableCell>
-                          <TableCell>{complaint.complainantName || 'Anonymous'}</TableCell>
-                          <TableCell>{complaint.againstTechnicianName || 'N/A'}</TableCell>
-                          <TableCell>
-                            <Badge className={getStatusBadge(complaint.status)}>
-                              {complaint.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={complaint.priority === 'high' ? 'destructive' : complaint.priority === 'medium' ? 'default' : 'secondary'}>
-                              {complaint.priority}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{new Date(complaint.createdAt).toLocaleDateString()}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button size="sm" variant="outline">
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-2xl">
-                                  <DialogHeader>
-                                    <DialogTitle>Complaint Details</DialogTitle>
-                                  </DialogHeader>
-                                  <div className="space-y-4">
-                                    <div>
-                                      <label className="text-sm font-medium">Complaint Type</label>
-                                      <p className="text-sm text-gray-600">{complaint.complaintType}</p>
-                                    </div>
-                                    <div>
-                                      <label className="text-sm font-medium">Description</label>
-                                      <p className="text-sm text-gray-600">{complaint.description}</p>
-                                    </div>
-                                    <div>
-                                      <label className="text-sm font-medium">Evidence</label>
-                                      <p className="text-sm text-gray-600">{complaint.evidence || 'No evidence provided'}</p>
-                                    </div>
-                                    <div className="flex gap-4">
-                                      <Select
-                                        value={complaint.status}
-                                        onValueChange={(newStatus) => 
-                                          updateComplaintStatusMutation.mutate({ 
-                                            complaintId: complaint.id, 
-                                            status: newStatus,
-                                            notes: "Status updated by admin"
-                                          })
-                                        }
-                                      >
-                                        <SelectTrigger className="w-48">
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="pending">Pending</SelectItem>
-                                          <SelectItem value="investigating">Investigating</SelectItem>
-                                          <SelectItem value="resolved">Resolved</SelectItem>
-                                          <SelectItem value="closed">Closed</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                      {complaint.status !== 'resolved' && (
-                                        <Button
-                                          onClick={() => resolveComplaintMutation.mutate({ 
-                                            complaintId: complaint.id, 
-                                            resolution: "Resolved by admin review"
-                                          })}
-                                          disabled={resolveComplaintMutation.isPending}
-                                          variant="default"
-                                          className="bg-green-600 hover:bg-green-700"
-                                        >
-                                          Mark Resolved
-                                        </Button>
-                                      )}
-                                    </div>
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Disputes Tab */}
-          <TabsContent value="disputes">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5" />
-                    Dispute Management
-                  </span>
-                  <Badge variant="outline" className="bg-red-50 text-red-700">
-                    {disputes.length} disputes
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Dispute ID</TableHead>
-                        <TableHead>Job ID</TableHead>
-                        <TableHead>Customer</TableHead>
-                        <TableHead>Technician</TableHead>
-                        <TableHead>Issue</TableHead>
-                        <TableHead>Priority</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Created</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {disputes.map((dispute) => (
-                        <TableRow key={dispute.id}>
-                          <TableCell>#{dispute.id}</TableCell>
-                          <TableCell>#{dispute.jobId}</TableCell>
-                          <TableCell>{dispute.customerName}</TableCell>
-                          <TableCell>{dispute.technicianName}</TableCell>
-                          <TableCell className="max-w-xs truncate">{dispute.issue}</TableCell>
-                          <TableCell>
-                            <Badge 
-                              className={
-                                dispute.priority === "high" ? "bg-red-100 text-red-800" :
-                                dispute.priority === "medium" ? "bg-yellow-100 text-yellow-800" :
-                                "bg-green-100 text-green-800"
-                              }
-                            >
-                              {dispute.priority}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={getStatusBadge(dispute.status)}>
-                              {dispute.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{dispute.createdAt}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button size="sm" variant="outline">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              {dispute.status === "pending" && (
-                                <Button size="sm" variant="outline">
-                                  <CheckCircle className="h-4 w-4 text-green-600" />
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+          {activeTab !== "overview" && (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Settings className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {sidebarItems.find(item => item.id === activeTab)?.label} Panel
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Comprehensive {sidebarItems.find(item => item.id === activeTab)?.label.toLowerCase()} management tools will be available here.
+              </p>
+              <Button onClick={() => setActiveTab("overview")}>
+                Back to Overview
+              </Button>
+            </div>
+          )}
+        </main>
       </div>
+
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
     </div>
   );
 }
