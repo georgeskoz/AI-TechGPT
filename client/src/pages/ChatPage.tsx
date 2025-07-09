@@ -13,7 +13,7 @@ import UsernameModal from '@/components/UsernameModal';
 import ErrorToast from '@/components/ErrorToast';
 import DomainSelector from '@/components/DomainSelector';
 import SupportOptionsWidget from '@/components/SupportOptionsWidget';
-import DiagnosticChecklist from '@/components/DiagnosticChecklist';
+
 
 export default function ChatPage() {
   // State for username and storage
@@ -21,7 +21,6 @@ export default function ChatPage() {
   const [showUsernameModal, setShowUsernameModal] = useState(false);
   const [showMobileTopics, setShowMobileTopics] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
-  const [showDiagnosticChecklist, setShowDiagnosticChecklist] = useState(false);
   const [lastUserMessage, setLastUserMessage] = useState<string>('');
   const [, setLocation] = useLocation();
   
