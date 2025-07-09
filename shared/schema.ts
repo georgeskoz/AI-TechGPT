@@ -370,6 +370,91 @@ export const supportMessages = pgTable("support_messages", {
   timestamp: timestamp("timestamp").defaultNow().notNull(),
 });
 
+// Disputes table for tracking customer and technician disputes
+export const disputes = pgTable("disputes", {
+  id: serial("id").primaryKey(),
+  jobId: integer("job_id").references(() => jobs.id),
+  customerId: integer("customer_id").references(() => users.id),
+  technicianId: integer("technician_id").references(() => technicians.id),
+  disputeType: varchar("dispute_type", { length: 50 }).notNull(), // 'payment', 'service_quality', 'communication', 'cancellation', 'other'
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description").notNull(),
+  severity: varchar("severity", { length: 20 }).notNull(), // 'low', 'medium', 'high', 'critical'
+  status: varchar("status", { length: 20 }).notNull().default("new"), // 'new', 'pending', 'investigating', 'resolved', 'closed'
+  reportedBy: varchar("reported_by", { length: 20 }).notNull(), // 'customer', 'technician', 'admin'
+  assignedAdminId: integer("assigned_admin_id").references(() => adminUsers.id),
+  priority: varchar("priority", { length: 20 }).notNull().default("medium"), // 'low', 'medium', 'high', 'urgent'
+  resolutionNotes: text("resolution_notes"),
+  adminNotes: text("admin_notes"),
+  customerSatisfaction: integer("customer_satisfaction"), // 1-5 rating after resolution
+  technicianSatisfaction: integer("technician_satisfaction"), // 1-5 rating after resolution
+  amountInDispute: decimal("amount_in_dispute", { precision: 10, scale: 2 }),
+  refundAmount: decimal("refund_amount", { precision: 10, scale: 2 }),
+  escalationLevel: integer("escalation_level").default(1), // 1-5 levels
+  dueDate: timestamp("due_date"),
+  resolvedAt: timestamp("resolved_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+// Dispute messages for communication between parties
+export const disputeMessages = pgTable("dispute_messages", {
+  id: serial("id").primaryKey(),
+  disputeId: integer("dispute_id").references(() => disputes.id).notNull(),
+  senderId: integer("sender_id").references(() => users.id).notNull(),
+  senderType: varchar("sender_type", { length: 20 }).notNull(), // 'customer', 'technician', 'admin'
+  message: text("message").notNull(),
+  attachments: text("attachments").array(), // Array of file URLs
+  isInternal: boolean("is_internal").default(false), // Internal admin notes
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+// Dispute attachments for evidence
+export const disputeAttachments = pgTable("dispute_attachments", {
+  id: serial("id").primaryKey(),
+  disputeId: integer("dispute_id").references(() => disputes.id).notNull(),
+  uploaderId: integer("uploader_id").references(() => users.id).notNull(),
+  uploaderType: varchar("uploader_type", { length: 20 }).notNull(), // 'customer', 'technician', 'admin'
+  fileName: varchar("file_name", { length: 255 }).notNull(),
+  fileUrl: text("file_url").notNull(),
+  fileType: varchar("file_type", { length: 50 }).notNull(),
+  fileSize: integer("file_size"),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+// Notifications system for all users
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  userType: varchar("user_type", { length: 20 }).notNull(), // 'customer', 'technician', 'admin'
+  type: varchar("type", { length: 50 }).notNull(), // 'dispute_created', 'dispute_updated', 'dispute_resolved', 'job_update', 'payment_update'
+  title: varchar("title", { length: 200 }).notNull(),
+  message: text("message").notNull(),
+  relatedEntityId: integer("related_entity_id"), // ID of related job, dispute, etc.
+  relatedEntityType: varchar("related_entity_type", { length: 50 }), // 'job', 'dispute', 'payment'
+  isRead: boolean("is_read").default(false),
+  priority: varchar("priority", { length: 20 }).notNull().default("medium"), // 'low', 'medium', 'high', 'urgent'
+  actionRequired: boolean("action_required").default(false),
+  actionUrl: text("action_url"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  readAt: timestamp("read_at")
+});
+
+// Dispute escalation history
+export const disputeEscalations = pgTable("dispute_escalations", {
+  id: serial("id").primaryKey(),
+  disputeId: integer("dispute_id").references(() => disputes.id).notNull(),
+  escalatedBy: integer("escalated_by").references(() => users.id).notNull(),
+  escalatedTo: integer("escalated_to").references(() => users.id),
+  previousLevel: integer("previous_level").notNull(),
+  newLevel: integer("new_level").notNull(),
+  reason: text("reason").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
 export const usersRelations = relations(users, ({ many, one }) => ({
   messages: many(messages),
   technicianProfile: one(technicians, {
@@ -501,6 +586,72 @@ export const technicianEarningSettingsRelations = relations(technicianEarningSet
   }),
   lastModifiedByUser: one(users, {
     fields: [technicianEarningSettings.lastModifiedBy],
+    references: [users.id],
+  }),
+}));
+
+export const disputesRelations = relations(disputes, ({ one, many }) => ({
+  job: one(jobs, {
+    fields: [disputes.jobId],
+    references: [jobs.id],
+  }),
+  customer: one(users, {
+    fields: [disputes.customerId],
+    references: [users.id],
+  }),
+  technician: one(technicians, {
+    fields: [disputes.technicianId],
+    references: [technicians.id],
+  }),
+  assignedAdmin: one(adminUsers, {
+    fields: [disputes.assignedAdminId],
+    references: [adminUsers.id],
+  }),
+  messages: many(disputeMessages),
+  attachments: many(disputeAttachments),
+  escalations: many(disputeEscalations),
+}));
+
+export const disputeMessagesRelations = relations(disputeMessages, ({ one }) => ({
+  dispute: one(disputes, {
+    fields: [disputeMessages.disputeId],
+    references: [disputes.id],
+  }),
+  sender: one(users, {
+    fields: [disputeMessages.senderId],
+    references: [users.id],
+  }),
+}));
+
+export const disputeAttachmentsRelations = relations(disputeAttachments, ({ one }) => ({
+  dispute: one(disputes, {
+    fields: [disputeAttachments.disputeId],
+    references: [disputes.id],
+  }),
+  uploader: one(users, {
+    fields: [disputeAttachments.uploaderId],
+    references: [users.id],
+  }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+}));
+
+export const disputeEscalationsRelations = relations(disputeEscalations, ({ one }) => ({
+  dispute: one(disputes, {
+    fields: [disputeEscalations.disputeId],
+    references: [disputes.id],
+  }),
+  escalatedByUser: one(users, {
+    fields: [disputeEscalations.escalatedBy],
+    references: [users.id],
+  }),
+  escalatedToUser: one(users, {
+    fields: [disputeEscalations.escalatedTo],
     references: [users.id],
   }),
 }));
@@ -714,6 +865,72 @@ export const insertSupportMessageSchema = createInsertSchema(supportMessages).pi
   messageType: true,
 });
 
+export const insertDisputeSchema = createInsertSchema(disputes).pick({
+  jobId: true,
+  customerId: true,
+  technicianId: true,
+  disputeType: true,
+  title: true,
+  description: true,
+  severity: true,
+  reportedBy: true,
+  assignedAdminId: true,
+  priority: true,
+  resolutionNotes: true,
+  adminNotes: true,
+  customerSatisfaction: true,
+  technicianSatisfaction: true,
+  amountInDispute: true,
+  refundAmount: true,
+  escalationLevel: true,
+  dueDate: true,
+});
+
+export const insertDisputeMessageSchema = createInsertSchema(disputeMessages).pick({
+  disputeId: true,
+  senderId: true,
+  senderType: true,
+  message: true,
+  isInternal: true,
+}).extend({
+  attachments: z.array(z.string()).optional(),
+});
+
+export const insertDisputeAttachmentSchema = createInsertSchema(disputeAttachments).pick({
+  disputeId: true,
+  uploaderId: true,
+  uploaderType: true,
+  fileName: true,
+  fileUrl: true,
+  fileType: true,
+  fileSize: true,
+  description: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).pick({
+  userId: true,
+  userType: true,
+  type: true,
+  title: true,
+  message: true,
+  relatedEntityId: true,
+  relatedEntityType: true,
+  priority: true,
+  actionRequired: true,
+  actionUrl: true,
+  expiresAt: true,
+});
+
+export const insertDisputeEscalationSchema = createInsertSchema(disputeEscalations).pick({
+  disputeId: true,
+  escalatedBy: true,
+  escalatedTo: true,
+  previousLevel: true,
+  newLevel: true,
+  reason: true,
+  notes: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpdateProfile = z.infer<typeof updateProfileSchema>;
 export type User = typeof users.$inferSelect;
@@ -743,6 +960,16 @@ export type InsertTechnicianEarningSettings = z.infer<typeof insertTechnicianEar
 export type TechnicianEarningSettings = typeof technicianEarningSettings.$inferSelect;
 export type InsertIssueCategory = z.infer<typeof insertIssueCategorySchema>;
 export type IssueCategory = typeof issueCategories.$inferSelect;
+export type InsertDispute = z.infer<typeof insertDisputeSchema>;
+export type Dispute = typeof disputes.$inferSelect;
+export type InsertDisputeMessage = z.infer<typeof insertDisputeMessageSchema>;
+export type DisputeMessage = typeof disputeMessages.$inferSelect;
+export type InsertDisputeAttachment = z.infer<typeof insertDisputeAttachmentSchema>;
+export type DisputeAttachment = typeof disputeAttachments.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertDisputeEscalation = z.infer<typeof insertDisputeEscalationSchema>;
+export type DisputeEscalation = typeof disputeEscalations.$inferSelect;
 
 // Enhanced technician schemas
 export const insertTechnicianEnhancedSchema = createInsertSchema(technicians).pick({
