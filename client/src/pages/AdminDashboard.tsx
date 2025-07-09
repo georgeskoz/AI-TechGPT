@@ -2854,9 +2854,103 @@ function JobManagement() {
                 <Calendar className="h-5 w-5" />
                 {timeframe.charAt(0).toUpperCase() + timeframe.slice(1)} Jobs ({jobs.length})
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {jobs.map(renderJobCard)}
+              
+              {/* Search for this timeframe */}
+              <div className="mb-4">
+                <div className="flex items-center gap-2 max-w-md">
+                  <Search className="h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder={`Search ${timeframe} jobs...`}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1"
+                  />
+                </div>
               </div>
+
+              {/* Table view */}
+              <Card>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[100px]">Job #</TableHead>
+                          <TableHead>Customer</TableHead>
+                          <TableHead>Technician</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Priority</TableHead>
+                          <TableHead>Amount</TableHead>
+                          <TableHead>Duration</TableHead>
+                          <TableHead>Created</TableHead>
+                          <TableHead className="w-[200px]">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {jobs
+                          .filter(job => 
+                            searchQuery === '' || 
+                            job.jobNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            job.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            job.technician.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            job.category.toLowerCase().includes(searchQuery.toLowerCase())
+                          )
+                          .slice(0, 50) // Limit to 50 jobs per section
+                          .map((job) => (
+                            <TableRow key={job.id} className="hover:bg-gray-50">
+                              <TableCell className="font-medium">{job.jobNumber}</TableCell>
+                              <TableCell>{job.customer}</TableCell>
+                              <TableCell>{job.technician}</TableCell>
+                              <TableCell>{job.category}</TableCell>
+                              <TableCell>{getStatusBadge(job.status)}</TableCell>
+                              <TableCell>{getPriorityBadge(job.priority)}</TableCell>
+                              <TableCell>${job.amount}</TableCell>
+                              <TableCell>{job.duration}min</TableCell>
+                              <TableCell className="text-sm text-gray-500">
+                                {new Date(job.createdAt).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedJob(job);
+                                      setShowJobDetails(true);
+                                    }}
+                                  >
+                                    <Eye className="h-3 w-3" />
+                                  </Button>
+                                  
+                                  <Select onValueChange={(value) => handleJobAction(job, value)}>
+                                    <SelectTrigger className="w-24 h-8">
+                                      <SelectValue placeholder="•••" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="complaint">Complaint</SelectItem>
+                                      <SelectItem value="investigate">Investigate</SelectItem>
+                                      <SelectItem value="refund">Refund</SelectItem>
+                                      <SelectItem value="coupon">Coupon</SelectItem>
+                                      <SelectItem value="penalty">Penalty</SelectItem>
+                                      <SelectItem value="case_action">Case Action</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  
+                  {jobs.length > 50 && (
+                    <div className="p-4 text-center text-sm text-gray-500 border-t">
+                      Showing first 50 of {jobs.length} jobs. Use filtered view for more options.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           );
         })}
@@ -2930,15 +3024,84 @@ function JobManagement() {
           </Select>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {jobs.map(renderJobCard)}
-        </div>
+        {/* Table view for filtered jobs */}
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px]">Job #</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Technician</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Priority</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Duration</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead className="w-[200px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {jobs.map((job) => (
+                    <TableRow key={job.id} className="hover:bg-gray-50">
+                      <TableCell className="font-medium">{job.jobNumber}</TableCell>
+                      <TableCell>{job.customer}</TableCell>
+                      <TableCell>{job.technician}</TableCell>
+                      <TableCell>{job.category}</TableCell>
+                      <TableCell>{getStatusBadge(job.status)}</TableCell>
+                      <TableCell>{getPriorityBadge(job.priority)}</TableCell>
+                      <TableCell>${job.amount}</TableCell>
+                      <TableCell>{job.duration}min</TableCell>
+                      <TableCell className="text-sm text-gray-500">
+                        {new Date(job.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedJob(job);
+                              setShowJobDetails(true);
+                            }}
+                          >
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                          
+                          <Select onValueChange={(value) => handleJobAction(job, value)}>
+                            <SelectTrigger className="w-24 h-8">
+                              <SelectValue placeholder="•••" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="complaint">Complaint</SelectItem>
+                              <SelectItem value="investigate">Investigate</SelectItem>
+                              <SelectItem value="refund">Refund</SelectItem>
+                              <SelectItem value="coupon">Coupon</SelectItem>
+                              <SelectItem value="penalty">Penalty</SelectItem>
+                              <SelectItem value="case_action">Case Action</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
 
-        {filteredJobs?.totalPages > 1 && (
-          <div className="flex justify-center">
-            <p className="text-sm text-gray-600">
+        {/* Pagination info */}
+        {filteredJobs && (
+          <div className="flex justify-between items-center text-sm text-gray-600">
+            <div>
               Showing {jobs.length} of {filteredJobs.totalCount} jobs
-            </p>
+            </div>
+            <div>
+              Page {filteredJobs.page} of {filteredJobs.totalPages}
+            </div>
           </div>
         )}
       </div>
