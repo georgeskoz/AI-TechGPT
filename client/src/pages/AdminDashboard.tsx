@@ -81,7 +81,8 @@ import {
   Moon,
   Sun,
   Menu,
-  X
+  X,
+  ChevronRight
 } from "lucide-react";
 
 interface AdminUser {
@@ -132,6 +133,13 @@ interface RecentActivity {
   status: string;
 }
 
+interface SidebarItem {
+  id: string;
+  label: string;
+  icon: any;
+  subItems?: SidebarItem[];
+}
+
 export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentAdmin, setCurrentAdmin] = useState<AdminUser | null>(null);
@@ -139,6 +147,7 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [darkMode, setDarkMode] = useState(false);
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -270,9 +279,33 @@ export default function AdminDashboard() {
     }
   };
 
+  const toggleExpanded = (itemId: string) => {
+    setExpandedItems(prev => 
+      prev.includes(itemId) 
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    );
+  };
+
   const sidebarItems = [
     { id: "overview", label: "Overview", icon: BarChart3 },
-    { id: "users", label: "Users", icon: Users },
+    { 
+      id: "users", 
+      label: "Users", 
+      icon: Users,
+      subItems: [
+        { id: "add-user", label: "Add New User", icon: UserPlus },
+        { id: "users-list", label: "Users List", icon: Users },
+        { id: "register-business", label: "Register Business", icon: Building },
+        { id: "refund-policy", label: "Refund Policy", icon: FileText },
+        { id: "privacy-policy", label: "Privacy Policy", icon: Shield },
+        { id: "cancellation-policy", label: "Cancellation Policy", icon: XCircle },
+        { id: "terms-conditions", label: "Terms & Conditions", icon: FileText },
+        { id: "about-us", label: "About Us", icon: Globe },
+        { id: "become-service-provider", label: "Become a Service Provider", icon: Wrench },
+        { id: "faqs", label: "FAQs", icon: MessageSquare },
+      ]
+    },
     { id: "service-providers", label: "Service Providers", icon: Wrench },
     { id: "jobs", label: "Jobs", icon: Briefcase },
     { id: "disputes", label: "Disputes", icon: AlertTriangle },
@@ -541,24 +574,57 @@ export default function AdminDashboard() {
               </div>
             </div>
             
-            <nav className="flex-1 px-4 py-6 space-y-2">
+            <nav className="flex-1 px-4 py-6 space-y-1">
               {sidebarItems.map((item) => (
-                <Button
-                  key={item.id}
-                  variant={activeTab === item.id ? "secondary" : "ghost"}
-                  className={`w-full justify-start ${
-                    activeTab === item.id 
-                      ? 'bg-gray-800 text-white' 
-                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                  }`}
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    setSidebarOpen(false);
-                  }}
-                >
-                  <item.icon className="h-4 w-4 mr-3" />
-                  {item.label}
-                </Button>
+                <div key={item.id}>
+                  <Button
+                    variant={activeTab === item.id ? "secondary" : "ghost"}
+                    className={`w-full justify-start ${
+                      activeTab === item.id 
+                        ? 'bg-gray-800 text-white' 
+                        : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    }`}
+                    onClick={() => {
+                      if (item.subItems) {
+                        toggleExpanded(item.id);
+                      } else {
+                        setActiveTab(item.id);
+                        setSidebarOpen(false);
+                      }
+                    }}
+                  >
+                    <item.icon className="h-4 w-4 mr-3" />
+                    {item.label}
+                    {item.subItems && (
+                      <ChevronRight className={`h-4 w-4 ml-auto transition-transform ${
+                        expandedItems.includes(item.id) ? 'rotate-90' : ''
+                      }`} />
+                    )}
+                  </Button>
+                  {item.subItems && expandedItems.includes(item.id) && (
+                    <div className="ml-4 mt-1 space-y-1">
+                      {item.subItems.map((subItem) => (
+                        <Button
+                          key={subItem.id}
+                          variant={activeTab === subItem.id ? "secondary" : "ghost"}
+                          size="sm"
+                          className={`w-full justify-start ${
+                            activeTab === subItem.id 
+                              ? 'bg-gray-700 text-white' 
+                              : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                          }`}
+                          onClick={() => {
+                            setActiveTab(subItem.id);
+                            setSidebarOpen(false);
+                          }}
+                        >
+                          <subItem.icon className="h-3 w-3 mr-2" />
+                          {subItem.label}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </nav>
 
@@ -618,7 +684,240 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {activeTab !== "overview" && (
+          {/* User Management Sections */}
+          {activeTab === "add-user" && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Add New User</h2>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Create New User Account</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Full Name</label>
+                      <Input placeholder="Enter full name" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Email Address</label>
+                      <Input placeholder="user@example.com" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">User Role</label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="customer">Customer</SelectItem>
+                          <SelectItem value="service_provider">Service Provider</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="inactive">Inactive</SelectItem>
+                          <SelectItem value="suspended">Suspended</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="mt-6">
+                    <Button>Create User</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "users-list" && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Users List</h2>
+              <Card>
+                <CardHeader>
+                  <CardTitle>All Platform Users</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-4">
+                    <Input placeholder="Search users..." className="max-w-sm" />
+                  </div>
+                  <div className="text-center py-8 text-gray-600">
+                    User management interface will be displayed here
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "register-business" && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Register Business</h2>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Business Registration</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Business Name</label>
+                      <Input placeholder="Enter business name" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Business Type</label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="corporation">Corporation</SelectItem>
+                          <SelectItem value="llc">LLC</SelectItem>
+                          <SelectItem value="partnership">Partnership</SelectItem>
+                          <SelectItem value="sole_proprietorship">Sole Proprietorship</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Tax ID</label>
+                      <Input placeholder="Enter tax ID" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Contact Email</label>
+                      <Input placeholder="business@example.com" />
+                    </div>
+                  </div>
+                  <div className="mt-6">
+                    <Button>Register Business</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Policy Management Sections */}
+          {(activeTab === "refund-policy" || activeTab === "privacy-policy" || activeTab === "cancellation-policy" || activeTab === "terms-conditions") && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                {activeTab === "refund-policy" && "Refund Policy"}
+                {activeTab === "privacy-policy" && "Privacy Policy"}
+                {activeTab === "cancellation-policy" && "Cancellation Policy"}
+                {activeTab === "terms-conditions" && "Terms & Conditions"}
+              </h2>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Policy Management</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Policy Content</label>
+                      <textarea 
+                        className="w-full h-64 p-3 border border-gray-300 rounded-md"
+                        placeholder="Enter policy content..."
+                      />
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Button>Save Policy</Button>
+                      <Button variant="outline">Preview</Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "about-us" && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">About Us</h2>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Company Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Company Description</label>
+                      <textarea 
+                        className="w-full h-32 p-3 border border-gray-300 rounded-md"
+                        placeholder="Enter company description..."
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Mission Statement</label>
+                      <textarea 
+                        className="w-full h-24 p-3 border border-gray-300 rounded-md"
+                        placeholder="Enter mission statement..."
+                      />
+                    </div>
+                    <Button>Update About Us</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "become-service-provider" && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Become a Service Provider</h2>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Service Provider Registration Settings</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Registration Requirements</label>
+                      <textarea 
+                        className="w-full h-32 p-3 border border-gray-300 rounded-md"
+                        placeholder="Enter registration requirements..."
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Application Process</label>
+                      <textarea 
+                        className="w-full h-32 p-3 border border-gray-300 rounded-md"
+                        placeholder="Enter application process details..."
+                      />
+                    </div>
+                    <Button>Update Registration Info</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "faqs" && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">FAQs Management</h2>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Frequently Asked Questions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-lg font-medium">FAQ Items</h3>
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add FAQ
+                      </Button>
+                    </div>
+                    <div className="text-center py-8 text-gray-600">
+                      FAQ management interface will be displayed here
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {(activeTab === "users" || activeTab === "service-providers" || activeTab === "jobs" || activeTab === "disputes" || activeTab === "payments" || activeTab === "system" || activeTab === "settings") && (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Settings className="h-8 w-8 text-gray-400" />
