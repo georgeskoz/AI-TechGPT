@@ -97,7 +97,7 @@ const certifications = [
   "Azure Certified", "Linux Professional", "Certified Ethical Hacker", "ITIL Certified"
 ];
 
-export default function TechnicianRegistration() {
+export default function ServiceProviderRegistration() {
   const [step, setStep] = useState(1);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -164,7 +164,7 @@ export default function TechnicianRegistration() {
     onSuccess: (data) => {
       toast({
         title: "Registration Successful!",
-        description: "Your technician profile has been created and is pending verification.",
+        description: "Your service provider profile has been created and is pending verification.",
       });
       setStep(5);
     },
@@ -338,10 +338,10 @@ export default function TechnicianRegistration() {
 
   return (
     <div className="container mx-auto p-4 max-w-7xl">
-      <Navigation title="Technician Registration" backTo="/technicians" />
+      <Navigation title="Service Provider Registration" backTo="/technicians" />
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Become a TechGPT Technician</h1>
-        <p className="text-gray-600">Join our network of skilled technicians and start earning</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Become a TechGPT Service Provider</h1>
+        <p className="text-gray-600">Join our network of skilled service providers and start earning</p>
         <Progress value={progress} className="mt-4" />
         <p className="text-sm text-gray-500 mt-2">Step {step} of 5</p>
       </div>
@@ -466,7 +466,7 @@ export default function TechnicianRegistration() {
                     placeholder="Your Tech Solutions (if working with a fleet)"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Only required if you're a technician working with another fleet, not mandatory for direct work
+                    Only required if you're a service provider working with another fleet, not mandatory for direct work
                   </p>
                 </div>
                 <div>

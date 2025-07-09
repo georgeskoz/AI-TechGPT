@@ -26,7 +26,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
-interface MatchedTechnician {
+interface MatchedServiceProvider {
   id: number;
   userId: number;
   businessName: string;
@@ -425,7 +425,7 @@ export default function TechnicianMatchingPage() {
                           >
                             {requestTechnicianMutation.isPending && selectedTechnicianId === technician.id
                               ? "Requesting..." 
-                              : "Select Technician"
+                              : "Select Service Provider"
                             }
                           </Button>
                           <Button variant="outline" size="sm">

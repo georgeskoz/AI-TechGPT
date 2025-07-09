@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 
-export default function TechnicianHomePage() {
+export default function ServiceProviderHomePage() {
   const [, setLocation] = useLocation();
 
   const benefits = [
@@ -95,7 +95,7 @@ export default function TechnicianHomePage() {
   ];
 
   const stats = [
-    { label: "Active Technicians", value: "5,000+", icon: <Users className="h-5 w-5" /> },
+    { label: "Active Service Providers", value: "5,000+", icon: <Users className="h-5 w-5" /> },
     { label: "Jobs Completed", value: "150,000+", icon: <CheckCircle className="h-5 w-5" /> },
     { label: "Average Rating", value: "4.8/5", icon: <Star className="h-5 w-5" /> },
     { label: "Countries Served", value: "25+", icon: <MapPin className="h-5 w-5" /> }
@@ -103,7 +103,7 @@ export default function TechnicianHomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
-      <Navigation title="Technician Portal" backTo="/domains" />
+      <Navigation title="Service Provider Portal" backTo="/domains" />
       {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
@@ -114,7 +114,7 @@ export default function TechnicianHomePage() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">TechGPT Pro</h1>
-                <p className="text-sm text-gray-600">Technician Platform</p>
+                <p className="text-sm text-gray-600">Service Provider Platform</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -142,7 +142,7 @@ export default function TechnicianHomePage() {
                 <span className="text-green-600"> People With Tech</span>
               </h1>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                Join thousands of verified technicians earning flexible income by solving technical problems. 
+                Join thousands of verified service providers earning flexible income by solving technical problems. 
                 Work remotely, by phone, or on-site - your choice, your schedule.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">

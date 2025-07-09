@@ -379,50 +379,50 @@ export default function SimpleBooking() {
             </div>
 
             <div className="grid gap-4">
-              {mockTechnicians.map((technician) => (
+              {mockTechnicians.map((serviceProvider) => (
                 <Card 
-                  key={technician.id} 
+                  key={serviceProvider.id} 
                   className={`cursor-pointer transition-all hover:shadow-lg ${
-                    selectedTechnician?.id === technician.id ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+                    selectedTechnician?.id === serviceProvider.id ? 'ring-2 ring-blue-500 bg-blue-50' : ''
                   }`}
-                  onClick={() => handleTechnicianSelect(technician)}
+                  onClick={() => handleTechnicianSelect(serviceProvider)}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                          {technician.name.split(' ').map(n => n[0]).join('')}
+                          {serviceProvider.name.split(' ').map(n => n[0]).join('')}
                         </div>
                         <div>
-                          <h3 className="text-xl font-semibold">{technician.name}</h3>
+                          <h3 className="text-xl font-semibold">{serviceProvider.name}</h3>
                           <div className="flex items-center gap-4 text-sm text-gray-600">
                             <div className="flex items-center gap-1">
                               <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              {technician.rating} ({technician.completedJobs} jobs)
+                              {serviceProvider.rating} ({serviceProvider.completedJobs} jobs)
                             </div>
                             <div className="flex items-center gap-1">
                               <Clock className="h-4 w-4" />
-                              {technician.responseTime} response
+                              {serviceProvider.responseTime} response
                             </div>
                             <div className="flex items-center gap-1">
                               <MapPin className="h-4 w-4" />
-                              {technician.distance} miles away
+                              {serviceProvider.distance} miles away
                             </div>
                           </div>
                           <div className="flex flex-wrap gap-2 mt-2">
-                            {technician.skills.map((skill, index) => (
+                            {serviceProvider.skills.map((skill, index) => (
                               <Badge key={index} variant="secondary">{skill}</Badge>
                             ))}
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-green-600">${technician.hourlyRate}/hr</div>
+                        <div className="text-2xl font-bold text-green-600">${serviceProvider.hourlyRate}/hr</div>
                         <div className="text-sm text-gray-600">
-                          <div>ETA: {technician.arrivalTime}</div>
-                          <div>Travel: {technician.estimatedArrival}</div>
+                          <div>ETA: {serviceProvider.arrivalTime}</div>
+                          <div>Travel: {serviceProvider.estimatedArrival}</div>
                         </div>
-                        {selectedTechnician?.id === technician.id && (
+                        {selectedTechnician?.id === serviceProvider.id && (
                           <CheckCircle className="h-6 w-6 text-blue-500 mt-2 ml-auto" />
                         )}
                       </div>

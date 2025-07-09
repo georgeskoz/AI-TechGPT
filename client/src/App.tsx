@@ -14,8 +14,8 @@ import TriagePage from "@/pages/TriagePage";
 import SimpleDiagnosticPage from "@/pages/SimpleDiagnosticPage";
 import ClientDashboard from "@/pages/ClientDashboard";
 import AuthTestPage from "@/components/AuthTestPage";
-import TechnicianRegistration from "@/pages/TechnicianRegistration";
-import TechnicianDashboard from "@/pages/TechnicianDashboard";
+import ServiceProviderRegistration from "@/pages/TechnicianRegistration";
+import ServiceProviderDashboard from "@/pages/TechnicianDashboard";
 import TechnicianLanding from "@/pages/TechnicianLanding";
 import TechnicianMatchingPage from "@/pages/TechnicianMatchingPage";
 import ExpertTechnicianFinder from "@/pages/ExpertTechnicianFinder";
@@ -24,7 +24,7 @@ import BookServicePage from "@/pages/BookServicePage";
 import TechnicianEarnings from "@/pages/TechnicianEarnings";
 import ProfileVisibilityPage from "@/pages/ProfileVisibilityPage";
 import CustomerHomePage from "@/pages/CustomerHomePage";
-import TechnicianHomePage from "@/pages/TechnicianHomePage";
+import ServiceProviderHomePage from "@/pages/TechnicianHomePage";
 import AdminHomePage from "@/pages/AdminHomePage";
 import DomainSelector from "@/pages/DomainSelector";
 import AdminDashboard from "@/pages/AdminDashboard";
@@ -48,8 +48,8 @@ function Router() {
       <Route path="/diagnostic" component={SimpleDiagnosticPage} />
       <Route path="/dashboard" component={ClientDashboard} />
       <Route path="/auth-test" component={AuthTestPage} />
-      <Route path="/technician-register" component={TechnicianRegistration} />
-      <Route path="/technician-dashboard" component={TechnicianDashboard} />
+      <Route path="/technician-register" component={ServiceProviderRegistration} />
+      <Route path="/technician-dashboard" component={ServiceProviderDashboard} />
       <Route path="/technicians" component={TechnicianLanding} />
       <Route path="/technician-matching" component={TechnicianMatchingPage} />
       <Route path="/find-expert" component={ExpertTechnicianFinder} />
@@ -59,7 +59,7 @@ function Router() {
       <Route path="/profile-visibility" component={ProfileVisibilityPage} />
       <Route path="/domains" component={DomainSelector} />
       <Route path="/customer-home" component={CustomerHomePage} />
-      <Route path="/technician-home" component={TechnicianHomePage} />
+      <Route path="/technician-home" component={ServiceProviderHomePage} />
       <Route path="/admin-home" component={AdminHomePage} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin-portal" component={AdminNavigation} />
