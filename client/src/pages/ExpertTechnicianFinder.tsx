@@ -764,7 +764,7 @@ export default function ExpertTechnicianFinder() {
                       : "Your general location (city, state)"
                   }
                 />
-                {currentUser?.address && (
+                {authUser?.address && (
                   <p className="text-sm text-gray-500 mt-1">
                     Auto-filled from your profile. Update if different location needed.
                   </p>
