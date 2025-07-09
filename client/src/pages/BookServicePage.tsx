@@ -30,7 +30,7 @@ interface BookingForm {
   category: string;
   description: string;
   location: string;
-  urgency: 'low' | 'medium' | 'high' | 'urgent';
+  urgency: 'now' | 'later';
   serviceType: 'remote' | 'phone' | 'onsite';
   preferredDate?: string;
 }
@@ -44,7 +44,7 @@ export default function BookServicePage() {
     category: '',
     description: '',
     location: '',
-    urgency: 'medium',
+    urgency: 'now',
     serviceType: 'onsite',
     preferredDate: ''
   });
@@ -204,8 +204,8 @@ export default function BookServicePage() {
     if (!selectedProvider) return;
 
     const selectedCategory = categories?.find(cat => cat.name === form.category);
-    const isUrgent = form.urgency === 'urgent';
-    const bookingFee = isUrgent ? 0 : 15;
+    const isNow = form.urgency === 'now';
+    const bookingFee = isNow ? 0 : 15;
 
     const bookingData = {
       customerId: 1, // Fixed customer ID
@@ -263,10 +263,8 @@ export default function BookServicePage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="low">Low - Can wait a few days</SelectItem>
-                      <SelectItem value="medium">Medium - Need help today</SelectItem>
-                      <SelectItem value="high">High - Need help within hours</SelectItem>
-                      <SelectItem value="urgent">Urgent - Need immediate help (FREE)</SelectItem>
+                      <SelectItem value="now">Now - Need immediate help (FREE)</SelectItem>
+                      <SelectItem value="later">Later - Can schedule for later ($15 fee)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
