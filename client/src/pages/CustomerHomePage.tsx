@@ -235,20 +235,20 @@ export default function CustomerHomePage() {
 
   const features = [
     {
+      icon: <Calendar className="h-8 w-8 text-green-600" />,
+      title: "Book Service Provider",
+      description: "Complete 3-step booking process to connect with the right service provider",
+      action: "Book Service",
+      route: "/book-service",
+      color: "bg-green-50 border-green-200"
+    },
+    {
       icon: <MessageSquare className="h-8 w-8 text-blue-600" />,
       title: "AI-Powered Chat Support",
       description: "Get instant help from our advanced AI assistant for common technical issues",
       action: "Start Chat",
       route: "/chat",
       color: "bg-blue-50 border-blue-200"
-    },
-    {
-      icon: <Users className="h-8 w-8 text-green-600" />,
-      title: "Expert Technicians",
-      description: "Connect with verified technicians for complex problems requiring human expertise",
-      action: "Find Technician",
-      route: "/technician-matching",
-      color: "bg-green-50 border-green-200"
     },
     {
       icon: <Headphones className="h-8 w-8 text-purple-600" />,
@@ -1004,6 +1004,14 @@ export default function CustomerHomePage() {
               Get help with hardware issues, software problems, and everything in between.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                size="lg" 
+                onClick={() => setLocation("/book-service")}
+                className="bg-green-600 hover:bg-green-700 text-lg px-8"
+              >
+                <Calendar className="h-5 w-5 mr-2" />
+                Book Service Provider
+              </Button>
               <Button 
                 size="lg" 
                 onClick={() => setLocation("/chat")}
