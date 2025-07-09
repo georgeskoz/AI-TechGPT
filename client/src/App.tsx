@@ -32,6 +32,8 @@ import AdminNavigation from "@/components/AdminNavigation";
 import AdminEarningSettings from "@/components/AdminEarningSettings";
 import AdminCategoryManagement from "@/pages/AdminCategoryManagement";
 import FloatingChatWidget from "@/components/FloatingChatWidget";
+import OnboardingWizard from "@/pages/OnboardingWizard";
+import OnboardingCheck from "@/components/OnboardingCheck";
 
 function Router() {
   return (
@@ -63,6 +65,7 @@ function Router() {
       <Route path="/admin-portal" component={AdminNavigation} />
       <Route path="/admin-earnings" component={AdminEarningSettings} />
       <Route path="/admin-categories" component={AdminCategoryManagement} />
+      <Route path="/onboarding" component={OnboardingWizard} />
       <Route path="/:username/profile" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>
@@ -76,10 +79,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <div className="min-h-screen bg-gray-50">
-          <Router />
-          <FloatingChatWidget username={username} />
-        </div>
+        <OnboardingCheck>
+          <div className="min-h-screen bg-gray-50">
+            <Router />
+            <FloatingChatWidget username={username} />
+          </div>
+        </OnboardingCheck>
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>

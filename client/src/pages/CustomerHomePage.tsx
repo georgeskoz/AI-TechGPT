@@ -947,6 +947,14 @@ export default function CustomerHomePage() {
                           <div className="space-y-3">
                             <Button 
                               variant="outline" 
+                              className="w-full justify-start hover:bg-purple-50 hover:text-purple-700 transition-colors"
+                              onClick={() => setLocation("/onboarding")}
+                            >
+                              <Settings className="h-4 w-4 mr-2" />
+                              Personalize Experience
+                            </Button>
+                            <Button 
+                              variant="outline" 
                               className="w-full justify-start hover:bg-blue-50 hover:text-blue-700 transition-colors"
                               onClick={handleDownloadAccountData}
                             >
