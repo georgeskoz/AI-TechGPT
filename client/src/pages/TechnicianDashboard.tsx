@@ -58,7 +58,7 @@ interface JobNotification {
   };
 }
 
-export default function TechnicianDashboard() {
+export default function ServiceProviderDashboard() {
   const [isAvailable, setIsAvailable] = useState(true);
   const [selectedTab, setSelectedTab] = useState("overview");
   const [, setLocation] = useLocation();
@@ -229,7 +229,7 @@ export default function TechnicianDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation 
-        title="Technician Dashboard" 
+        title="Service Provider Dashboard" 
         backTo="/technician-home" 
         showHomeButton={false}
       />

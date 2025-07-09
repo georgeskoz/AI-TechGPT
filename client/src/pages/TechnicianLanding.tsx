@@ -56,7 +56,7 @@ export default function TechnicianLanding() {
     {
       icon: TrendingUp,
       title: "Growing Platform",
-      description: "Join thousands of technicians on the fastest-growing tech support platform.",
+      description: "Join thousands of service providers on the fastest-growing tech support platform.",
       color: "text-indigo-600",
       bg: "bg-indigo-100"
     }
@@ -94,12 +94,12 @@ export default function TechnicianLanding() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <Navigation title="Technician Opportunities" backTo="/domains" />
+      <Navigation title="Service Provider Opportunities" backTo="/domains" />
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
           <Badge className="mb-4" variant="secondary">
-            Now Hiring Technicians
+            Now Hiring Service Providers
           </Badge>
           <h1 className="text-5xl font-bold text-gray-900 mb-6">
             Turn Your Tech Skills Into <span className="text-blue-600">Income</span>
@@ -116,7 +116,7 @@ export default function TechnicianLanding() {
             </Link>
             <Link href="/technician-dashboard">
               <Button size="lg" variant="outline" className="text-lg px-8 py-3">
-                Technician Login
+                Service Provider Login
               </Button>
             </Link>
           </div>
@@ -130,7 +130,7 @@ export default function TechnicianLanding() {
           </div>
           <div className="text-center p-6 bg-white rounded-lg shadow-sm">
             <div className="text-3xl font-bold text-green-600">2,500+</div>
-            <div className="text-gray-600">Active Technicians</div>
+            <div className="text-gray-600">Active Service Providers</div>
           </div>
           <div className="text-center p-6 bg-white rounded-lg shadow-sm">
             <div className="text-3xl font-bold text-purple-600">50k+</div>
