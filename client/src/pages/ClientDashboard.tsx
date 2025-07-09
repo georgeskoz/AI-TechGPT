@@ -74,6 +74,9 @@ export default function ClientDashboard() {
       const requests = await requestsRes.json();
       const userJobs = await jobsRes.json();
       
+      console.log("Loaded service requests:", requests);
+      console.log("Loaded jobs:", userJobs);
+      
       setServiceRequests(requests);
       setJobs(userJobs);
     } catch (error) {

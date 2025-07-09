@@ -170,7 +170,7 @@ export default function SimpleBooking() {
     const bookingFee = isUrgent ? 0 : 15; // Free for urgent, $15 for scheduled
 
     const bookingData = {
-      customerId: 1, // Demo user
+      customerId: 1, // Demo user - fixed to match dashboard
       technicianId: selectedTechnician.id,
       categoryId: selectedCategory?.id,
       category: form.category,
@@ -183,6 +183,7 @@ export default function SimpleBooking() {
       estimatedCost: `$${selectedTechnician.hourlyRate * 2}-$${selectedTechnician.hourlyRate * 4}`,
     };
 
+    console.log('Submitting booking:', bookingData);
     bookTechnicianMutation.mutate(bookingData);
   };
 
