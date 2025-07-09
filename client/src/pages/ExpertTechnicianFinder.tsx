@@ -550,14 +550,14 @@ export default function ExpertTechnicianFinder() {
         {/* Quick Access Section */}
         <div className="mb-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">Quick Access</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/book-service')}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/chat')}>
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Calendar className="h-6 w-6 text-blue-600" />
+                  <MessageSquare className="h-6 w-6 text-blue-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Book Service Provider</h3>
-                <p className="text-sm text-gray-600">Schedule a technician for your specific needs</p>
+                <h3 className="font-semibold text-gray-900 mb-2">AI Chat Support</h3>
+                <p className="text-sm text-gray-600">Get instant AI-powered assistance</p>
               </CardContent>
             </Card>
             
@@ -566,18 +566,18 @@ export default function ExpertTechnicianFinder() {
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <MessageSquare className="h-6 w-6 text-green-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Live Support Chat</h3>
-                <p className="text-sm text-gray-600">Get instant help from live technicians</p>
+                <h3 className="font-semibold text-gray-900 mb-2">Live Support</h3>
+                <p className="text-sm text-gray-600">Get instant help from live Service Providers</p>
               </CardContent>
             </Card>
             
             <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/phone-support')}>
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Wrench className="h-6 w-6 text-purple-600" />
+                  <Phone className="h-6 w-6 text-purple-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">On-Site Services</h3>
-                <p className="text-sm text-gray-600">Get professional on-site technical support</p>
+                <h3 className="font-semibold text-gray-900 mb-2">Phone Support</h3>
+                <p className="text-sm text-gray-600">Get help via phone from Service Providers</p>
               </CardContent>
             </Card>
             
@@ -588,6 +588,16 @@ export default function ExpertTechnicianFinder() {
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">Issue Tracker</h3>
                 <p className="text-sm text-gray-600">Track and manage your support requests</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/technician-matching')}>
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <User className="h-6 w-6 text-teal-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Service Provider Matching</h3>
+                <p className="text-sm text-gray-600">Find matched Service Providers for your needs</p>
               </CardContent>
             </Card>
           </div>

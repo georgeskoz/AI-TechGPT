@@ -276,14 +276,14 @@ export default function TechnicianMatchingPage() {
         {/* Quick Access Section */}
         <div className="mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Access</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/book-service')}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/chat')}>
               <CardContent className="p-4 text-center">
                 <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Calendar className="h-5 w-5 text-blue-600" />
+                  <MessageSquare className="h-5 w-5 text-blue-600" />
                 </div>
-                <h3 className="font-medium text-gray-900 mb-1">Book Service Provider</h3>
-                <p className="text-xs text-gray-600">Schedule a technician</p>
+                <h3 className="font-medium text-gray-900 mb-1">AI Chat Support</h3>
+                <p className="text-xs text-gray-600">AI-powered assistance</p>
               </CardContent>
             </Card>
             
@@ -292,18 +292,18 @@ export default function TechnicianMatchingPage() {
                 <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <MessageSquare className="h-5 w-5 text-green-600" />
                 </div>
-                <h3 className="font-medium text-gray-900 mb-1">Live Support Chat</h3>
-                <p className="text-xs text-gray-600">Get instant help</p>
+                <h3 className="font-medium text-gray-900 mb-1">Live Support</h3>
+                <p className="text-xs text-gray-600">Live Service Providers</p>
               </CardContent>
             </Card>
             
             <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/phone-support')}>
               <CardContent className="p-4 text-center">
                 <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Wrench className="h-5 w-5 text-purple-600" />
+                  <Phone className="h-5 w-5 text-purple-600" />
                 </div>
-                <h3 className="font-medium text-gray-900 mb-1">On-Site Services</h3>
-                <p className="text-xs text-gray-600">Professional support</p>
+                <h3 className="font-medium text-gray-900 mb-1">Phone Support</h3>
+                <p className="text-xs text-gray-600">Phone Service Providers</p>
               </CardContent>
             </Card>
             
@@ -314,6 +314,16 @@ export default function TechnicianMatchingPage() {
                 </div>
                 <h3 className="font-medium text-gray-900 mb-1">Issue Tracker</h3>
                 <p className="text-xs text-gray-600">Track requests</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/technician-matching')}>
+              <CardContent className="p-4 text-center">
+                <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <User className="h-5 w-5 text-teal-600" />
+                </div>
+                <h3 className="font-medium text-gray-900 mb-1">Service Provider Matching</h3>
+                <p className="text-xs text-gray-600">Find matched Service Providers</p>
               </CardContent>
             </Card>
           </div>
