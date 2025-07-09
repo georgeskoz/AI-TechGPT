@@ -19,6 +19,7 @@ import TechnicianDashboard from "@/pages/TechnicianDashboard";
 import TechnicianLanding from "@/pages/TechnicianLanding";
 import TechnicianMatchingPage from "@/pages/TechnicianMatchingPage";
 import ExpertTechnicianFinder from "@/pages/ExpertTechnicianFinder";
+import SimpleBooking from "@/pages/SimpleBooking";
 import TechnicianEarnings from "@/pages/TechnicianEarnings";
 import ProfileVisibilityPage from "@/pages/ProfileVisibilityPage";
 import CustomerHomePage from "@/pages/CustomerHomePage";
@@ -49,6 +50,7 @@ function Router() {
       <Route path="/technicians" component={TechnicianLanding} />
       <Route path="/technician-matching" component={TechnicianMatchingPage} />
       <Route path="/find-expert" component={ExpertTechnicianFinder} />
+      <Route path="/book-technician" component={SimpleBooking} />
       <Route path="/technician-earnings" component={TechnicianEarnings} />
       <Route path="/profile-visibility" component={ProfileVisibilityPage} />
       <Route path="/domains" component={DomainSelector} />
