@@ -381,7 +381,24 @@ export default function AdminDashboard() {
         { id: "faqs", label: "FAQs", icon: MessageSquare },
       ]
     },
-    { id: "service-providers", label: "Service Providers", icon: Wrench },
+    { 
+      id: "service-providers", 
+      label: "Service Providers", 
+      icon: Wrench,
+      subItems: [
+        { id: "add-service-provider", label: "Add New Service Provider", icon: UserPlus },
+        { id: "service-provider-list", label: "Service Provider List", icon: Users },
+        { id: "pending-service-providers", label: "Recent Pending Service Pro", icon: Clock },
+        { id: "service-provider-earnings", label: "Earnings & Referrals", icon: DollarSign },
+        { id: "service-provider-opportunities", label: "Opportunities", icon: Target },
+        { id: "refund-policy-sp", label: "Refund Policy", icon: FileText },
+        { id: "privacy-policy-sp", label: "Privacy Policy", icon: Shield },
+        { id: "cancellation-policy-sp", label: "Cancellation Policy", icon: XCircle },
+        { id: "terms-conditions-sp", label: "Terms & Conditions", icon: FileText },
+        { id: "about-us-sp", label: "About Us", icon: Globe },
+        { id: "faqs-sp", label: "FAQs", icon: MessageSquare },
+      ]
+    },
     { id: "jobs", label: "Jobs", icon: Briefcase },
     { id: "disputes", label: "Disputes", icon: AlertTriangle },
     { id: "payments", label: "Payments", icon: CreditCard },
@@ -1180,6 +1197,621 @@ export default function AdminDashboard() {
                     </div>
                     <div className="text-center py-8 text-gray-600">
                       FAQ management interface will be displayed here
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Service Providers Section */}
+          {activeTab === "add-service-provider" && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Add New Service Provider</h2>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Service Provider Registration Form</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Full Name</label>
+                      <Input placeholder="Enter full name..." />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Email Address</label>
+                      <Input type="email" placeholder="Enter email address..." />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Phone Number</label>
+                      <Input type="tel" placeholder="Enter phone number..." />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Service Categories</label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select service categories..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="hardware">Hardware Issues</SelectItem>
+                          <SelectItem value="software">Software Issues</SelectItem>
+                          <SelectItem value="network">Network Troubleshooting</SelectItem>
+                          <SelectItem value="web">Web Development</SelectItem>
+                          <SelectItem value="mobile">Mobile Devices</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Experience Level</label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select experience level..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="beginner">Beginner (0-2 years)</SelectItem>
+                          <SelectItem value="intermediate">Intermediate (3-5 years)</SelectItem>
+                          <SelectItem value="advanced">Advanced (6-10 years)</SelectItem>
+                          <SelectItem value="expert">Expert (10+ years)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Location</label>
+                      <Input placeholder="Enter location..." />
+                    </div>
+                  </div>
+                  <div className="mt-6 space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Bio/Description</label>
+                      <textarea 
+                        className="w-full h-32 p-3 border border-gray-300 rounded-md"
+                        placeholder="Enter service provider bio..."
+                      />
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Button>
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Add Service Provider
+                      </Button>
+                      <Button variant="outline">
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload CSV
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "service-provider-list" && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Service Provider List</h2>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>All Service Providers</span>
+                    <div className="flex items-center gap-2">
+                      <Input 
+                        placeholder="Search service providers..." 
+                        className="w-64"
+                      />
+                      <Button variant="outline">
+                        <Filter className="h-4 w-4 mr-2" />
+                        Filter
+                      </Button>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Service Provider</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Rating</TableHead>
+                          <TableHead>Completed Jobs</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src="/api/placeholder/32/32" />
+                                <AvatarFallback>JD</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">John Doe</p>
+                                <p className="text-sm text-gray-600">john@example.com</p>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>Hardware Issues</TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="bg-green-100 text-green-800">
+                              Active
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                              <span>4.8</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>127</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button size="sm" variant="outline">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "pending-service-providers" && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Recent Pending Service Providers</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-orange-500" />
+                      Pending Approvals
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                        <div>
+                          <p className="font-medium">Mike Johnson</p>
+                          <p className="text-sm text-gray-600">Network Specialist</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                            <CheckCircle className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <XCircle className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                        <div>
+                          <p className="font-medium">Sarah Wilson</p>
+                          <p className="text-sm text-gray-600">Web Developer</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                            <CheckCircle className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <XCircle className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <DollarSign className="h-5 w-5 text-green-500" />
+                      Earnings Overview
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Total Pending Earnings</span>
+                        <span className="font-bold text-green-600">$2,450</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Processing Payments</span>
+                        <span className="font-bold text-orange-600">$1,200</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Referral Bonuses</span>
+                        <span className="font-bold text-blue-600">$350</span>
+                      </div>
+                      <Button className="w-full" size="sm">
+                        <DollarSign className="h-4 w-4 mr-2" />
+                        Process Payments
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="h-5 w-5 text-blue-500" />
+                      New Opportunities
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <p className="font-medium text-sm">High-Priority Jobs</p>
+                        <p className="text-xs text-gray-600">15 urgent assignments available</p>
+                      </div>
+                      <div className="p-3 bg-purple-50 rounded-lg">
+                        <p className="font-medium text-sm">Premium Clients</p>
+                        <p className="text-xs text-gray-600">3 enterprise clients requesting</p>
+                      </div>
+                      <div className="p-3 bg-green-50 rounded-lg">
+                        <p className="font-medium text-sm">Skill Matches</p>
+                        <p className="text-xs text-gray-600">22 perfect skill matches</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "service-provider-earnings" && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Service Provider Earnings & Referrals</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total Earnings</p>
+                        <p className="text-2xl font-bold text-green-600">$45,230</p>
+                      </div>
+                      <DollarSign className="h-8 w-8 text-green-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Referral Bonus</p>
+                        <p className="text-2xl font-bold text-blue-600">$2,850</p>
+                      </div>
+                      <Users className="h-8 w-8 text-blue-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Pending Payouts</p>
+                        <p className="text-2xl font-bold text-orange-600">$3,420</p>
+                      </div>
+                      <Clock className="h-8 w-8 text-orange-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Commission Rate</p>
+                        <p className="text-2xl font-bold text-purple-600">15%</p>
+                      </div>
+                      <TrendingUp className="h-8 w-8 text-purple-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "service-provider-opportunities" && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Service Provider Opportunities</h2>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Available Opportunities</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-medium">Network Setup - Enterprise Client</h3>
+                          <p className="text-sm text-gray-600">High-priority network configuration for corporate office</p>
+                          <div className="flex items-center gap-4 mt-2">
+                            <Badge variant="secondary">Network Troubleshooting</Badge>
+                            <span className="text-sm text-gray-600">Budget: $500-800</span>
+                            <span className="text-sm text-gray-600">Deadline: 2 days</span>
+                          </div>
+                        </div>
+                        <Button>
+                          <Target className="h-4 w-4 mr-2" />
+                          Assign
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-medium">Mobile App Development</h3>
+                          <p className="text-sm text-gray-600">React Native app for local business</p>
+                          <div className="flex items-center gap-4 mt-2">
+                            <Badge variant="secondary">Mobile Development</Badge>
+                            <span className="text-sm text-gray-600">Budget: $1,200-2,000</span>
+                            <span className="text-sm text-gray-600">Deadline: 1 week</span>
+                          </div>
+                        </div>
+                        <Button>
+                          <Target className="h-4 w-4 mr-2" />
+                          Assign
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Service Provider Policy Sections */}
+          {(activeTab === "refund-policy-sp" || activeTab === "privacy-policy-sp" || activeTab === "cancellation-policy-sp" || activeTab === "terms-conditions-sp") && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Service Provider {activeTab.replace('-sp', '').replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </h2>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Company Information Panel */}
+                <div className="lg:col-span-1">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Company Information</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">Company Name</label>
+                        <Input 
+                          value={companyInfo.name} 
+                          onChange={(e) => setCompanyInfo({...companyInfo, name: e.target.value})}
+                          placeholder="Enter company name..."
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">Business Type</label>
+                        <Select value={companyInfo.businessType} onValueChange={(value) => setCompanyInfo({...companyInfo, businessType: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select business type..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="llc">Limited Liability Company (LLC)</SelectItem>
+                            <SelectItem value="corporation">Corporation</SelectItem>
+                            <SelectItem value="partnership">Partnership</SelectItem>
+                            <SelectItem value="sole-proprietorship">Sole Proprietorship</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">Jurisdiction</label>
+                        <Select value={companyInfo.jurisdiction} onValueChange={(value) => setCompanyInfo({...companyInfo, jurisdiction: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select jurisdiction..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="united-states">United States</SelectItem>
+                            <SelectItem value="canada">Canada</SelectItem>
+                            <SelectItem value="united-kingdom">United Kingdom</SelectItem>
+                            <SelectItem value="european-union">European Union</SelectItem>
+                            <SelectItem value="australia">Australia</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">Contact Email</label>
+                        <Input 
+                          type="email"
+                          value={companyInfo.contactEmail} 
+                          onChange={(e) => setCompanyInfo({...companyInfo, contactEmail: e.target.value})}
+                          placeholder="Enter contact email..."
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">Website</label>
+                        <Input 
+                          value={companyInfo.website} 
+                          onChange={(e) => setCompanyInfo({...companyInfo, website: e.target.value})}
+                          placeholder="Enter website URL..."
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">Address</label>
+                        <textarea 
+                          className="w-full h-20 p-3 border border-gray-300 rounded-md"
+                          value={companyInfo.address} 
+                          onChange={(e) => setCompanyInfo({...companyInfo, address: e.target.value})}
+                          placeholder="Enter company address..."
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* AI Generation Controls */}
+                <div className="lg:col-span-1">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>AI Generation Controls</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">Policy Type</label>
+                        <Select value={getPolicyType(activeTab)} disabled>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="refund">Refund Policy</SelectItem>
+                            <SelectItem value="privacy">Privacy Policy</SelectItem>
+                            <SelectItem value="cancellation">Cancellation Policy</SelectItem>
+                            <SelectItem value="terms">Terms & Conditions</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">Custom Requirements (Optional)</label>
+                        <textarea 
+                          className="w-full h-24 p-3 border border-gray-300 rounded-md"
+                          value={customPrompts}
+                          onChange={(e) => setCustomPrompts(e.target.value)}
+                          placeholder="Add any specific requirements or clauses..."
+                        />
+                      </div>
+                      <Button 
+                        onClick={generatePolicy}
+                        disabled={isGenerating}
+                        className="w-full"
+                      >
+                        {isGenerating ? (
+                          <>
+                            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="h-4 w-4 mr-2" />
+                            Generate Policy
+                          </>
+                        )}
+                      </Button>
+                      <div className="text-xs text-gray-600 bg-gray-50 p-3 rounded-md">
+                        <p className="font-medium mb-1">AI Policy Generator</p>
+                        <p>Uses advanced AI to create legally compliant policy documents tailored to your business and jurisdiction.</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Content Preview */}
+                <div className="lg:col-span-1">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Content Preview</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="bg-gray-50 p-4 rounded-md h-96 overflow-y-auto">
+                        {generatedContent ? (
+                          <div className="whitespace-pre-wrap text-sm">
+                            {generatedContent}
+                          </div>
+                        ) : (
+                          <div className="text-center py-16 text-gray-500">
+                            <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                            <p>Generated policy content will appear here</p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              {generatedContent && (
+                <Card className="mt-6">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-4 mt-4">
+                      <Button>
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Changes
+                      </Button>
+                      <Button variant="outline">
+                        <Eye className="h-4 w-4 mr-2" />
+                        Preview
+                      </Button>
+                      <Button variant="outline">
+                        <Download className="h-4 w-4 mr-2" />
+                        Export as PDF
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+
+          {activeTab === "about-us-sp" && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">About Us - Service Provider Section</h2>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Service Provider About Us Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Service Provider Platform Description</label>
+                      <textarea 
+                        className="w-full h-32 p-3 border border-gray-300 rounded-md"
+                        placeholder="Enter service provider platform description..."
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Benefits for Service Providers</label>
+                      <textarea 
+                        className="w-full h-24 p-3 border border-gray-300 rounded-md"
+                        placeholder="Enter benefits for service providers..."
+                      />
+                    </div>
+                    <Button>Update Service Provider Info</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "faqs-sp" && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Service Provider FAQs</h2>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Service Provider Frequently Asked Questions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-lg font-medium">Service Provider FAQ Items</h3>
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add FAQ
+                      </Button>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="p-4 border rounded-lg">
+                        <h4 className="font-medium">How do I become a service provider?</h4>
+                        <p className="text-sm text-gray-600 mt-1">Complete our application process and pass our verification requirements.</p>
+                      </div>
+                      <div className="p-4 border rounded-lg">
+                        <h4 className="font-medium">What are the earning opportunities?</h4>
+                        <p className="text-sm text-gray-600 mt-1">Service providers can earn 85% of service fees with additional bonuses for performance.</p>
+                      </div>
+                      <div className="p-4 border rounded-lg">
+                        <h4 className="font-medium">How do I get paid?</h4>
+                        <p className="text-sm text-gray-600 mt-1">Payments are processed weekly via direct deposit or your preferred payment method.</p>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
