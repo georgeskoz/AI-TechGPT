@@ -2609,11 +2609,13 @@ Last Updated: ${effectiveDate}
 
 // Comprehensive Job Management Component
 function JobManagement() {
-  const [activeView, setActiveView] = useState("categorized");
+  const [activeView, setActiveView] = useState("filtered");
   const [selectedTimeframe, setSelectedTimeframe] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [showJobDetails, setShowJobDetails] = useState(false);
   const [showActionModal, setShowActionModal] = useState(false);
@@ -2628,9 +2630,23 @@ function JobManagement() {
   });
 
   // Fetch filtered jobs data
-  const { data: filteredJobs, isLoading: loadingFiltered } = useQuery({
-    queryKey: ['/api/admin/jobs/filtered', selectedTimeframe, selectedStatus, selectedCategory, searchQuery],
-    enabled: activeView === "filtered"
+  const { data: filteredJobs, isLoading: loadingFiltered, refetch } = useQuery({
+    queryKey: ['/api/admin/jobs/filtered', selectedTimeframe, selectedStatus, selectedCategory, searchQuery, currentPage, pageSize],
+    enabled: activeView === "filtered",
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        timeframe: selectedTimeframe,
+        status: selectedStatus,
+        category: selectedCategory,
+        search: searchQuery,
+        page: currentPage.toString(),
+        limit: pageSize.toString()
+      });
+      
+      const response = await fetch(`/api/admin/jobs/filtered?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch jobs');
+      return response.json();
+    }
   });
 
   // Job action mutations
@@ -2971,58 +2987,126 @@ function JobManagement() {
 
     return (
       <div className="space-y-4">
-        <div className="flex flex-wrap gap-4 items-center">
-          <div className="flex items-center gap-2">
-            <Search className="h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search jobs..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-64"
-            />
+        {/* Advanced Search and Filter Controls */}
+        <div className="bg-gray-50 p-4 rounded-lg border">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div className="flex items-center gap-2">
+              <Search className="h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search jobs, customers, technicians..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1); // Reset to first page when searching
+                }}
+                className="flex-1"
+              />
+            </div>
+            
+            <Select value={selectedTimeframe} onValueChange={(value) => {
+              setSelectedTimeframe(value);
+              setCurrentPage(1);
+            }}>
+              <SelectTrigger>
+                <SelectValue placeholder="Time Period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="yesterday">Yesterday</SelectItem>
+                <SelectItem value="weekly">This Week</SelectItem>
+                <SelectItem value="monthly">This Month</SelectItem>
+                <SelectItem value="yearly">This Year</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedStatus} onValueChange={(value) => {
+              setSelectedStatus(value);
+              setCurrentPage(1);
+            }}>
+              <SelectTrigger>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedCategory} onValueChange={(value) => {
+              setSelectedCategory(value);
+              setCurrentPage(1);
+            }}>
+              <SelectTrigger>
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="Hardware Issues">Hardware Issues</SelectItem>
+                <SelectItem value="Software Issues">Software Issues</SelectItem>
+                <SelectItem value="Network Troubleshooting">Network Troubleshooting</SelectItem>
+                <SelectItem value="Web Development">Web Development</SelectItem>
+                <SelectItem value="Database Help">Database Help</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          
-          <Select value={selectedTimeframe} onValueChange={setSelectedTimeframe}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Timeframe" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Time</SelectItem>
-              <SelectItem value="today">Today</SelectItem>
-              <SelectItem value="yesterday">Yesterday</SelectItem>
-              <SelectItem value="weekly">This Week</SelectItem>
-              <SelectItem value="monthly">This Month</SelectItem>
-              <SelectItem value="yearly">This Year</SelectItem>
-            </SelectContent>
-          </Select>
 
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
+          {/* Page Size Selection */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Show:</span>
+              <Select value={pageSize.toString()} onValueChange={(value) => {
+                setPageSize(parseInt(value));
+                setCurrentPage(1);
+              }}>
+                <SelectTrigger className="w-20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-sm text-gray-600">per page</span>
+            </div>
 
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="Hardware Issues">Hardware Issues</SelectItem>
-              <SelectItem value="Software Issues">Software Issues</SelectItem>
-              <SelectItem value="Network Troubleshooting">Network Troubleshooting</SelectItem>
-              <SelectItem value="Web Development">Web Development</SelectItem>
-              <SelectItem value="Database Help">Database Help</SelectItem>
-            </SelectContent>
-          </Select>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedTimeframe("all");
+                setSelectedStatus("all");
+                setSelectedCategory("all");
+                setCurrentPage(1);
+              }}
+            >
+              Clear Filters
+            </Button>
+          </div>
         </div>
+
+        {/* Results Summary */}
+        {filteredJobs && (
+          <div className="flex justify-between items-center text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+            <div>
+              {filteredJobs.totalCount === 0 ? (
+                "No jobs found matching your criteria"
+              ) : (
+                <>
+                  Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, filteredJobs.totalCount)} of {filteredJobs.totalCount} jobs
+                </>
+              )}
+            </div>
+            <div>
+              Page {currentPage} of {filteredJobs.totalPages || 1}
+            </div>
+          </div>
+        )}
 
         {/* Table view for filtered jobs */}
         <Card>
@@ -3044,64 +3128,123 @@ function JobManagement() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {jobs.map((job) => (
-                    <TableRow key={job.id} className="hover:bg-gray-50">
-                      <TableCell className="font-medium">{job.jobNumber}</TableCell>
-                      <TableCell>{job.customer}</TableCell>
-                      <TableCell>{job.technician}</TableCell>
-                      <TableCell>{job.category}</TableCell>
-                      <TableCell>{getStatusBadge(job.status)}</TableCell>
-                      <TableCell>{getPriorityBadge(job.priority)}</TableCell>
-                      <TableCell>${job.amount}</TableCell>
-                      <TableCell>{job.duration}min</TableCell>
-                      <TableCell className="text-sm text-gray-500">
-                        {new Date(job.createdAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedJob(job);
-                              setShowJobDetails(true);
-                            }}
-                          >
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                          
-                          <Select onValueChange={(value) => handleJobAction(job, value)}>
-                            <SelectTrigger className="w-24 h-8">
-                              <SelectValue placeholder="•••" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="complaint">Complaint</SelectItem>
-                              <SelectItem value="investigate">Investigate</SelectItem>
-                              <SelectItem value="refund">Refund</SelectItem>
-                              <SelectItem value="coupon">Coupon</SelectItem>
-                              <SelectItem value="penalty">Penalty</SelectItem>
-                              <SelectItem value="case_action">Case Action</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+                  {jobs.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={10} className="text-center py-8 text-gray-500">
+                        No jobs found matching your criteria
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    jobs.map((job) => (
+                      <TableRow key={job.id} className="hover:bg-gray-50">
+                        <TableCell className="font-medium">{job.jobNumber}</TableCell>
+                        <TableCell>{job.customer}</TableCell>
+                        <TableCell>{job.technician}</TableCell>
+                        <TableCell>{job.category}</TableCell>
+                        <TableCell>{getStatusBadge(job.status)}</TableCell>
+                        <TableCell>{getPriorityBadge(job.priority)}</TableCell>
+                        <TableCell>${job.amount}</TableCell>
+                        <TableCell>{job.duration}min</TableCell>
+                        <TableCell className="text-sm text-gray-500">
+                          {new Date(job.createdAt).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedJob(job);
+                                setShowJobDetails(true);
+                              }}
+                            >
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                            
+                            <Select onValueChange={(value) => handleJobAction(job, value)}>
+                              <SelectTrigger className="w-24 h-8">
+                                <SelectValue placeholder="•••" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="complaint">Complaint</SelectItem>
+                                <SelectItem value="investigate">Investigate</SelectItem>
+                                <SelectItem value="refund">Refund</SelectItem>
+                                <SelectItem value="coupon">Coupon</SelectItem>
+                                <SelectItem value="penalty">Penalty</SelectItem>
+                                <SelectItem value="case_action">Case Action</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
           </CardContent>
         </Card>
 
-        {/* Pagination info */}
-        {filteredJobs && (
-          <div className="flex justify-between items-center text-sm text-gray-600">
-            <div>
-              Showing {jobs.length} of {filteredJobs.totalCount} jobs
+        {/* Pagination Controls */}
+        {filteredJobs && filteredJobs.totalPages > 1 && (
+          <div className="flex justify-center items-center gap-4 py-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+            >
+              First
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            
+            <div className="flex items-center gap-2">
+              {[...Array(Math.min(5, filteredJobs.totalPages))].map((_, index) => {
+                const pageNum = Math.max(1, Math.min(
+                  filteredJobs.totalPages - 4,
+                  Math.max(1, currentPage - 2)
+                )) + index;
+                
+                if (pageNum <= filteredJobs.totalPages) {
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={pageNum === currentPage ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(pageNum)}
+                      className="w-8"
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                }
+                return null;
+              })}
             </div>
-            <div>
-              Page {filteredJobs.page} of {filteredJobs.totalPages}
-            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === filteredJobs.totalPages}
+            >
+              Next
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(filteredJobs.totalPages)}
+              disabled={currentPage === filteredJobs.totalPages}
+            >
+              Last
+            </Button>
           </div>
         )}
       </div>
@@ -3494,21 +3637,26 @@ function JobManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900">Job Management</h2>
-        <div className="flex items-center gap-2">
-          <Button
-            variant={activeView === "categorized" ? "default" : "outline"}
-            onClick={() => setActiveView("categorized")}
-          >
-            <Calendar className="h-4 w-4 mr-2" />
-            Categorized View
-          </Button>
-          <Button
-            variant={activeView === "filtered" ? "default" : "outline"}
-            onClick={() => setActiveView("filtered")}
-          >
-            <Filter className="h-4 w-4 mr-2" />
-            Filtered View
-          </Button>
+        <div className="flex items-center gap-4">
+          <div className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded">
+            💡 Use Advanced Search for detailed job management with pagination
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant={activeView === "filtered" ? "default" : "outline"}
+              onClick={() => setActiveView("filtered")}
+            >
+              <Filter className="h-4 w-4 mr-2" />
+              Advanced Search
+            </Button>
+            <Button
+              variant={activeView === "categorized" ? "default" : "outline"}
+              onClick={() => setActiveView("categorized")}
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              Quick Overview
+            </Button>
+          </div>
         </div>
       </div>
 
