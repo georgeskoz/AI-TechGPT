@@ -1,12 +1,13 @@
 import { 
   users, messages, technicians, serviceRequests, jobs, jobUpdates, supportCases, supportMessages, issueCategories,
-  bookingSettings, serviceBookings,
+  bookingSettings, serviceBookings, disputes, disputeMessages, disputeAttachments,
   type User, type InsertUser, type UpdateProfile, type Message, type InsertMessage,
   type Technician, type InsertTechnician, type ServiceRequest, type InsertServiceRequest,
   type Job, type InsertJob, type JobUpdate, type InsertJobUpdate,
   type SupportCase, type InsertSupportCase, type SupportMessage, type InsertSupportMessage,
   type IssueCategory, type InsertIssueCategory, type BookingSettings, type InsertBookingSettings,
-  type ServiceBooking, type InsertServiceBooking
+  type ServiceBooking, type InsertServiceBooking, type Dispute, type InsertDispute,
+  type DisputeMessage, type InsertDisputeMessage, type DisputeAttachment, type InsertDisputeAttachment
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -150,6 +151,27 @@ export interface IStorage {
   getServiceBooking(id: number): Promise<ServiceBooking | undefined>;
   getServiceBookingsByCustomer(customerId: number): Promise<ServiceBooking[]>;
   updateServiceBooking(id: number, updates: Partial<ServiceBooking>): Promise<ServiceBooking>;
+
+  // Dispute management
+  createDispute(dispute: InsertDispute): Promise<Dispute>;
+  getDispute(id: number): Promise<Dispute | undefined>;
+  getDisputesByStatus(status: string): Promise<Dispute[]>;
+  getDisputesByCustomer(customerId: number): Promise<Dispute[]>;
+  getDisputesByTechnician(technicianId: number): Promise<Dispute[]>;
+  updateDisputeStatus(id: number, status: string, adminId?: number): Promise<Dispute>;
+  assignDisputeToAdmin(id: number, adminId: number): Promise<Dispute>;
+  getAllDisputes(): Promise<Dispute[]>;
+  getDisputeAnalytics(): Promise<any>;
+  
+  // Dispute messages
+  createDisputeMessage(message: InsertDisputeMessage): Promise<DisputeMessage>;
+  getDisputeMessages(disputeId: number): Promise<DisputeMessage[]>;
+  markDisputeMessageAsRead(messageId: number): Promise<void>;
+  
+  // Dispute attachments
+  createDisputeAttachment(attachment: InsertDisputeAttachment): Promise<DisputeAttachment>;
+  getDisputeAttachments(disputeId: number): Promise<DisputeAttachment[]>;
+  deleteDisputeAttachment(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1988,6 +2010,191 @@ class MemoryStorage implements IStorage {
       updatedAt: new Date(),
       success: true
     };
+  }
+
+  // Dispute management methods
+  private disputes = new Map<number, Dispute>();
+  private disputeMessages = new Map<number, DisputeMessage[]>();
+  private disputeAttachments = new Map<number, DisputeAttachment[]>();
+  private disputeIdCounter = 1;
+
+  async createDispute(dispute: InsertDispute): Promise<Dispute> {
+    const id = this.disputeIdCounter++;
+    const newDispute: Dispute = {
+      id,
+      ...dispute,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      status: dispute.status || 'new',
+      priority: dispute.priority || 'medium',
+      assignedAdminId: dispute.assignedAdminId || null,
+      resolutionNotes: dispute.resolutionNotes || null,
+      resolvedAt: dispute.resolvedAt || null,
+      escalatedAt: dispute.escalatedAt || null,
+      estimatedResolutionTime: dispute.estimatedResolutionTime || null,
+      attachmentCount: dispute.attachmentCount || 0,
+      lastResponseAt: dispute.lastResponseAt || null,
+      responseTime: dispute.responseTime || null,
+      satisfactionRating: dispute.satisfactionRating || null,
+      tags: dispute.tags || null,
+      internalNotes: dispute.internalNotes || null,
+      requiresManagerApproval: dispute.requiresManagerApproval || false,
+      isPublic: dispute.isPublic || true,
+      metadata: dispute.metadata || null
+    };
+    
+    this.disputes.set(id, newDispute);
+    this.disputeMessages.set(id, []);
+    this.disputeAttachments.set(id, []);
+    
+    return newDispute;
+  }
+
+  async getDispute(id: number): Promise<Dispute | undefined> {
+    return this.disputes.get(id);
+  }
+
+  async getDisputesByStatus(status: string): Promise<Dispute[]> {
+    return Array.from(this.disputes.values()).filter(dispute => dispute.status === status);
+  }
+
+  async getDisputesByCustomer(customerId: number): Promise<Dispute[]> {
+    return Array.from(this.disputes.values()).filter(dispute => dispute.customerId === customerId);
+  }
+
+  async getDisputesByTechnician(technicianId: number): Promise<Dispute[]> {
+    return Array.from(this.disputes.values()).filter(dispute => dispute.technicianId === technicianId);
+  }
+
+  async updateDisputeStatus(id: number, status: string, adminId?: number): Promise<Dispute> {
+    const dispute = this.disputes.get(id);
+    if (!dispute) {
+      throw new Error('Dispute not found');
+    }
+    
+    const updatedDispute = {
+      ...dispute,
+      status,
+      updatedAt: new Date(),
+      assignedAdminId: adminId || dispute.assignedAdminId,
+      resolvedAt: status === 'resolved' ? new Date() : dispute.resolvedAt
+    };
+    
+    this.disputes.set(id, updatedDispute);
+    return updatedDispute;
+  }
+
+  async assignDisputeToAdmin(id: number, adminId: number): Promise<Dispute> {
+    const dispute = this.disputes.get(id);
+    if (!dispute) {
+      throw new Error('Dispute not found');
+    }
+    
+    const updatedDispute = {
+      ...dispute,
+      assignedAdminId: adminId,
+      updatedAt: new Date()
+    };
+    
+    this.disputes.set(id, updatedDispute);
+    return updatedDispute;
+  }
+
+  async getAllDisputes(): Promise<Dispute[]> {
+    return Array.from(this.disputes.values()).sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+
+  async getDisputeAnalytics(): Promise<any> {
+    const disputes = Array.from(this.disputes.values());
+    const total = disputes.length;
+    const byStatus = disputes.reduce((acc, dispute) => {
+      acc[dispute.status] = (acc[dispute.status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    const averageResolutionTime = disputes
+      .filter(d => d.resolvedAt)
+      .reduce((acc, d) => acc + (new Date(d.resolvedAt!).getTime() - new Date(d.createdAt).getTime()), 0) / 
+      disputes.filter(d => d.resolvedAt).length;
+    
+    return {
+      total,
+      byStatus,
+      averageResolutionTime: averageResolutionTime || 0,
+      recentDisputes: disputes.slice(0, 5)
+    };
+  }
+
+  // Dispute messages
+  async createDisputeMessage(message: InsertDisputeMessage): Promise<DisputeMessage> {
+    const id = Date.now() + Math.random();
+    const newMessage: DisputeMessage = {
+      id,
+      ...message,
+      createdAt: new Date(),
+      isRead: false,
+      messageType: message.messageType || 'text',
+      priority: message.priority || 'normal',
+      isInternal: message.isInternal || false,
+      parentMessageId: message.parentMessageId || null,
+      attachments: message.attachments || null,
+      metadata: message.metadata || null
+    };
+    
+    const messages = this.disputeMessages.get(message.disputeId) || [];
+    messages.push(newMessage);
+    this.disputeMessages.set(message.disputeId, messages);
+    
+    return newMessage;
+  }
+
+  async getDisputeMessages(disputeId: number): Promise<DisputeMessage[]> {
+    return this.disputeMessages.get(disputeId) || [];
+  }
+
+  async markDisputeMessageAsRead(messageId: number): Promise<void> {
+    for (const messages of this.disputeMessages.values()) {
+      const message = messages.find(m => m.id === messageId);
+      if (message) {
+        message.isRead = true;
+        break;
+      }
+    }
+  }
+
+  // Dispute attachments
+  async createDisputeAttachment(attachment: InsertDisputeAttachment): Promise<DisputeAttachment> {
+    const id = Date.now() + Math.random();
+    const newAttachment: DisputeAttachment = {
+      id,
+      ...attachment,
+      createdAt: new Date(),
+      isPublic: attachment.isPublic || true,
+      metadata: attachment.metadata || null
+    };
+    
+    const attachments = this.disputeAttachments.get(attachment.disputeId) || [];
+    attachments.push(newAttachment);
+    this.disputeAttachments.set(attachment.disputeId, attachments);
+    
+    return newAttachment;
+  }
+
+  async getDisputeAttachments(disputeId: number): Promise<DisputeAttachment[]> {
+    return this.disputeAttachments.get(disputeId) || [];
+  }
+
+  async deleteDisputeAttachment(id: number): Promise<void> {
+    for (const [disputeId, attachments] of this.disputeAttachments.entries()) {
+      const index = attachments.findIndex(a => a.id === id);
+      if (index !== -1) {
+        attachments.splice(index, 1);
+        this.disputeAttachments.set(disputeId, attachments);
+        break;
+      }
+    }
   }
 
   private generateMockJobs(): any[] {
