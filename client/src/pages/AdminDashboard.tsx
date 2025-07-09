@@ -30,6 +30,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { 
@@ -86,7 +87,15 @@ import {
   Loader2,
   Sparkles,
   Copy,
-  Save
+  Save,
+  Flag,
+  Gift,
+  Receipt,
+  Ban,
+  FolderOpen,
+  FolderX,
+  Edit3,
+  ExternalLink
 } from "lucide-react";
 
 interface AdminUser {
@@ -2566,7 +2575,9 @@ Last Updated: ${effectiveDate}
             </div>
           )}
 
-          {(activeTab === "users" || activeTab === "service-providers" || activeTab === "jobs" || activeTab === "disputes" || activeTab === "payments" || activeTab === "system" || activeTab === "settings") && (
+          {activeTab === "jobs" && <JobManagement />}
+
+          {(activeTab === "users" || activeTab === "service-providers" || activeTab === "disputes" || activeTab === "payments" || activeTab === "system" || activeTab === "settings") && (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Settings className="h-8 w-8 text-gray-400" />
@@ -2592,6 +2603,757 @@ Last Updated: ${effectiveDate}
           onClick={() => setSidebarOpen(false)}
         />
       )}
+    </div>
+  );
+}
+
+// Comprehensive Job Management Component
+function JobManagement() {
+  const [activeView, setActiveView] = useState("categorized");
+  const [selectedTimeframe, setSelectedTimeframe] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [showJobDetails, setShowJobDetails] = useState(false);
+  const [showActionModal, setShowActionModal] = useState(false);
+  const [actionType, setActionType] = useState("");
+  const [actionData, setActionData] = useState<any>({});
+  const { toast } = useToast();
+
+  // Fetch categorized jobs data
+  const { data: categorizedJobs, isLoading: loadingCategorized } = useQuery({
+    queryKey: ['/api/admin/jobs/categorized'],
+    enabled: activeView === "categorized"
+  });
+
+  // Fetch filtered jobs data
+  const { data: filteredJobs, isLoading: loadingFiltered } = useQuery({
+    queryKey: ['/api/admin/jobs/filtered', selectedTimeframe, selectedStatus, selectedCategory, searchQuery],
+    enabled: activeView === "filtered"
+  });
+
+  // Job action mutations
+  const jobActionMutation = useMutation({
+    mutationFn: (actionData: any) => {
+      switch (actionData.type) {
+        case 'complaint':
+          return fetch('/api/admin/jobs/complaint', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(actionData.data)
+          });
+        case 'investigate':
+          return fetch('/api/admin/jobs/investigate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(actionData.data)
+          });
+        case 'refund':
+          return fetch('/api/admin/jobs/refund', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(actionData.data)
+          });
+        case 'coupon':
+          return fetch('/api/admin/jobs/coupon', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(actionData.data)
+          });
+        case 'penalty':
+          return fetch('/api/admin/jobs/penalty', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(actionData.data)
+          });
+        case 'case_action':
+          return fetch('/api/admin/jobs/case-action', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(actionData.data)
+          });
+        default:
+          return Promise.reject(new Error('Unknown action type'));
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Job action completed successfully"
+      });
+      setShowActionModal(false);
+      setActionData({});
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to complete job action",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleJobAction = (job: any, action: string) => {
+    setSelectedJob(job);
+    setActionType(action);
+    setActionData({ jobId: job.id, type: action });
+    setShowActionModal(true);
+  };
+
+  const submitJobAction = () => {
+    jobActionMutation.mutate({
+      type: actionType,
+      data: actionData
+    });
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      pending: { variant: "secondary", color: "bg-yellow-100 text-yellow-800" },
+      in_progress: { variant: "default", color: "bg-blue-100 text-blue-800" },
+      completed: { variant: "success", color: "bg-green-100 text-green-800" },
+      cancelled: { variant: "destructive", color: "bg-red-100 text-red-800" }
+    };
+    
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
+    return (
+      <Badge className={`${config.color} border-0`}>
+        {status.replace('_', ' ').toUpperCase()}
+      </Badge>
+    );
+  };
+
+  const getPriorityBadge = (priority: string) => {
+    const priorityConfig = {
+      low: "bg-gray-100 text-gray-800",
+      medium: "bg-yellow-100 text-yellow-800",
+      high: "bg-orange-100 text-orange-800",
+      urgent: "bg-red-100 text-red-800"
+    };
+    
+    return (
+      <Badge className={`${priorityConfig[priority as keyof typeof priorityConfig]} border-0`}>
+        {priority.toUpperCase()}
+      </Badge>
+    );
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const renderJobCard = (job: any) => (
+    <Card key={job.id} className="hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <h3 className="font-semibold text-sm">{job.jobNumber}</h3>
+            <p className="text-xs text-gray-600 mt-1">{job.title}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {getStatusBadge(job.status)}
+            {getPriorityBadge(job.priority)}
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 mb-3">
+          <div>
+            <span className="font-medium">Customer:</span> {job.customer}
+          </div>
+          <div>
+            <span className="font-medium">Technician:</span> {job.technician}
+          </div>
+          <div>
+            <span className="font-medium">Amount:</span> ${job.amount}
+          </div>
+          <div>
+            <span className="font-medium">Duration:</span> {job.duration}min
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSelectedJob(job);
+                setShowJobDetails(true);
+              }}
+            >
+              <Eye className="h-3 w-3 mr-1" />
+              View
+            </Button>
+            
+            <Select onValueChange={(value) => handleJobAction(job, value)}>
+              <SelectTrigger className="w-32 h-8">
+                <SelectValue placeholder="Actions" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="complaint">
+                  <Flag className="h-3 w-3 mr-2" />
+                  Complaint
+                </SelectItem>
+                <SelectItem value="investigate">
+                  <Search className="h-3 w-3 mr-2" />
+                  Investigate
+                </SelectItem>
+                <SelectItem value="refund">
+                  <Receipt className="h-3 w-3 mr-2" />
+                  Refund
+                </SelectItem>
+                <SelectItem value="coupon">
+                  <Gift className="h-3 w-3 mr-2" />
+                  Coupon
+                </SelectItem>
+                <SelectItem value="penalty">
+                  <Ban className="h-3 w-3 mr-2" />
+                  Penalty
+                </SelectItem>
+                <SelectItem value="case_action">
+                  <FolderOpen className="h-3 w-3 mr-2" />
+                  Case Action
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="text-xs text-gray-500">
+            {formatDate(job.createdAt)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderCategorizedView = () => {
+    if (loadingCategorized) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        {['today', 'yesterday', 'weekly', 'monthly', 'yearly'].map((timeframe) => {
+          const jobs = categorizedJobs?.[timeframe] || [];
+          if (jobs.length === 0) return null;
+
+          return (
+            <div key={timeframe}>
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                {timeframe.charAt(0).toUpperCase() + timeframe.slice(1)} Jobs ({jobs.length})
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {jobs.map(renderJobCard)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderFilteredView = () => {
+    if (loadingFiltered) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      );
+    }
+
+    const jobs = filteredJobs?.jobs || [];
+
+    return (
+      <div className="space-y-4">
+        <div className="flex flex-wrap gap-4 items-center">
+          <div className="flex items-center gap-2">
+            <Search className="h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search jobs..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-64"
+            />
+          </div>
+          
+          <Select value={selectedTimeframe} onValueChange={setSelectedTimeframe}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Timeframe" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Time</SelectItem>
+              <SelectItem value="today">Today</SelectItem>
+              <SelectItem value="yesterday">Yesterday</SelectItem>
+              <SelectItem value="weekly">This Week</SelectItem>
+              <SelectItem value="monthly">This Month</SelectItem>
+              <SelectItem value="yearly">This Year</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="Hardware Issues">Hardware Issues</SelectItem>
+              <SelectItem value="Software Issues">Software Issues</SelectItem>
+              <SelectItem value="Network Troubleshooting">Network Troubleshooting</SelectItem>
+              <SelectItem value="Web Development">Web Development</SelectItem>
+              <SelectItem value="Database Help">Database Help</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {jobs.map(renderJobCard)}
+        </div>
+
+        {filteredJobs?.totalPages > 1 && (
+          <div className="flex justify-center">
+            <p className="text-sm text-gray-600">
+              Showing {jobs.length} of {filteredJobs.totalCount} jobs
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderJobDetailsModal = () => (
+    <Dialog open={showJobDetails} onOpenChange={setShowJobDetails}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Job Details - {selectedJob?.jobNumber}</DialogTitle>
+        </DialogHeader>
+        
+        {selectedJob && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <h4 className="font-semibold mb-3">Job Information</h4>
+                <div className="space-y-2 text-sm">
+                  <div><strong>Title:</strong> {selectedJob.title}</div>
+                  <div><strong>Description:</strong> {selectedJob.description}</div>
+                  <div><strong>Category:</strong> {selectedJob.category}</div>
+                  <div><strong>Service Type:</strong> {selectedJob.serviceType}</div>
+                  <div><strong>Priority:</strong> {getPriorityBadge(selectedJob.priority)}</div>
+                  <div><strong>Status:</strong> {getStatusBadge(selectedJob.status)}</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold mb-3">Participants</h4>
+                <div className="space-y-2 text-sm">
+                  <div><strong>Customer:</strong> {selectedJob.customer}</div>
+                  <div><strong>Customer Email:</strong> {selectedJob.customerEmail}</div>
+                  <div><strong>Technician:</strong> {selectedJob.technician}</div>
+                  <div><strong>Technician Email:</strong> {selectedJob.technicianEmail}</div>
+                  <div><strong>Location:</strong> {selectedJob.location}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <h4 className="font-semibold mb-3">Financial Details</h4>
+                <div className="space-y-2 text-sm">
+                  <div><strong>Amount:</strong> ${selectedJob.amount}</div>
+                  <div><strong>Duration:</strong> {selectedJob.duration} minutes</div>
+                  <div><strong>Rating:</strong> {selectedJob.rating}/5 stars</div>
+                  <div><strong>Feedback:</strong> {selectedJob.feedback}</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold mb-3">Timeline</h4>
+                <div className="space-y-2 text-sm">
+                  <div><strong>Created:</strong> {formatDate(selectedJob.createdAt)}</div>
+                  <div><strong>Assigned:</strong> {formatDate(selectedJob.assignedAt)}</div>
+                  <div><strong>Started:</strong> {formatDate(selectedJob.startedAt)}</div>
+                  <div><strong>Completed:</strong> {formatDate(selectedJob.completedAt)}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowJobDetails(false);
+                  handleJobAction(selectedJob, 'complaint');
+                }}
+              >
+                <Flag className="h-4 w-4 mr-2" />
+                File Complaint
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowJobDetails(false);
+                  handleJobAction(selectedJob, 'investigate');
+                }}
+              >
+                <Search className="h-4 w-4 mr-2" />
+                Investigate
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowJobDetails(false);
+                  handleJobAction(selectedJob, 'refund');
+                }}
+              >
+                <Receipt className="h-4 w-4 mr-2" />
+                Process Refund
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+
+  const renderActionModal = () => (
+    <Dialog open={showActionModal} onOpenChange={setShowActionModal}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {actionType === 'complaint' && 'File Complaint'}
+            {actionType === 'investigate' && 'Start Investigation'}
+            {actionType === 'refund' && 'Process Refund'}
+            {actionType === 'coupon' && 'Create Coupon'}
+            {actionType === 'penalty' && 'Apply Penalty'}
+            {actionType === 'case_action' && 'Case Action'}
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-4">
+          {actionType === 'complaint' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium mb-2">Complaint Type</label>
+                <Select 
+                  value={actionData.category} 
+                  onValueChange={(value) => setActionData({...actionData, category: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select complaint type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="behavior">Behavior Issue</SelectItem>
+                    <SelectItem value="quality">Service Quality</SelectItem>
+                    <SelectItem value="billing">Billing Dispute</SelectItem>
+                    <SelectItem value="technical">Technical Issue</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Severity</label>
+                <Select 
+                  value={actionData.severity} 
+                  onValueChange={(value) => setActionData({...actionData, severity: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select severity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Description</label>
+                <Textarea 
+                  value={actionData.description} 
+                  onChange={(e) => setActionData({...actionData, description: e.target.value})}
+                  placeholder="Describe the complaint in detail..."
+                  className="min-h-[100px]"
+                />
+              </div>
+            </>
+          )}
+
+          {actionType === 'investigate' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium mb-2">Investigation Type</label>
+                <Select 
+                  value={actionData.investigationType} 
+                  onValueChange={(value) => setActionData({...actionData, investigationType: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select investigation type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="quality">Quality Review</SelectItem>
+                    <SelectItem value="fraud">Fraud Investigation</SelectItem>
+                    <SelectItem value="performance">Performance Review</SelectItem>
+                    <SelectItem value="compliance">Compliance Check</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Priority</label>
+                <Select 
+                  value={actionData.priority} 
+                  onValueChange={(value) => setActionData({...actionData, priority: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Investigation Notes</label>
+                <Textarea 
+                  value={actionData.notes} 
+                  onChange={(e) => setActionData({...actionData, notes: e.target.value})}
+                  placeholder="Enter investigation details and initial findings..."
+                  className="min-h-[100px]"
+                />
+              </div>
+            </>
+          )}
+
+          {actionType === 'refund' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium mb-2">Refund Amount</label>
+                <Input 
+                  type="number" 
+                  value={actionData.amount} 
+                  onChange={(e) => setActionData({...actionData, amount: e.target.value})}
+                  placeholder="Enter refund amount"
+                  step="0.01"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Refund Reason</label>
+                <Select 
+                  value={actionData.reason} 
+                  onValueChange={(value) => setActionData({...actionData, reason: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select refund reason" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="service_unsatisfactory">Service Unsatisfactory</SelectItem>
+                    <SelectItem value="technician_issue">Technician Issue</SelectItem>
+                    <SelectItem value="billing_error">Billing Error</SelectItem>
+                    <SelectItem value="service_incomplete">Service Incomplete</SelectItem>
+                    <SelectItem value="customer_request">Customer Request</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Refund Notes</label>
+                <Textarea 
+                  value={actionData.notes} 
+                  onChange={(e) => setActionData({...actionData, notes: e.target.value})}
+                  placeholder="Enter refund processing notes..."
+                  className="min-h-[100px]"
+                />
+              </div>
+            </>
+          )}
+
+          {actionType === 'coupon' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium mb-2">Coupon Code</label>
+                <Input 
+                  value={actionData.code} 
+                  onChange={(e) => setActionData({...actionData, code: e.target.value})}
+                  placeholder="Enter coupon code"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Discount Type</label>
+                <Select 
+                  value={actionData.discountType} 
+                  onValueChange={(value) => setActionData({...actionData, discountType: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select discount type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="percentage">Percentage</SelectItem>
+                    <SelectItem value="fixed">Fixed Amount</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Discount Value</label>
+                <Input 
+                  type="number" 
+                  value={actionData.value} 
+                  onChange={(e) => setActionData({...actionData, value: e.target.value})}
+                  placeholder="Enter discount value"
+                  step="0.01"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Expiry Date</label>
+                <Input 
+                  type="date" 
+                  value={actionData.expiryDate} 
+                  onChange={(e) => setActionData({...actionData, expiryDate: e.target.value})}
+                />
+              </div>
+            </>
+          )}
+
+          {actionType === 'penalty' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium mb-2">Penalty Type</label>
+                <Select 
+                  value={actionData.penaltyType} 
+                  onValueChange={(value) => setActionData({...actionData, penaltyType: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select penalty type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="warning">Warning</SelectItem>
+                    <SelectItem value="fine">Fine</SelectItem>
+                    <SelectItem value="suspension">Suspension</SelectItem>
+                    <SelectItem value="termination">Termination</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Penalty Amount</label>
+                <Input 
+                  type="number" 
+                  value={actionData.amount} 
+                  onChange={(e) => setActionData({...actionData, amount: e.target.value})}
+                  placeholder="Enter penalty amount (if applicable)"
+                  step="0.01"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Penalty Reason</label>
+                <Textarea 
+                  value={actionData.reason} 
+                  onChange={(e) => setActionData({...actionData, reason: e.target.value})}
+                  placeholder="Enter penalty reason and details..."
+                  className="min-h-[100px]"
+                />
+              </div>
+            </>
+          )}
+
+          {actionType === 'case_action' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium mb-2">Case Action</label>
+                <Select 
+                  value={actionData.caseAction} 
+                  onValueChange={(value) => setActionData({...actionData, caseAction: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select case action" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="open_case">Open Case</SelectItem>
+                    <SelectItem value="escalate">Escalate</SelectItem>
+                    <SelectItem value="resolve">Resolve</SelectItem>
+                    <SelectItem value="close_case">Close Case</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Case Notes</label>
+                <Textarea 
+                  value={actionData.caseNotes} 
+                  onChange={(e) => setActionData({...actionData, caseNotes: e.target.value})}
+                  placeholder="Enter case management notes..."
+                  className="min-h-[100px]"
+                />
+              </div>
+            </>
+          )}
+
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setShowActionModal(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={submitJobAction}
+              disabled={jobActionMutation.isPending}
+            >
+              {jobActionMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Submit
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-900">Job Management</h2>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={activeView === "categorized" ? "default" : "outline"}
+            onClick={() => setActiveView("categorized")}
+          >
+            <Calendar className="h-4 w-4 mr-2" />
+            Categorized View
+          </Button>
+          <Button
+            variant={activeView === "filtered" ? "default" : "outline"}
+            onClick={() => setActiveView("filtered")}
+          >
+            <Filter className="h-4 w-4 mr-2" />
+            Filtered View
+          </Button>
+        </div>
+      </div>
+
+      {activeView === "categorized" && renderCategorizedView()}
+      {activeView === "filtered" && renderFilteredView()}
+
+      {renderJobDetailsModal()}
+      {renderActionModal()}
     </div>
   );
 }
