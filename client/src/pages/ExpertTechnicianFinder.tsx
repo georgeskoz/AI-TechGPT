@@ -645,6 +645,21 @@ export default function ExpertTechnicianFinder() {
                   onChange={handleCameraCapture}
                   className="hidden"
                 />
+                {uploadedImage && (
+                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-sm font-medium">Image uploaded successfully</span>
+                    </div>
+                    <div className="flex justify-center">
+                      <img 
+                        src={uploadedImage} 
+                        alt="Uploaded preview" 
+                        className="max-w-xs max-h-32 object-contain rounded border"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Common Symptoms */}
@@ -1070,7 +1085,7 @@ export default function ExpertTechnicianFinder() {
                     <img 
                       src={uploadedImage} 
                       alt="Uploaded" 
-                      className="max-w-full h-auto rounded-lg border"
+                      className="max-w-md max-h-64 object-contain mx-auto rounded-lg border"
                     />
                   </div>
                 )}
