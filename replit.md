@@ -120,7 +120,8 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
   - **Add New Service Provider**: Complete registration form with service categories, experience levels, location, and bio management
   - **Service Provider List**: Professional table view with search, filtering, ratings, and action buttons for provider management
   - **Recent Pending Service Providers**: Dashboard showing pending approvals, earnings overview, and new opportunities with quick action buttons
-  - **Earnings & Referrals**: Comprehensive earnings tracking with total earnings, referral bonuses, pending payouts, and commission rates
+  - **Earnings**: Comprehensive earnings tracking with total earnings, monthly earnings, pending payouts, and commission rates
+  - **Referrals**: Dedicated referral management system with total referrals, active referrals, referral bonuses, conversion rates, recent referrals tracking, top referrers leaderboard, and referral program settings
   - **Opportunities Management**: Available job assignments with budget information, deadlines, and assignment capabilities
   - **Service Provider Policies**: Complete AI-powered policy generation for Service Providers including Refund Policy, Privacy Policy, Cancellation Policy, and Terms & Conditions
   - **About Us & FAQs**: Dedicated sections for service provider platform information and frequently asked questions

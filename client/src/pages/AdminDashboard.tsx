@@ -389,7 +389,8 @@ export default function AdminDashboard() {
         { id: "add-service-provider", label: "Add New Service Provider", icon: UserPlus },
         { id: "service-provider-list", label: "Service Provider List", icon: Users },
         { id: "pending-service-providers", label: "Recent Pending Service Pro", icon: Clock },
-        { id: "service-provider-earnings", label: "Earnings & Referrals", icon: DollarSign },
+        { id: "service-provider-earnings", label: "Earnings", icon: DollarSign },
+        { id: "service-provider-referrals", label: "Referrals", icon: Users },
         { id: "service-provider-opportunities", label: "Opportunities", icon: Target },
         { id: "refund-policy-sp", label: "Refund Policy", icon: FileText },
         { id: "privacy-policy-sp", label: "Privacy Policy", icon: Shield },
@@ -1469,7 +1470,7 @@ export default function AdminDashboard() {
 
           {activeTab === "service-provider-earnings" && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Service Provider Earnings & Referrals</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Service Provider Earnings</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <Card>
                   <CardContent className="p-6">
@@ -1486,10 +1487,10 @@ export default function AdminDashboard() {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600">Referral Bonus</p>
-                        <p className="text-2xl font-bold text-blue-600">$2,850</p>
+                        <p className="text-sm font-medium text-gray-600">Monthly Earnings</p>
+                        <p className="text-2xl font-bold text-blue-600">$8,420</p>
                       </div>
-                      <Users className="h-8 w-8 text-blue-500" />
+                      <Calendar className="h-8 w-8 text-blue-500" />
                     </div>
                   </CardContent>
                 </Card>
@@ -1516,6 +1517,214 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </div>
+            </div>
+          )}
+
+          {activeTab === "service-provider-referrals" && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Service Provider Referrals</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total Referrals</p>
+                        <p className="text-2xl font-bold text-blue-600">127</p>
+                      </div>
+                      <Users className="h-8 w-8 text-blue-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Active Referrals</p>
+                        <p className="text-2xl font-bold text-green-600">89</p>
+                      </div>
+                      <CheckCircle className="h-8 w-8 text-green-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Referral Bonus</p>
+                        <p className="text-2xl font-bold text-purple-600">$2,850</p>
+                      </div>
+                      <DollarSign className="h-8 w-8 text-purple-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Conversion Rate</p>
+                        <p className="text-2xl font-bold text-orange-600">68%</p>
+                      </div>
+                      <TrendingUp className="h-8 w-8 text-orange-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Referrals</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src="/api/placeholder/32/32" />
+                            <AvatarFallback>AM</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-sm">Alice Morgan</p>
+                            <p className="text-xs text-gray-600">Referred by: John Doe</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-green-600">+$50</p>
+                          <p className="text-xs text-gray-600">2 days ago</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src="/api/placeholder/32/32" />
+                            <AvatarFallback>RT</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-sm">Robert Taylor</p>
+                            <p className="text-xs text-gray-600">Referred by: Sarah Wilson</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-green-600">+$50</p>
+                          <p className="text-xs text-gray-600">1 week ago</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src="/api/placeholder/32/32" />
+                            <AvatarFallback>MJ</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-sm">Mike Johnson</p>
+                            <p className="text-xs text-gray-600">Referred by: Lisa Chen</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-green-600">+$50</p>
+                          <p className="text-xs text-gray-600">2 weeks ago</p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Top Referrers</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src="/api/placeholder/32/32" />
+                            <AvatarFallback>JD</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-sm">John Doe</p>
+                            <p className="text-xs text-gray-600">Hardware Specialist</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-green-600">23 referrals</p>
+                          <p className="text-xs text-gray-600">$1,150 earned</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src="/api/placeholder/32/32" />
+                            <AvatarFallback>SW</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-sm">Sarah Wilson</p>
+                            <p className="text-xs text-gray-600">Web Developer</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-green-600">18 referrals</p>
+                          <p className="text-xs text-gray-600">$900 earned</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src="/api/placeholder/32/32" />
+                            <AvatarFallback>LC</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-sm">Lisa Chen</p>
+                            <p className="text-xs text-gray-600">Network Engineer</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-green-600">15 referrals</p>
+                          <p className="text-xs text-gray-600">$750 earned</p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>Referral Program Settings</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Referral Bonus Amount</label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">$</span>
+                        <Input type="number" defaultValue="50" className="w-24" />
+                        <span className="text-sm text-gray-600">per successful referral</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Minimum Requirements</label>
+                      <Select defaultValue="30-days">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="immediate">Immediate</SelectItem>
+                          <SelectItem value="7-days">7 days active</SelectItem>
+                          <SelectItem value="30-days">30 days active</SelectItem>
+                          <SelectItem value="first-job">Complete first job</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="mt-6">
+                    <Button>
+                      <Save className="h-4 w-4 mr-2" />
+                      Update Referral Settings
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
 
