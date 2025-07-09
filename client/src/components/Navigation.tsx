@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { ArrowLeft, Home, Menu, X } from "lucide-react";
+import { ArrowLeft, Home, Menu, X, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -74,8 +74,17 @@ export default function Navigation({
             </Button>
           </div>
 
-          {/* Right side - Home button and Menu */}
+          {/* Right side - Chat, Home button and Menu */}
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setLocation("/chat")}
+              className="hidden sm:flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Chat
+            </Button>
             {showHomeButton && (
               <Button
                 variant="ghost"
