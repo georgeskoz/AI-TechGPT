@@ -33,6 +33,7 @@ export default function ClientDashboard() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [serviceRequests, setServiceRequests] = useState<any[]>([]);
   const [jobs, setJobs] = useState<any[]>([]);
+  const [serviceBookings, setServiceBookings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -65,20 +66,24 @@ export default function ClientDashboard() {
   const loadUserData = async (userId: number) => {
     setIsLoading(true);
     try {
-      // Load service requests and jobs for the user
-      const [requestsRes, jobsRes] = await Promise.all([
+      // Load service requests, jobs, and service bookings for the user
+      const [requestsRes, jobsRes, bookingsRes] = await Promise.all([
         apiRequest("GET", `/api/service-requests/customer/${userId}`),
-        apiRequest("GET", `/api/jobs/customer/${userId}`)
+        apiRequest("GET", `/api/jobs/customer/${userId}`),
+        apiRequest("GET", `/api/service-bookings/customer/${userId}`)
       ]);
       
       const requests = await requestsRes.json();
       const userJobs = await jobsRes.json();
+      const bookings = await bookingsRes.json();
       
       console.log("Loaded service requests:", requests);
       console.log("Loaded jobs:", userJobs);
+      console.log("Loaded service bookings:", bookings);
       
       setServiceRequests(requests);
       setJobs(userJobs);
+      setServiceBookings(bookings);
     } catch (error) {
       console.error("Error loading user data:", error);
       toast({
@@ -127,7 +132,18 @@ export default function ClientDashboard() {
     }
   };
 
-  const filteredRequests = serviceRequests.filter(request => {
+  // Combine service requests and service bookings
+  const allRequests = [
+    ...serviceRequests.map(req => ({...req, type: 'service_request'})),
+    ...serviceBookings.map(booking => ({
+      ...booking,
+      type: 'service_booking',
+      category: booking.category || 'General Support',
+      title: booking.description || 'Service Booking'
+    }))
+  ];
+
+  const filteredRequests = allRequests.filter(request => {
     const matchesStatus = filterStatus === 'all' || request.status === filterStatus;
     const matchesSearch = (request.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (request.category || '').toLowerCase().includes(searchQuery.toLowerCase());
