@@ -11,8 +11,27 @@ export const users = pgTable("users", {
   fullName: text("full_name"),
   bio: text("bio"),
   avatar: text("avatar"),
-  userType: text("user_type").notNull().default("customer"), // customer, technician
+  userType: text("user_type").notNull().default("customer"), // customer, technician, admin
   createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Admin users with roles and permissions
+export const adminUsers = pgTable("admin_users", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  role: text("role").notNull().default("admin"), // admin, super_admin, manager, support
+  permissions: jsonb("permissions").$type<string[]>(), // Array of permission strings
+  department: text("department"), // technical, customer_service, finance, operations
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email").notNull(),
+  phoneNumber: text("phone_number"),
+  avatar: text("avatar"),
+  isActive: boolean("is_active").default(true),
+  lastLogin: timestamp("last_login"),
+  createdBy: integer("created_by"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Admin-managed categories for issue assessment
