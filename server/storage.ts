@@ -1778,6 +1778,7 @@ class MemoryStorage implements IStorage {
     timeframe?: string;
     status?: string;
     category?: string;
+    search?: string;
     page?: number;
     limit?: number;
   }): Promise<any> {
@@ -1785,7 +1786,7 @@ class MemoryStorage implements IStorage {
     let filteredJobs = mockJobs;
 
     // Apply timeframe filter
-    if (filters.timeframe) {
+    if (filters.timeframe && filters.timeframe !== 'all') {
       const now = new Date();
       const startDate = new Date();
       
@@ -1814,18 +1815,31 @@ class MemoryStorage implements IStorage {
     }
 
     // Apply status filter
-    if (filters.status) {
+    if (filters.status && filters.status !== 'all') {
       filteredJobs = filteredJobs.filter(job => job.status === filters.status);
     }
 
     // Apply category filter
-    if (filters.category) {
+    if (filters.category && filters.category !== 'all') {
       filteredJobs = filteredJobs.filter(job => job.category === filters.category);
+    }
+
+    // Apply search filter
+    if (filters.search && filters.search.trim()) {
+      const searchTerm = filters.search.toLowerCase().trim();
+      filteredJobs = filteredJobs.filter(job => 
+        job.jobNumber.toLowerCase().includes(searchTerm) ||
+        job.customer.toLowerCase().includes(searchTerm) ||
+        job.technician.toLowerCase().includes(searchTerm) ||
+        job.category.toLowerCase().includes(searchTerm) ||
+        job.title.toLowerCase().includes(searchTerm) ||
+        job.description.toLowerCase().includes(searchTerm)
+      );
     }
 
     // Apply pagination
     const page = filters.page || 1;
-    const limit = filters.limit || 50;
+    const limit = filters.limit || 25;
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
 
