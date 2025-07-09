@@ -67,7 +67,7 @@ export default function Navigation({
           <div className="absolute left-1/2 transform -translate-x-1/2">
             <Button
               variant="ghost"
-              onClick={() => setLocation("/")}
+              onClick={() => setLocation("/customer-home")}
               className="text-xl font-bold text-blue-600 hover:text-blue-700"
             >
               TechGPT
@@ -80,7 +80,7 @@ export default function Navigation({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setLocation("/")}
+                onClick={() => setLocation("/customer-home")}
                 className="hidden sm:flex items-center gap-2 text-gray-600 hover:text-gray-900"
               >
                 <Home className="h-4 w-4" />
