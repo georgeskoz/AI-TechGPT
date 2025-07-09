@@ -349,7 +349,6 @@ export default function AdminDashboard() {
       <Navigation 
         title="Admin Dashboard" 
         backTo="/admin-home" 
-        showHomeButton={false}
       />
       
       {/* Admin Header */}
