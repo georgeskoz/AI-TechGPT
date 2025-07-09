@@ -41,14 +41,23 @@ export default function ClientDashboard() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Load user from localStorage
+    // Load user from localStorage or use demo user
     const userStr = localStorage.getItem('tech_user');
-    if (!userStr) {
-      setIsLoading(false);
-      return;
+    let user;
+    
+    if (userStr) {
+      user = JSON.parse(userStr);
+    } else {
+      // Create demo user for testing
+      user = {
+        id: 1,
+        username: "demo_user",
+        email: "demo@example.com",
+        fullName: "Demo User",
+        userType: "customer"
+      };
     }
     
-    const user = JSON.parse(userStr);
     setCurrentUser(user);
     loadUserData(user.id);
   }, []);
@@ -117,8 +126,8 @@ export default function ClientDashboard() {
 
   const filteredRequests = serviceRequests.filter(request => {
     const matchesStatus = filterStatus === 'all' || request.status === filterStatus;
-    const matchesSearch = request.issueDescription.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         request.category.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = (request.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (request.category || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesStatus && matchesSearch;
   });
 
@@ -444,7 +453,7 @@ export default function ClientDashboard() {
                   <div key={request.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                     {getStatusIcon(request.status)}
                     <div className="flex-1">
-                      <p className="font-medium">{request.issueDescription}</p>
+                      <p className="font-medium">{request.description || request.title}</p>
                       <p className="text-sm text-gray-600">{request.category}</p>
                     </div>
                     <Badge className={getStatusColor(request.status)}>
@@ -495,7 +504,7 @@ export default function ClientDashboard() {
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <CardTitle className="text-lg">{request.issueDescription}</CardTitle>
+                        <CardTitle className="text-lg">{request.description || request.title}</CardTitle>
                         <Badge className={getStatusColor(request.status)}>
                           {request.status}
                         </Badge>
@@ -513,7 +522,7 @@ export default function ClientDashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 mb-4">{request.issueDescription}</p>
+                  <p className="text-gray-700 mb-4">{request.description || request.title}</p>
                   <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm">
                       <MessageSquare className="h-4 w-4 mr-1" />
@@ -613,7 +622,7 @@ export default function ClientDashboard() {
                     <div key={`${item.id}-${item.title ? 'job' : 'request'}`} className="flex items-center gap-3 p-4 border rounded-lg">
                       <CheckCircle className="h-5 w-5 text-green-600" />
                       <div className="flex-1">
-                        <p className="font-medium">{item.title || item.issueDescription}</p>
+                        <p className="font-medium">{item.title || item.description}</p>
                         <p className="text-sm text-gray-600">
                           Completed on {new Date(item.updatedAt || item.createdAt).toLocaleDateString()}
                         </p>
