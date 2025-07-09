@@ -121,7 +121,7 @@ export default function LiveSupportChat({
         await apiRequest("POST", `/api/support/cases/${newCase.id}/messages`, {
           senderId: 999,
           senderType: "technician",
-          content: "Hello! I'm your AI Technical Assistant. I'm here to help you with your technical questions and issues. What can I assist you with today?",
+          content: "🤖 Hello! I'm your Live AI Technical Assistant. I'm here to provide instant help with all your technical questions and issues. I can help with hardware, software, network problems, and much more. What's the technical challenge you're facing today?",
           messageType: "text",
         });
         
@@ -146,7 +146,7 @@ export default function LiveSupportChat({
       });
       return response.json();
     },
-    onSuccess: (message) => {
+    onSuccess: async (message) => {
       setNewMessage("");
       queryClient.invalidateQueries({ 
         queryKey: ["/api/support/cases", currentCase?.id, "messages"] 
@@ -159,20 +159,20 @@ export default function LiveSupportChat({
     },
   });
 
-  // AI response handler
+  // AI response handler using the new live AI agent
   const handleAiResponse = async (userMessage: string) => {
     if (!currentCase) return;
     
     setIsAiResponding(true);
     
     try {
-      // Simulate AI thinking delay
-      await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000));
+      // Simulate AI thinking delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 1200 + Math.random() * 800));
       
-      const response = await apiRequest("POST", `/api/support/ai-response`, {
-        caseId: currentCase.id,
-        userMessage,
-        context: messages.slice(-5), // Last 5 messages for context
+      const response = await apiRequest("POST", `/api/live-ai-agent`, {
+        message: userMessage,
+        conversationHistory: messages.slice(-8), // Last 8 messages for context
+        sessionId: currentCase.id,
       });
       
       const aiResponse = await response.json();
@@ -189,8 +189,26 @@ export default function LiveSupportChat({
         queryKey: ["/api/support/cases", currentCase?.id, "messages"] 
       });
       
+      // If AI suggests escalation, show escalation option
+      if (aiResponse.needsHumanSupport || aiResponse.canEscalate) {
+        // You can add UI to show escalation option here
+        console.log("AI suggests escalation to human support");
+      }
+      
     } catch (error) {
       console.error("Error generating AI response:", error);
+      
+      // Fallback message if AI fails
+      await apiRequest("POST", `/api/support/cases/${currentCase.id}/messages`, {
+        senderId: 999,
+        senderType: "technician",
+        content: "I'm having trouble processing your request right now. Would you like me to connect you with a human Service Provider?",
+        messageType: "text",
+      });
+      
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/support/cases", currentCase?.id, "messages"] 
+      });
     } finally {
       setIsAiResponding(false);
     }
