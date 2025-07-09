@@ -310,6 +310,10 @@ export default function AdminDashboard() {
       case "privacy-policy-sp": return "privacy";
       case "cancellation-policy-sp": return "cancellation";
       case "terms-conditions-sp": return "terms";
+      case "refund-policy": return "refund";
+      case "privacy-policy": return "privacy";
+      case "cancellation-policy": return "cancellation";
+      case "terms-conditions": return "terms";
       default: return "refund";
     }
   };
@@ -894,15 +898,7 @@ Last Updated: ${effectiveDate}
     }
   };
 
-  const getPolicyType = (activeTab: string): string => {
-    const policyTypes = {
-      "refund-policy": "refund",
-      "privacy-policy": "privacy",
-      "cancellation-policy": "cancellation",
-      "terms-conditions": "terms"
-    };
-    return policyTypes[activeTab] || "general";
-  };
+
 
   const sidebarItems = [
     { id: "overview", label: "Overview", icon: BarChart3 },
