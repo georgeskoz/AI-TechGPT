@@ -11,7 +11,7 @@ import PhoneSupportPage from "@/pages/PhoneSupportPage";
 import MarketplacePage from "@/pages/MarketplacePage";
 import LiveSupportPage from "@/pages/LiveSupportPage";
 import TriagePage from "@/pages/TriagePage";
-import DiagnosticPage from "@/pages/DiagnosticPage";
+import SimpleDiagnosticPage from "@/pages/SimpleDiagnosticPage";
 import ClientDashboard from "@/pages/ClientDashboard";
 import AuthTestPage from "@/components/AuthTestPage";
 import TechnicianRegistration from "@/pages/TechnicianRegistration";
@@ -45,7 +45,7 @@ function Router() {
       <Route path="/phone-support" component={PhoneSupportPage} />
       <Route path="/live-support" component={() => <LiveSupportPage username={localStorage.getItem("username") || "Guest"} />} />
       <Route path="/triage" component={TriagePage} />
-      <Route path="/diagnostic" component={DiagnosticPage} />
+      <Route path="/diagnostic" component={SimpleDiagnosticPage} />
       <Route path="/dashboard" component={ClientDashboard} />
       <Route path="/auth-test" component={AuthTestPage} />
       <Route path="/technician-register" component={TechnicianRegistration} />
