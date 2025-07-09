@@ -72,6 +72,24 @@ export interface IStorage {
   updateTechnicianStatus(technicianId: number, status: string): Promise<any>;
   resolveDispute(disputeId: number, resolution: string): Promise<any>;
 
+  // Enhanced job management methods
+  getJobsWithFilters(filters: {
+    timeframe?: string;
+    status?: string;
+    category?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<any>;
+  getCategorizedJobs(): Promise<any>;
+  getJobById(jobId: number): Promise<any>;
+  updateJobStatus(jobId: number, status: string, adminNotes?: string): Promise<any>;
+  createComplaint(complaint: any): Promise<any>;
+  createInvestigation(investigation: any): Promise<any>;
+  processRefund(refund: any): Promise<any>;
+  createCoupon(coupon: any): Promise<any>;
+  createPenalty(penalty: any): Promise<any>;
+  updateJobCase(jobId: number, caseAction: string, caseNotes?: string): Promise<any>;
+
   // Technician earning settings management
   getTechnicianEarningSettings(): Promise<any[]>;
   getTechnicianEarningSetting(technicianId: number): Promise<any>;
@@ -1753,6 +1771,248 @@ class MemoryStorage implements IStorage {
 
   async deleteIssueCategory(id: number): Promise<boolean> {
     return true; // Mock implementation
+  }
+
+  // Enhanced job management methods
+  async getJobsWithFilters(filters: {
+    timeframe?: string;
+    status?: string;
+    category?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<any> {
+    const mockJobs = this.generateMockJobs();
+    let filteredJobs = mockJobs;
+
+    // Apply timeframe filter
+    if (filters.timeframe) {
+      const now = new Date();
+      const startDate = new Date();
+      
+      switch (filters.timeframe) {
+        case 'today':
+          startDate.setHours(0, 0, 0, 0);
+          break;
+        case 'yesterday':
+          startDate.setDate(now.getDate() - 1);
+          startDate.setHours(0, 0, 0, 0);
+          break;
+        case 'weekly':
+          startDate.setDate(now.getDate() - 7);
+          break;
+        case 'monthly':
+          startDate.setMonth(now.getMonth() - 1);
+          break;
+        case 'yearly':
+          startDate.setFullYear(now.getFullYear() - 1);
+          break;
+      }
+      
+      filteredJobs = filteredJobs.filter(job => 
+        new Date(job.createdAt) >= startDate
+      );
+    }
+
+    // Apply status filter
+    if (filters.status) {
+      filteredJobs = filteredJobs.filter(job => job.status === filters.status);
+    }
+
+    // Apply category filter
+    if (filters.category) {
+      filteredJobs = filteredJobs.filter(job => job.category === filters.category);
+    }
+
+    // Apply pagination
+    const page = filters.page || 1;
+    const limit = filters.limit || 50;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+
+    return {
+      jobs: filteredJobs.slice(startIndex, endIndex),
+      totalCount: filteredJobs.length,
+      page,
+      limit,
+      totalPages: Math.ceil(filteredJobs.length / limit)
+    };
+  }
+
+  async getCategorizedJobs(): Promise<any> {
+    const mockJobs = this.generateMockJobs();
+    const now = new Date();
+    
+    const categorizeByTime = (jobs: any[]) => {
+      const today = jobs.filter(job => {
+        const jobDate = new Date(job.createdAt);
+        return jobDate.toDateString() === now.toDateString();
+      });
+
+      const yesterday = jobs.filter(job => {
+        const jobDate = new Date(job.createdAt);
+        const yesterdayDate = new Date(now);
+        yesterdayDate.setDate(now.getDate() - 1);
+        return jobDate.toDateString() === yesterdayDate.toDateString();
+      });
+
+      const weekly = jobs.filter(job => {
+        const jobDate = new Date(job.createdAt);
+        const weekAgo = new Date(now);
+        weekAgo.setDate(now.getDate() - 7);
+        return jobDate >= weekAgo && jobDate < now;
+      });
+
+      const monthly = jobs.filter(job => {
+        const jobDate = new Date(job.createdAt);
+        const monthAgo = new Date(now);
+        monthAgo.setMonth(now.getMonth() - 1);
+        return jobDate >= monthAgo && jobDate < now;
+      });
+
+      const yearly = jobs.filter(job => {
+        const jobDate = new Date(job.createdAt);
+        const yearAgo = new Date(now);
+        yearAgo.setFullYear(now.getFullYear() - 1);
+        return jobDate >= yearAgo && jobDate < now;
+      });
+
+      return { today, yesterday, weekly, monthly, yearly };
+    };
+
+    return categorizeByTime(mockJobs);
+  }
+
+  async getJobById(jobId: number): Promise<any> {
+    const mockJobs = this.generateMockJobs();
+    const job = mockJobs.find(j => j.id === jobId);
+    
+    if (!job) {
+      throw new Error("Job not found");
+    }
+
+    return {
+      ...job,
+      details: {
+        timeline: [
+          { event: "Job Created", timestamp: job.createdAt, status: "info" },
+          { event: "Technician Assigned", timestamp: job.assignedAt, status: "success" },
+          { event: "Work Started", timestamp: job.startedAt, status: "info" },
+          { event: "Work Completed", timestamp: job.completedAt, status: "success" }
+        ],
+        payments: [
+          { type: "Service Fee", amount: job.amount, status: "paid" },
+          { type: "Platform Fee", amount: job.amount * 0.15, status: "processed" }
+        ],
+        communications: [
+          { type: "Initial Contact", timestamp: job.createdAt, from: "customer" },
+          { type: "Job Acceptance", timestamp: job.assignedAt, from: "technician" },
+          { type: "Status Update", timestamp: job.startedAt, from: "technician" }
+        ]
+      }
+    };
+  }
+
+  async updateJobStatus(jobId: number, status: string, adminNotes?: string): Promise<any> {
+    return {
+      id: jobId,
+      status,
+      adminNotes,
+      updatedAt: new Date(),
+      success: true
+    };
+  }
+
+  async createInvestigation(investigation: any): Promise<any> {
+    const id = Date.now();
+    return {
+      id,
+      ...investigation,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      status: "open"
+    };
+  }
+
+  async processRefund(refund: any): Promise<any> {
+    const id = Date.now();
+    return {
+      id,
+      ...refund,
+      processedAt: new Date(),
+      status: "pending",
+      refundReference: `REF-${id}`
+    };
+  }
+
+  async createCoupon(coupon: any): Promise<any> {
+    const id = Date.now();
+    return {
+      id,
+      ...coupon,
+      createdAt: new Date(),
+      isActive: true,
+      usageCount: 0
+    };
+  }
+
+  async createPenalty(penalty: any): Promise<any> {
+    const id = Date.now();
+    return {
+      id,
+      ...penalty,
+      createdAt: new Date(),
+      status: "pending",
+      penaltyReference: `PEN-${id}`
+    };
+  }
+
+  async updateJobCase(jobId: number, caseAction: string, caseNotes?: string): Promise<any> {
+    return {
+      jobId,
+      caseAction,
+      caseNotes,
+      updatedAt: new Date(),
+      success: true
+    };
+  }
+
+  private generateMockJobs(): any[] {
+    const statuses = ['pending', 'in_progress', 'completed', 'cancelled'];
+    const categories = ['Hardware Issues', 'Software Issues', 'Network Troubleshooting', 'Web Development', 'Database Help'];
+    const jobs = [];
+
+    for (let i = 1; i <= 100; i++) {
+      const createdAt = new Date();
+      createdAt.setDate(createdAt.getDate() - Math.floor(Math.random() * 365));
+      
+      const job = {
+        id: i,
+        jobNumber: `JOB-${String(i).padStart(4, '0')}`,
+        customer: `Customer ${i}`,
+        technician: `Technician ${Math.floor(Math.random() * 10) + 1}`,
+        category: categories[Math.floor(Math.random() * categories.length)],
+        title: `Job ${i} - Technical Support`,
+        description: `Technical support job for ${categories[Math.floor(Math.random() * categories.length)].toLowerCase()}`,
+        status: statuses[Math.floor(Math.random() * statuses.length)],
+        priority: ['low', 'medium', 'high', 'urgent'][Math.floor(Math.random() * 4)],
+        amount: Math.floor(Math.random() * 500) + 50,
+        duration: Math.floor(Math.random() * 240) + 30,
+        createdAt: createdAt.toISOString(),
+        assignedAt: new Date(createdAt.getTime() + 3600000).toISOString(),
+        startedAt: new Date(createdAt.getTime() + 7200000).toISOString(),
+        completedAt: new Date(createdAt.getTime() + 14400000).toISOString(),
+        customerEmail: `customer${i}@example.com`,
+        technicianEmail: `technician${Math.floor(Math.random() * 10) + 1}@example.com`,
+        rating: Math.floor(Math.random() * 5) + 1,
+        feedback: `Feedback for job ${i}`,
+        location: `Location ${i}`,
+        serviceType: ['remote', 'phone', 'onsite'][Math.floor(Math.random() * 3)]
+      };
+      
+      jobs.push(job);
+    }
+
+    return jobs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 }
 
