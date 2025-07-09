@@ -1229,7 +1229,10 @@ export default function ExpertTechnicianFinder() {
               </div>
               
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => navigate('/dashboard')}>
+                <Button variant="outline" onClick={() => {
+                  setShowBookingConfirmation(false);
+                  window.location.href = '/dashboard';
+                }}>
                   View Dashboard
                 </Button>
                 <Button onClick={() => setShowBookingConfirmation(false)}>
