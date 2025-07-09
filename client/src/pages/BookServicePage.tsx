@@ -263,8 +263,8 @@ export default function BookServicePage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="now">On Demand Service Provider - Immediate help (FREE)</SelectItem>
-                      <SelectItem value="later">Booking - Schedule for later ($15 fee)</SelectItem>
+                      <SelectItem value="now">Now</SelectItem>
+                      <SelectItem value="later">Book for Later</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
