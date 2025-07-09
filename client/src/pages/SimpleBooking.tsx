@@ -43,6 +43,9 @@ interface Technician {
   responseTime: string;
   estimatedArrival: string;
   distance: number;
+  currentLocation?: string;
+  arrivalTime?: string;
+  totalMinutes?: number;
 }
 
 export default function SimpleBooking() {
@@ -158,41 +161,71 @@ export default function SimpleBooking() {
     bookTechnicianMutation.mutate(bookingData);
   };
 
-  const mockTechnicians: Technician[] = [
-    {
-      id: 1,
-      name: "Alex Johnson",
-      rating: 4.9,
-      completedJobs: 245,
-      skills: ["Hardware", "Network", "Software"],
-      hourlyRate: 75,
-      responseTime: "5 min",
-      estimatedArrival: "30-45 min",
-      distance: 2.3
-    },
-    {
-      id: 2,
-      name: "Sarah Chen",
-      rating: 4.8,
-      completedJobs: 198,
-      skills: ["Software", "Database", "Web Dev"],
-      hourlyRate: 85,
-      responseTime: "8 min",
-      estimatedArrival: "45-60 min",
-      distance: 4.1
-    },
-    {
-      id: 3,
-      name: "Mike Rodriguez",
-      rating: 4.7,
-      completedJobs: 156,
-      skills: ["Hardware", "Mobile", "Security"],
-      hourlyRate: 70,
-      responseTime: "12 min",
-      estimatedArrival: "20-30 min",
-      distance: 1.8
-    }
-  ];
+  // Calculate ETA based on distance and current time
+  const calculateETA = (distance: number, currentLocation: string, customerLocation: string) => {
+    const baseTime = Math.round(distance * 15); // 15 minutes per mile average
+    const trafficMultiplier = new Date().getHours() >= 7 && new Date().getHours() <= 19 ? 1.2 : 1.0;
+    const totalMinutes = Math.round(baseTime * trafficMultiplier);
+    
+    const now = new Date();
+    const eta = new Date(now.getTime() + totalMinutes * 60000);
+    
+    return {
+      minutes: totalMinutes,
+      arrivalTime: eta.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+      range: `${totalMinutes - 5}-${totalMinutes + 10} min`
+    };
+  };
+
+  const generateMockTechnicians = (customerLocation: string): Technician[] => {
+    const baseTechnicians = [
+      {
+        id: 1,
+        name: "Alex Johnson",
+        rating: 4.9,
+        completedJobs: 245,
+        skills: ["Hardware", "Network", "Software"],
+        hourlyRate: 75,
+        responseTime: "5 min",
+        distance: 2.3,
+        currentLocation: "Downtown Tech Hub"
+      },
+      {
+        id: 2,
+        name: "Sarah Chen",
+        rating: 4.8,
+        completedJobs: 198,
+        skills: ["Software", "Database", "Web Dev"],
+        hourlyRate: 85,
+        responseTime: "8 min",
+        distance: 4.1,
+        currentLocation: "Business District"
+      },
+      {
+        id: 3,
+        name: "Mike Rodriguez",
+        rating: 4.7,
+        completedJobs: 156,
+        skills: ["Hardware", "Mobile", "Security"],
+        hourlyRate: 70,
+        responseTime: "12 min",
+        distance: 1.8,
+        currentLocation: "Residential Area"
+      }
+    ];
+
+    return baseTechnicians.map(tech => {
+      const eta = calculateETA(tech.distance, tech.currentLocation, customerLocation);
+      return {
+        ...tech,
+        estimatedArrival: eta.range,
+        arrivalTime: eta.arrivalTime,
+        totalMinutes: eta.minutes
+      };
+    }).sort((a, b) => a.totalMinutes - b.totalMinutes); // Sort by closest ETA
+  };
+
+  const mockTechnicians = generateMockTechnicians(form.location);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
@@ -359,7 +392,10 @@ export default function SimpleBooking() {
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-green-600">${technician.hourlyRate}/hr</div>
-                        <div className="text-sm text-gray-600">ETA: {technician.estimatedArrival}</div>
+                        <div className="text-sm text-gray-600">
+                          <div>ETA: {technician.arrivalTime}</div>
+                          <div>Travel: {technician.estimatedArrival}</div>
+                        </div>
                         {selectedTechnician?.id === technician.id && (
                           <CheckCircle className="h-6 w-6 text-blue-500 mt-2 ml-auto" />
                         )}
@@ -411,11 +447,47 @@ export default function SimpleBooking() {
                 </p>
               </div>
               
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="font-medium mb-2">What's next?</h4>
-                <ul className="text-sm text-blue-700 space-y-1">
+              {selectedTechnician && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-medium mb-3 text-blue-900">Technician Details</h4>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                      {selectedTechnician.name.split(' ').map(n => n[0]).join('')}
+                    </div>
+                    <div>
+                      <div className="font-medium text-blue-900">{selectedTechnician.name}</div>
+                      <div className="text-sm text-blue-700">
+                        Currently at: {selectedTechnician.currentLocation}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="bg-white p-3 rounded">
+                      <div className="text-gray-600">Distance</div>
+                      <div className="font-medium">{selectedTechnician.distance} miles</div>
+                    </div>
+                    <div className="bg-white p-3 rounded">
+                      <div className="text-gray-600">Travel Time</div>
+                      <div className="font-medium">{selectedTechnician.estimatedArrival}</div>
+                    </div>
+                    <div className="bg-white p-3 rounded">
+                      <div className="text-gray-600">ETA</div>
+                      <div className="font-medium text-green-600">{selectedTechnician.arrivalTime}</div>
+                    </div>
+                    <div className="bg-white p-3 rounded">
+                      <div className="text-gray-600">Your Location</div>
+                      <div className="font-medium">{form.location}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <h4 className="font-medium mb-2 text-yellow-800">What's next?</h4>
+                <ul className="text-sm text-yellow-700 space-y-1">
                   <li>• Technician will call you within 15 minutes</li>
-                  <li>• Estimated arrival: {selectedTechnician?.estimatedArrival}</li>
+                  <li>• Estimated arrival: {selectedTechnician?.arrivalTime}</li>
+                  <li>• Live tracking available in your dashboard</li>
                   <li>• Payment after service completion</li>
                 </ul>
               </div>
