@@ -70,7 +70,16 @@ interface BookingData {
   location?: string;
   bookingFee: string;
   estimatedCost?: string;
-  aiAnalysis?: string;
+  aiAnalysis?: {
+    category?: string;
+    complexity?: string;
+    urgency?: string;
+    estimatedDuration?: number;
+    requiredSkills?: string[];
+    confidence?: number;
+    recommendedSupportType?: string;
+    reasoning?: string;
+  };
 }
 
 interface BookingSettings {
@@ -473,7 +482,16 @@ export default function ExpertTechnicianFinder() {
       location: assessment.location,
       bookingFee: bookingFee.toString(),
       estimatedCost: assessmentResult?.estimatedCost || null,
-      aiAnalysis: assessmentResult?.aiAnalysis || null,
+      aiAnalysis: assessmentResult?.aiAnalysis ? {
+        category: assessment.category,
+        complexity: assessment.urgency,
+        urgency: assessment.urgency,
+        estimatedDuration: 3,
+        requiredSkills: [],
+        confidence: 75,
+        recommendedSupportType: assessment.serviceType,
+        reasoning: assessmentResult.aiAnalysis
+      } : null,
     };
 
     console.log('Submitting booking:', booking);
