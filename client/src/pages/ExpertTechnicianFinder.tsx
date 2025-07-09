@@ -430,8 +430,17 @@ export default function ExpertTechnicianFinder() {
   };
 
   const calculateBookingFee = () => {
-    const isToday = assessment.timeline === 'today' || assessment.timeline === 'asap';
-    return isToday ? parseFloat(bookingSettings.sameDayFee) : parseFloat(bookingSettings.futureDayFee);
+    // Immediate/urgent bookings should be free, only scheduled future bookings have fees
+    const isUrgent = assessment.urgency === 'urgent' || assessment.timeline === 'asap';
+    const isImmediate = assessment.timeline === 'today' || assessment.timeline === 'asap';
+    
+    // Free for urgent/immediate, charge for scheduled future bookings
+    if (isUrgent || isImmediate) {
+      return 0;
+    }
+    
+    // Only charge for scheduled future bookings
+    return parseFloat(bookingSettings.futureDayFee);
   };
 
   const handleBookingConfirmation = () => {
