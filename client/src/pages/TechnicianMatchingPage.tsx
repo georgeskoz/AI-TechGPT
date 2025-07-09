@@ -17,7 +17,10 @@ import {
   ArrowLeft,
   Home,
   CheckCircle,
-  Loader2
+  Loader2,
+  Calendar,
+  FileText,
+  Wrench
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -269,6 +272,52 @@ export default function TechnicianMatchingPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Quick Access Section */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Access</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/book-service')}>
+              <CardContent className="p-4 text-center">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Calendar className="h-5 w-5 text-blue-600" />
+                </div>
+                <h3 className="font-medium text-gray-900 mb-1">Book Service Provider</h3>
+                <p className="text-xs text-gray-600">Schedule a technician</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/live-support')}>
+              <CardContent className="p-4 text-center">
+                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <MessageSquare className="h-5 w-5 text-green-600" />
+                </div>
+                <h3 className="font-medium text-gray-900 mb-1">Live Support Chat</h3>
+                <p className="text-xs text-gray-600">Get instant help</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/phone-support')}>
+              <CardContent className="p-4 text-center">
+                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Wrench className="h-5 w-5 text-purple-600" />
+                </div>
+                <h3 className="font-medium text-gray-900 mb-1">On-Site Services</h3>
+                <p className="text-xs text-gray-600">Professional support</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/issues')}>
+              <CardContent className="p-4 text-center">
+                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <FileText className="h-5 w-5 text-orange-600" />
+                </div>
+                <h3 className="font-medium text-gray-900 mb-1">Issue Tracker</h3>
+                <p className="text-xs text-gray-600">Track requests</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
 
         {/* Matched Technicians */}
         <div className="space-y-4">
