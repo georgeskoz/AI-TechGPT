@@ -162,6 +162,9 @@ export default function AdminDashboard() {
     website: "https://techgpt.com",
     address: "123 Tech Street, Silicon Valley, CA 94105"
   });
+  const [customPrompts, setCustomPrompts] = useState("");
+  const [generatedContent, setGeneratedContent] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -299,6 +302,545 @@ export default function AdminDashboard() {
         ? prev.filter(id => id !== itemId)
         : [...prev, itemId]
     );
+  };
+
+  const getPolicyType = (tabId: string) => {
+    switch (tabId) {
+      case "refund-policy-sp": return "refund";
+      case "privacy-policy-sp": return "privacy";
+      case "cancellation-policy-sp": return "cancellation";
+      case "terms-conditions-sp": return "terms";
+      default: return "refund";
+    }
+  };
+
+  const generatePolicy = async () => {
+    setIsGenerating(true);
+    try {
+      const response = await fetch("/api/admin/generate-policy", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          policyType: getPolicyType(activeTab),
+          companyInfo,
+          customRequirements: customPrompts,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate policy");
+      }
+
+      const data = await response.json();
+      
+      // If AI service is unavailable, provide fallback content
+      if (data.error === "AI service unavailable") {
+        setGeneratedContent(getFallbackPolicyContent(getPolicyType(activeTab)));
+        toast({
+          title: "Policy Template Generated",
+          description: "A template policy document has been generated. Please review and customize as needed.",
+        });
+      } else {
+        setGeneratedContent(data.content);
+        toast({
+          title: "Policy Generated Successfully",
+          description: "The AI-powered policy document has been generated.",
+        });
+      }
+    } catch (error) {
+      console.error("Error generating policy:", error);
+      setGeneratedContent(getFallbackPolicyContent(getPolicyType(activeTab)));
+      toast({
+        title: "Template Generated",
+        description: "A template policy document has been generated. Please review and customize as needed.",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const getFallbackPolicyContent = (policyType: string) => {
+    const { name, businessType, jurisdiction, contactEmail, website, address } = companyInfo;
+    const effectiveDate = new Date().toLocaleDateString();
+    
+    switch (policyType) {
+      case "refund":
+        return `REFUND POLICY
+
+Effective Date: ${effectiveDate}
+
+${name} ("we," "our," or "us") is committed to providing excellent service provider marketplace services. This Refund Policy outlines the terms and conditions for refunds on our platform.
+
+1. REFUND ELIGIBILITY
+
+1.1 Service Provider Services
+- Refunds may be requested if the service provider fails to deliver the agreed-upon service
+- Technical issues that prevent service completion may qualify for partial or full refunds
+- Refund requests must be submitted within 7 days of service completion or cancellation
+
+1.2 Non-Refundable Items
+- Platform fees and processing charges are non-refundable
+- Services that have been successfully completed are generally non-refundable
+- Refunds will not be issued for services cancelled less than 24 hours before the scheduled time
+
+2. REFUND PROCESS
+
+2.1 How to Request a Refund
+- Contact our support team at ${contactEmail}
+- Provide your job reference number and reason for refund request
+- Include any supporting documentation or evidence
+
+2.2 Processing Time
+- Refund requests will be reviewed within 5-7 business days
+- Approved refunds will be processed within 10-14 business days
+- Refunds will be issued to the original payment method
+
+3. DISPUTE RESOLUTION
+
+3.1 Service Provider Disputes
+- If you're unsatisfied with a service provider's work, we'll first attempt to resolve the issue directly
+- We may arrange for a different service provider to complete the work at no additional cost
+- Full refunds may be issued if the issue cannot be resolved satisfactorily
+
+3.2 Platform Issues
+- Technical issues on our platform that prevent service delivery will result in full refunds
+- Service disruptions caused by maintenance will be communicated in advance
+
+4. CANCELLATION POLICY
+
+4.1 Customer Cancellations
+- Cancellations made 24+ hours before scheduled service: Full refund
+- Cancellations made 2-24 hours before scheduled service: 50% refund
+- Cancellations made less than 2 hours before scheduled service: No refund
+
+4.2 Service Provider Cancellations
+- If a service provider cancels, customers will receive a full refund
+- We will attempt to find a replacement service provider at no additional cost
+
+5. SPECIAL CIRCUMSTANCES
+
+5.1 Emergency Situations
+- Refunds may be provided for emergency situations beyond customer control
+- Documentation may be required to verify emergency circumstances
+
+5.2 Service Quality Issues
+- If service quality doesn't meet our standards, partial or full refunds may be issued
+- We reserve the right to investigate service quality claims
+
+6. CONTACT INFORMATION
+
+For refund requests or questions about this policy, please contact:
+- Email: ${contactEmail}
+- Website: ${website}
+- Address: ${address}
+
+7. POLICY UPDATES
+
+This policy may be updated periodically. Changes will be posted on our website and communicated to active users.
+
+Last Updated: ${effectiveDate}
+
+© ${new Date().getFullYear()} ${name}. All rights reserved.`;
+
+      case "privacy":
+        return `PRIVACY POLICY
+
+Effective Date: ${effectiveDate}
+
+${name} ("we," "our," or "us") respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your information when you use our service provider marketplace platform.
+
+1. INFORMATION WE COLLECT
+
+1.1 Personal Information
+- Name, email address, phone number, and address
+- Payment information and billing details
+- Profile information and preferences
+- Communication history and support interactions
+
+1.2 Service Information
+- Service requests and job details
+- Service provider ratings and reviews
+- Transaction history and payment records
+- Location data for service delivery
+
+1.3 Technical Information
+- Device information and IP addresses
+- Browser type and operating system
+- Usage patterns and platform interactions
+- Cookies and tracking technologies
+
+2. HOW WE USE YOUR INFORMATION
+
+2.1 Service Delivery
+- Matching customers with appropriate service providers
+- Processing payments and managing transactions
+- Facilitating communication between users
+- Providing customer support and resolving issues
+
+2.2 Platform Improvement
+- Analyzing usage patterns to improve our services
+- Developing new features and functionality
+- Conducting research and analytics
+- Ensuring platform security and preventing fraud
+
+3. INFORMATION SHARING
+
+3.1 Service Providers
+- We share necessary information with service providers to deliver services
+- Service providers may access customer contact information and service details
+- Service providers are bound by confidentiality agreements
+
+3.2 Third-Party Services
+- Payment processors for transaction handling
+- Communication services for notifications
+- Analytics providers for platform improvement
+- Legal authorities when required by law
+
+4. DATA SECURITY
+
+4.1 Protection Measures
+- Encryption of sensitive data in transit and at rest
+- Regular security audits and vulnerability assessments
+- Access controls and authentication requirements
+- Secure data storage and backup procedures
+
+4.2 Incident Response
+- Immediate notification of security breaches
+- Prompt investigation and resolution of incidents
+- Cooperation with regulatory authorities
+- Transparent communication with affected users
+
+5. YOUR RIGHTS
+
+5.1 Access and Control
+- Access to your personal information
+- Right to correct or update your data
+- Ability to delete your account and data
+- Control over marketing communications
+
+5.2 Data Portability
+- Right to export your data in a standard format
+- Ability to transfer data to other services
+- Access to transaction history and records
+
+6. CONTACT INFORMATION
+
+For privacy-related questions or concerns, please contact:
+- Email: ${contactEmail}
+- Website: ${website}
+- Address: ${address}
+
+Last Updated: ${effectiveDate}
+
+© ${new Date().getFullYear()} ${name}. All rights reserved.`;
+
+      case "cancellation":
+        return `CANCELLATION POLICY
+
+Effective Date: ${effectiveDate}
+
+${name} ("we," "our," or "us") understands that plans can change. This Cancellation Policy outlines the terms and conditions for cancelling services on our platform.
+
+1. CANCELLATION WINDOWS
+
+1.1 Advance Cancellation (24+ hours)
+- Full refund of service fees
+- No cancellation penalties
+- Automatic notification to service provider
+- Rebooking assistance available
+
+1.2 Short Notice Cancellation (2-24 hours)
+- 50% refund of service fees
+- Partial cancellation fee may apply
+- Service provider notification
+- Limited rebooking options
+
+1.3 Last-Minute Cancellation (Under 2 hours)
+- No refund of service fees
+- Full cancellation fee applies
+- Service provider may claim compensation
+- Emergency exceptions may apply
+
+2. CANCELLATION PROCESS
+
+2.1 How to Cancel
+- Log into your account dashboard
+- Navigate to "Active Bookings"
+- Select the service to cancel
+- Provide a reason for cancellation
+- Confirm cancellation request
+
+2.2 Confirmation
+- Immediate email confirmation sent
+- Service provider automatically notified
+- Refund processing begins (if applicable)
+- Updated booking status in dashboard
+
+3. EMERGENCY CANCELLATIONS
+
+3.1 Qualifying Emergencies
+- Medical emergencies
+- Natural disasters or severe weather
+- Family emergencies
+- Transportation failures
+
+3.2 Emergency Process
+- Contact support immediately at ${contactEmail}
+- Provide emergency documentation
+- Full refund consideration
+- Expedited processing
+
+4. SERVICE PROVIDER CANCELLATIONS
+
+4.1 Provider-Initiated Cancellations
+- Full refund automatically processed
+- Alternative service provider matching
+- Priority rebooking assistance
+- Compensation for inconvenience
+
+4.2 Provider No-Shows
+- Full refund immediately processed
+- Service provider penalty applied
+- Priority rescheduling options
+- Customer satisfaction follow-up
+
+5. RECURRING SERVICES
+
+5.1 Subscription Cancellations
+- Cancel at least 24 hours before next service
+- Prorated refunds for unused services
+- No early termination fees
+- Pause option available
+
+5.2 Package Cancellations
+- Refund for unused services in package
+- Completed services are non-refundable
+- Partial completion considered
+- Custom solutions available
+
+6. WEATHER-RELATED CANCELLATIONS
+
+6.1 Severe Weather
+- Automatic cancellation for safety
+- Full refund processed
+- Free rescheduling options
+- Safety-first policy
+
+6.2 Minor Weather Delays
+- Service provider discretion
+- Rescheduling at no cost
+- Customer notification required
+- Flexible timing options
+
+7. CONTACT INFORMATION
+
+For cancellation assistance or questions, please contact:
+- Email: ${contactEmail}
+- Website: ${website}
+- Address: ${address}
+
+Last Updated: ${effectiveDate}
+
+© ${new Date().getFullYear()} ${name}. All rights reserved.`;
+
+      case "terms":
+        return `TERMS & CONDITIONS
+
+Effective Date: ${effectiveDate}
+
+Welcome to ${name} ("we," "our," or "us"). These Terms & Conditions ("Terms") govern your use of our service provider marketplace platform and services.
+
+1. ACCEPTANCE OF TERMS
+
+By accessing or using our platform, you agree to be bound by these Terms. If you do not agree to these Terms, please do not use our services.
+
+2. PLATFORM DESCRIPTION
+
+2.1 Our Services
+- Connection between customers and service providers
+- Secure payment processing
+- Quality assurance and dispute resolution
+- Customer support and platform maintenance
+
+2.2 Service Categories
+- Technical support and troubleshooting
+- Hardware repairs and maintenance
+- Software installation and configuration
+- Network setup and optimization
+
+3. USER ACCOUNTS
+
+3.1 Account Creation
+- Accurate information required for registration
+- Responsibility for account security
+- Unique account per user
+- Compliance with platform rules
+
+3.2 Account Responsibilities
+- Maintain current and accurate information
+- Protect login credentials
+- Report unauthorized access immediately
+- Comply with platform policies
+
+4. SERVICE PROVIDER TERMS
+
+4.1 Provider Requirements
+- Verification of qualifications and experience
+- Background checks and reference validation
+- Insurance and bonding requirements
+- Ongoing performance monitoring
+
+4.2 Service Standards
+- Professional conduct and appearance
+- Timely service delivery
+- Quality workmanship standards
+- Customer satisfaction commitment
+
+5. CUSTOMER TERMS
+
+5.1 Service Requests
+- Accurate description of service needs
+- Reasonable access to service location
+- Payment obligation for completed services
+- Cooperation with service providers
+
+5.2 Conduct Standards
+- Respectful communication with service providers
+- Reasonable service expectations
+- Compliance with safety requirements
+- Honest feedback and reviews
+
+6. PAYMENT TERMS
+
+6.1 Pricing and Fees
+- Service fees determined by provider and platform
+- Platform fees clearly disclosed
+- Payment processing fees may apply
+- Dynamic pricing during peak times
+
+6.2 Payment Processing
+- Secure payment methods accepted
+- Automatic payment upon service completion
+- Refund processing according to refund policy
+- Dispute resolution for payment issues
+
+7. INTELLECTUAL PROPERTY
+
+7.1 Platform Rights
+- All platform content and technology owned by ${name}
+- Trademarks and copyrights protected
+- User-generated content license to platform
+- Respect for third-party intellectual property
+
+7.2 User Content
+- Users retain ownership of their content
+- License granted to platform for operational purposes
+- Responsibility for content accuracy and legality
+- Prohibited content restrictions
+
+8. DISCLAIMERS AND LIMITATIONS
+
+8.1 Service Disclaimers
+- Platform facilitates connections but doesn't provide services
+- No warranty on service provider performance
+- Third-party service provider responsibility
+- Customer satisfaction not guaranteed
+
+8.2 Liability Limitations
+- Limited liability for platform issues
+- No responsibility for service provider actions
+- Force majeure protections
+- Reasonable care standard
+
+9. DISPUTE RESOLUTION
+
+9.1 Platform Disputes
+- Internal resolution process
+- Mediation services available
+- Arbitration for unresolved disputes
+- Legal jurisdiction: ${jurisdiction}
+
+9.2 Service Disputes
+- Direct resolution between parties encouraged
+- Platform mediation services
+- Refund consideration for unresolved issues
+- Quality assurance investigations
+
+10. TERMINATION
+
+10.1 Account Termination
+- User right to terminate account
+- Platform right to suspend or terminate accounts
+- Data retention and deletion policies
+- Outstanding obligation resolution
+
+10.2 Service Termination
+- Immediate termination for policy violations
+- Suspension for investigation purposes
+- Appeal process for terminated accounts
+- Data export options before termination
+
+11. PRIVACY AND DATA PROTECTION
+
+11.1 Privacy Policy
+- Separate privacy policy governs data handling
+- User consent for data collection and use
+- Data security measures implemented
+- User rights regarding personal data
+
+11.2 Data Security
+- Industry-standard security measures
+- Regular security audits and updates
+- Breach notification procedures
+- User responsibility for account security
+
+12. MODIFICATIONS
+
+12.1 Terms Updates
+- Right to modify terms with notice
+- Effective date of modifications
+- Continued use implies acceptance
+- Significant changes require explicit consent
+
+12.2 Service Changes
+- Platform improvements and updates
+- Service availability may vary
+- Feature additions and removals
+- User notification of major changes
+
+13. GOVERNING LAW
+
+These Terms are governed by the laws of ${jurisdiction}. Any disputes will be resolved in the courts of ${jurisdiction}.
+
+14. CONTACT INFORMATION
+
+For questions about these Terms, please contact:
+- Email: ${contactEmail}
+- Website: ${website}
+- Address: ${address}
+
+Last Updated: ${effectiveDate}
+
+© ${new Date().getFullYear()} ${name}. All rights reserved.`;
+
+      default:
+        return `POLICY DOCUMENT
+
+Effective Date: ${effectiveDate}
+
+This is a template policy document for ${name}. Please customize this content according to your specific business needs and legal requirements.
+
+For questions, please contact:
+- Email: ${contactEmail}
+- Website: ${website}
+- Address: ${address}
+
+Last Updated: ${effectiveDate}
+
+© ${new Date().getFullYear()} ${name}. All rights reserved.`;
+    }
   };
 
   // AI Policy Generation Mutation
