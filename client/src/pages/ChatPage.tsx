@@ -114,19 +114,10 @@ export default function ChatPage() {
             isTyping={isTyping}
           />
           
-          {/* Diagnostic Checklist */}
-          {showDiagnosticChecklist && lastUserMessage && (
-            <div className="bg-white border-t border-gray-200 p-4">
-              <DiagnosticChecklist 
-                issue={lastUserMessage}
-                category={selectedDomain || undefined}
-                onComplete={() => setShowDiagnosticChecklist(false)}
-              />
-            </div>
-          )}
+
 
           {/* Support Options Widget - Show after AI has provided initial help */}
-          {messages.length >= 2 && !showDiagnosticChecklist && (
+          {messages.length >= 2 && (
             <div className="bg-white border-t border-gray-200 p-4">
               <div className="mb-3">
                 <h3 className="text-sm font-medium text-gray-900 mb-1">
@@ -137,23 +128,23 @@ export default function ChatPage() {
                 </p>
               </div>
               
-              {/* Diagnostic Checklist Button */}
+              {/* Diagnostic Tool Button */}
               <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="text-sm font-medium text-blue-900">
-                      🔍 Try Our AI Diagnostic Checklist
+                      🔍 Try Our Diagnostic Tool
                     </h4>
                     <p className="text-xs text-blue-700 mt-1">
-                      Get a personalized step-by-step troubleshooting guide for your issue
+                      Get step-by-step troubleshooting guides for common issues
                     </p>
                   </div>
                   <Button 
-                    onClick={() => setShowDiagnosticChecklist(true)}
+                    onClick={() => setLocation('/diagnostic')}
                     size="sm"
                     className="ml-3"
                   >
-                    Generate Checklist
+                    Open Diagnostics
                   </Button>
                 </div>
               </div>
