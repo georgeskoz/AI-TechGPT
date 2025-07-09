@@ -34,7 +34,8 @@ import {
   Calendar,
   DollarSign,
   FileText,
-  User
+  User,
+  MessageSquare
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -544,6 +545,52 @@ export default function ExpertTechnicianFinder() {
           <p className="text-xl text-gray-600">
             Get matched with qualified technicians for your technical issues
           </p>
+        </div>
+
+        {/* Quick Access Section */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">Quick Access</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/book-service')}>
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="h-6 w-6 text-blue-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Book Service Provider</h3>
+                <p className="text-sm text-gray-600">Schedule a technician for your specific needs</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/live-support')}>
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MessageSquare className="h-6 w-6 text-green-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Live Support Chat</h3>
+                <p className="text-sm text-gray-600">Get instant help from live technicians</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/phone-support')}>
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Wrench className="h-6 w-6 text-purple-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">On-Site Services</h3>
+                <p className="text-sm text-gray-600">Get professional on-site technical support</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/issues')}>
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FileText className="h-6 w-6 text-orange-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Issue Tracker</h3>
+                <p className="text-sm text-gray-600">Track and manage your support requests</p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Progress Bar */}
