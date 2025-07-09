@@ -454,7 +454,9 @@ class MemoryStorage implements IStorage {
 
   constructor() {
     // Initialize with sample data for demo
+    console.log("MemoryStorage constructor called - initializing sample data...");
     this.initializeSampleData();
+    console.log(`After initialization: ${this.technicians.size} technicians loaded`);
   }
 
   private initializeSampleData() {
@@ -473,8 +475,12 @@ class MemoryStorage implements IStorage {
     // Sample technicians
     const sampleTechnicians = [
       {
-        id: 1, userId: 5, businessName: "TechFix Pro", companyName: "TechFix Solutions", 
-        experience: "5+ years", hourlyRate: "85", location: "San Francisco, CA", 
+        id: 1, userId: 1, firstName: "John", lastName: "Doe", email: "john@example.com", 
+        phoneNumber: "+1-555-123-4567", address: "123 Main St, San Francisco, CA 94105",
+        businessName: "TechFix Pro", companyName: "TechFix Solutions", 
+        experience: "5+ years", hourlyRate: "85", 
+        country: "United States", state: "California", city: "San Francisco",
+        location: "San Francisco, CA", 
         serviceRadius: 25, serviceAreas: ["San Francisco", "Oakland"], 
         skills: ["Hardware Repair", "Network Setup", "Software Installation"], 
         categories: ["Hardware Issues", "Network Troubleshooting"], 
@@ -483,11 +489,16 @@ class MemoryStorage implements IStorage {
         profileDescription: "Expert in hardware and network solutions", rating: "4.9",
         completedJobs: 245, totalEarnings: "18750", responseTime: 30, 
         isActive: true, isVerified: true, verificationStatus: "verified",
+        remoteEarningPercentage: "85.00", phoneEarningPercentage: "85.00", onsiteEarningPercentage: "85.00",
         stripeAccountId: null, createdAt: new Date(), updatedAt: new Date()
       },
       {
-        id: 2, userId: 6, businessName: "Code Solutions", companyName: "Mike Chen Tech", 
-        experience: "7+ years", hourlyRate: "95", location: "New York, NY", 
+        id: 2, userId: 5, firstName: "Sarah", lastName: "Johnson", email: "sarah@example.com",
+        phoneNumber: "+1-555-234-5678", address: "456 Tech Ave, New York, NY 10001",
+        businessName: "Code Solutions", companyName: "Mike Chen Tech", 
+        experience: "7+ years", hourlyRate: "95", 
+        country: "United States", state: "New York", city: "New York",
+        location: "New York, NY", 
         serviceRadius: 30, serviceAreas: ["Manhattan", "Brooklyn"], 
         skills: ["Web Development", "Database Management", "System Administration"], 
         categories: ["Web Development", "Database Help"], 
@@ -496,6 +507,25 @@ class MemoryStorage implements IStorage {
         profileDescription: "Full-stack developer and system architect", rating: "4.8",
         completedJobs: 198, totalEarnings: "15840", responseTime: 45, 
         isActive: true, isVerified: true, verificationStatus: "verified",
+        remoteEarningPercentage: "85.00", phoneEarningPercentage: "85.00", onsiteEarningPercentage: "85.00",
+        stripeAccountId: null, createdAt: new Date(), updatedAt: new Date()
+      },
+      {
+        id: 3, userId: 6, firstName: "Mike", lastName: "Chen", email: "mike@example.com",
+        phoneNumber: "+1-555-345-6789", address: "789 Support Blvd, Austin, TX 78701",
+        businessName: "TechSupport Plus", companyName: "Chen Solutions", 
+        experience: "3+ years", hourlyRate: "75", 
+        country: "United States", state: "Texas", city: "Austin",
+        location: "Austin, TX", 
+        serviceRadius: 20, serviceAreas: ["Austin", "Round Rock"], 
+        skills: ["Mobile Device Repair", "Software Troubleshooting", "Network Setup"], 
+        categories: ["Mobile Devices", "Software Issues"], 
+        certifications: ["Apple Certified", "Android Certified"], languages: ["English"],
+        availability: { monday: "10-18", tuesday: "10-18", wednesday: "10-18" },
+        profileDescription: "Mobile device specialist and software expert", rating: "4.7",
+        completedJobs: 125, totalEarnings: "9375", responseTime: 40, 
+        isActive: true, isVerified: true, verificationStatus: "verified",
+        remoteEarningPercentage: "85.00", phoneEarningPercentage: "85.00", onsiteEarningPercentage: "85.00",
         stripeAccountId: null, createdAt: new Date(), updatedAt: new Date()
       }
     ];
@@ -972,8 +1002,7 @@ class MemoryStorage implements IStorage {
   }
 
   async getTechnicianProfile(userId: number): Promise<any> {
-    const technician = Array.from(this.technicians.values()).find(t => t.userId === userId);
-    return technician || null;
+    return await this.getTechnicianByUserId(userId);
   }
 
   async updateTechnicianAvailability(technicianId: number, isAvailable: boolean): Promise<any> {
