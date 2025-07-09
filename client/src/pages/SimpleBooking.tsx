@@ -100,8 +100,32 @@ export default function SimpleBooking() {
   // Book technician mutation
   const bookTechnicianMutation = useMutation({
     mutationFn: async (bookingData: any) => {
-      const response = await apiRequest('POST', '/api/bookings', bookingData);
-      return response.json();
+      // Create both service request and booking
+      const serviceRequest = {
+        customerId: bookingData.customerId,
+        category: bookingData.category,
+        subcategory: bookingData.category,
+        title: `${bookingData.category} - ${bookingData.serviceType}`,
+        description: bookingData.description,
+        serviceType: bookingData.serviceType,
+        urgency: bookingData.urgency,
+        location: bookingData.location,
+        budget: parseFloat(bookingData.estimatedCost?.replace(/[^0-9.-]/g, '').split('-')[0] || '0'),
+        scheduledAt: bookingData.scheduledDate
+      };
+      
+      // Create service request first
+      const serviceResponse = await apiRequest('POST', '/api/service-requests', serviceRequest);
+      const serviceData = await serviceResponse.json();
+      
+      // Then create booking
+      const booking = {
+        ...bookingData,
+        serviceRequestId: serviceData.id
+      };
+      
+      const bookingResponse = await apiRequest('POST', '/api/service-bookings', booking);
+      return bookingResponse.json();
     },
     onSuccess: () => {
       setShowConfirmation(true);
@@ -149,6 +173,7 @@ export default function SimpleBooking() {
       customerId: 1, // Demo user
       technicianId: selectedTechnician.id,
       categoryId: selectedCategory?.id,
+      category: form.category,
       description: form.description,
       location: form.location,
       urgency: form.urgency,
