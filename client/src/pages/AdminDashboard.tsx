@@ -82,7 +82,11 @@ import {
   Sun,
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  Loader2,
+  Sparkles,
+  Copy,
+  Save
 } from "lucide-react";
 
 interface AdminUser {
@@ -148,6 +152,16 @@ export default function AdminDashboard() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [darkMode, setDarkMode] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [policyContent, setPolicyContent] = useState("");
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [companyInfo, setCompanyInfo] = useState({
+    name: "TechGPT",
+    businessType: "Technology Platform",
+    jurisdiction: "United States",
+    contactEmail: "legal@techgpt.com",
+    website: "https://techgpt.com",
+    address: "123 Tech Street, Silicon Valley, CA 94105"
+  });
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -285,6 +299,67 @@ export default function AdminDashboard() {
         ? prev.filter(id => id !== itemId)
         : [...prev, itemId]
     );
+  };
+
+  // AI Policy Generation Mutation
+  const generatePolicyMutation = useMutation({
+    mutationFn: async ({ policyType, customPrompts }: { policyType: string; customPrompts?: string }) => {
+      const response = await fetch("/api/admin/generate-policy", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          policyType,
+          companyInfo,
+          customPrompts,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to generate policy");
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setPolicyContent(data.content);
+      toast({
+        title: "Policy Generated",
+        description: "AI has successfully generated your policy document.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Generation Failed",
+        description: "Failed to generate policy. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Copied to Clipboard",
+        description: "Policy content has been copied to your clipboard.",
+      });
+    } catch (error) {
+      toast({
+        title: "Copy Failed",
+        description: "Failed to copy to clipboard.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getPolicyType = (activeTab: string): string => {
+    const policyTypes = {
+      "refund-policy": "refund",
+      "privacy-policy": "privacy",
+      "cancellation-policy": "cancellation",
+      "terms-conditions": "terms"
+    };
+    return policyTypes[activeTab] || "general";
   };
 
   const sidebarItems = [
@@ -800,35 +875,230 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* Policy Management Sections */}
+          {/* AI-Powered Policy Management Sections */}
           {(activeTab === "refund-policy" || activeTab === "privacy-policy" || activeTab === "cancellation-policy" || activeTab === "terms-conditions") && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                {activeTab === "refund-policy" && "Refund Policy"}
-                {activeTab === "privacy-policy" && "Privacy Policy"}
-                {activeTab === "cancellation-policy" && "Cancellation Policy"}
-                {activeTab === "terms-conditions" && "Terms & Conditions"}
+                {activeTab === "refund-policy" && "Refund Policy Generator"}
+                {activeTab === "privacy-policy" && "Privacy Policy Generator"}
+                {activeTab === "cancellation-policy" && "Cancellation Policy Generator"}
+                {activeTab === "terms-conditions" && "Terms & Conditions Generator"}
               </h2>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Policy Management</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
+              
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Company Information Panel */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Building className="h-5 w-5" />
+                      Company Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-700 mb-2 block">Policy Content</label>
-                      <textarea 
-                        className="w-full h-64 p-3 border border-gray-300 rounded-md"
-                        placeholder="Enter policy content..."
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Company Name</label>
+                      <Input 
+                        value={companyInfo.name}
+                        onChange={(e) => setCompanyInfo(prev => ({ ...prev, name: e.target.value }))}
+                        placeholder="Enter company name"
                       />
                     </div>
-                    <div className="flex items-center gap-4">
-                      <Button>Save Policy</Button>
-                      <Button variant="outline">Preview</Button>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Business Type</label>
+                      <Input 
+                        value={companyInfo.businessType}
+                        onChange={(e) => setCompanyInfo(prev => ({ ...prev, businessType: e.target.value }))}
+                        placeholder="e.g., Technology Platform"
+                      />
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Jurisdiction</label>
+                      <Select value={companyInfo.jurisdiction} onValueChange={(value) => setCompanyInfo(prev => ({ ...prev, jurisdiction: value }))}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select jurisdiction" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="United States">United States</SelectItem>
+                          <SelectItem value="Canada">Canada</SelectItem>
+                          <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+                          <SelectItem value="European Union">European Union</SelectItem>
+                          <SelectItem value="Australia">Australia</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Contact Email</label>
+                      <Input 
+                        value={companyInfo.contactEmail}
+                        onChange={(e) => setCompanyInfo(prev => ({ ...prev, contactEmail: e.target.value }))}
+                        placeholder="legal@company.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Website</label>
+                      <Input 
+                        value={companyInfo.website}
+                        onChange={(e) => setCompanyInfo(prev => ({ ...prev, website: e.target.value }))}
+                        placeholder="https://company.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Address</label>
+                      <Input 
+                        value={companyInfo.address}
+                        onChange={(e) => setCompanyInfo(prev => ({ ...prev, address: e.target.value }))}
+                        placeholder="Street address"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* AI Generation Panel */}
+                <Card className="lg:col-span-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5" />
+                      AI Policy Generator
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h3 className="font-medium text-blue-900 mb-2">
+                        {activeTab === "refund-policy" && "Refund Policy Features"}
+                        {activeTab === "privacy-policy" && "Privacy Policy Features"}
+                        {activeTab === "cancellation-policy" && "Cancellation Policy Features"}
+                        {activeTab === "terms-conditions" && "Terms & Conditions Features"}
+                      </h3>
+                      <ul className="text-sm text-blue-800 space-y-1">
+                        {activeTab === "refund-policy" && (
+                          <>
+                            <li>• Refund eligibility criteria and timeframes</li>
+                            <li>• Processing methods and timelines</li>
+                            <li>• Exceptions and special circumstances</li>
+                            <li>• Customer service contact information</li>
+                          </>
+                        )}
+                        {activeTab === "privacy-policy" && (
+                          <>
+                            <li>• Data collection and usage practices</li>
+                            <li>• Cookie and tracking technology disclosure</li>
+                            <li>• Third-party service integrations</li>
+                            <li>• User rights and data protection compliance</li>
+                          </>
+                        )}
+                        {activeTab === "cancellation-policy" && (
+                          <>
+                            <li>• Service cancellation procedures</li>
+                            <li>• Notice requirements and timeframes</li>
+                            <li>• Prorated billing and refund terms</li>
+                            <li>• Account closure and data retention</li>
+                          </>
+                        )}
+                        {activeTab === "terms-conditions" && (
+                          <>
+                            <li>• Service usage rights and restrictions</li>
+                            <li>• User obligations and prohibited activities</li>
+                            <li>• Liability limitations and disclaimers</li>
+                            <li>• Dispute resolution and governing law</li>
+                          </>
+                        )}
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Custom Requirements (Optional)</label>
+                      <textarea 
+                        className="w-full h-24 p-3 border border-gray-300 rounded-md text-sm"
+                        placeholder="Add any specific requirements, clauses, or industry-specific terms you'd like included..."
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <Button 
+                        onClick={() => generatePolicyMutation.mutate({ 
+                          policyType: getPolicyType(activeTab),
+                          customPrompts: document.querySelector('textarea')?.value 
+                        })}
+                        disabled={generatePolicyMutation.isPending}
+                        className="flex items-center gap-2"
+                      >
+                        {generatePolicyMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-4 w-4" />
+                        )}
+                        {generatePolicyMutation.isPending ? "Generating..." : "Generate with AI"}
+                      </Button>
+                      
+                      {policyContent && (
+                        <>
+                          <Button variant="outline" onClick={() => copyToClipboard(policyContent)}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Copy
+                          </Button>
+                          <Button variant="outline">
+                            <Download className="h-4 w-4 mr-2" />
+                            Download
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Generated Policy Content */}
+              {policyContent && (
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span>Generated Policy Document</span>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => copyToClipboard(policyContent)}>
+                          <Copy className="h-4 w-4 mr-2" />
+                          Copy
+                        </Button>
+                        <Button size="sm">
+                          <Save className="h-4 w-4 mr-2" />
+                          Save Policy
+                        </Button>
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-96 overflow-y-auto">
+                      <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono">
+                        {policyContent}
+                      </pre>
+                    </div>
+                    
+                    <div className="mt-4">
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Edit Generated Content</label>
+                      <textarea 
+                        className="w-full h-32 p-3 border border-gray-300 rounded-md text-sm"
+                        value={policyContent}
+                        onChange={(e) => setPolicyContent(e.target.value)}
+                        placeholder="Edit the generated policy content as needed..."
+                      />
+                    </div>
+                    
+                    <div className="flex items-center gap-4 mt-4">
+                      <Button>
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Changes
+                      </Button>
+                      <Button variant="outline">
+                        <Eye className="h-4 w-4 mr-2" />
+                        Preview
+                      </Button>
+                      <Button variant="outline">
+                        <Download className="h-4 w-4 mr-2" />
+                        Export as PDF
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )}
 
