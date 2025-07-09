@@ -338,7 +338,7 @@ export default function TechnicianRegistration() {
 
   return (
     <div className="container mx-auto p-4 max-w-7xl">
-      <Navigation title="Technician Registration" backTo="/technician-landing" />
+      <Navigation title="Technician Registration" backTo="/technicians" />
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Become a TechGPT Technician</h1>
         <p className="text-gray-600">Join our network of skilled technicians and start earning</p>
