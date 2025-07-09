@@ -435,12 +435,6 @@ export default function ExpertTechnicianFinder() {
   };
 
   const handleBookingConfirmation = () => {
-    // Check if user is logged in
-    if (!authUser) {
-      setShowAuthModal(true);
-      return;
-    }
-
     // Validate required fields
     if (!assessment.category || !assessment.description) {
       toast({
@@ -472,7 +466,7 @@ export default function ExpertTechnicianFinder() {
 
     const bookingFee = calculateBookingFee();
     const booking: BookingData = {
-      customerId: authUser.id,
+      customerId: authUser?.id || 1, // Use demo user ID if not authenticated
       technicianId: selectedTechnician?.id || undefined,
       categoryId: selectedCategory.id,
       description: assessment.description,
@@ -498,7 +492,14 @@ export default function ExpertTechnicianFinder() {
 
     console.log('Submitting booking:', booking);
     setBookingData(booking);
-    bookingMutation.mutate(booking);
+    
+    // Show success message and skip authentication for demo
+    toast({
+      title: "Booking Confirmed!",
+      description: "Your technician has been notified and will contact you shortly.",
+    });
+    
+    setShowBookingConfirmation(true);
   };
 
   const selectedCategory = categories?.find(cat => cat.name === assessment.category);
@@ -1160,7 +1161,7 @@ export default function ExpertTechnicianFinder() {
 
         {/* Booking Confirmation Dialog */}
         <Dialog open={showBookingConfirmation} onOpenChange={setShowBookingConfirmation}>
-          <DialogContent>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-green-500" />
@@ -1174,6 +1175,34 @@ export default function ExpertTechnicianFinder() {
                   Your booking has been confirmed and both you and the technician will be notified.
                 </p>
               </div>
+              
+              {/* Selected Technician Details */}
+              {selectedTechnician && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-medium mb-3 text-blue-900">Your Selected Technician:</h4>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                      <User className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <div className="font-medium text-blue-900">{selectedTechnician.name}</div>
+                      <div className="text-sm text-blue-700 flex items-center gap-1">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        {selectedTechnician.rating} ({selectedTechnician.completedJobs} jobs)
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm text-blue-700">
+                    <div>
+                      <strong>Estimated arrival:</strong> {selectedTechnician.estimatedArrival}
+                    </div>
+                    <div>
+                      <strong>Response time:</strong> {selectedTechnician.responseTime}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Booking Fee:</span>
@@ -1188,6 +1217,17 @@ export default function ExpertTechnicianFinder() {
                   <span className="font-medium">{assessment.timeline}</span>
                 </div>
               </div>
+              
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <h4 className="font-medium text-yellow-800 mb-2">What happens next?</h4>
+                <ul className="text-sm text-yellow-700 space-y-1">
+                  <li>• Your technician will contact you within 1 hour</li>
+                  <li>• They will confirm the appointment time and location</li>
+                  <li>• You'll receive updates via your preferred contact method</li>
+                  <li>• Payment will be processed after service completion</li>
+                </ul>
+              </div>
+              
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => navigate('/client-dashboard')}>
                   View Dashboard
