@@ -488,6 +488,16 @@ export default function AdminDashboard() {
               <span className="font-medium text-green-600">Operational</span>
             </div>
             
+            <Button variant="ghost" size="sm" onClick={() => setLocation("/chat")}>
+              <Home className="h-4 w-4 mr-2" />
+              <span className="hidden md:inline">Home</span>
+            </Button>
+            
+            <Button variant="ghost" size="sm" onClick={() => setLocation("/admin-earnings")}>
+              <DollarSign className="h-4 w-4 mr-2" />
+              <span className="hidden md:inline">Earnings</span>
+            </Button>
+            
             <Button variant="ghost" size="sm">
               <Bell className="h-4 w-4" />
             </Button>
@@ -552,24 +562,7 @@ export default function AdminDashboard() {
               ))}
             </nav>
 
-            <div className="p-4 border-t border-gray-700">
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start text-gray-300 hover:bg-gray-800 hover:text-white"
-                onClick={() => setLocation("/")}
-              >
-                <Home className="h-4 w-4 mr-3" />
-                Back to Home
-              </Button>
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start text-gray-300 hover:bg-gray-800 hover:text-white"
-                onClick={() => setLocation("/admin-earnings")}
-              >
-                <DollarSign className="h-4 w-4 mr-3" />
-                Earnings Settings
-              </Button>
-            </div>
+
           </div>
         </aside>
 
