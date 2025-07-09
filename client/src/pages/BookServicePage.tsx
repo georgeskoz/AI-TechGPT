@@ -94,7 +94,7 @@ export default function BookServicePage() {
         serviceType: bookingData.serviceType,
         urgency: bookingData.urgency,
         location: bookingData.location,
-        budget: bookingData.hourlyRate * 2,
+        budget: (bookingData.hourlyRate * 2).toString(),
         scheduledAt: bookingData.preferredDate || null
       };
       
