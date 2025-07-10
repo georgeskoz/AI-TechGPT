@@ -36,6 +36,9 @@ import { useLocation } from "wouter";
 import AdminDisputeManagement from "@/components/AdminDisputeManagement";
 import PaymentGatewayManagement from "@/components/PaymentGatewayManagement";
 import TaxManagement from "@/components/TaxManagement";
+import CouponsManagement from "@/components/CouponsManagement";
+import PushNotifications from "@/components/PushNotifications";
+import EmailSystem from "@/components/EmailSystem";
 import { 
   Users, 
   Settings, 
@@ -98,7 +101,8 @@ import {
   FolderOpen,
   FolderX,
   Edit3,
-  ExternalLink
+  ExternalLink,
+  Percent
 } from "lucide-react";
 
 interface AdminUser {
@@ -954,6 +958,9 @@ Last Updated: ${effectiveDate}
     { id: "disputes", label: "Disputes", icon: AlertTriangle },
     { id: "payments", label: "Payments", icon: CreditCard },
     { id: "tax", label: "Tax Management", icon: Settings },
+    { id: "coupons", label: "Coupons", icon: Percent },
+    { id: "notifications", label: "Push Notifications", icon: Bell },
+    { id: "email", label: "Email System", icon: Mail },
     { id: "system", label: "System", icon: Server },
     { id: "settings", label: "Settings", icon: Settings },
   ];
@@ -2586,6 +2593,12 @@ Last Updated: ${effectiveDate}
           {activeTab === "payments" && <PaymentGatewayManagement />}
 
           {activeTab === "tax" && <TaxManagement />}
+
+          {activeTab === "coupons" && <CouponsManagement />}
+
+          {activeTab === "notifications" && <PushNotifications />}
+
+          {activeTab === "email" && <EmailSystem />}
 
           {(activeTab === "users" || activeTab === "service-providers" || activeTab === "system" || activeTab === "settings") && (
             <div className="text-center py-12">
