@@ -68,10 +68,14 @@ const RealTimeNotificationService: React.FC<RealTimeNotificationServiceProps> = 
       setConnectionStatus('connected');
       
       // Send authentication or subscription message
-      wsRef.current?.send(JSON.stringify({
-        type: 'subscribe',
-        channel: 'admin-notifications'
-      }));
+      try {
+        wsRef.current?.send(JSON.stringify({
+          type: 'subscribe',
+          channel: 'admin-notifications'
+        }));
+      } catch (error) {
+        console.error('Error sending subscription message:', error);
+      }
     };
 
     wsRef.current.onmessage = (event) => {

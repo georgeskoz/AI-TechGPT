@@ -86,8 +86,16 @@ export default function LiveSupportChat({
   const { data: supportCases = [] } = useQuery({
     queryKey: ["/api/support/cases/customer", userId],
     queryFn: async () => {
-      const response = await fetch(`/api/support/cases/customer/${userId}`);
-      return response.json();
+      try {
+        const response = await fetch(`/api/support/cases/customer/${userId}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      } catch (error) {
+        console.error("Error fetching support cases:", error);
+        return [];
+      }
     },
   });
 
@@ -96,8 +104,16 @@ export default function LiveSupportChat({
     queryKey: ["/api/support/cases", currentCase?.id, "messages"],
     queryFn: async () => {
       if (!currentCase) return [];
-      const response = await fetch(`/api/support/cases/${currentCase.id}/messages`);
-      return response.json();
+      try {
+        const response = await fetch(`/api/support/cases/${currentCase.id}/messages`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+        return [];
+      }
     },
     enabled: !!currentCase,
   });
@@ -249,41 +265,63 @@ export default function LiveSupportChat({
   // WebSocket connection
   useEffect(() => {
     if (currentCase) {
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `${protocol}//${window.location.host}/ws`;
-      
-      wsRef.current = new WebSocket(wsUrl);
-      
-      wsRef.current.onopen = () => {
-        wsRef.current?.send(JSON.stringify({
-          type: "join_case",
-          caseId: currentCase.id,
-        }));
-      };
-      
-      wsRef.current.onmessage = (event) => {
-        const data = JSON.parse(event.data);
+      try {
+        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const wsUrl = `${protocol}//${window.location.host}/ws`;
         
-        switch (data.type) {
-          case "new_message":
-            queryClient.invalidateQueries({ 
-              queryKey: ["/api/support/cases", currentCase.id, "messages"] 
-            });
-            break;
-          case "typing":
-            if (data.userId !== userId) {
-              setIsTyping(data.isTyping);
+        wsRef.current = new WebSocket(wsUrl);
+        
+        wsRef.current.onopen = () => {
+          try {
+            wsRef.current?.send(JSON.stringify({
+              type: "join_case",
+              caseId: currentCase.id,
+            }));
+          } catch (error) {
+            console.error('Error sending join_case message:', error);
+          }
+        };
+        
+        wsRef.current.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            
+            switch (data.type) {
+              case "new_message":
+                queryClient.invalidateQueries({ 
+                  queryKey: ["/api/support/cases", currentCase.id, "messages"] 
+                });
+                break;
+              case "typing":
+                if (data.userId !== userId) {
+                  setIsTyping(data.isTyping);
+                }
+                break;
+              case "joined_case":
+                console.log(`Joined case ${data.caseId}`);
+                break;
             }
-            break;
-          case "joined_case":
-            console.log(`Joined case ${data.caseId}`);
-            break;
-        }
-      };
-      
-      return () => {
-        wsRef.current?.close();
-      };
+          } catch (error) {
+            console.error('Error parsing WebSocket message:', error);
+          }
+        };
+        
+        wsRef.current.onerror = (error) => {
+          console.error('WebSocket error:', error);
+        };
+        
+        wsRef.current.onclose = () => {
+          console.log('WebSocket connection closed');
+        };
+        
+        return () => {
+          if (wsRef.current) {
+            wsRef.current.close();
+          }
+        };
+      } catch (error) {
+        console.error('Error creating WebSocket connection:', error);
+      }
     }
   }, [currentCase, userId, queryClient]);
 
@@ -312,17 +350,21 @@ export default function LiveSupportChat({
     
     setAiMode(false);
     
-    // Send system message about switching to human agent
-    await apiRequest("POST", `/api/support/cases/${currentCase.id}/messages`, {
-      senderId: 999,
-      senderType: "technician", 
-      content: "I'm connecting you with a human technician who can provide more specialized assistance. Please wait a moment...",
-      messageType: "system",
-    });
-    
-    queryClient.invalidateQueries({ 
-      queryKey: ["/api/support/cases", currentCase?.id, "messages"] 
-    });
+    try {
+      // Send system message about switching to human agent
+      await apiRequest("POST", `/api/support/cases/${currentCase.id}/messages`, {
+        senderId: 999,
+        senderType: "technician", 
+        content: "I'm connecting you with a human technician who can provide more specialized assistance. Please wait a moment...",
+        messageType: "system",
+      });
+      
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/support/cases", currentCase?.id, "messages"] 
+      });
+    } catch (error) {
+      console.error('Error switching to human agent:', error);
+    }
   };
 
   const formatTime = (minutes: number) => {
