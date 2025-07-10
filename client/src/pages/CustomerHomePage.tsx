@@ -33,13 +33,24 @@ import {
   Download,
   Send,
   Apple,
-  Smartphone
+  Smartphone,
+  HelpCircle,
+  FileText,
+  Building2,
+  Globe,
+  DollarSign,
+  TrendingUp,
+  BarChart3,
+  HeadphonesIcon,
+  MessageCircle,
+  Book,
+  ExternalLink
 } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function CustomerHomePage() {
   const [, setLocation] = useLocation();
-  const [selectedAccountSection, setSelectedAccountSection] = useState('profile');
+  const [selectedAccountSection, setSelectedAccountSection] = useState('help');
   const [profileData, setProfileData] = useState({
     fullName: '',
     email: '',
@@ -304,13 +315,408 @@ export default function CustomerHomePage() {
                     <DialogTitle>Customer Account Management</DialogTitle>
                   </DialogHeader>
                   <Tabs value={selectedAccountSection} onValueChange={setSelectedAccountSection}>
-                    <TabsList className="grid w-full grid-cols-5">
-                      <TabsTrigger value="profile">Profile</TabsTrigger>
-                      <TabsTrigger value="security">Security</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-6">
+                      <TabsTrigger value="help">Help</TabsTrigger>
+                      <TabsTrigger value="personal">Personal</TabsTrigger>
+                      <TabsTrigger value="business">Business</TabsTrigger>
                       <TabsTrigger value="history">History</TabsTrigger>
                       <TabsTrigger value="billing">Billing</TabsTrigger>
                       <TabsTrigger value="settings">Settings</TabsTrigger>
                     </TabsList>
+                    
+                    <TabsContent value="help" className="space-y-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <HelpCircle className="h-5 w-5" />
+                            Help & Support Center
+                          </CardTitle>
+                          <CardDescription>
+                            Get assistance with your account and technical issues
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div className="space-y-4">
+                              <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <MessageCircle className="h-5 w-5 text-blue-600" />
+                                  <h3 className="font-medium">Live Chat Support</h3>
+                                </div>
+                                <p className="text-sm text-gray-600">Start a conversation with our support team</p>
+                                <Button size="sm" className="mt-2" onClick={() => setLocation('/live-support')}>
+                                  Start Chat
+                                </Button>
+                              </div>
+                              
+                              <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <HeadphonesIcon className="h-5 w-5 text-green-600" />
+                                  <h3 className="font-medium">Phone Support</h3>
+                                </div>
+                                <p className="text-sm text-gray-600">Call our technical support hotline</p>
+                                <p className="text-sm font-medium text-green-600">1-800-TECHGPT</p>
+                              </div>
+                              
+                              <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <Mail className="h-5 w-5 text-purple-600" />
+                                  <h3 className="font-medium">Email Support</h3>
+                                </div>
+                                <p className="text-sm text-gray-600">Send us an email for detailed assistance</p>
+                                <p className="text-sm font-medium text-purple-600">support@techgpt.com</p>
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-4">
+                              <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <Book className="h-5 w-5 text-orange-600" />
+                                  <h3 className="font-medium">Knowledge Base</h3>
+                                </div>
+                                <p className="text-sm text-gray-600">Browse our comprehensive help articles</p>
+                                <Button size="sm" variant="outline" className="mt-2">
+                                  <ExternalLink className="h-4 w-4 mr-1" />
+                                  Browse Articles
+                                </Button>
+                              </div>
+                              
+                              <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <FileText className="h-5 w-5 text-indigo-600" />
+                                  <h3 className="font-medium">Submit a Ticket</h3>
+                                </div>
+                                <p className="text-sm text-gray-600">Create a support ticket for complex issues</p>
+                                <Button size="sm" variant="outline" className="mt-2">
+                                  Create Ticket
+                                </Button>
+                              </div>
+                              
+                              <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <Users className="h-5 w-5 text-pink-600" />
+                                  <h3 className="font-medium">Community Forum</h3>
+                                </div>
+                                <p className="text-sm text-gray-600">Connect with other customers and experts</p>
+                                <Button size="sm" variant="outline" className="mt-2">
+                                  <ExternalLink className="h-4 w-4 mr-1" />
+                                  Join Forum
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Quick Actions</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <Button variant="outline" size="sm" className="h-auto py-3 flex flex-col gap-1">
+                              <Settings className="h-4 w-4" />
+                              <span className="text-xs">Account Settings</span>
+                            </Button>
+                            <Button variant="outline" size="sm" className="h-auto py-3 flex flex-col gap-1">
+                              <CreditCard className="h-4 w-4" />
+                              <span className="text-xs">Billing</span>
+                            </Button>
+                            <Button variant="outline" size="sm" className="h-auto py-3 flex flex-col gap-1">
+                              <History className="h-4 w-4" />
+                              <span className="text-xs">Service History</span>
+                            </Button>
+                            <Button variant="outline" size="sm" className="h-auto py-3 flex flex-col gap-1">
+                              <Download className="h-4 w-4" />
+                              <span className="text-xs">Download Data</span>
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                    
+                    <TabsContent value="personal" className="space-y-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <User className="h-5 w-5" />
+                            Personal Information
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Full Name *</label>
+                              <Input 
+                                placeholder="Enter your full name" 
+                                value={profileData.fullName}
+                                onChange={(e) => handleInputChange('fullName', e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Email Address *</label>
+                              <Input 
+                                type="email" 
+                                placeholder="Enter your email" 
+                                value={profileData.email}
+                                onChange={(e) => handleInputChange('email', e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Phone Number</label>
+                              <Input 
+                                type="tel" 
+                                placeholder="Enter your phone number" 
+                                value={profileData.phone}
+                                onChange={(e) => handleInputChange('phone', e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Username *</label>
+                              <Input 
+                                placeholder="Choose a username" 
+                                value={profileData.username}
+                                onChange={(e) => handleInputChange('username', e.target.value)}
+                              />
+                            </div>
+                            <div className="md:col-span-2">
+                              <label className="block text-sm font-medium mb-1">Home Address</label>
+                              <Input 
+                                placeholder="Enter your address (for onsite services)" 
+                                value={profileData.address}
+                                onChange={(e) => handleInputChange('address', e.target.value)}
+                              />
+                            </div>
+                          </div>
+                          <div className="mt-4">
+                            <Button onClick={handleProfileUpdate}>Update Personal Information</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Settings className="h-5 w-5" />
+                            Account Status & Verification
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                              <div>
+                                <p className="font-medium">Account Type</p>
+                                <p className="text-sm text-gray-600">Current subscription level</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge variant={accountStatus.accountType === 'Premium Customer' ? 'default' : 'outline'}>
+                                  {accountStatus.accountType}
+                                </Badge>
+                                {accountStatus.accountType === 'Standard Customer' && (
+                                  <Button size="sm" onClick={handleUpgradeAccount}>
+                                    Upgrade
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div>
+                                <p className="font-medium">Email Verification</p>
+                                <p className="text-sm text-gray-600">Secure your account</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {accountStatus.emailVerified ? (
+                                  <CheckCircle className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <Button size="sm" onClick={handleVerifyEmail}>
+                                    Verify
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div>
+                                <p className="font-medium">Phone Verification</p>
+                                <p className="text-sm text-gray-600">Two-factor authentication</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {accountStatus.phoneVerified ? (
+                                  <CheckCircle className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <Button size="sm" onClick={handleVerifyPhone}>
+                                    Verify
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div>
+                                <p className="font-medium">Identity Verification</p>
+                                <p className="text-sm text-gray-600">Enhanced security level</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {accountStatus.identityVerified ? (
+                                  <CheckCircle className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <Button size="sm" onClick={handleVerifyIdentity}>
+                                    Verify
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="p-3 bg-blue-50 rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <p className="font-medium">Profile Completion</p>
+                                <span className="text-sm text-blue-600">{accountStatus.profileComplete}%</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div 
+                                  className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                  style={{ width: `${accountStatus.profileComplete}%` }}
+                                ></div>
+                              </div>
+                              <p className="text-xs text-gray-600 mt-1">Complete your profile to unlock all features</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                    
+                    <TabsContent value="business" className="space-y-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Building2 className="h-5 w-5" />
+                            Business Account Information
+                          </CardTitle>
+                          <CardDescription>
+                            Manage your business account details and enterprise features
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Company Name</label>
+                              <Input placeholder="Enter company name" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Business Email</label>
+                              <Input type="email" placeholder="business@company.com" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Business Phone</label>
+                              <Input type="tel" placeholder="Business phone number" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Tax ID / EIN</label>
+                              <Input placeholder="Tax identification number" />
+                            </div>
+                            <div className="md:col-span-2">
+                              <label className="block text-sm font-medium mb-1">Business Address</label>
+                              <Input placeholder="Complete business address" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Industry</label>
+                              <Input placeholder="e.g., Technology, Manufacturing" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Company Size</label>
+                              <Input placeholder="e.g., 1-10, 11-50, 51-200" />
+                            </div>
+                          </div>
+                          <div className="mt-4">
+                            <Button>Update Business Information</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <TrendingUp className="h-5 w-5" />
+                            Enterprise Features
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div className="p-4 border rounded-lg">
+                              <div className="flex items-center gap-3 mb-3">
+                                <Users className="h-5 w-5 text-blue-600" />
+                                <h3 className="font-medium">Team Management</h3>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-3">Manage multiple users under your business account</p>
+                              <Button size="sm" variant="outline">Manage Team</Button>
+                            </div>
+                            
+                            <div className="p-4 border rounded-lg">
+                              <div className="flex items-center gap-3 mb-3">
+                                <BarChart3 className="h-5 w-5 text-green-600" />
+                                <h3 className="font-medium">Usage Analytics</h3>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-3">Track service usage and team performance</p>
+                              <Button size="sm" variant="outline">View Analytics</Button>
+                            </div>
+                            
+                            <div className="p-4 border rounded-lg">
+                              <div className="flex items-center gap-3 mb-3">
+                                <DollarSign className="h-5 w-5 text-purple-600" />
+                                <h3 className="font-medium">Bulk Billing</h3>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-3">Consolidated billing for all team members</p>
+                              <Button size="sm" variant="outline">Configure Billing</Button>
+                            </div>
+                            
+                            <div className="p-4 border rounded-lg">
+                              <div className="flex items-center gap-3 mb-3">
+                                <Globe className="h-5 w-5 text-orange-600" />
+                                <h3 className="font-medium">API Access</h3>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-3">Integrate TechGPT with your business systems</p>
+                              <Button size="sm" variant="outline">API Documentation</Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Business Subscription</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                            <div className="flex items-center justify-between mb-3">
+                              <div>
+                                <h3 className="font-medium">Current Plan: Business Pro</h3>
+                                <p className="text-sm text-gray-600">Advanced features for growing businesses</p>
+                              </div>
+                              <Badge variant="default">Active</Badge>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 text-center mb-4">
+                              <div>
+                                <p className="text-2xl font-bold text-blue-600">50</p>
+                                <p className="text-xs text-gray-600">Team Members</p>
+                              </div>
+                              <div>
+                                <p className="text-2xl font-bold text-green-600">24/7</p>
+                                <p className="text-xs text-gray-600">Priority Support</p>
+                              </div>
+                              <div>
+                                <p className="text-2xl font-bold text-purple-600">API</p>
+                                <p className="text-xs text-gray-600">Integration</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm">Upgrade Plan</Button>
+                              <Button size="sm" variant="outline">View Details</Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
                     
                     <TabsContent value="profile" className="space-y-6">
                       <Card>
