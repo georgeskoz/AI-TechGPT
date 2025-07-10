@@ -227,7 +227,8 @@ Respond with just the estimated cost as a number (without $ symbol).`;
     
     // Availability Score (0-100) - check current availability
     const now = new Date();
-    const dayOfWeek = now.toLocaleLowerCase().substring(0, 3) + 'day'; // monday, tuesday, etc.
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayOfWeek = dayNames[now.getDay()];
     const availability = technician.availability as any;
     const todayAvail = availability?.[dayOfWeek];
     const availabilityScore = (todayAvail?.available && technician.isActive) ? 100 : 0;
