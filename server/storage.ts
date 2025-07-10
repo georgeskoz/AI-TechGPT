@@ -3882,6 +3882,48 @@ class MemoryStorage implements IStorage {
         ],
         createdAt: new Date(),
         updatedAt: new Date()
+      },
+      {
+        id: "create-support-ticket",
+        title: "How to Create a Support Ticket",
+        description: "Step-by-step guide for creating support tickets from chat conversations for priority help",
+        category: "support",
+        icon: "Ticket",
+        isActive: true,
+        steps: [
+          {
+            id: "step1",
+            title: "Start a chat conversation",
+            description: "Begin by chatting with our AI assistant about your technical issue to gather initial troubleshooting steps",
+            order: 1
+          },
+          {
+            id: "step2",
+            title: "Look for the ticket button",
+            description: "After your chat conversation, look for the 'Create Support Ticket' button at the bottom of the chat area",
+            order: 2
+          },
+          {
+            id: "step3",
+            title: "Fill out ticket details",
+            description: "Click the button to open the ticket form, add a subject, select category (Technical, Billing, Account, General), choose priority level, and add any additional details",
+            order: 3
+          },
+          {
+            id: "step4",
+            title: "Review and submit",
+            description: "Your chat conversation will be automatically attached to the ticket. Review all details and click 'Create Support Ticket' to submit",
+            order: 4
+          },
+          {
+            id: "step5",
+            title: "Track your ticket",
+            description: "You'll receive a ticket number and email updates. The support team will review your case within 24 hours and provide priority assistance",
+            order: 5
+          }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
     ];
 
