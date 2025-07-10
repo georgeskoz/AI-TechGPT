@@ -4,6 +4,7 @@ import { Clipboard } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import DomainIndicator from './DomainIndicator';
+import CreateTicketButton from './CreateTicketButton';
 
 interface ChatAreaProps {
   messages: Message[];
@@ -213,6 +214,22 @@ export default function ChatArea({ messages, isLoading, username, typingMessage,
         {/* This div allows us to scroll to the bottom */}
         <div ref={messagesEndRef} />
       </div>
+      
+      {/* Support ticket creation button */}
+      {messages.length > 0 && (
+        <div className="p-4 border-t border-gray-200 bg-white">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-600">
+              Need more help? Escalate your chat to a support ticket for priority handling.
+            </div>
+            <CreateTicketButton 
+              messages={messages} 
+              username={username} 
+              className="ml-4"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
