@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navigation from "@/components/Navigation";
 import { 
   DollarSign, 
@@ -17,12 +19,30 @@ import {
   ArrowRight,
   CheckCircle,
   Target,
-  Calendar
+  Calendar,
+  User,
+  BookOpen,
+  HelpCircle,
+  Inbox,
+  MessageCircle,
+  Phone,
+  Mail,
+  FileText,
+  Video,
+  GraduationCap,
+  PlayCircle,
+  Download,
+  Search,
+  Filter,
+  MoreHorizontal,
+  Bell,
+  Archive
 } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function ServiceProviderHomePage() {
   const [, setLocation] = useLocation();
+  const [selectedAccountSection, setSelectedAccountSection] = useState('learning');
 
   const benefits = [
     {
@@ -118,6 +138,505 @@ export default function ServiceProviderHomePage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Account
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="text-2xl font-bold text-green-600">
+                      Service Provider Account
+                    </DialogTitle>
+                  </DialogHeader>
+                  <Tabs value={selectedAccountSection} onValueChange={setSelectedAccountSection} className="w-full">
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="learning" className="flex items-center gap-2">
+                        <GraduationCap className="h-4 w-4" />
+                        Learning Center
+                      </TabsTrigger>
+                      <TabsTrigger value="help" className="flex items-center gap-2">
+                        <HelpCircle className="h-4 w-4" />
+                        Help
+                      </TabsTrigger>
+                      <TabsTrigger value="inbox" className="flex items-center gap-2">
+                        <Inbox className="h-4 w-4" />
+                        Inbox
+                      </TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="learning" className="space-y-6">
+                      <div className="bg-green-50 p-6 rounded-lg">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="bg-green-600 p-2 rounded-lg">
+                            <BookOpen className="h-6 w-6 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-semibold">Learning Center</h3>
+                            <p className="text-gray-600">Enhance your skills and grow your service provider career</p>
+                          </div>
+                        </div>
+                        
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <Card className="bg-white">
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Video className="h-5 w-5 text-blue-600" />
+                                Training Videos
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <PlayCircle className="h-5 w-5 text-green-600" />
+                                  <span className="text-sm font-medium">Getting Started Guide</span>
+                                </div>
+                                <Badge variant="secondary">12 min</Badge>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <PlayCircle className="h-5 w-5 text-green-600" />
+                                  <span className="text-sm font-medium">Best Practices</span>
+                                </div>
+                                <Badge variant="secondary">18 min</Badge>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <PlayCircle className="h-5 w-5 text-green-600" />
+                                  <span className="text-sm font-medium">Customer Communication</span>
+                                </div>
+                                <Badge variant="secondary">15 min</Badge>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-white">
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <FileText className="h-5 w-5 text-purple-600" />
+                                Resources
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <Download className="h-5 w-5 text-blue-600" />
+                                  <span className="text-sm font-medium">Service Provider Handbook</span>
+                                </div>
+                                <Button variant="outline" size="sm">Download</Button>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <Download className="h-5 w-5 text-blue-600" />
+                                  <span className="text-sm font-medium">Troubleshooting Guide</span>
+                                </div>
+                                <Button variant="outline" size="sm">Download</Button>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <Download className="h-5 w-5 text-blue-600" />
+                                  <span className="text-sm font-medium">Pricing Guidelines</span>
+                                </div>
+                                <Button variant="outline" size="sm">Download</Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-white">
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Award className="h-5 w-5 text-orange-600" />
+                                Certifications
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <CheckCircle className="h-5 w-5 text-green-600" />
+                                  <span className="text-sm font-medium">Basic Technician</span>
+                                </div>
+                                <Badge className="bg-green-100 text-green-800">Completed</Badge>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <Clock className="h-5 w-5 text-orange-600" />
+                                  <span className="text-sm font-medium">Advanced Networking</span>
+                                </div>
+                                <Badge variant="outline">In Progress</Badge>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <Target className="h-5 w-5 text-gray-400" />
+                                  <span className="text-sm font-medium">Expert Certification</span>
+                                </div>
+                                <Button variant="outline" size="sm">Start</Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-white">
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Users className="h-5 w-5 text-green-600" />
+                                Community
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <MessageCircle className="h-5 w-5 text-blue-600" />
+                                  <span className="text-sm font-medium">Service Provider Forum</span>
+                                </div>
+                                <Button variant="outline" size="sm">Join</Button>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <Calendar className="h-5 w-5 text-purple-600" />
+                                  <span className="text-sm font-medium">Monthly Webinars</span>
+                                </div>
+                                <Button variant="outline" size="sm">Register</Button>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <Zap className="h-5 w-5 text-yellow-600" />
+                                  <span className="text-sm font-medium">Success Stories</span>
+                                </div>
+                                <Button variant="outline" size="sm">Read</Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="help" className="space-y-6">
+                      <div className="bg-blue-50 p-6 rounded-lg">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="bg-blue-600 p-2 rounded-lg">
+                            <HelpCircle className="h-6 w-6 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-semibold">Help & Support</h3>
+                            <p className="text-gray-600">Get assistance with your service provider account</p>
+                          </div>
+                        </div>
+                        
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <Card className="bg-white">
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <MessageCircle className="h-5 w-5 text-green-600" />
+                                Contact Support
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <MessageCircle className="h-5 w-5 text-green-600" />
+                                  <div>
+                                    <span className="text-sm font-medium">Live Chat</span>
+                                    <p className="text-xs text-gray-500">Available 24/7</p>
+                                  </div>
+                                </div>
+                                <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                                  Start Chat
+                                </Button>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <Phone className="h-5 w-5 text-blue-600" />
+                                  <div>
+                                    <span className="text-sm font-medium">Phone Support</span>
+                                    <p className="text-xs text-gray-500">1-800-TECHGPT</p>
+                                  </div>
+                                </div>
+                                <Button variant="outline" size="sm">Call</Button>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <Mail className="h-5 w-5 text-purple-600" />
+                                  <div>
+                                    <span className="text-sm font-medium">Email Support</span>
+                                    <p className="text-xs text-gray-500">support@techgpt.com</p>
+                                  </div>
+                                </div>
+                                <Button variant="outline" size="sm">Email</Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-white">
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Search className="h-5 w-5 text-orange-600" />
+                                Knowledge Base
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <FileText className="h-5 w-5 text-blue-600" />
+                                  <span className="text-sm font-medium">Getting Started</span>
+                                </div>
+                                <Button variant="outline" size="sm">View</Button>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <FileText className="h-5 w-5 text-blue-600" />
+                                  <span className="text-sm font-medium">Payment & Billing</span>
+                                </div>
+                                <Button variant="outline" size="sm">View</Button>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <FileText className="h-5 w-5 text-blue-600" />
+                                  <span className="text-sm font-medium">Technical Issues</span>
+                                </div>
+                                <Button variant="outline" size="sm">View</Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-white">
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <FileText className="h-5 w-5 text-green-600" />
+                                Submit Ticket
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              <div className="space-y-2">
+                                <label className="text-sm font-medium">Issue Type</label>
+                                <select className="w-full p-2 border rounded-lg">
+                                  <option>Account Issues</option>
+                                  <option>Payment Problems</option>
+                                  <option>Technical Support</option>
+                                  <option>Feature Request</option>
+                                </select>
+                              </div>
+                              <div className="space-y-2">
+                                <label className="text-sm font-medium">Priority</label>
+                                <select className="w-full p-2 border rounded-lg">
+                                  <option>Low</option>
+                                  <option>Medium</option>
+                                  <option>High</option>
+                                  <option>Urgent</option>
+                                </select>
+                              </div>
+                              <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                                Submit Ticket
+                              </Button>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-white">
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Users className="h-5 w-5 text-purple-600" />
+                                Community Help
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <MessageCircle className="h-5 w-5 text-green-600" />
+                                  <span className="text-sm font-medium">Provider Forum</span>
+                                </div>
+                                <Button variant="outline" size="sm">Join</Button>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <HelpCircle className="h-5 w-5 text-blue-600" />
+                                  <span className="text-sm font-medium">FAQ</span>
+                                </div>
+                                <Button variant="outline" size="sm">Browse</Button>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <Video className="h-5 w-5 text-red-600" />
+                                  <span className="text-sm font-medium">Video Tutorials</span>
+                                </div>
+                                <Button variant="outline" size="sm">Watch</Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="inbox" className="space-y-6">
+                      <div className="bg-purple-50 p-6 rounded-lg">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="bg-purple-600 p-2 rounded-lg">
+                            <Inbox className="h-6 w-6 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-semibold">Inbox</h3>
+                            <p className="text-gray-600">Messages, notifications, and updates</p>
+                          </div>
+                        </div>
+                        
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <Card className="bg-white">
+                            <CardHeader>
+                              <div className="flex items-center justify-between">
+                                <CardTitle className="flex items-center gap-2">
+                                  <Mail className="h-5 w-5 text-blue-600" />
+                                  Messages
+                                </CardTitle>
+                                <Badge variant="destructive">3</Badge>
+                              </div>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-600">
+                                <div className="bg-blue-600 p-1 rounded-full">
+                                  <Bell className="h-3 w-3 text-white" />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium">New Job Opportunity</span>
+                                    <span className="text-xs text-gray-500">2 hours ago</span>
+                                  </div>
+                                  <p className="text-xs text-gray-600 mt-1">Network troubleshooting job in downtown area</p>
+                                </div>
+                              </div>
+                              <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                <div className="bg-gray-400 p-1 rounded-full">
+                                  <Mail className="h-3 w-3 text-white" />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium">Payment Processed</span>
+                                    <span className="text-xs text-gray-500">1 day ago</span>
+                                  </div>
+                                  <p className="text-xs text-gray-600 mt-1">Weekly payment of $450 has been processed</p>
+                                </div>
+                              </div>
+                              <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                <div className="bg-gray-400 p-1 rounded-full">
+                                  <Users className="h-3 w-3 text-white" />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium">Customer Review</span>
+                                    <span className="text-xs text-gray-500">3 days ago</span>
+                                  </div>
+                                  <p className="text-xs text-gray-600 mt-1">Sarah M. left you a 5-star review</p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-white">
+                            <CardHeader>
+                              <div className="flex items-center justify-between">
+                                <CardTitle className="flex items-center gap-2">
+                                  <Bell className="h-5 w-5 text-orange-600" />
+                                  Notifications
+                                </CardTitle>
+                                <div className="flex items-center gap-2">
+                                  <Filter className="h-4 w-4 text-gray-400" />
+                                  <MoreHorizontal className="h-4 w-4 text-gray-400" />
+                                </div>
+                              </div>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <Bell className="h-5 w-5 text-green-600" />
+                                  <span className="text-sm font-medium">Job Notifications</span>
+                                </div>
+                                <Button variant="outline" size="sm">On</Button>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <Mail className="h-5 w-5 text-blue-600" />
+                                  <span className="text-sm font-medium">Email Updates</span>
+                                </div>
+                                <Button variant="outline" size="sm">On</Button>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <DollarSign className="h-5 w-5 text-green-600" />
+                                  <span className="text-sm font-medium">Payment Alerts</span>
+                                </div>
+                                <Button variant="outline" size="sm">On</Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-white">
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Archive className="h-5 w-5 text-gray-600" />
+                                Recent Activity
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <CheckCircle className="h-5 w-5 text-green-600" />
+                                  <div>
+                                    <span className="text-sm font-medium">Job Completed</span>
+                                    <p className="text-xs text-gray-500">Hardware repair - $85</p>
+                                  </div>
+                                </div>
+                                <span className="text-xs text-gray-500">Today</span>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <Clock className="h-5 w-5 text-orange-600" />
+                                  <div>
+                                    <span className="text-sm font-medium">Job Started</span>
+                                    <p className="text-xs text-gray-500">Network setup - $120</p>
+                                  </div>
+                                </div>
+                                <span className="text-xs text-gray-500">Yesterday</span>
+                              </div>
+                              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <Star className="h-5 w-5 text-yellow-600" />
+                                  <div>
+                                    <span className="text-sm font-medium">Rating Received</span>
+                                    <p className="text-xs text-gray-500">5 stars from John D.</p>
+                                  </div>
+                                </div>
+                                <span className="text-xs text-gray-500">2 days ago</span>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-white">
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <MessageCircle className="h-5 w-5 text-purple-600" />
+                                Quick Actions
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <Button variant="outline" className="w-full justify-start">
+                                <Mail className="h-4 w-4 mr-2" />
+                                Compose Message
+                              </Button>
+                              <Button variant="outline" className="w-full justify-start">
+                                <HelpCircle className="h-4 w-4 mr-2" />
+                                Contact Support
+                              </Button>
+                              <Button variant="outline" className="w-full justify-start">
+                                <Archive className="h-4 w-4 mr-2" />
+                                View Archive
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </DialogContent>
+              </Dialog>
+              
               <Button variant="outline" onClick={() => setLocation("/technician-dashboard")}>
                 Dashboard
               </Button>
