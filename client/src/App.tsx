@@ -36,6 +36,7 @@ import FloatingChatWidget from "@/components/FloatingChatWidget";
 import OnboardingWizard from "@/pages/OnboardingWizard";
 import RegisterPage from "@/pages/RegisterPage";
 import TestNotificationSystem from "@/pages/TestNotificationSystem";
+import NotificationsDashboard from "@/pages/NotificationsDashboard";
 
 
 function Router() {
@@ -72,6 +73,7 @@ function Router() {
       <Route path="/onboarding" component={OnboardingWizard} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/test-notifications" component={TestNotificationSystem} />
+      <Route path="/notifications" component={NotificationsDashboard} />
       <Route path="/:username/profile" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>
