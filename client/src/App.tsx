@@ -31,6 +31,7 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import AdminNavigation from "@/components/AdminNavigation";
 import AdminEarningSettings from "@/components/AdminEarningSettings";
 import AdminCategoryManagement from "@/pages/AdminCategoryManagement";
+import AdminAnnouncements from "@/pages/AdminAnnouncements";
 import FloatingChatWidget from "@/components/FloatingChatWidget";
 import OnboardingWizard from "@/pages/OnboardingWizard";
 
@@ -65,6 +66,7 @@ function Router() {
       <Route path="/admin-portal" component={AdminNavigation} />
       <Route path="/admin-earnings" component={AdminEarningSettings} />
       <Route path="/admin-categories" component={AdminCategoryManagement} />
+      <Route path="/admin/announcements" component={AdminAnnouncements} />
       <Route path="/onboarding" component={OnboardingWizard} />
       <Route path="/:username/profile" component={ProfilePage} />
       <Route component={NotFound} />
