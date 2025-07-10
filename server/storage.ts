@@ -496,6 +496,7 @@ class MemoryStorage implements IStorage {
     // Initialize with sample data for demo
     console.log("MemoryStorage constructor called - initializing sample data...");
     this.initializeSampleData();
+    this.initializePaymentGateways();
     console.log(`After initialization: ${this.technicians.size} technicians loaded`);
   }
 
@@ -2234,6 +2235,358 @@ class MemoryStorage implements IStorage {
     }
 
     return jobs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  // Payment Gateway Management Methods
+  private paymentGateways: Map<string, any> = new Map();
+  private paymentTransactions: Map<string, any> = new Map();
+
+
+
+  private initializePaymentGateways() {
+    // Add mock payment gateways
+    const mockGateways = [
+      {
+        id: '1',
+        name: 'Stripe Production',
+        type: 'stripe',
+        status: 'active',
+        isEnabled: true,
+        apiKey: 'pk_live_51J**********************',
+        secretKey: 'sk_live_51J**********************',
+        webhookUrl: 'https://api.techgpt.com/webhooks/stripe',
+        fees: { percentage: 2.9, fixed: 0.30 },
+        supportedCurrencies: ['USD', 'CAD', 'EUR', 'GBP'],
+        supportedCountries: ['US', 'CA', 'GB', 'DE', 'FR'],
+        createdAt: new Date('2024-01-15'),
+        updatedAt: new Date('2025-01-08'),
+        lastSync: new Date('2025-01-08'),
+        totalTransactions: 2847,
+        totalVolume: 284750,
+        monthlyVolume: 45200,
+        config: {
+          webhookSecret: 'whsec_**********************',
+          accountId: 'acct_**********************'
+        }
+      },
+      {
+        id: '2',
+        name: 'PayPal Business',
+        type: 'paypal',
+        status: 'active',
+        isEnabled: true,
+        apiKey: 'AYr**********************',
+        secretKey: 'EHt**********************',
+        webhookUrl: 'https://api.techgpt.com/webhooks/paypal',
+        fees: { percentage: 3.49, fixed: 0.49 },
+        supportedCurrencies: ['USD', 'CAD', 'EUR', 'GBP', 'AUD'],
+        supportedCountries: ['US', 'CA', 'GB', 'DE', 'FR', 'AU'],
+        createdAt: new Date('2024-02-01'),
+        updatedAt: new Date('2025-01-07'),
+        lastSync: new Date('2025-01-07'),
+        totalTransactions: 1523,
+        totalVolume: 152300,
+        monthlyVolume: 28400,
+        config: {
+          clientId: 'AYr**********************',
+          environment: 'production'
+        }
+      },
+      {
+        id: '3',
+        name: 'Apple Pay',
+        type: 'apple_pay',
+        status: 'pending',
+        isEnabled: false,
+        apiKey: 'merchant.com.techgpt.payments',
+        secretKey: '',
+        webhookUrl: 'https://api.techgpt.com/webhooks/apple',
+        fees: { percentage: 2.9, fixed: 0.30 },
+        supportedCurrencies: ['USD', 'CAD', 'EUR', 'GBP'],
+        supportedCountries: ['US', 'CA', 'GB', 'DE', 'FR'],
+        createdAt: new Date('2024-12-15'),
+        updatedAt: new Date('2025-01-05'),
+        lastSync: new Date('2025-01-05'),
+        totalTransactions: 0,
+        totalVolume: 0,
+        monthlyVolume: 0,
+        config: {
+          merchantId: 'merchant.com.techgpt.payments',
+          certificateId: 'cert_**********************'
+        }
+      }
+    ];
+
+    mockGateways.forEach(gateway => {
+      this.paymentGateways.set(gateway.id, gateway);
+    });
+
+    // Add mock transactions
+    const mockTransactions = [
+      {
+        id: 'txn_001',
+        gatewayId: '1',
+        gatewayName: 'Stripe',
+        transactionId: 'pi_3O**********************',
+        amount: 125.50,
+        currency: 'USD',
+        status: 'completed',
+        type: 'payment',
+        customerId: 101,
+        technicianId: 201,
+        jobId: 301,
+        fees: 3.94,
+        netAmount: 121.56,
+        createdAt: new Date('2025-01-08T10:30:00Z'),
+        completedAt: new Date('2025-01-08T10:32:15Z'),
+        failureReason: null,
+        metadata: { service: 'Hardware Support', duration: '2 hours' }
+      },
+      {
+        id: 'txn_002',
+        gatewayId: '2',
+        gatewayName: 'PayPal',
+        transactionId: 'PAYID-MXXXXXXXXXXXXXXXX',
+        amount: 85.00,
+        currency: 'USD',
+        status: 'completed',
+        type: 'payment',
+        customerId: 102,
+        technicianId: 202,
+        jobId: 302,
+        fees: 3.46,
+        netAmount: 81.54,
+        createdAt: new Date('2025-01-08T09:15:00Z'),
+        completedAt: new Date('2025-01-08T09:17:30Z'),
+        failureReason: null,
+        metadata: { service: 'Network Setup', duration: '1.5 hours' }
+      },
+      {
+        id: 'txn_003',
+        gatewayId: '1',
+        gatewayName: 'Stripe',
+        transactionId: 'pi_3P**********************',
+        amount: 200.00,
+        currency: 'USD',
+        status: 'pending',
+        type: 'payment',
+        customerId: 103,
+        technicianId: 203,
+        jobId: 303,
+        fees: 6.10,
+        netAmount: 193.90,
+        createdAt: new Date('2025-01-08T11:45:00Z'),
+        completedAt: null,
+        failureReason: null,
+        metadata: { service: 'System Administration', duration: '3 hours' }
+      },
+      {
+        id: 'txn_004',
+        gatewayId: '1',
+        gatewayName: 'Stripe',
+        transactionId: 'pi_3Q**********************',
+        amount: 75.00,
+        currency: 'USD',
+        status: 'failed',
+        type: 'payment',
+        customerId: 104,
+        technicianId: 204,
+        jobId: 304,
+        fees: 0,
+        netAmount: 0,
+        createdAt: new Date('2025-01-08T08:20:00Z'),
+        completedAt: null,
+        failureReason: 'Insufficient funds',
+        metadata: { service: 'Software Installation', duration: '1 hour' }
+      },
+      {
+        id: 'txn_005',
+        gatewayId: '2',
+        gatewayName: 'PayPal',
+        transactionId: 'PAYID-NXXXXXXXXXXXXXXXX',
+        amount: 150.00,
+        currency: 'USD',
+        status: 'refunded',
+        type: 'refund',
+        customerId: 105,
+        technicianId: 205,
+        jobId: 305,
+        fees: 5.74,
+        netAmount: 144.26,
+        createdAt: new Date('2025-01-07T14:30:00Z'),
+        completedAt: new Date('2025-01-07T14:32:00Z'),
+        failureReason: null,
+        metadata: { service: 'Database Migration', duration: '2.5 hours', refundReason: 'Service cancelled by customer' }
+      }
+    ];
+
+    mockTransactions.forEach(transaction => {
+      this.paymentTransactions.set(transaction.id, transaction);
+    });
+  }
+
+  async getAllPaymentGateways(): Promise<any[]> {
+    return Array.from(this.paymentGateways.values());
+  }
+
+  async createPaymentGateway(gatewayData: any): Promise<any> {
+    const id = Date.now().toString();
+    const gateway = {
+      id,
+      ...gatewayData,
+      status: 'active',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      lastSync: new Date(),
+      totalTransactions: 0,
+      totalVolume: 0,
+      monthlyVolume: 0,
+      config: gatewayData.config || {}
+    };
+    
+    this.paymentGateways.set(id, gateway);
+    return gateway;
+  }
+
+  async updatePaymentGateway(id: string, updateData: any): Promise<any> {
+    const gateway = this.paymentGateways.get(id);
+    if (!gateway) {
+      throw new Error('Payment gateway not found');
+    }
+    
+    const updatedGateway = {
+      ...gateway,
+      ...updateData,
+      updatedAt: new Date()
+    };
+    
+    this.paymentGateways.set(id, updatedGateway);
+    return updatedGateway;
+  }
+
+  async deletePaymentGateway(id: string): Promise<void> {
+    if (!this.paymentGateways.has(id)) {
+      throw new Error('Payment gateway not found');
+    }
+    
+    this.paymentGateways.delete(id);
+  }
+
+  async togglePaymentGateway(id: string, isEnabled: boolean): Promise<any> {
+    const gateway = this.paymentGateways.get(id);
+    if (!gateway) {
+      throw new Error('Payment gateway not found');
+    }
+    
+    gateway.isEnabled = isEnabled;
+    gateway.status = isEnabled ? 'active' : 'inactive';
+    gateway.updatedAt = new Date();
+    
+    this.paymentGateways.set(id, gateway);
+    return gateway;
+  }
+
+  async syncPaymentGateway(id: string): Promise<any> {
+    const gateway = this.paymentGateways.get(id);
+    if (!gateway) {
+      throw new Error('Payment gateway not found');
+    }
+    
+    // Simulate sync process
+    gateway.lastSync = new Date();
+    gateway.updatedAt = new Date();
+    
+    this.paymentGateways.set(id, gateway);
+    return { success: true, lastSync: gateway.lastSync };
+  }
+
+  async getPaymentTransactions(filters: { search?: string; status?: string; range?: string }): Promise<any[]> {
+    let transactions = Array.from(this.paymentTransactions.values());
+    
+    if (filters.search) {
+      transactions = transactions.filter(t => 
+        t.transactionId.toLowerCase().includes(filters.search.toLowerCase()) ||
+        t.gatewayName.toLowerCase().includes(filters.search.toLowerCase())
+      );
+    }
+    
+    if (filters.status && filters.status !== 'all') {
+      transactions = transactions.filter(t => t.status === filters.status);
+    }
+    
+    if (filters.range) {
+      const days = parseInt(filters.range.replace('d', ''));
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+      transactions = transactions.filter(t => new Date(t.createdAt) >= cutoff);
+    }
+    
+    return transactions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getPaymentAnalytics(range: string): Promise<any> {
+    const transactions = Array.from(this.paymentTransactions.values());
+    const gateways = Array.from(this.paymentGateways.values());
+    
+    const totalTransactions = transactions.length;
+    const totalVolume = transactions.reduce((sum, t) => sum + t.amount, 0);
+    const completedTransactions = transactions.filter(t => t.status === 'completed');
+    const successRate = totalTransactions > 0 ? (completedTransactions.length / totalTransactions) * 100 : 0;
+    const averageTransactionValue = totalTransactions > 0 ? totalVolume / totalTransactions : 0;
+    
+    const gatewayBreakdown = gateways.reduce((acc, gateway) => {
+      const gatewayTransactions = transactions.filter(t => t.gatewayId === gateway.id);
+      acc[gateway.type] = {
+        volume: gatewayTransactions.reduce((sum, t) => sum + t.amount, 0),
+        count: gatewayTransactions.length,
+        fees: gatewayTransactions.reduce((sum, t) => sum + t.fees, 0)
+      };
+      return acc;
+    }, {});
+    
+    const topGateway = Object.entries(gatewayBreakdown).reduce((max, [name, data]: [string, any]) => 
+      data.volume > (max.volume || 0) ? { name, ...data } : max, { name: '', volume: 0 }
+    );
+    
+    return {
+      totalTransactions,
+      totalVolume,
+      successRate,
+      averageTransactionValue,
+      monthlyGrowth: 15.5, // Mock growth percentage
+      topGateway: topGateway.name,
+      gatewayBreakdown,
+      recentTransactions: transactions.slice(0, 10)
+    };
+  }
+
+  async processRefund(transactionId: string, amount: number, reason: string): Promise<any> {
+    const transaction = this.paymentTransactions.get(transactionId);
+    if (!transaction) {
+      throw new Error('Transaction not found');
+    }
+    
+    const refundId = Date.now().toString();
+    const refund = {
+      id: refundId,
+      transactionId,
+      amount,
+      reason,
+      status: 'completed',
+      createdAt: new Date(),
+      gatewayId: transaction.gatewayId,
+      gatewayName: transaction.gatewayName
+    };
+    
+    // Update original transaction
+    transaction.status = 'refunded';
+    transaction.refundAmount = amount;
+    transaction.refundReason = reason;
+    transaction.refundedAt = new Date();
+    
+    this.paymentTransactions.set(transactionId, transaction);
+    
+    return refund;
   }
 }
 
