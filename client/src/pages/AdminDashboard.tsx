@@ -44,6 +44,7 @@ import NewsletterManagement from "@/components/NewsletterManagement";
 import StatisticsPanel from "@/components/StatisticsPanel";
 import FinancialStatements from "@/components/FinancialStatements";
 import AdminManagement from "@/components/AdminManagement";
+import NotificationsCenter from "@/components/NotificationsCenter";
 import { 
   Users, 
   Settings, 
@@ -929,6 +930,7 @@ Last Updated: ${effectiveDate}
 
   const sidebarItems = [
     { id: "overview", label: "Overview", icon: BarChart3 },
+    { id: "notifications", label: "Notifications", icon: Bell },
     { 
       id: "users", 
       label: "Users", 
@@ -1363,6 +1365,10 @@ Last Updated: ${effectiveDate}
                 </Card>
               </div>
             </div>
+          )}
+
+          {activeTab === "notifications" && (
+            <NotificationsCenter />
           )}
 
           {/* User Management Sections */}
