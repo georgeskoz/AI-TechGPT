@@ -1009,24 +1009,78 @@ Last Updated: ${effectiveDate}
   ];
 
   const QuickActions = () => (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-      <Button onClick={() => setActiveTab("users")} className="h-20 flex-col gap-2">
-        <Users className="h-6 w-6" />
-        <span className="text-sm">Manage Users</span>
-      </Button>
-      <Button onClick={() => setActiveTab("service-providers")} className="h-20 flex-col gap-2" variant="outline">
-        <Wrench className="h-6 w-6" />
-        <span className="text-sm">Service Providers</span>
-      </Button>
-      <Button onClick={() => setActiveTab("jobs")} className="h-20 flex-col gap-2" variant="outline">
-        <Briefcase className="h-6 w-6" />
-        <span className="text-sm">Active Jobs</span>
-      </Button>
-      <Button onClick={() => setActiveTab("disputes")} className="h-20 flex-col gap-2" variant="outline">
-        <AlertTriangle className="h-6 w-6" />
-        <span className="text-sm">Resolve Disputes</span>
-      </Button>
-    </div>
+    <Card className="mb-8">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Zap className="h-5 w-5" />
+          Quick Actions
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <Button 
+            onClick={() => {
+              setExpandedItems(prev => prev.includes("users") ? prev : [...prev, "users"]);
+              setActiveTab("users-list");
+            }} 
+            className="h-20 flex-col gap-2"
+            variant="outline"
+          >
+            <Users className="h-6 w-6" />
+            <span className="text-sm">Manage Users</span>
+          </Button>
+          <Button 
+            onClick={() => {
+              setExpandedItems(prev => prev.includes("service-providers") ? prev : [...prev, "service-providers"]);
+              setActiveTab("service-providers-list");
+            }} 
+            className="h-20 flex-col gap-2" 
+            variant="outline"
+          >
+            <Wrench className="h-6 w-6" />
+            <span className="text-sm">Service Providers</span>
+          </Button>
+          <Button 
+            onClick={() => setActiveTab("jobs")} 
+            className="h-20 flex-col gap-2" 
+            variant="outline"
+          >
+            <Briefcase className="h-6 w-6" />
+            <span className="text-sm">Active Jobs</span>
+          </Button>
+          <Button 
+            onClick={() => setActiveTab("disputes")} 
+            className="h-20 flex-col gap-2" 
+            variant="outline"
+          >
+            <AlertTriangle className="h-6 w-6" />
+            <span className="text-sm">Resolve Disputes</span>
+          </Button>
+          <Button 
+            onClick={() => {
+              setExpandedItems(prev => prev.includes("system") ? prev : [...prev, "system"]);
+              setActiveTab("regional-announcements");
+            }} 
+            className="h-20 flex-col gap-2" 
+            variant="outline"
+          >
+            <Globe className="h-6 w-6" />
+            <span className="text-sm">Announcements</span>
+          </Button>
+          <Button 
+            onClick={() => {
+              setExpandedItems(prev => prev.includes("settings") ? prev : [...prev, "settings"]);
+              setActiveTab("statistics");
+            }} 
+            className="h-20 flex-col gap-2" 
+            variant="outline"
+          >
+            <BarChart3 className="h-6 w-6" />
+            <span className="text-sm">Analytics</span>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 
   const StatsCards = () => (
