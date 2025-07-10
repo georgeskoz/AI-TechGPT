@@ -34,6 +34,7 @@ import AdminCategoryManagement from "@/pages/AdminCategoryManagement";
 import AdminAnnouncements from "@/pages/AdminAnnouncements";
 import FloatingChatWidget from "@/components/FloatingChatWidget";
 import OnboardingWizard from "@/pages/OnboardingWizard";
+import RegisterPage from "@/pages/RegisterPage";
 
 
 function Router() {
@@ -68,6 +69,7 @@ function Router() {
       <Route path="/admin-categories" component={AdminCategoryManagement} />
       <Route path="/admin/announcements" component={AdminAnnouncements} />
       <Route path="/onboarding" component={OnboardingWizard} />
+      <Route path="/register" component={RegisterPage} />
       <Route path="/:username/profile" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>
