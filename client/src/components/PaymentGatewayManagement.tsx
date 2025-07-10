@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { 
   CreditCard, 
@@ -38,7 +39,8 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Activity
+  Activity,
+  Receipt
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -512,10 +514,11 @@ export default function PaymentGatewayManagement() {
         <CardContent>
           <Tabs value={selectedTab} onValueChange={setSelectedTab}>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-              <TabsList className="grid w-full grid-cols-3 sm:w-auto">
+              <TabsList className="grid w-full grid-cols-4 sm:w-auto">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="gateways">Gateways</TabsTrigger>
                 <TabsTrigger value="transactions">Transactions</TabsTrigger>
+                <TabsTrigger value="payouts">Service Provider Payouts</TabsTrigger>
               </TabsList>
               
               <div className="flex gap-2">
@@ -758,6 +761,514 @@ export default function PaymentGatewayManagement() {
                       ))}
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="payouts" className="space-y-4">
+              <ServiceProviderPayouts />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// Service Provider Payout Management Component
+function ServiceProviderPayouts() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  const [payoutTab, setPayoutTab] = useState('dashboard');
+  const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
+  const [showProcessPayoutDialog, setShowProcessPayoutDialog] = useState(false);
+  const [showPayoutMethodDialog, setShowPayoutMethodDialog] = useState(false);
+  const [payoutAmount, setPayoutAmount] = useState('');
+  const [payoutNote, setPayoutNote] = useState('');
+
+  // API calls for payout management
+  const { data: payoutDashboard, isLoading: payoutDashboardLoading } = useQuery({
+    queryKey: ['/api/admin/service-provider-payouts/dashboard'],
+    queryFn: () => apiRequest('GET', '/api/admin/service-provider-payouts/dashboard').then(res => res.json())
+  });
+
+  const { data: serviceProviders, isLoading: serviceProvidersLoading } = useQuery({
+    queryKey: ['/api/admin/service-providers/earnings'],
+    queryFn: () => apiRequest('GET', '/api/admin/service-providers/earnings').then(res => res.json())
+  });
+
+  const { data: payoutHistory, isLoading: payoutHistoryLoading } = useQuery({
+    queryKey: ['/api/admin/payouts/history'],
+    queryFn: () => apiRequest('GET', '/api/admin/payouts/history').then(res => res.json())
+  });
+
+  const { data: payoutSettings, isLoading: payoutSettingsLoading } = useQuery({
+    queryKey: ['/api/admin/payout-settings'],
+    queryFn: () => apiRequest('GET', '/api/admin/payout-settings').then(res => res.json())
+  });
+
+  // Mutations for payout operations
+  const processPayoutMutation = useMutation({
+    mutationFn: (payoutData: any) => apiRequest('POST', '/api/admin/process-payout', payoutData).then(res => res.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/service-provider-payouts/dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/service-providers/earnings'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/payouts/history'] });
+      setShowProcessPayoutDialog(false);
+      setPayoutAmount('');
+      setPayoutNote('');
+      toast({
+        title: "Success",
+        description: "Payout processed successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to process payout",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const bulkPayoutMutation = useMutation({
+    mutationFn: (payoutData: any) => apiRequest('POST', '/api/admin/bulk-payout', payoutData).then(res => res.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/service-provider-payouts/dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/service-providers/earnings'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/payouts/history'] });
+      toast({
+        title: "Success",
+        description: "Bulk payout processed successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to process bulk payout",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const updatePayoutSettingsMutation = useMutation({
+    mutationFn: (settingsData: any) => apiRequest('PUT', '/api/admin/payout-settings', settingsData).then(res => res.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/payout-settings'] });
+      toast({
+        title: "Success",
+        description: "Payout settings updated successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update payout settings",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleProcessPayout = () => {
+    if (!selectedProvider || !payoutAmount) {
+      toast({
+        title: "Error",
+        description: "Please select a provider and enter payout amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    processPayoutMutation.mutate({
+      providerId: selectedProvider,
+      amount: parseFloat(payoutAmount),
+      note: payoutNote,
+      method: 'stripe_transfer'
+    });
+  };
+
+  const handleBulkPayout = () => {
+    const eligibleProviders = serviceProviders?.filter((p: any) => p.pendingEarnings >= 50);
+    if (!eligibleProviders || eligibleProviders.length === 0) {
+      toast({
+        title: "No Eligible Providers",
+        description: "No service providers meet the minimum payout threshold",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (window.confirm(`Process payouts for ${eligibleProviders.length} service providers?`)) {
+      bulkPayoutMutation.mutate({
+        providers: eligibleProviders.map((p: any) => ({
+          providerId: p.id,
+          amount: p.pendingEarnings,
+          method: 'stripe_transfer'
+        }))
+      });
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Payout Dashboard Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Pending Payouts</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">${payoutDashboard?.totalPendingPayouts?.toLocaleString() || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              {payoutDashboard?.eligibleProviders || 0} providers eligible
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">This Week's Payouts</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">${payoutDashboard?.weeklyPayouts?.toLocaleString() || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              {payoutDashboard?.weeklyPayoutCount || 0} transactions
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Processing Fees</CardTitle>
+            <Receipt className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">${payoutDashboard?.processingFees?.toLocaleString() || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              {payoutDashboard?.feePercentage || 2.5}% average fee
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Next Auto Payout</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{payoutDashboard?.nextPayoutDate || 'Friday'}</div>
+            <p className="text-xs text-muted-foreground">
+              Weekly schedule
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Payout Management Tabs */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <CardTitle className="text-xl">Service Provider Payouts</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Manage automatic payouts and payment methods for service providers
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleBulkPayout}
+                disabled={bulkPayoutMutation.isPending}
+                className="flex items-center gap-2"
+              >
+                <DollarSign className="h-4 w-4" />
+                Process All Eligible
+              </Button>
+              <Dialog open={showProcessPayoutDialog} onOpenChange={setShowProcessPayoutDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Manual Payout
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Process Manual Payout</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="provider">Service Provider</Label>
+                      <Select value={selectedProvider || ''} onValueChange={setSelectedProvider}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select service provider" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {serviceProviders?.map((provider: any) => (
+                            <SelectItem key={provider.id} value={provider.id.toString()}>
+                              {provider.name} - ${provider.pendingEarnings} pending
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="amount">Payout Amount</Label>
+                      <Input
+                        id="amount"
+                        type="number"
+                        step="0.01"
+                        value={payoutAmount}
+                        onChange={(e) => setPayoutAmount(e.target.value)}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="note">Note (Optional)</Label>
+                      <Input
+                        id="note"
+                        value={payoutNote}
+                        onChange={(e) => setPayoutNote(e.target.value)}
+                        placeholder="Payout reason or reference"
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={() => setShowProcessPayoutDialog(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleProcessPayout} disabled={processPayoutMutation.isPending}>
+                        {processPayoutMutation.isPending ? 'Processing...' : 'Process Payout'}
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={payoutTab} onValueChange={setPayoutTab}>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+              <TabsTrigger value="providers">Service Providers</TabsTrigger>
+              <TabsTrigger value="history">Payout History</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="dashboard" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Recent Payouts</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {payoutHistory?.slice(0, 5).map((payout: any) => (
+                        <div key={payout.id} className="flex justify-between items-center">
+                          <div>
+                            <div className="font-medium">{payout.providerName}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {new Date(payout.createdAt).toLocaleDateString()}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-semibold">${payout.amount.toFixed(2)}</div>
+                            <Badge variant={payout.status === 'completed' ? 'default' : 'outline'}>
+                              {payout.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Payout Schedule</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="p-4 bg-blue-50 rounded-lg">
+                        <h4 className="font-semibold text-blue-900 mb-2">Automatic Payouts</h4>
+                        <p className="text-sm text-blue-800">
+                          Service providers receive automatic payouts every Friday for earnings above $50 minimum threshold.
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm">Next payout date:</span>
+                          <span className="font-medium">{payoutDashboard?.nextPayoutDate || 'Friday'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Minimum threshold:</span>
+                          <span className="font-medium">${payoutSettings?.minimumPayout || 50}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Processing fee:</span>
+                          <span className="font-medium">{payoutSettings?.processingFee || 2.5}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="providers" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Service Provider Earnings</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {serviceProvidersLoading ? (
+                    <div className="flex items-center justify-center p-8">
+                      <RefreshCw className="h-6 w-6 animate-spin" />
+                      <span className="ml-2">Loading service providers...</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {serviceProviders?.map((provider: any) => (
+                        <div key={provider.id} className="flex justify-between items-center p-4 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage src={provider.avatar} />
+                              <AvatarFallback>{provider.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{provider.name}</p>
+                              <p className="text-sm text-muted-foreground">{provider.email}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-semibold">${provider.pendingEarnings} pending</div>
+                            <div className="text-sm text-muted-foreground">
+                              ${provider.totalEarnings} total
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedProvider(provider.id.toString());
+                                setPayoutAmount(provider.pendingEarnings.toString());
+                                setShowProcessPayoutDialog(true);
+                              }}
+                              disabled={provider.pendingEarnings < 1}
+                            >
+                              <DollarSign className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="history" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Payout History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {payoutHistoryLoading ? (
+                    <div className="flex items-center justify-center p-8">
+                      <RefreshCw className="h-6 w-6 animate-spin" />
+                      <span className="ml-2">Loading payout history...</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {payoutHistory?.map((payout: any) => (
+                        <div key={payout.id} className="flex justify-between items-center p-4 border rounded-lg">
+                          <div>
+                            <div className="font-medium">{payout.providerName}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {new Date(payout.createdAt).toLocaleDateString()} • {payout.method}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-semibold">${payout.amount.toFixed(2)}</div>
+                            <Badge variant={payout.status === 'completed' ? 'default' : 'outline'}>
+                              {payout.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="settings" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Payout Settings</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="minimumPayout">Minimum Payout Threshold</Label>
+                      <Input
+                        id="minimumPayout"
+                        type="number"
+                        defaultValue={payoutSettings?.minimumPayout || 50}
+                        placeholder="50"
+                      />
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Service providers must reach this amount before automatic payout
+                      </p>
+                    </div>
+                    <div>
+                      <Label htmlFor="processingFee">Processing Fee (%)</Label>
+                      <Input
+                        id="processingFee"
+                        type="number"
+                        step="0.1"
+                        defaultValue={payoutSettings?.processingFee || 2.5}
+                        placeholder="2.5"
+                      />
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Fee charged for processing payouts
+                      </p>
+                    </div>
+                    <div>
+                      <Label htmlFor="payoutSchedule">Payout Schedule</Label>
+                      <Select defaultValue={payoutSettings?.schedule || 'weekly'}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select schedule" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="weekly">Weekly</SelectItem>
+                          <SelectItem value="biweekly">Bi-weekly</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch id="autoPayout" defaultChecked={payoutSettings?.autoPayoutEnabled || true} />
+                      <Label htmlFor="autoPayout">Enable automatic payouts</Label>
+                    </div>
+                    <Button
+                      onClick={() => updatePayoutSettingsMutation.mutate({
+                        minimumPayout: parseFloat((document.getElementById('minimumPayout') as HTMLInputElement)?.value || '50'),
+                        processingFee: parseFloat((document.getElementById('processingFee') as HTMLInputElement)?.value || '2.5'),
+                        schedule: 'weekly',
+                        autoPayoutEnabled: true
+                      })}
+                      disabled={updatePayoutSettingsMutation.isPending}
+                    >
+                      {updatePayoutSettingsMutation.isPending ? 'Saving...' : 'Save Settings'}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
