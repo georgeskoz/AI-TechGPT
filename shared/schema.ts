@@ -656,6 +656,57 @@ export const disputeEscalationsRelations = relations(disputeEscalations, ({ one 
   }),
 }));
 
+// Tax jurisdictions for countries, states, and provinces
+export const taxJurisdictions = pgTable("tax_jurisdictions", {
+  id: serial("id").primaryKey(),
+  country: text("country").notNull(),
+  countryCode: text("country_code").notNull(),
+  state: text("state"), // For US states
+  stateCode: text("state_code"),
+  province: text("province"), // For Canadian provinces
+  provinceCode: text("province_code"),
+  taxType: text("tax_type").notNull(), // GST, PST, HST, VAT, Sales Tax, Service Tax
+  taxRate: decimal("tax_rate", { precision: 5, scale: 2 }).notNull(),
+  isActive: boolean("is_active").default(true),
+  appliesTo: jsonb("applies_to").$type<('service_providers' | 'customers')[]>().notNull(),
+  exemptions: jsonb("exemptions").$type<string[]>().default([]),
+  effectiveDate: timestamp("effective_date").notNull().defaultNow(),
+  lastUpdated: timestamp("last_updated").notNull().defaultNow(),
+  description: text("description"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Platform settings for system-wide configuration
+export const platformSettings = pgTable("platform_settings", {
+  id: serial("id").primaryKey(),
+  category: text("category").notNull(), // general, payments, taxes, notifications, security, api, integration
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  dataType: text("data_type").notNull(), // string, number, boolean, json, array
+  description: text("description"),
+  isRequired: boolean("is_required").default(false),
+  isSecret: boolean("is_secret").default(false),
+  lastUpdated: timestamp("last_updated").notNull().defaultNow(),
+  updatedBy: text("updated_by"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Admin panel configuration
+export const adminPanelConfig = pgTable("admin_panel_config", {
+  id: serial("id").primaryKey(),
+  section: text("section").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  isEnabled: boolean("is_enabled").default(true),
+  permissions: jsonb("permissions").$type<string[]>().default([]),
+  icon: text("icon"),
+  order: integer("order").default(0),
+  settings: jsonb("settings").$type<Record<string, any>>().default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -896,6 +947,45 @@ export const insertDisputeMessageSchema = createInsertSchema(disputeMessages).pi
   attachments: z.array(z.string()).optional(),
 });
 
+export const insertTaxJurisdictionSchema = createInsertSchema(taxJurisdictions).pick({
+  country: true,
+  countryCode: true,
+  state: true,
+  stateCode: true,
+  province: true,
+  provinceCode: true,
+  taxType: true,
+  taxRate: true,
+  isActive: true,
+  description: true,
+}).extend({
+  appliesTo: z.array(z.enum(['service_providers', 'customers'])),
+  exemptions: z.array(z.string()).optional(),
+});
+
+export const insertPlatformSettingSchema = createInsertSchema(platformSettings).pick({
+  category: true,
+  key: true,
+  value: true,
+  dataType: true,
+  description: true,
+  isRequired: true,
+  isSecret: true,
+  updatedBy: true,
+});
+
+export const insertAdminPanelConfigSchema = createInsertSchema(adminPanelConfig).pick({
+  section: true,
+  title: true,
+  description: true,
+  isEnabled: true,
+  icon: true,
+  order: true,
+}).extend({
+  permissions: z.array(z.string()).optional(),
+  settings: z.record(z.any()).optional(),
+});
+
 export const insertDisputeAttachmentSchema = createInsertSchema(disputeAttachments).pick({
   disputeId: true,
   uploaderId: true,
@@ -970,6 +1060,12 @@ export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertDisputeEscalation = z.infer<typeof insertDisputeEscalationSchema>;
 export type DisputeEscalation = typeof disputeEscalations.$inferSelect;
+export type InsertTaxJurisdiction = z.infer<typeof insertTaxJurisdictionSchema>;
+export type TaxJurisdiction = typeof taxJurisdictions.$inferSelect;
+export type InsertPlatformSetting = z.infer<typeof insertPlatformSettingSchema>;
+export type PlatformSetting = typeof platformSettings.$inferSelect;
+export type InsertAdminPanelConfig = z.infer<typeof insertAdminPanelConfigSchema>;
+export type AdminPanelConfig = typeof adminPanelConfig.$inferSelect;
 
 // Enhanced technician schemas
 export const insertTechnicianEnhancedSchema = createInsertSchema(technicians).pick({
