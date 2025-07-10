@@ -187,6 +187,22 @@ export interface IStorage {
   // Admin Panel Configuration
   getAdminPanelConfig(): Promise<any[]>;
   updateAdminPanelConfig(id: number, data: any): Promise<any>;
+
+  // Notification management
+  getNotifications(filters: {
+    category?: string;
+    priority?: string;
+    read?: boolean;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<any[]>;
+  createNotification(notification: any): Promise<any>;
+  markNotificationAsRead(notificationId: string): Promise<any>;
+  archiveNotification(notificationId: string): Promise<any>;
+  deleteNotification(notificationId: string): Promise<void>;
+  bulkUpdateNotifications(action: string, notificationIds: string[]): Promise<any>;
+  getNotificationStats(): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -512,6 +528,7 @@ class MemoryStorage implements IStorage {
     console.log("MemoryStorage constructor called - initializing sample data...");
     this.initializeSampleData();
     this.initializePaymentGateways();
+    this.initializeNotifications();
     console.log(`After initialization: ${this.technicians.size} technicians loaded`);
   }
 
@@ -3274,6 +3291,253 @@ class MemoryStorage implements IStorage {
 
     this.adminPanelConfig.set(id, updatedConfig);
     return updatedConfig;
+  }
+
+  // Notification management
+  private notifications = new Map<string, any>();
+  
+  private initializeNotifications() {
+    const initialNotifications = [
+      {
+        id: "1",
+        title: "System Maintenance Scheduled",
+        message: "Scheduled maintenance will occur tonight from 2:00 AM to 4:00 AM EST. Services may be temporarily unavailable.",
+        priority: "high",
+        category: "system",
+        timestamp: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+        isRead: false,
+        isArchived: false,
+        metadata: { severity: "high" }
+      },
+      {
+        id: "2",
+        title: "New User Registration",
+        message: "John Smith has registered for a new account and requires approval.",
+        priority: "medium",
+        category: "user",
+        timestamp: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
+        isRead: false,
+        isArchived: false,
+        metadata: { userId: "user123" }
+      },
+      {
+        id: "3",
+        title: "Payment Failed",
+        message: "Payment of $299.99 failed for order #12345. Customer has been notified.",
+        priority: "high",
+        category: "payment",
+        timestamp: new Date(Date.now() - 10800000).toISOString(), // 3 hours ago
+        isRead: true,
+        isArchived: false,
+        metadata: { amount: 299.99, orderId: "12345" }
+      },
+      {
+        id: "4",
+        title: "Support Ticket Created",
+        message: "New support ticket #456 has been created for technical assistance.",
+        priority: "medium",
+        category: "support",
+        timestamp: new Date(Date.now() - 14400000).toISOString(), // 4 hours ago
+        isRead: false,
+        isArchived: false,
+        metadata: { ticketId: "456" }
+      },
+      {
+        id: "5",
+        title: "Security Alert",
+        message: "Multiple failed login attempts detected for admin account. Account has been temporarily locked.",
+        priority: "urgent",
+        category: "security",
+        timestamp: new Date(Date.now() - 18000000).toISOString(), // 5 hours ago
+        isRead: false,
+        isArchived: false,
+        metadata: { severity: "urgent" }
+      },
+      {
+        id: "6",
+        title: "Performance Alert",
+        message: "Server response time has exceeded 2 seconds. Performance monitoring is active.",
+        priority: "medium",
+        category: "performance",
+        timestamp: new Date(Date.now() - 21600000).toISOString(), // 6 hours ago
+        isRead: true,
+        isArchived: false,
+        metadata: { responseTime: "2.3s" }
+      }
+    ];
+    
+    initialNotifications.forEach(notification => {
+      this.notifications.set(notification.id, notification);
+    });
+  }
+  
+  async getNotifications(filters: {
+    category?: string;
+    priority?: string;
+    read?: boolean;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<any[]> {
+    let notifications = Array.from(this.notifications.values());
+    
+    // Apply filters
+    if (filters.category) {
+      notifications = notifications.filter(n => n.category === filters.category);
+    }
+    
+    if (filters.priority) {
+      notifications = notifications.filter(n => n.priority === filters.priority);
+    }
+    
+    if (filters.read !== undefined) {
+      notifications = notifications.filter(n => n.isRead === filters.read);
+    }
+    
+    if (filters.search) {
+      const searchTerm = filters.search.toLowerCase();
+      notifications = notifications.filter(n => 
+        n.title.toLowerCase().includes(searchTerm) || 
+        n.message.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    // Sort by timestamp (newest first)
+    notifications.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    
+    // Apply pagination
+    const limit = filters.limit || 100;
+    const offset = filters.offset || 0;
+    
+    return notifications.slice(offset, offset + limit);
+  }
+
+  async createNotification(notification: any): Promise<any> {
+    const id = Math.random().toString(36).substr(2, 9);
+    const newNotification = {
+      id,
+      ...notification,
+      timestamp: new Date().toISOString(),
+      isRead: false,
+      isArchived: false,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    this.notifications.set(id, newNotification);
+    return newNotification;
+  }
+
+  async markNotificationAsRead(notificationId: string): Promise<any> {
+    const notification = this.notifications.get(notificationId);
+    if (!notification) {
+      throw new Error('Notification not found');
+    }
+    
+    const updatedNotification = {
+      ...notification,
+      isRead: true,
+      updatedAt: new Date()
+    };
+    
+    this.notifications.set(notificationId, updatedNotification);
+    return updatedNotification;
+  }
+
+  async archiveNotification(notificationId: string): Promise<any> {
+    const notification = this.notifications.get(notificationId);
+    if (!notification) {
+      throw new Error('Notification not found');
+    }
+    
+    const updatedNotification = {
+      ...notification,
+      isArchived: true,
+      updatedAt: new Date()
+    };
+    
+    this.notifications.set(notificationId, updatedNotification);
+    return updatedNotification;
+  }
+
+  async deleteNotification(notificationId: string): Promise<void> {
+    if (!this.notifications.has(notificationId)) {
+      throw new Error('Notification not found');
+    }
+    
+    this.notifications.delete(notificationId);
+  }
+
+  async bulkUpdateNotifications(action: string, notificationIds: string[]): Promise<any> {
+    const updatedNotifications = [];
+    
+    for (const id of notificationIds) {
+      const notification = this.notifications.get(id);
+      if (!notification) continue;
+      
+      let updatedNotification = { ...notification };
+      
+      switch (action) {
+        case 'markAsRead':
+          updatedNotification.isRead = true;
+          break;
+        case 'markAsUnread':
+          updatedNotification.isRead = false;
+          break;
+        case 'archive':
+          updatedNotification.isArchived = true;
+          break;
+        case 'unarchive':
+          updatedNotification.isArchived = false;
+          break;
+        case 'delete':
+          this.notifications.delete(id);
+          continue;
+      }
+      
+      updatedNotification.updatedAt = new Date();
+      this.notifications.set(id, updatedNotification);
+      updatedNotifications.push(updatedNotification);
+    }
+    
+    return {
+      success: true,
+      updated: updatedNotifications.length,
+      action
+    };
+  }
+
+  async getNotificationStats(): Promise<any> {
+    const notifications = Array.from(this.notifications.values());
+    const total = notifications.length;
+    const unread = notifications.filter(n => !n.isRead).length;
+    const archived = notifications.filter(n => n.isArchived).length;
+    
+    // Count by priority
+    const priorityStats = {
+      low: notifications.filter(n => n.priority === 'low').length,
+      medium: notifications.filter(n => n.priority === 'medium').length,
+      high: notifications.filter(n => n.priority === 'high').length,
+      urgent: notifications.filter(n => n.priority === 'urgent').length
+    };
+    
+    // Count by category
+    const categoryStats = {
+      system: notifications.filter(n => n.category === 'system').length,
+      user: notifications.filter(n => n.category === 'user').length,
+      payment: notifications.filter(n => n.category === 'payment').length,
+      support: notifications.filter(n => n.category === 'support').length,
+      security: notifications.filter(n => n.category === 'security').length,
+      performance: notifications.filter(n => n.category === 'performance').length
+    };
+    
+    return {
+      total,
+      unread,
+      archived,
+      priorityStats,
+      categoryStats
+    };
   }
 }
 
