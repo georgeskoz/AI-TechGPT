@@ -167,7 +167,7 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [darkMode, setDarkMode] = useState(false);
-  const [expandedItems, setExpandedItems] = useState<string[]>(["system"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["system", "settings"]);
   const [policyContent, setPolicyContent] = useState("");
   const [aiGenerating, setAiGenerating] = useState(false);
   const [companyInfo, setCompanyInfo] = useState({
@@ -957,7 +957,6 @@ Last Updated: ${effectiveDate}
     { id: "jobs", label: "Jobs", icon: Briefcase },
     { id: "disputes", label: "Disputes", icon: AlertTriangle },
     { id: "payments", label: "Payments", icon: CreditCard },
-    { id: "tax", label: "Tax Management", icon: Settings },
     { 
       id: "system", 
       label: "System", 
@@ -969,7 +968,15 @@ Last Updated: ${effectiveDate}
         { id: "system-settings", label: "System Settings", icon: Settings }
       ]
     },
-    { id: "settings", label: "Settings", icon: Settings },
+    { 
+      id: "settings", 
+      label: "Settings", 
+      icon: Settings,
+      subItems: [
+        { id: "tax", label: "Tax Management", icon: Receipt },
+        { id: "general-settings", label: "General Settings", icon: Settings }
+      ]
+    },
   ];
 
   const QuickActions = () => (
@@ -2607,7 +2614,7 @@ Last Updated: ${effectiveDate}
 
           {activeTab === "email" && <EmailSystem />}
 
-          {(activeTab === "users" || activeTab === "service-providers" || activeTab === "system-settings" || activeTab === "settings") && (
+          {(activeTab === "users" || activeTab === "service-providers" || activeTab === "system-settings" || activeTab === "general-settings") && (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Settings className="h-8 w-8 text-gray-400" />
