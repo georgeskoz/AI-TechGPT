@@ -508,21 +508,35 @@ const AdminDisputeManagement: React.FC = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="reportedBy">Reported By</Label>
-                        <Input
-                          id="reportedBy"
-                          value={newDispute.reportedBy}
-                          onChange={(e) => setNewDispute({...newDispute, reportedBy: e.target.value})}
-                          placeholder="Reporter name"
-                        />
+                        <Select value={newDispute.reportedBy} onValueChange={(value) => setNewDispute({...newDispute, reportedBy: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select reporter" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="service_providers">Service Providers</SelectItem>
+                            <SelectItem value="customer_service">Customer Service</SelectItem>
+                            <SelectItem value="admins">Admins</SelectItem>
+                            <SelectItem value="tech_support_team">Tech Support Team</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div>
                         <Label htmlFor="category">Category</Label>
-                        <Input
-                          id="category"
-                          value={newDispute.category}
-                          onChange={(e) => setNewDispute({...newDispute, category: e.target.value})}
-                          placeholder="Category"
-                        />
+                        <Select value={newDispute.category} onValueChange={(value) => setNewDispute({...newDispute, category: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="service_delivery">Service Delivery</SelectItem>
+                            <SelectItem value="communication">Communication</SelectItem>
+                            <SelectItem value="billing_payment">Billing & Payment</SelectItem>
+                            <SelectItem value="technical_issues">Technical Issues</SelectItem>
+                            <SelectItem value="quality_standards">Quality Standards</SelectItem>
+                            <SelectItem value="policy_violation">Policy Violation</SelectItem>
+                            <SelectItem value="scheduling">Scheduling</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
 
