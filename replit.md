@@ -103,12 +103,14 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
 ## Recent Changes
 
 ### January 10, 2025
-- **Simplified Tax Management System**: Replaced complex Platform Management Console with streamlined tax system focused on core requirements
-  - **Simple Tax Calculator**: Invoice tax calculation for all Canadian provinces with GST/PST/HST rates
-  - **Tax Flow Management**: Clear system where customers pay tax on invoices, service providers collect tax for platform, and GST is paid to government
-  - **Regional Tax Rates**: Comprehensive support for all Canadian provinces with accurate tax calculations
-  - **Tax Summary Dashboard**: Real-time tracking of customer payments, service provider collections, and GST remittance
-  - **Streamlined Interface**: Three-tab system (Tax Calculator, Tax Rates, Tax Summary) for easy navigation
+- **Comprehensive North American Tax Management System**: Replaced complex Platform Management Console with streamlined tax system supporting both Canada and United States
+  - **Multi-Country Tax Calculator**: Invoice tax calculation for all Canadian provinces (GST/PST/HST) and all US states (sales tax)
+  - **Tax Flow Management**: Clear system where customers pay tax on invoices, service providers collect tax for platform, and taxes are paid to respective governments
+  - **Comprehensive Regional Tax Rates**: Complete support for all Canadian provinces and US states with accurate tax calculations
+  - **Dual Tax System Support**: Canadian GST/PST/HST system and US state sales tax system with proper labeling and calculations
+  - **Interactive Country Selection**: Easy switching between Canadian and US tax jurisdictions with region-specific displays
+  - **Tax Summary Dashboard**: Real-time tracking of customer payments, service provider collections, and government remittance for both countries
+  - **Streamlined Interface**: Three-tab system (Tax Calculator, Tax Rates, Tax Summary) with country-specific content
   - **Admin Integration**: Tax Management accessible from admin dashboard sidebar replacing complex platform console
 
 - **Comprehensive Service Provider Automatic Payment System**: Implemented complete payout management system with automated processing capabilities
