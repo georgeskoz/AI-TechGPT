@@ -35,7 +35,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import AdminDisputeManagement from "@/components/AdminDisputeManagement";
 import PaymentGatewayManagement from "@/components/PaymentGatewayManagement";
-import PlatformManagementConsole from "@/components/PlatformManagementConsole";
+import TaxManagement from "@/components/TaxManagement";
 import { 
   Users, 
   Settings, 
@@ -953,7 +953,7 @@ Last Updated: ${effectiveDate}
     { id: "jobs", label: "Jobs", icon: Briefcase },
     { id: "disputes", label: "Disputes", icon: AlertTriangle },
     { id: "payments", label: "Payments", icon: CreditCard },
-    { id: "platform", label: "Platform Management", icon: Settings },
+    { id: "tax", label: "Tax Management", icon: Settings },
     { id: "system", label: "System", icon: Server },
     { id: "settings", label: "Settings", icon: Settings },
   ];
@@ -2585,7 +2585,7 @@ Last Updated: ${effectiveDate}
 
           {activeTab === "payments" && <PaymentGatewayManagement />}
 
-          {activeTab === "platform" && <PlatformManagementConsole />}
+          {activeTab === "tax" && <TaxManagement />}
 
           {(activeTab === "users" || activeTab === "service-providers" || activeTab === "system" || activeTab === "settings") && (
             <div className="text-center py-12">
