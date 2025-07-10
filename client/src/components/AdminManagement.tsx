@@ -63,6 +63,7 @@ const AdminManagement: React.FC = () => {
     email: "",
     role: "customer_service_admin",
     country: "",
+    stateProvince: "",
     city: "",
     region: "",
     permissions: [] as string[],
@@ -221,22 +222,157 @@ const AdminManagement: React.FC = () => {
     { value: "canada", label: "Canada" }
   ];
 
+  const statesProvinces = {
+    united_states: [
+      { value: "alabama", label: "Alabama" },
+      { value: "alaska", label: "Alaska" },
+      { value: "arizona", label: "Arizona" },
+      { value: "arkansas", label: "Arkansas" },
+      { value: "california", label: "California" },
+      { value: "colorado", label: "Colorado" },
+      { value: "connecticut", label: "Connecticut" },
+      { value: "delaware", label: "Delaware" },
+      { value: "florida", label: "Florida" },
+      { value: "georgia", label: "Georgia" },
+      { value: "hawaii", label: "Hawaii" },
+      { value: "idaho", label: "Idaho" },
+      { value: "illinois", label: "Illinois" },
+      { value: "indiana", label: "Indiana" },
+      { value: "iowa", label: "Iowa" },
+      { value: "kansas", label: "Kansas" },
+      { value: "kentucky", label: "Kentucky" },
+      { value: "louisiana", label: "Louisiana" },
+      { value: "maine", label: "Maine" },
+      { value: "maryland", label: "Maryland" },
+      { value: "massachusetts", label: "Massachusetts" },
+      { value: "michigan", label: "Michigan" },
+      { value: "minnesota", label: "Minnesota" },
+      { value: "mississippi", label: "Mississippi" },
+      { value: "missouri", label: "Missouri" },
+      { value: "montana", label: "Montana" },
+      { value: "nebraska", label: "Nebraska" },
+      { value: "nevada", label: "Nevada" },
+      { value: "new_hampshire", label: "New Hampshire" },
+      { value: "new_jersey", label: "New Jersey" },
+      { value: "new_mexico", label: "New Mexico" },
+      { value: "new_york", label: "New York" },
+      { value: "north_carolina", label: "North Carolina" },
+      { value: "north_dakota", label: "North Dakota" },
+      { value: "ohio", label: "Ohio" },
+      { value: "oklahoma", label: "Oklahoma" },
+      { value: "oregon", label: "Oregon" },
+      { value: "pennsylvania", label: "Pennsylvania" },
+      { value: "rhode_island", label: "Rhode Island" },
+      { value: "south_carolina", label: "South Carolina" },
+      { value: "south_dakota", label: "South Dakota" },
+      { value: "tennessee", label: "Tennessee" },
+      { value: "texas", label: "Texas" },
+      { value: "utah", label: "Utah" },
+      { value: "vermont", label: "Vermont" },
+      { value: "virginia", label: "Virginia" },
+      { value: "washington", label: "Washington" },
+      { value: "west_virginia", label: "West Virginia" },
+      { value: "wisconsin", label: "Wisconsin" },
+      { value: "wyoming", label: "Wyoming" }
+    ],
+    canada: [
+      { value: "alberta", label: "Alberta" },
+      { value: "british_columbia", label: "British Columbia" },
+      { value: "manitoba", label: "Manitoba" },
+      { value: "new_brunswick", label: "New Brunswick" },
+      { value: "newfoundland_and_labrador", label: "Newfoundland and Labrador" },
+      { value: "northwest_territories", label: "Northwest Territories" },
+      { value: "nova_scotia", label: "Nova Scotia" },
+      { value: "nunavut", label: "Nunavut" },
+      { value: "ontario", label: "Ontario" },
+      { value: "prince_edward_island", label: "Prince Edward Island" },
+      { value: "quebec", label: "Quebec" },
+      { value: "saskatchewan", label: "Saskatchewan" },
+      { value: "yukon", label: "Yukon" }
+    ]
+  };
+
   const cities = {
     united_states: [
-      { value: "new_york", label: "New York" },
+      { value: "new_york_city", label: "New York City" },
       { value: "los_angeles", label: "Los Angeles" },
       { value: "chicago", label: "Chicago" },
       { value: "houston", label: "Houston" },
-      { value: "san_francisco", label: "San Francisco" }
+      { value: "phoenix", label: "Phoenix" },
+      { value: "philadelphia", label: "Philadelphia" },
+      { value: "san_antonio", label: "San Antonio" },
+      { value: "san_diego", label: "San Diego" },
+      { value: "dallas", label: "Dallas" },
+      { value: "san_jose", label: "San Jose" },
+      { value: "austin", label: "Austin" },
+      { value: "jacksonville", label: "Jacksonville" },
+      { value: "fort_worth", label: "Fort Worth" },
+      { value: "columbus", label: "Columbus" },
+      { value: "san_francisco", label: "San Francisco" },
+      { value: "charlotte", label: "Charlotte" },
+      { value: "indianapolis", label: "Indianapolis" },
+      { value: "seattle", label: "Seattle" },
+      { value: "denver", label: "Denver" },
+      { value: "boston", label: "Boston" },
+      { value: "el_paso", label: "El Paso" },
+      { value: "detroit", label: "Detroit" },
+      { value: "nashville", label: "Nashville" },
+      { value: "portland", label: "Portland" },
+      { value: "memphis", label: "Memphis" },
+      { value: "oklahoma_city", label: "Oklahoma City" },
+      { value: "las_vegas", label: "Las Vegas" },
+      { value: "louisville", label: "Louisville" },
+      { value: "baltimore", label: "Baltimore" },
+      { value: "milwaukee", label: "Milwaukee" }
     ],
     canada: [
       { value: "toronto", label: "Toronto" },
-      { value: "vancouver", label: "Vancouver" },
       { value: "montreal", label: "Montreal" },
       { value: "calgary", label: "Calgary" },
-      { value: "ottawa", label: "Ottawa" }
+      { value: "ottawa", label: "Ottawa" },
+      { value: "edmonton", label: "Edmonton" },
+      { value: "winnipeg", label: "Winnipeg" },
+      { value: "mississauga", label: "Mississauga" },
+      { value: "vancouver", label: "Vancouver" },
+      { value: "brampton", label: "Brampton" },
+      { value: "hamilton", label: "Hamilton" },
+      { value: "quebec_city", label: "Quebec City" },
+      { value: "surrey", label: "Surrey" },
+      { value: "laval", label: "Laval" },
+      { value: "halifax", label: "Halifax" },
+      { value: "london", label: "London" },
+      { value: "markham", label: "Markham" },
+      { value: "vaughan", label: "Vaughan" },
+      { value: "gatineau", label: "Gatineau" },
+      { value: "longueuil", label: "Longueuil" },
+      { value: "burnaby", label: "Burnaby" },
+      { value: "saskatoon", label: "Saskatoon" },
+      { value: "kitchener", label: "Kitchener" },
+      { value: "windsor", label: "Windsor" },
+      { value: "regina", label: "Regina" },
+      { value: "richmond", label: "Richmond" },
+      { value: "richmond_hill", label: "Richmond Hill" },
+      { value: "oakville", label: "Oakville" },
+      { value: "burlington", label: "Burlington" },
+      { value: "greater_sudbury", label: "Greater Sudbury" },
+      { value: "sherbrooke", label: "Sherbrooke" }
     ]
   };
+
+  const departments = [
+    { value: "executive", label: "Executive" },
+    { value: "operations", label: "Operations" },
+    { value: "regional_operations", label: "Regional Operations" },
+    { value: "technical_support", label: "Technical Support" },
+    { value: "customer_service", label: "Customer Service" },
+    { value: "finance", label: "Finance" },
+    { value: "marketing", label: "Marketing" },
+    { value: "human_resources", label: "Human Resources" },
+    { value: "legal_compliance", label: "Legal & Compliance" },
+    { value: "product_development", label: "Product Development" },
+    { value: "quality_assurance", label: "Quality Assurance" },
+    { value: "business_development", label: "Business Development" }
+  ];
 
   const handleAddAdmin = () => {
     if (!newAdmin.firstName || !newAdmin.lastName || !newAdmin.email || !newAdmin.role) {
@@ -259,6 +395,7 @@ const AdminManagement: React.FC = () => {
       email: "",
       role: "customer_service_admin",
       country: "",
+      stateProvince: "",
       city: "",
       region: "",
       permissions: [],
@@ -292,6 +429,23 @@ const AdminManagement: React.FC = () => {
 
   const getRolePermissions = (role: string) => {
     return roleHierarchy[role as keyof typeof roleHierarchy]?.permissions || [];
+  };
+
+  const handlePermissionToggle = (permissionId: string) => {
+    setNewAdmin(prev => ({
+      ...prev,
+      permissions: prev.permissions.includes(permissionId)
+        ? prev.permissions.filter(p => p !== permissionId)
+        : [...prev.permissions, permissionId]
+    }));
+  };
+
+  const getAvailablePermissions = (role: string) => {
+    const rolePermissions = getRolePermissions(role);
+    if (rolePermissions.includes("all")) {
+      return allPermissions;
+    }
+    return allPermissions.filter(p => rolePermissions.includes(p.id));
   };
 
   const filteredAdmins = admins.filter(admin => {
@@ -375,7 +529,7 @@ const AdminManagement: React.FC = () => {
               {(newAdmin.role === "country_admin" || newAdmin.role === "city_admin" || newAdmin.role === "tech_support_admin" || newAdmin.role === "customer_service_admin") && (
                 <div>
                   <Label htmlFor="country">Country</Label>
-                  <Select value={newAdmin.country} onValueChange={(value) => setNewAdmin({...newAdmin, country: value})}>
+                  <Select value={newAdmin.country} onValueChange={(value) => setNewAdmin({...newAdmin, country: value, stateProvince: "", city: ""})}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select country" />
                     </SelectTrigger>
@@ -383,6 +537,23 @@ const AdminManagement: React.FC = () => {
                       {countries.map((country) => (
                         <SelectItem key={country.value} value={country.value}>
                           {country.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {(newAdmin.role === "city_admin" || newAdmin.role === "tech_support_admin" || newAdmin.role === "customer_service_admin") && newAdmin.country && (
+                <div>
+                  <Label htmlFor="stateProvince">State/Province</Label>
+                  <Select value={newAdmin.stateProvince} onValueChange={(value) => setNewAdmin({...newAdmin, stateProvince: value, city: ""})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select state/province" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statesProvinces[newAdmin.country as keyof typeof statesProvinces]?.map((stateProvince) => (
+                        <SelectItem key={stateProvince.value} value={stateProvince.value}>
+                          {stateProvince.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -408,25 +579,40 @@ const AdminManagement: React.FC = () => {
               )}
               <div>
                 <Label htmlFor="department">Department</Label>
-                <Input
-                  id="department"
-                  value={newAdmin.department}
-                  onChange={(e) => setNewAdmin({...newAdmin, department: e.target.value})}
-                  placeholder="Enter department"
-                />
+                <Select value={newAdmin.department} onValueChange={(value) => setNewAdmin({...newAdmin, department: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map((department) => (
+                      <SelectItem key={department.value} value={department.value}>
+                        {department.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label>Permissions</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  {getRolePermissions(newAdmin.role).map((permission) => {
-                    const permissionData = allPermissions.find(p => p.id === permission);
-                    return permissionData ? (
-                      <div key={permission} className="flex items-center space-x-2 p-2 bg-gray-50 rounded">
-                        <Shield className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm">{permissionData.name}</span>
+                <div className="grid grid-cols-1 gap-2 mt-2 max-h-48 overflow-y-auto">
+                  {getAvailablePermissions(newAdmin.role).map((permission) => (
+                    <div key={permission.id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded hover:bg-gray-100 cursor-pointer"
+                         onClick={() => handlePermissionToggle(permission.id)}>
+                      <input
+                        type="checkbox"
+                        checked={newAdmin.permissions.includes(permission.id)}
+                        onChange={() => handlePermissionToggle(permission.id)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <Shield className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm font-medium">{permission.name}</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">{permission.description}</p>
                       </div>
-                    ) : null;
-                  })}
+                    </div>
+                  ))}
                 </div>
               </div>
               <div className="flex justify-end space-x-2">
