@@ -103,6 +103,14 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
 ## Recent Changes
 
 ### January 10, 2025
+- **Service Availability Announcement System**: Added professional popup modal on chat page (main landing page) to inform users about service availability
+  - **Onsite Services**: Clear notification that onsite services are limited to Ottawa–Gatineau region
+  - **Online Services**: Confirmation that all online services are available across Canada and United States
+  - **User Experience**: Modal appears automatically on first visit, stores in localStorage to prevent repeated display
+  - **Professional Design**: Includes icons, colored sections, and clear formatting for better readability
+  - **Strategic Placement**: Positioned on chat page as the primary user entry point for maximum visibility
+
+### January 10, 2025
 - **Complete Admin Panel Enhancement with 5-Tier Hierarchy System**: Implemented comprehensive admin management system with full role-based access control
   - **5-Tier Admin Hierarchy**: Super Admin → Country Admin → City/Region Admin → Platform Tech Support Admin → Platform Customer Service Admin
   - **Price Management System**: Dynamic pricing rules, service rate management, pricing factors, and price history tracking with real-time updates
