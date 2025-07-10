@@ -93,12 +93,16 @@ export default function TechnicianNotificationService({
         setConnectionError(null);
         
         // Register technician for job notifications
-        ws.send(JSON.stringify({
-          type: 'register_technician',
-          technicianId: technicianId
-        }));
-
-        console.log(`Technician ${technicianId} connected to notification service`);
+        try {
+          ws.send(JSON.stringify({
+            type: 'register_technician',
+            technicianId: technicianId
+          }));
+          console.log(`Technician ${technicianId} connected to notification service`);
+        } catch (error) {
+          console.error('Error sending registration message:', error);
+          setConnectionError('Failed to register for notifications');
+        }
       };
 
       ws.onmessage = (event) => {

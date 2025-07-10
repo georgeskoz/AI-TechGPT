@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/components/UserAuthProvider";
+import { useState, useEffect } from "react";
 import NotFound from "@/pages/not-found";
 import ChatPage from "@/pages/ChatPage";
 import ProfilePage from "@/pages/ProfilePage";
@@ -40,14 +41,22 @@ import NotificationsDashboard from "@/pages/NotificationsDashboard";
 
 
 function Router() {
+  // Safe localStorage access for client-side rendering
+  const getStoredUsername = () => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("username") || "Guest";
+    }
+    return "Guest";
+  };
+
   return (
     <Switch>
       <Route path="/" component={CustomerHomePage} />
-      <Route path="/marketplace" component={() => <MarketplacePage username={localStorage.getItem("username") || "Guest"} />} />
+      <Route path="/marketplace" component={() => <MarketplacePage username={getStoredUsername()} />} />
       <Route path="/chat" component={ChatPage} />
       <Route path="/issues" component={IssueCategorizationPage} />
       <Route path="/phone-support" component={PhoneSupportPage} />
-      <Route path="/live-support" component={() => <LiveSupportPage username={localStorage.getItem("username") || "Guest"} />} />
+      <Route path="/live-support" component={() => <LiveSupportPage username={getStoredUsername()} />} />
       <Route path="/triage" component={TriagePage} />
       <Route path="/diagnostic" component={SimpleDiagnosticPage} />
       <Route path="/dashboard" component={ClientDashboard} />
@@ -82,7 +91,18 @@ function Router() {
 
 function App() {
   // Get username from localStorage for the floating chat widget
-  const username = localStorage.getItem("username") || "Guest";
+  // Use useState to handle client-side rendering properly
+  const [username, setUsername] = useState<string>("Guest");
+
+  useEffect(() => {
+    // Only access localStorage on the client side
+    if (typeof window !== "undefined") {
+      const storedUsername = localStorage.getItem("username");
+      if (storedUsername) {
+        setUsername(storedUsername);
+      }
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
