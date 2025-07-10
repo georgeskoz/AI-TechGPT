@@ -33,7 +33,7 @@ import AdminEarningSettings from "@/components/AdminEarningSettings";
 import AdminCategoryManagement from "@/pages/AdminCategoryManagement";
 import FloatingChatWidget from "@/components/FloatingChatWidget";
 import OnboardingWizard from "@/pages/OnboardingWizard";
-import OnboardingCheck from "@/components/OnboardingCheck";
+
 
 function Router() {
   return (
@@ -79,12 +79,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <OnboardingCheck>
-          <div className="min-h-screen bg-gray-50">
-            <Router />
-            <FloatingChatWidget username={username} />
-          </div>
-        </OnboardingCheck>
+        <div className="min-h-screen bg-gray-50">
+          <Router />
+          <FloatingChatWidget username={username} />
+        </div>
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
