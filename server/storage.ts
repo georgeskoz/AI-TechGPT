@@ -172,6 +172,21 @@ export interface IStorage {
   createDisputeAttachment(attachment: InsertDisputeAttachment): Promise<DisputeAttachment>;
   getDisputeAttachments(disputeId: number): Promise<DisputeAttachment[]>;
   deleteDisputeAttachment(id: number): Promise<void>;
+
+  // Platform management console methods
+  
+  // Platform Settings
+  getPlatformSettings(): Promise<any[]>;
+  updatePlatformSetting(id: number, data: any): Promise<any>;
+  
+  // Tax Jurisdictions
+  getTaxJurisdictions(): Promise<any[]>;
+  createTaxJurisdiction(data: any): Promise<any>;
+  updateTaxJurisdiction(id: number, data: any): Promise<any>;
+  
+  // Admin Panel Configuration
+  getAdminPanelConfig(): Promise<any[]>;
+  updateAdminPanelConfig(id: number, data: any): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2866,6 +2881,399 @@ class MemoryStorage implements IStorage {
       statusBreakdown,
       successRate: statusBreakdown.completed ? (statusBreakdown.completed / totalPayouts) * 100 : 0
     };
+  }
+
+  // Platform Management Console Methods
+  
+  // Mock platform settings data
+  private platformSettings = new Map<number, any>([
+    [1, {
+      id: 1,
+      category: 'general',
+      key: 'platform_name',
+      value: 'TechGPT',
+      dataType: 'string',
+      description: 'Platform name displayed to users',
+      isRequired: true,
+      isSecret: false,
+      lastUpdated: new Date('2025-01-01'),
+      updatedBy: 'system',
+      createdAt: new Date('2025-01-01')
+    }],
+    [2, {
+      id: 2,
+      category: 'general',
+      key: 'maintenance_mode',
+      value: 'false',
+      dataType: 'boolean',
+      description: 'Enable/disable maintenance mode',
+      isRequired: false,
+      isSecret: false,
+      lastUpdated: new Date('2025-01-01'),
+      updatedBy: 'admin',
+      createdAt: new Date('2025-01-01')
+    }],
+    [3, {
+      id: 3,
+      category: 'payments',
+      key: 'stripe_webhook_secret',
+      value: 'whsec_test_secret_key',
+      dataType: 'string',
+      description: 'Stripe webhook endpoint secret',
+      isRequired: true,
+      isSecret: true,
+      lastUpdated: new Date('2025-01-01'),
+      updatedBy: 'admin',
+      createdAt: new Date('2025-01-01')
+    }],
+    [4, {
+      id: 4,
+      category: 'taxes',
+      key: 'default_tax_rate',
+      value: '13.00',
+      dataType: 'number',
+      description: 'Default tax rate percentage',
+      isRequired: true,
+      isSecret: false,
+      lastUpdated: new Date('2025-01-01'),
+      updatedBy: 'admin',
+      createdAt: new Date('2025-01-01')
+    }],
+    [5, {
+      id: 5,
+      category: 'notifications',
+      key: 'email_notifications_enabled',
+      value: 'true',
+      dataType: 'boolean',
+      description: 'Enable email notifications',
+      isRequired: false,
+      isSecret: false,
+      lastUpdated: new Date('2025-01-01'),
+      updatedBy: 'admin',
+      createdAt: new Date('2025-01-01')
+    }],
+    [6, {
+      id: 6,
+      category: 'security',
+      key: 'session_timeout',
+      value: '3600',
+      dataType: 'number',
+      description: 'Session timeout in seconds',
+      isRequired: true,
+      isSecret: false,
+      lastUpdated: new Date('2025-01-01'),
+      updatedBy: 'admin',
+      createdAt: new Date('2025-01-01')
+    }],
+    [7, {
+      id: 7,
+      category: 'api',
+      key: 'rate_limit_requests',
+      value: '100',
+      dataType: 'number',
+      description: 'API rate limit requests per minute',
+      isRequired: true,
+      isSecret: false,
+      lastUpdated: new Date('2025-01-01'),
+      updatedBy: 'admin',
+      createdAt: new Date('2025-01-01')
+    }],
+    [8, {
+      id: 8,
+      category: 'integration',
+      key: 'openai_model',
+      value: 'gpt-4o',
+      dataType: 'string',
+      description: 'OpenAI model for AI responses',
+      isRequired: true,
+      isSecret: false,
+      lastUpdated: new Date('2025-01-01'),
+      updatedBy: 'admin',
+      createdAt: new Date('2025-01-01')
+    }]
+  ]);
+
+  // Mock tax jurisdictions data
+  private taxJurisdictions = new Map<number, any>([
+    [1, {
+      id: 1,
+      country: 'Canada',
+      countryCode: 'CA',
+      state: null,
+      stateCode: null,
+      province: 'Ontario',
+      provinceCode: 'ON',
+      taxType: 'HST',
+      taxRate: 13.00,
+      isActive: true,
+      appliesTo: ['customers', 'service_providers'],
+      exemptions: [],
+      effectiveDate: new Date('2025-01-01'),
+      lastUpdated: new Date('2025-01-01'),
+      description: 'Ontario HST rate',
+      createdAt: new Date('2025-01-01'),
+      updatedAt: new Date('2025-01-01')
+    }],
+    [2, {
+      id: 2,
+      country: 'Canada',
+      countryCode: 'CA',
+      state: null,
+      stateCode: null,
+      province: 'British Columbia',
+      provinceCode: 'BC',
+      taxType: 'GST',
+      taxRate: 5.00,
+      isActive: true,
+      appliesTo: ['customers', 'service_providers'],
+      exemptions: [],
+      effectiveDate: new Date('2025-01-01'),
+      lastUpdated: new Date('2025-01-01'),
+      description: 'British Columbia GST rate',
+      createdAt: new Date('2025-01-01'),
+      updatedAt: new Date('2025-01-01')
+    }],
+    [3, {
+      id: 3,
+      country: 'United States',
+      countryCode: 'US',
+      state: 'California',
+      stateCode: 'CA',
+      province: null,
+      provinceCode: null,
+      taxType: 'Sales Tax',
+      taxRate: 7.50,
+      isActive: true,
+      appliesTo: ['customers'],
+      exemptions: ['service_providers'],
+      effectiveDate: new Date('2025-01-01'),
+      lastUpdated: new Date('2025-01-01'),
+      description: 'California state sales tax',
+      createdAt: new Date('2025-01-01'),
+      updatedAt: new Date('2025-01-01')
+    }],
+    [4, {
+      id: 4,
+      country: 'United States',
+      countryCode: 'US',
+      state: 'New York',
+      stateCode: 'NY',
+      province: null,
+      provinceCode: null,
+      taxType: 'Sales Tax',
+      taxRate: 8.00,
+      isActive: true,
+      appliesTo: ['customers'],
+      exemptions: [],
+      effectiveDate: new Date('2025-01-01'),
+      lastUpdated: new Date('2025-01-01'),
+      description: 'New York state sales tax',
+      createdAt: new Date('2025-01-01'),
+      updatedAt: new Date('2025-01-01')
+    }],
+    [5, {
+      id: 5,
+      country: 'United Kingdom',
+      countryCode: 'UK',
+      state: null,
+      stateCode: null,
+      province: null,
+      provinceCode: null,
+      taxType: 'VAT',
+      taxRate: 20.00,
+      isActive: true,
+      appliesTo: ['customers', 'service_providers'],
+      exemptions: [],
+      effectiveDate: new Date('2025-01-01'),
+      lastUpdated: new Date('2025-01-01'),
+      description: 'UK VAT rate',
+      createdAt: new Date('2025-01-01'),
+      updatedAt: new Date('2025-01-01')
+    }]
+  ]);
+
+  // Mock admin panel configuration data
+  private adminPanelConfig = new Map<number, any>([
+    [1, {
+      id: 1,
+      section: 'dashboard',
+      title: 'Dashboard Overview',
+      description: 'Main dashboard with key metrics and statistics',
+      isEnabled: true,
+      permissions: ['admin', 'super_admin'],
+      icon: 'LayoutDashboard',
+      order: 1,
+      settings: {
+        showMetrics: true,
+        showActivity: true,
+        showQuickActions: true
+      },
+      createdAt: new Date('2025-01-01'),
+      updatedAt: new Date('2025-01-01')
+    }],
+    [2, {
+      id: 2,
+      section: 'users',
+      title: 'User Management',
+      description: 'Manage platform users and customers',
+      isEnabled: true,
+      permissions: ['admin', 'super_admin', 'manager'],
+      icon: 'Users',
+      order: 2,
+      settings: {
+        canCreate: true,
+        canEdit: true,
+        canDelete: false,
+        canExport: true
+      },
+      createdAt: new Date('2025-01-01'),
+      updatedAt: new Date('2025-01-01')
+    }],
+    [3, {
+      id: 3,
+      section: 'service_providers',
+      title: 'Service Provider Management',
+      description: 'Manage service providers and technicians',
+      isEnabled: true,
+      permissions: ['admin', 'super_admin', 'manager'],
+      icon: 'UserCheck',
+      order: 3,
+      settings: {
+        canApprove: true,
+        canSuspend: true,
+        canViewEarnings: true
+      },
+      createdAt: new Date('2025-01-01'),
+      updatedAt: new Date('2025-01-01')
+    }],
+    [4, {
+      id: 4,
+      section: 'payments',
+      title: 'Payment Management',
+      description: 'Manage payments, gateways, and transactions',
+      isEnabled: true,
+      permissions: ['admin', 'super_admin'],
+      icon: 'CreditCard',
+      order: 4,
+      settings: {
+        canProcessRefunds: true,
+        canViewTransactions: true,
+        canManageGateways: true
+      },
+      createdAt: new Date('2025-01-01'),
+      updatedAt: new Date('2025-01-01')
+    }],
+    [5, {
+      id: 5,
+      section: 'disputes',
+      title: 'Dispute Resolution',
+      description: 'Handle customer and service provider disputes',
+      isEnabled: true,
+      permissions: ['admin', 'super_admin', 'support'],
+      icon: 'AlertTriangle',
+      order: 5,
+      settings: {
+        canAssign: true,
+        canResolve: true,
+        canEscalate: true
+      },
+      createdAt: new Date('2025-01-01'),
+      updatedAt: new Date('2025-01-01')
+    }],
+    [6, {
+      id: 6,
+      section: 'platform',
+      title: 'Platform Settings',
+      description: 'Configure platform-wide settings and preferences',
+      isEnabled: true,
+      permissions: ['super_admin'],
+      icon: 'Settings',
+      order: 6,
+      settings: {
+        canModifySettings: true,
+        canViewSecrets: true,
+        canManageTaxes: true
+      },
+      createdAt: new Date('2025-01-01'),
+      updatedAt: new Date('2025-01-01')
+    }]
+  ]);
+
+  async getPlatformSettings(): Promise<any[]> {
+    return Array.from(this.platformSettings.values());
+  }
+
+  async updatePlatformSetting(id: number, data: any): Promise<any> {
+    const setting = this.platformSettings.get(id);
+    if (!setting) {
+      throw new Error('Platform setting not found');
+    }
+
+    const updatedSetting = {
+      ...setting,
+      ...data,
+      lastUpdated: new Date(),
+      updatedBy: data.updatedBy || 'admin'
+    };
+
+    this.platformSettings.set(id, updatedSetting);
+    return updatedSetting;
+  }
+
+  async getTaxJurisdictions(): Promise<any[]> {
+    return Array.from(this.taxJurisdictions.values());
+  }
+
+  async createTaxJurisdiction(data: any): Promise<any> {
+    const id = Math.max(...Array.from(this.taxJurisdictions.keys()), 0) + 1;
+    const jurisdiction = {
+      id,
+      ...data,
+      effectiveDate: new Date(data.effectiveDate || new Date()),
+      lastUpdated: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    this.taxJurisdictions.set(id, jurisdiction);
+    return jurisdiction;
+  }
+
+  async updateTaxJurisdiction(id: number, data: any): Promise<any> {
+    const jurisdiction = this.taxJurisdictions.get(id);
+    if (!jurisdiction) {
+      throw new Error('Tax jurisdiction not found');
+    }
+
+    const updatedJurisdiction = {
+      ...jurisdiction,
+      ...data,
+      lastUpdated: new Date(),
+      updatedAt: new Date()
+    };
+
+    this.taxJurisdictions.set(id, updatedJurisdiction);
+    return updatedJurisdiction;
+  }
+
+  async getAdminPanelConfig(): Promise<any[]> {
+    return Array.from(this.adminPanelConfig.values());
+  }
+
+  async updateAdminPanelConfig(id: number, data: any): Promise<any> {
+    const config = this.adminPanelConfig.get(id);
+    if (!config) {
+      throw new Error('Admin panel config not found');
+    }
+
+    const updatedConfig = {
+      ...config,
+      ...data,
+      updatedAt: new Date()
+    };
+
+    this.adminPanelConfig.set(id, updatedConfig);
+    return updatedConfig;
   }
 }
 
