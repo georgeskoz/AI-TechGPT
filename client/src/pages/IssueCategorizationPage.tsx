@@ -78,136 +78,75 @@ export default function IssueCategorizationPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation title="Issue Management" backTo="/" />
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setLocation('/chat')}
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Chat
-              </Button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Issue Management</h1>
-                <p className="text-gray-600">Categorize and track your technical support requests</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                {issues.length} Total Issues
-              </Badge>
-              <Badge variant="outline" className="bg-green-50 text-green-700">
-                {issues.filter(i => i.status === 'resolved').length} Resolved
-              </Badge>
-            </div>
+      {/* Main Content */}
+      <div className="max-w-md mx-auto px-4 py-6">
+        <div className="text-center mb-6">
+          <h1 className="text-xl font-bold text-gray-900">Support Options</h1>
+          <div className="flex justify-center gap-2 mt-2">
+            <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
+              {issues.length} Issues
+            </Badge>
+            <Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
+              {issues.filter(i => i.status === 'resolved').length} Resolved
+            </Badge>
           </div>
         </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+        
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="categorize" className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
-              Categorize New Issue
-            </TabsTrigger>
-            <TabsTrigger value="pricing" className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4" />
-              Service Pricing
+              New Issue
             </TabsTrigger>
             <TabsTrigger value="tracker" className="flex items-center gap-2">
               <List className="w-4 h-4" />
-              Issue Tracker
-            </TabsTrigger>
-            <TabsTrigger value="chat" className="flex items-center gap-2">
-              <MessageCircle className="w-4 h-4" />
-              AI Chat Support
+              My Issues
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="categorize" className="mt-6">
+          <TabsContent value="categorize" className="mt-4">
             <IssueCategorization
               onIssueCreated={handleIssueCreated}
               onCategorySelected={handleCategorySelected}
             />
           </TabsContent>
 
-          <TabsContent value="pricing" className="mt-6">
-            <UniversalPricingCalculator
-              selectedCategory={selectedCategory}
-              selectedSubcategory={selectedSubcategory}
-              onServiceBooked={handleServiceBooked}
-            />
-          </TabsContent>
-
-          <TabsContent value="tracker" className="mt-6">
+          <TabsContent value="tracker" className="mt-4">
             <IssueTracker
               issues={issues}
               onIssueSelect={handleIssueSelect}
               onStatusUpdate={handleStatusUpdate}
             />
           </TabsContent>
-
-          <TabsContent value="chat" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageCircle className="w-5 h-5" />
-                  AI Chat Support
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <MessageCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Get AI-Powered Support</h3>
-                  <p className="text-gray-600 mb-6">
-                    Chat with our AI assistant for immediate help with your technical issues.
-                    {selectedIssue && (
-                      <span className="block mt-2 text-blue-600 font-medium">
-                        Current Issue: {selectedIssue.title}
-                      </span>
-                    )}
-                  </p>
-                  <Button onClick={() => setLocation('/chat')} size="lg">
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Start Chat Session
+        </Tabs>
+        
+        {/* Quick Help Actions */}
+        <div className="mt-6 space-y-3">
+          <Card>
+            <CardContent className="p-4">
+              <div className="text-center space-y-3">
+                <h3 className="font-semibold">Need Help Right Now?</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button 
+                    onClick={() => setLocation('/chat')}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    AI Chat
+                  </Button>
+                  <Button 
+                    onClick={() => setLocation('/phone-support')}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <DollarSign className="w-4 h-4" />
+                    Phone Support
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-
-      {/* Quick Actions Sidebar */}
-      <div className="fixed bottom-6 right-6 space-y-3">
-        <div className="bg-white rounded-lg shadow-lg p-4 border">
-          <h4 className="font-semibold mb-2">Quick Actions</h4>
-          <div className="space-y-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setActiveTab('categorize')}
-              className="w-full justify-start"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              New Issue
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setLocation('/chat')}
-              className="w-full justify-start"
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Chat Support
-            </Button>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
