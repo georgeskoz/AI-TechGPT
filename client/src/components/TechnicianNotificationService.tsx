@@ -373,6 +373,7 @@ export default function TechnicianNotificationService({
         onAccept={handleAcceptJob}
         onReject={handleRejectJob}
         onTimeout={handleTimeoutJob}
+        onClose={() => setShowPopup(false)}
       />
     </>
   );
