@@ -167,7 +167,7 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [darkMode, setDarkMode] = useState(false);
-  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["system"]);
   const [policyContent, setPolicyContent] = useState("");
   const [aiGenerating, setAiGenerating] = useState(false);
   const [companyInfo, setCompanyInfo] = useState({
