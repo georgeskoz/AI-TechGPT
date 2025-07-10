@@ -79,10 +79,7 @@ export default function Navigation({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => {
-                console.log("Chat button clicked - navigating to /chat");
-                setLocation("/chat");
-              }}
+              onClick={() => setLocation("/chat")}
               className="hidden sm:flex items-center gap-2 text-gray-600 hover:text-gray-900"
             >
               <MessageCircle className="h-4 w-4" />
