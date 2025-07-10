@@ -2240,6 +2240,14 @@ class MemoryStorage implements IStorage {
   // Payment Gateway Management Methods
   private paymentGateways: Map<string, any> = new Map();
   private paymentTransactions: Map<string, any> = new Map();
+  private serviceProviderPayouts: Map<string, any> = new Map();
+  private payoutSettings: any = {
+    minimumPayout: 50,
+    processingFee: 2.5,
+    schedule: 'weekly',
+    autoPayoutEnabled: true,
+    nextPayoutDate: 'Friday'
+  };
 
 
 
@@ -2423,6 +2431,56 @@ class MemoryStorage implements IStorage {
     mockTransactions.forEach(transaction => {
       this.paymentTransactions.set(transaction.id, transaction);
     });
+
+    // Initialize with mock payout history
+    const mockPayouts = [
+      {
+        id: 'payout_001',
+        providerId: 1,
+        providerName: 'John Doe',
+        amount: 127.50,
+        processingFee: 3.19,
+        netAmount: 124.31,
+        method: 'stripe_transfer',
+        status: 'completed',
+        note: 'Weekly automatic payout',
+        processedBy: 'system',
+        createdAt: new Date('2025-01-03T12:00:00Z'),
+        completedAt: new Date('2025-01-03T12:05:00Z')
+      },
+      {
+        id: 'payout_002',
+        providerId: 2,
+        providerName: 'Sarah Johnson',
+        amount: 195.00,
+        processingFee: 4.88,
+        netAmount: 190.12,
+        method: 'paypal_transfer',
+        status: 'completed',
+        note: 'Weekly automatic payout',
+        processedBy: 'system',
+        createdAt: new Date('2025-01-03T12:00:00Z'),
+        completedAt: new Date('2025-01-03T12:07:00Z')
+      },
+      {
+        id: 'payout_003',
+        providerId: 3,
+        providerName: 'Mike Chen',
+        amount: 89.75,
+        processingFee: 2.24,
+        netAmount: 87.51,
+        method: 'bank_transfer',
+        status: 'pending',
+        note: 'Manual payout - bonus payment',
+        processedBy: 'admin',
+        createdAt: new Date('2025-01-08T10:30:00Z'),
+        completedAt: null
+      }
+    ];
+
+    mockPayouts.forEach(payout => {
+      this.serviceProviderPayouts.set(payout.id, payout);
+    });
   }
 
   async getAllPaymentGateways(): Promise<any[]> {
@@ -2587,6 +2645,227 @@ class MemoryStorage implements IStorage {
     this.paymentTransactions.set(transactionId, transaction);
     
     return refund;
+  }
+
+  // Service Provider Payout Management Methods
+  async getPayoutDashboard(): Promise<any> {
+    const payouts = Array.from(this.serviceProviderPayouts.values());
+    const technicians = Array.from(this.technicians.values());
+    
+    // Calculate pending payouts for each technician
+    const pendingPayouts = technicians.map(tech => {
+      const pendingEarnings = parseFloat(tech.totalEarnings) * 0.1; // Mock 10% pending
+      return { 
+        id: tech.id,
+        name: `${tech.firstName} ${tech.lastName}`,
+        pendingEarnings: pendingEarnings >= 50 ? pendingEarnings : 0
+      };
+    }).filter(p => p.pendingEarnings > 0);
+
+    const totalPendingPayouts = pendingPayouts.reduce((sum, p) => sum + p.pendingEarnings, 0);
+    const eligibleProviders = pendingPayouts.length;
+
+    // Calculate weekly payouts
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const weeklyPayouts = payouts.filter(p => new Date(p.createdAt) >= weekAgo);
+    const weeklyPayoutAmount = weeklyPayouts.reduce((sum, p) => sum + p.amount, 0);
+
+    // Calculate processing fees
+    const processingFees = payouts.reduce((sum, p) => sum + p.processingFee, 0);
+
+    return {
+      totalPendingPayouts,
+      eligibleProviders,
+      weeklyPayouts: weeklyPayoutAmount,
+      weeklyPayoutCount: weeklyPayouts.length,
+      processingFees,
+      feePercentage: this.payoutSettings.processingFee,
+      nextPayoutDate: this.payoutSettings.nextPayoutDate
+    };
+  }
+
+  async getServiceProvidersWithEarnings(): Promise<any[]> {
+    const technicians = Array.from(this.technicians.values());
+    
+    return technicians.map(tech => ({
+      id: tech.id,
+      name: `${tech.firstName} ${tech.lastName}`,
+      email: tech.email,
+      avatar: null,
+      totalEarnings: parseFloat(tech.totalEarnings),
+      pendingEarnings: parseFloat(tech.totalEarnings) * 0.1, // Mock 10% pending
+      completedJobs: tech.completedJobs,
+      rating: tech.rating,
+      payoutMethod: 'stripe_transfer',
+      lastPayoutDate: new Date('2025-01-03'),
+      isActive: tech.isActive
+    }));
+  }
+
+  async getPayoutHistory(page: number = 1, limit: number = 50): Promise<any[]> {
+    const payouts = Array.from(this.serviceProviderPayouts.values());
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    
+    return payouts
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(startIndex, endIndex);
+  }
+
+  async getPayoutSettings(): Promise<any> {
+    return this.payoutSettings;
+  }
+
+  async updatePayoutSettings(settings: any): Promise<any> {
+    this.payoutSettings = { ...this.payoutSettings, ...settings };
+    return this.payoutSettings;
+  }
+
+  async processPayout(payoutData: any): Promise<any> {
+    const { providerId, amount, note, method, processedBy } = payoutData;
+    
+    // Get technician info
+    const technician = this.technicians.get(providerId);
+    if (!technician) {
+      throw new Error('Service provider not found');
+    }
+
+    // Calculate processing fee
+    const processingFee = amount * (this.payoutSettings.processingFee / 100);
+    const netAmount = amount - processingFee;
+
+    // Create payout record
+    const payout = {
+      id: `payout_${Date.now()}`,
+      providerId,
+      providerName: `${technician.firstName} ${technician.lastName}`,
+      amount,
+      processingFee,
+      netAmount,
+      method,
+      status: 'completed', // In real implementation, this would be 'pending' initially
+      note,
+      processedBy,
+      createdAt: new Date(),
+      completedAt: new Date() // Mock immediate completion
+    };
+
+    this.serviceProviderPayouts.set(payout.id, payout);
+    
+    // Update technician's earnings (reduce pending amount)
+    const currentEarnings = parseFloat(technician.totalEarnings);
+    const newEarnings = Math.max(0, currentEarnings - amount);
+    technician.totalEarnings = newEarnings.toString();
+    this.technicians.set(providerId, technician);
+
+    return payout;
+  }
+
+  async processBulkPayout(providers: any[]): Promise<any> {
+    const results = [];
+    let totalProcessed = 0;
+    let totalFees = 0;
+
+    for (const provider of providers) {
+      try {
+        const payout = await this.processPayout({
+          providerId: provider.providerId,
+          amount: provider.amount,
+          note: 'Bulk automatic payout',
+          method: provider.method,
+          processedBy: 'system'
+        });
+        
+        results.push({ success: true, payout });
+        totalProcessed += provider.amount;
+        totalFees += payout.processingFee;
+      } catch (error) {
+        results.push({ success: false, error: error.message, providerId: provider.providerId });
+      }
+    }
+
+    return {
+      totalProcessed: results.filter(r => r.success).length,
+      totalAmount: totalProcessed,
+      totalFees,
+      results
+    };
+  }
+
+  async scheduleAutomaticPayouts(): Promise<any> {
+    const providers = await this.getServiceProvidersWithEarnings();
+    const eligibleProviders = providers.filter(p => p.pendingEarnings >= this.payoutSettings.minimumPayout);
+
+    if (eligibleProviders.length === 0) {
+      return { message: 'No eligible providers for automatic payout', count: 0 };
+    }
+
+    const payoutRequests = eligibleProviders.map(provider => ({
+      providerId: provider.id,
+      amount: provider.pendingEarnings,
+      method: 'stripe_transfer'
+    }));
+
+    const result = await this.processBulkPayout(payoutRequests);
+    
+    return {
+      message: 'Automatic payouts scheduled',
+      count: result.totalProcessed,
+      totalAmount: result.totalAmount,
+      totalFees: result.totalFees
+    };
+  }
+
+  async getPayoutAnalytics(range: string): Promise<any> {
+    const payouts = Array.from(this.serviceProviderPayouts.values());
+    
+    // Filter by date range
+    const now = new Date();
+    let startDate = new Date();
+    
+    switch (range) {
+      case '7d':
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case '30d':
+        startDate.setDate(now.getDate() - 30);
+        break;
+      case '90d':
+        startDate.setDate(now.getDate() - 90);
+        break;
+      default:
+        startDate.setDate(now.getDate() - 30);
+    }
+
+    const filteredPayouts = payouts.filter(p => new Date(p.createdAt) >= startDate);
+    
+    const totalPayouts = filteredPayouts.length;
+    const totalAmount = filteredPayouts.reduce((sum, p) => sum + p.amount, 0);
+    const totalFees = filteredPayouts.reduce((sum, p) => sum + p.processingFee, 0);
+    const averageAmount = totalPayouts > 0 ? totalAmount / totalPayouts : 0;
+
+    // Group by method
+    const methodBreakdown = filteredPayouts.reduce((acc, p) => {
+      acc[p.method] = (acc[p.method] || 0) + p.amount;
+      return acc;
+    }, {});
+
+    // Group by status
+    const statusBreakdown = filteredPayouts.reduce((acc, p) => {
+      acc[p.status] = (acc[p.status] || 0) + 1;
+      return acc;
+    }, {});
+
+    return {
+      totalPayouts,
+      totalAmount,
+      totalFees,
+      averageAmount,
+      methodBreakdown,
+      statusBreakdown,
+      successRate: statusBreakdown.completed ? (statusBreakdown.completed / totalPayouts) * 100 : 0
+    };
   }
 }
 
