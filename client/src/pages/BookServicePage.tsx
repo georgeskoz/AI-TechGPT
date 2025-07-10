@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, MapPin, Clock, Phone, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Star, MapPin, Clock, Phone, CheckCircle, ArrowRight, ArrowLeft, Zap, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import Navigation from '@/components/Navigation';
@@ -51,6 +51,7 @@ export default function BookServicePage() {
   
   const [selectedProvider, setSelectedProvider] = useState<ServiceProvider | null>(null);
   const [providers, setProviders] = useState<ServiceProvider[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Fetch categories
   const { data: categories } = useQuery({
@@ -225,6 +226,21 @@ export default function BookServicePage() {
     bookServiceMutation.mutate(bookingData);
   };
 
+  // Add loading state check
+  if (!categories) {
+    return (
+      <div className="container mx-auto p-4 max-w-4xl">
+        <Navigation title="Book Service" backTo="/customer-home" />
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading service categories...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-4 max-w-4xl">
       <Navigation title="Book Service" backTo="/customer-home" />
@@ -238,6 +254,21 @@ export default function BookServicePage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Immediate Help Alert */}
+            {form.urgency === 'now' && (
+              <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Zap className="h-5 w-5 text-orange-600" />
+                  <div>
+                    <h3 className="font-semibold text-orange-900">Immediate Help Available</h3>
+                    <p className="text-sm text-orange-700">
+                      Service providers are standing by! Fill out the form below and we'll connect you with available technicians in your area.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <form onSubmit={handleFormSubmit} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
@@ -332,6 +363,21 @@ export default function BookServicePage() {
             </Button>
             <h2 className="text-2xl font-bold">Available Service Providers</h2>
           </div>
+          
+          {/* Urgent Help Status */}
+          {form.urgency === 'now' && (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <div>
+                  <h3 className="font-semibold text-green-900">Immediate Help Available</h3>
+                  <p className="text-sm text-green-700">
+                    {providers.length} service providers are available for immediate assistance. Select one to book your service.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           
           <div className="grid gap-4">
             {providers.map((provider) => (
