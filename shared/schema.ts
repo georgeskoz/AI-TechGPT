@@ -34,6 +34,84 @@ export const adminUsers = pgTable("admin_users", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Support tickets system
+export const supportTickets = pgTable("support_tickets", {
+  id: serial("id").primaryKey(),
+  ticketNumber: text("ticket_number").notNull().unique(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  assignedTo: integer("assigned_to").references(() => adminUsers.id),
+  
+  // Basic ticket information
+  subject: text("subject").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(), // technical, billing, account, general
+  priority: text("priority").notNull().default("medium"), // low, medium, high, urgent
+  status: text("status").notNull().default("open"), // open, in_progress, resolved, closed
+  source: text("source").notNull().default("chat"), // chat, email, phone, web_form
+  
+  // Chat integration
+  chatConversation: jsonb("chat_conversation").$type<{
+    username: string;
+    messages: Array<{
+      content: string;
+      isUser: boolean;
+      timestamp: string;
+      domain?: string;
+    }>;
+  }>(),
+  
+  // Resolution tracking
+  resolution: text("resolution"),
+  resolvedBy: integer("resolved_by").references(() => adminUsers.id),
+  resolvedAt: timestamp("resolved_at"),
+  
+  // Customer satisfaction
+  customerRating: integer("customer_rating"), // 1-5 stars
+  customerFeedback: text("customer_feedback"),
+  
+  // SLA tracking
+  firstResponseAt: timestamp("first_response_at"),
+  lastResponseAt: timestamp("last_response_at"),
+  
+  // Metadata
+  tags: jsonb("tags").$type<string[]>(),
+  internalNotes: text("internal_notes"),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Support ticket messages/communications
+export const supportTicketMessages = pgTable("support_ticket_messages", {
+  id: serial("id").primaryKey(),
+  ticketId: integer("ticket_id").notNull().references(() => supportTickets.id),
+  senderId: integer("sender_id").notNull().references(() => users.id),
+  senderType: text("sender_type").notNull(), // customer, admin, system
+  
+  content: text("content").notNull(),
+  messageType: text("message_type").notNull().default("text"), // text, attachment, internal_note
+  attachments: jsonb("attachments").$type<string[]>(),
+  
+  isInternal: boolean("is_internal").default(false), // Only visible to admins
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Support ticket attachments
+export const supportTicketAttachments = pgTable("support_ticket_attachments", {
+  id: serial("id").primaryKey(),
+  ticketId: integer("ticket_id").notNull().references(() => supportTickets.id),
+  messageId: integer("message_id").references(() => supportTicketMessages.id),
+  
+  fileName: text("file_name").notNull(),
+  fileUrl: text("file_url").notNull(),
+  fileSize: integer("file_size"), // in bytes
+  fileType: text("file_type").notNull(),
+  uploadedBy: integer("uploaded_by").notNull().references(() => users.id),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Admin-managed categories for issue assessment
 export const issueCategories = pgTable("issue_categories", {
   id: serial("id").primaryKey(),
@@ -997,6 +1075,56 @@ export const insertDisputeAttachmentSchema = createInsertSchema(disputeAttachmen
   description: true,
 });
 
+// Support ticket schemas
+export const insertSupportTicketSchema = createInsertSchema(supportTickets).pick({
+  ticketNumber: true,
+  userId: true,
+  assignedTo: true,
+  subject: true,
+  description: true,
+  category: true,
+  priority: true,
+  status: true,
+  source: true,
+  resolution: true,
+  resolvedBy: true,
+  customerRating: true,
+  customerFeedback: true,
+  internalNotes: true,
+}).extend({
+  chatConversation: z.object({
+    username: z.string(),
+    messages: z.array(z.object({
+      content: z.string(),
+      isUser: z.boolean(),
+      timestamp: z.string(),
+      domain: z.string().optional(),
+    })),
+  }).optional(),
+  tags: z.array(z.string()).optional(),
+});
+
+export const insertSupportTicketMessageSchema = createInsertSchema(supportTicketMessages).pick({
+  ticketId: true,
+  senderId: true,
+  senderType: true,
+  content: true,
+  messageType: true,
+  isInternal: true,
+}).extend({
+  attachments: z.array(z.string()).optional(),
+});
+
+export const insertSupportTicketAttachmentSchema = createInsertSchema(supportTicketAttachments).pick({
+  ticketId: true,
+  messageId: true,
+  fileName: true,
+  fileUrl: true,
+  fileSize: true,
+  fileType: true,
+  uploadedBy: true,
+});
+
 export const insertNotificationSchema = createInsertSchema(notifications).pick({
   userId: true,
   userType: true,
@@ -1056,6 +1184,16 @@ export type InsertDisputeMessage = z.infer<typeof insertDisputeMessageSchema>;
 export type DisputeMessage = typeof disputeMessages.$inferSelect;
 export type InsertDisputeAttachment = z.infer<typeof insertDisputeAttachmentSchema>;
 export type DisputeAttachment = typeof disputeAttachments.$inferSelect;
+
+// Support ticket types
+export type SupportTicket = typeof supportTickets.$inferSelect;
+export type InsertSupportTicket = typeof supportTickets.$inferInsert;
+
+export type SupportTicketMessage = typeof supportTicketMessages.$inferSelect;
+export type InsertSupportTicketMessage = typeof supportTicketMessages.$inferInsert;
+
+export type SupportTicketAttachment = typeof supportTicketAttachments.$inferSelect;
+export type InsertSupportTicketAttachment = typeof supportTicketAttachments.$inferInsert;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertDisputeEscalation = z.infer<typeof insertDisputeEscalationSchema>;

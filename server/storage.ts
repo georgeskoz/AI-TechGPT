@@ -139,6 +139,20 @@ export interface IStorage {
   // Support messages
   createSupportMessage(message: InsertSupportMessage): Promise<SupportMessage>;
   getSupportMessages(caseId: number): Promise<SupportMessage[]>;
+  
+  // Support ticket management
+  createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
+  getSupportTicket(id: number): Promise<SupportTicket | undefined>;
+  getSupportTicketsByUser(userId: number): Promise<SupportTicket[]>;
+  updateSupportTicketStatus(id: number, status: string): Promise<SupportTicket>;
+  
+  // Support ticket message management
+  createSupportTicketMessage(message: InsertSupportTicketMessage): Promise<SupportTicketMessage>;
+  getSupportTicketMessages(ticketId: number): Promise<SupportTicketMessage[]>;
+  
+  // Support ticket attachment management
+  createSupportTicketAttachment(attachment: InsertSupportTicketAttachment): Promise<SupportTicketAttachment>;
+  getSupportTicketAttachments(ticketId: number): Promise<SupportTicketAttachment[]>;
   markMessageAsRead(messageId: number): Promise<void>;
   getUnreadMessageCount(caseId: number, userId: number): Promise<number>;
 
@@ -519,6 +533,9 @@ class MemoryStorage implements IStorage {
   private jobUpdates: Map<number, JobUpdate> = new Map();
   private supportCases: Map<number, SupportCase> = new Map();
   private supportMessages: Map<number, SupportMessage> = new Map();
+  private supportTickets: Map<number, SupportTicket> = new Map();
+  private supportTicketMessages: Map<number, SupportTicketMessage> = new Map();
+  private supportTicketAttachments: Map<number, SupportTicketAttachment> = new Map();
   private serviceBookings: Map<number, ServiceBooking> = new Map();
   
   private nextId = 1;
@@ -3538,6 +3555,109 @@ class MemoryStorage implements IStorage {
       priorityStats,
       categoryStats
     };
+  }
+
+  // Support ticket management
+  async createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket> {
+    const newTicket: SupportTicket = {
+      id: this.nextId++,
+      ticketNumber: ticket.ticketNumber,
+      userId: ticket.userId,
+      assignedTo: ticket.assignedTo || null,
+      subject: ticket.subject,
+      description: ticket.description,
+      category: ticket.category,
+      priority: ticket.priority,
+      status: ticket.status || 'open',
+      source: ticket.source || 'chat',
+      chatConversation: ticket.chatConversation || null,
+      resolution: ticket.resolution || null,
+      resolvedBy: ticket.resolvedBy || null,
+      resolvedAt: ticket.resolvedAt || null,
+      customerRating: ticket.customerRating || null,
+      customerFeedback: ticket.customerFeedback || null,
+      firstResponseAt: ticket.firstResponseAt || null,
+      lastResponseAt: ticket.lastResponseAt || null,
+      tags: ticket.tags || [],
+      internalNotes: ticket.internalNotes || null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    
+    this.supportTickets.set(newTicket.id, newTicket);
+    return newTicket;
+  }
+
+  async getSupportTicket(id: number): Promise<SupportTicket | undefined> {
+    return this.supportTickets.get(id);
+  }
+
+  async getSupportTicketsByUser(userId: number): Promise<SupportTicket[]> {
+    return Array.from(this.supportTickets.values()).filter(ticket => ticket.userId === userId);
+  }
+
+  async updateSupportTicketStatus(id: number, status: string): Promise<SupportTicket> {
+    const ticket = this.supportTickets.get(id);
+    if (!ticket) {
+      throw new Error(`Support ticket with id ${id} not found`);
+    }
+    
+    ticket.status = status;
+    ticket.updatedAt = new Date();
+    
+    if (status === 'resolved' || status === 'closed') {
+      ticket.resolvedAt = new Date();
+    }
+    
+    this.supportTickets.set(id, ticket);
+    return ticket;
+  }
+
+  // Support ticket message management
+  async createSupportTicketMessage(message: InsertSupportTicketMessage): Promise<SupportTicketMessage> {
+    const newMessage: SupportTicketMessage = {
+      id: this.nextId++,
+      ticketId: message.ticketId,
+      senderId: message.senderId,
+      senderType: message.senderType,
+      content: message.content,
+      messageType: message.messageType || 'text',
+      attachments: message.attachments || [],
+      isInternal: message.isInternal || false,
+      createdAt: new Date(),
+    };
+    
+    this.supportTicketMessages.set(newMessage.id, newMessage);
+    return newMessage;
+  }
+
+  async getSupportTicketMessages(ticketId: number): Promise<SupportTicketMessage[]> {
+    return Array.from(this.supportTicketMessages.values())
+      .filter(msg => msg.ticketId === ticketId)
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  }
+
+  // Support ticket attachment management
+  async createSupportTicketAttachment(attachment: InsertSupportTicketAttachment): Promise<SupportTicketAttachment> {
+    const newAttachment: SupportTicketAttachment = {
+      id: this.nextId++,
+      ticketId: attachment.ticketId,
+      messageId: attachment.messageId || null,
+      fileName: attachment.fileName,
+      fileUrl: attachment.fileUrl,
+      fileSize: attachment.fileSize || null,
+      fileType: attachment.fileType,
+      uploadedBy: attachment.uploadedBy,
+      createdAt: new Date(),
+    };
+    
+    this.supportTicketAttachments.set(newAttachment.id, newAttachment);
+    return newAttachment;
+  }
+
+  async getSupportTicketAttachments(ticketId: number): Promise<SupportTicketAttachment[]> {
+    return Array.from(this.supportTicketAttachments.values())
+      .filter(attachment => attachment.ticketId === ticketId);
   }
 }
 
