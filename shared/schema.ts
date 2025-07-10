@@ -446,6 +446,114 @@ export const statements = pgTable("statements", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Job dispatch requests for real-time notifications
+export const jobDispatchRequests = pgTable("job_dispatch_requests", {
+  id: serial("id").primaryKey(),
+  ticketId: integer("ticket_id").notNull().references(() => supportTickets.id),
+  customerId: integer("customer_id").notNull().references(() => users.id),
+  technicianId: integer("technician_id").notNull().references(() => users.id),
+  
+  // Service details
+  serviceType: text("service_type").notNull(), // onsite, remote, phone
+  category: text("category").notNull(),
+  description: text("description").notNull(),
+  urgency: text("urgency").notNull().default("medium"), // low, medium, high, urgent
+  
+  // Location and logistics
+  customerLocation: jsonb("customer_location").$type<{
+    address: string;
+    latitude: number;
+    longitude: number;
+    city: string;
+    state: string;
+    zipCode: string;
+  }>(),
+  technicianLocation: jsonb("technician_location").$type<{
+    latitude: number;
+    longitude: number;
+  }>(),
+  
+  // AI estimates
+  estimatedCost: decimal("estimated_cost", { precision: 10, scale: 2 }),
+  estimatedDuration: integer("estimated_duration"), // in minutes
+  estimatedDistance: decimal("estimated_distance", { precision: 8, scale: 2 }), // in miles
+  estimatedETA: integer("estimated_eta"), // in minutes
+  trafficFactor: decimal("traffic_factor", { precision: 3, scale: 2 }).default('1.00'),
+  
+  // Response tracking
+  status: text("status").notNull().default("pending"), // pending, accepted, rejected, expired, reassigned
+  responseDeadline: timestamp("response_deadline").notNull(), // 60 seconds from creation
+  respondedAt: timestamp("responded_at"),
+  responseTimeSeconds: integer("response_time_seconds"),
+  
+  // Analytics
+  notificationSentAt: timestamp("notification_sent_at"),
+  viewedAt: timestamp("viewed_at"),
+  reassignmentCount: integer("reassignment_count").default(0),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Provider response analytics
+export const providerResponseAnalytics = pgTable("provider_response_analytics", {
+  id: serial("id").primaryKey(),
+  dispatchRequestId: integer("dispatch_request_id").notNull().references(() => jobDispatchRequests.id),
+  technicianId: integer("technician_id").notNull().references(() => users.id),
+  
+  // Response metrics
+  responseAction: text("response_action").notNull(), // accepted, rejected, timeout
+  responseTimeSeconds: integer("response_time_seconds"),
+  deviceType: text("device_type"), // web, mobile, desktop
+  userAgent: text("user_agent"),
+  
+  // Context data
+  technicianCurrentWorkload: integer("technician_current_workload"),
+  technicianAvailabilityStatus: text("technician_availability_status"),
+  timeOfDay: text("time_of_day"),
+  dayOfWeek: text("day_of_week"),
+  
+  // Location data
+  technicianDistance: decimal("technician_distance", { precision: 8, scale: 2 }),
+  estimatedTravelTime: integer("estimated_travel_time"),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// AI provider recommendations
+export const providerRecommendations = pgTable("provider_recommendations", {
+  id: serial("id").primaryKey(),
+  dispatchRequestId: integer("dispatch_request_id").notNull().references(() => jobDispatchRequests.id),
+  
+  // Ranking algorithm results
+  recommendedTechnicians: jsonb("recommended_technicians").$type<Array<{
+    technicianId: number;
+    score: number;
+    factors: {
+      proximityScore: number;
+      workloadScore: number;
+      expertiseScore: number;
+      ratingScore: number;
+      availabilityScore: number;
+    };
+    distance: number;
+    eta: number;
+    currentJobs: number;
+  }>>(),
+  
+  // Algorithm metadata
+  algorithmVersion: text("algorithm_version").default("1.0"),
+  factorWeights: jsonb("factor_weights").$type<{
+    proximity: number;
+    workload: number;
+    expertise: number;
+    rating: number;
+    availability: number;
+  }>(),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
   username: text("username").notNull(),
@@ -1584,3 +1692,85 @@ export const insertAnnouncementSchema = createInsertSchema(announcements).omit({
   createdBy: true
 });
 export type InsertAnnouncementForm = z.infer<typeof insertAnnouncementSchema>;
+
+// Job dispatch request schemas
+export const insertJobDispatchRequestSchema = createInsertSchema(jobDispatchRequests).pick({
+  ticketId: true,
+  customerId: true,
+  technicianId: true,
+  serviceType: true,
+  category: true,
+  description: true,
+  urgency: true,
+  estimatedCost: true,
+  estimatedDuration: true,
+  estimatedDistance: true,
+  estimatedETA: true,
+  trafficFactor: true,
+  responseDeadline: true,
+}).extend({
+  customerLocation: z.object({
+    address: z.string(),
+    latitude: z.number(),
+    longitude: z.number(),
+    city: z.string(),
+    state: z.string(),
+    zipCode: z.string(),
+  }),
+  technicianLocation: z.object({
+    latitude: z.number(),
+    longitude: z.number(),
+  }),
+});
+
+export const insertProviderResponseAnalyticsSchema = createInsertSchema(providerResponseAnalytics).pick({
+  dispatchRequestId: true,
+  technicianId: true,
+  responseAction: true,
+  responseTimeSeconds: true,
+  deviceType: true,
+  userAgent: true,
+  technicianCurrentWorkload: true,
+  technicianAvailabilityStatus: true,
+  timeOfDay: true,
+  dayOfWeek: true,
+  technicianDistance: true,
+  estimatedTravelTime: true,
+});
+
+export const insertProviderRecommendationSchema = createInsertSchema(providerRecommendations).pick({
+  dispatchRequestId: true,
+  algorithmVersion: true,
+}).extend({
+  recommendedTechnicians: z.array(z.object({
+    technicianId: z.number(),
+    score: z.number(),
+    factors: z.object({
+      proximityScore: z.number(),
+      workloadScore: z.number(),
+      expertiseScore: z.number(),
+      ratingScore: z.number(),
+      availabilityScore: z.number(),
+    }),
+    distance: z.number(),
+    eta: z.number(),
+    currentJobs: z.number(),
+  })),
+  factorWeights: z.object({
+    proximity: z.number(),
+    workload: z.number(),
+    expertise: z.number(),
+    rating: z.number(),
+    availability: z.number(),
+  }),
+});
+
+// Export types for new dispatch tables
+export type JobDispatchRequest = typeof jobDispatchRequests.$inferSelect;
+export type InsertJobDispatchRequest = z.infer<typeof insertJobDispatchRequestSchema>;
+
+export type ProviderResponseAnalytics = typeof providerResponseAnalytics.$inferSelect;
+export type InsertProviderResponseAnalytics = z.infer<typeof insertProviderResponseAnalyticsSchema>;
+
+export type ProviderRecommendation = typeof providerRecommendations.$inferSelect;
+export type InsertProviderRecommendation = z.infer<typeof insertProviderRecommendationSchema>;
