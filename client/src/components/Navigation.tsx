@@ -34,7 +34,7 @@ export default function Navigation({
     { label: "Customer Portal", path: "/customer-home", description: "Get technical support" },
     { label: "Technician Portal", path: "/technician-home", description: "Join as a service provider" },
     { label: "Admin Dashboard", path: "/admin", description: "Platform management" },
-    { label: "AI Chat Support", path: "/", description: "Free AI assistance" },
+    { label: "AI Chat Support", path: "/chat", description: "Free AI assistance" },
     { label: "Live Support", path: "/live-support", description: "Human technician help" },
     { label: "Phone Support", path: "/phone-support", description: "Call-based support" },
     { label: "Issue Tracker", path: "/issues", description: "Manage your requests" },
@@ -79,7 +79,10 @@ export default function Navigation({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setLocation("/chat")}
+              onClick={() => {
+                console.log("Chat button clicked - navigating to /chat");
+                setLocation("/chat");
+              }}
               className="hidden sm:flex items-center gap-2 text-gray-600 hover:text-gray-900"
             >
               <MessageCircle className="h-4 w-4" />
