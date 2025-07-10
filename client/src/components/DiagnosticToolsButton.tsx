@@ -47,7 +47,7 @@ export default function DiagnosticToolsButton() {
           Quick Fixes
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-sm max-h-[50vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Wrench className="h-5 w-5" />
@@ -92,38 +92,25 @@ export default function DiagnosticToolsButton() {
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
-            <p className="text-gray-600">
-              Quick diagnostic tools to help solve common technical issues instantly.
+          <div className="space-y-3">
+            <p className="text-gray-600 text-sm">
+              Quick fixes for common issues:
             </p>
             
-            {categories.map((category) => (
-              <div key={category} className="space-y-2">
-                <h3 className="font-semibold text-lg capitalize text-gray-800">
-                  {category} Tools
-                </h3>
-                <div className="grid gap-2">
-                  {tools
-                    .filter((tool: DiagnosticTool) => tool.category === category && tool.isActive)
-                    .map((tool: DiagnosticTool) => (
-                      <button
-                        key={tool.id}
-                        onClick={() => handleToolSelect(tool)}
-                        className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors text-left"
-                      >
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                          <div>
-                            <h4 className="font-medium text-gray-900">{tool.title}</h4>
-                            <p className="text-sm text-gray-600">{tool.description}</p>
-                          </div>
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-gray-400" />
-                      </button>
-                    ))}
-                </div>
-              </div>
-            ))}
+            <div className="space-y-2">
+              {tools
+                .filter((tool: DiagnosticTool) => tool.isActive)
+                .map((tool: DiagnosticTool) => (
+                  <button
+                    key={tool.id}
+                    onClick={() => handleToolSelect(tool)}
+                    className="flex items-center gap-2 p-2 w-full text-left hover:bg-gray-50 rounded-md transition-colors"
+                  >
+                    <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                    <span className="text-sm font-medium text-gray-900">{tool.title}</span>
+                  </button>
+                ))}
+            </div>
           </div>
         )}
       </DialogContent>
