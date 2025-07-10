@@ -13,6 +13,7 @@ import UsernameModal from '@/components/UsernameModal';
 import ErrorToast from '@/components/ErrorToast';
 import DomainSelector from '@/components/DomainSelector';
 import SupportOptionsWidget from '@/components/SupportOptionsWidget';
+import ServiceAnnouncementModal from '@/components/ServiceAnnouncementModal';
 
 
 export default function ChatPage() {
@@ -22,6 +23,7 @@ export default function ChatPage() {
   const [showMobileTopics, setShowMobileTopics] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   const [lastUserMessage, setLastUserMessage] = useState<string>('');
+  const [showServiceAnnouncement, setShowServiceAnnouncement] = useState(false);
   const [, setLocation] = useLocation();
   
   // Chat functionality with OpenAI
@@ -33,6 +35,20 @@ export default function ChatPage() {
       setShowUsernameModal(true);
     }
   }, [username]);
+
+  // Show service announcement on first visit
+  useEffect(() => {
+    const announcementShown = localStorage.getItem('serviceAnnouncementShown');
+    if (!announcementShown) {
+      setShowServiceAnnouncement(true);
+    }
+  }, []);
+
+  // Handle closing the service announcement
+  const handleCloseServiceAnnouncement = () => {
+    setShowServiceAnnouncement(false);
+    localStorage.setItem('serviceAnnouncementShown', 'true');
+  };
   
   // Handle saving username
   const handleSaveUsername = (newUsername: string) => {
@@ -138,6 +154,12 @@ export default function ChatPage() {
       <UsernameModal 
         isOpen={showUsernameModal} 
         onSave={handleSaveUsername} 
+      />
+      
+      {/* Service Announcement Modal */}
+      <ServiceAnnouncementModal 
+        isOpen={showServiceAnnouncement} 
+        onClose={handleCloseServiceAnnouncement} 
       />
       
       {/* Error Toast */}
