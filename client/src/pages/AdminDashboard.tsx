@@ -34,6 +34,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import AdminDisputeManagement from "@/components/AdminDisputeManagement";
+import PaymentGatewayManagement from "@/components/PaymentGatewayManagement";
 import { 
   Users, 
   Settings, 
@@ -2580,7 +2581,9 @@ Last Updated: ${effectiveDate}
 
           {activeTab === "disputes" && <AdminDisputeManagement />}
 
-          {(activeTab === "users" || activeTab === "service-providers" || activeTab === "payments" || activeTab === "system" || activeTab === "settings") && (
+          {activeTab === "payments" && <PaymentGatewayManagement />}
+
+          {(activeTab === "users" || activeTab === "service-providers" || activeTab === "system" || activeTab === "settings") && (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Settings className="h-8 w-8 text-gray-400" />
