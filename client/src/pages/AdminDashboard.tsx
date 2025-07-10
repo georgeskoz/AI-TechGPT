@@ -45,6 +45,7 @@ import StatisticsPanel from "@/components/StatisticsPanel";
 import FinancialStatements from "@/components/FinancialStatements";
 import AdminManagement from "@/components/AdminManagement";
 import NotificationsCenter from "@/components/NotificationsCenter";
+import DiagnosticToolsManagement from "@/components/DiagnosticToolsManagement";
 import { 
   Users, 
   Settings, 
@@ -170,6 +171,7 @@ interface SidebarItem {
   label: string;
   icon: any;
   subItems?: SidebarItem[];
+  superAdminOnly?: boolean;
 }
 
 export default function AdminDashboard() {
@@ -949,6 +951,12 @@ Last Updated: ${effectiveDate}
       ]
     },
     { 
+      id: "diagnostic-tools", 
+      label: "Quick Diagnostic Tools", 
+      icon: Wrench,
+      superAdminOnly: true,
+    },
+    { 
       id: "service-providers", 
       label: "Service Providers", 
       icon: Wrench,
@@ -1258,7 +1266,7 @@ Last Updated: ${effectiveDate}
             </div>
             
             <nav className="flex-1 px-4 py-6 space-y-1">
-              {sidebarItems.map((item) => (
+              {sidebarItems.filter(item => !item.superAdminOnly || currentAdmin?.role === "super_admin").map((item) => (
                 <div key={item.id}>
                   <Button
                     variant={activeTab === item.id ? "secondary" : "ghost"}
@@ -2623,6 +2631,10 @@ Last Updated: ${effectiveDate}
           )}
 
           {activeTab === "jobs" && <JobManagement />}
+          
+          {activeTab === "diagnostic-tools" && (
+            <DiagnosticToolsManagement />
+          )}
 
           {activeTab === "disputes" && <AdminDisputeManagement />}
 

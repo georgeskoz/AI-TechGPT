@@ -1,13 +1,14 @@
 import { 
   users, messages, technicians, serviceRequests, jobs, jobUpdates, supportCases, supportMessages, issueCategories,
-  bookingSettings, serviceBookings, disputes, disputeMessages, disputeAttachments,
+  bookingSettings, serviceBookings, disputes, disputeMessages, disputeAttachments, diagnosticTools,
   type User, type InsertUser, type UpdateProfile, type Message, type InsertMessage,
   type Technician, type InsertTechnician, type ServiceRequest, type InsertServiceRequest,
   type Job, type InsertJob, type JobUpdate, type InsertJobUpdate,
   type SupportCase, type InsertSupportCase, type SupportMessage, type InsertSupportMessage,
   type IssueCategory, type InsertIssueCategory, type BookingSettings, type InsertBookingSettings,
   type ServiceBooking, type InsertServiceBooking, type Dispute, type InsertDispute,
-  type DisputeMessage, type InsertDisputeMessage, type DisputeAttachment, type InsertDisputeAttachment
+  type DisputeMessage, type InsertDisputeMessage, type DisputeAttachment, type InsertDisputeAttachment,
+  type DiagnosticTool, type InsertDiagnosticTool
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -96,6 +97,14 @@ export interface IStorage {
   getTechnicianEarningSetting(technicianId: number): Promise<any>;
   updateTechnicianEarningSettings(technicianId: number, settings: any): Promise<any>;
   bulkUpdateTechnicianEarningSettings(technicianIds: number[], settings: any): Promise<any>;
+
+  // Diagnostic tools management
+  getAllDiagnosticTools(): Promise<DiagnosticTool[]>;
+  getDiagnosticTool(id: string): Promise<DiagnosticTool | undefined>;
+  createDiagnosticTool(tool: InsertDiagnosticTool): Promise<DiagnosticTool>;
+  updateDiagnosticTool(id: string, updates: Partial<InsertDiagnosticTool>): Promise<DiagnosticTool>;
+  deleteDiagnosticTool(id: string): Promise<void>;
+  toggleDiagnosticTool(id: string, isActive: boolean): Promise<DiagnosticTool>;
 
   // Technician approval system
   approveTechnician(technicianId: number, adminId: number, notes?: string): Promise<any>;
@@ -537,6 +546,7 @@ class MemoryStorage implements IStorage {
   private supportTicketMessages: Map<number, SupportTicketMessage> = new Map();
   private supportTicketAttachments: Map<number, SupportTicketAttachment> = new Map();
   private serviceBookings: Map<number, ServiceBooking> = new Map();
+  private diagnosticTools: Map<string, DiagnosticTool> = new Map();
   
   private nextId = 1;
 
@@ -546,6 +556,7 @@ class MemoryStorage implements IStorage {
     this.initializeSampleData();
     this.initializePaymentGateways();
     this.initializeNotifications();
+    this.initializeDiagnosticTools();
     console.log(`After initialization: ${this.technicians.size} technicians loaded`);
   }
 
@@ -3658,6 +3669,225 @@ class MemoryStorage implements IStorage {
   async getSupportTicketAttachments(ticketId: number): Promise<SupportTicketAttachment[]> {
     return Array.from(this.supportTicketAttachments.values())
       .filter(attachment => attachment.ticketId === ticketId);
+  }
+
+  // Diagnostic tools methods
+  async getAllDiagnosticTools(): Promise<DiagnosticTool[]> {
+    return Array.from(this.diagnosticTools.values());
+  }
+
+  async getDiagnosticTool(id: string): Promise<DiagnosticTool | undefined> {
+    return this.diagnosticTools.get(id);
+  }
+
+  async createDiagnosticTool(tool: InsertDiagnosticTool): Promise<DiagnosticTool> {
+    const newTool = {
+      ...tool,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as DiagnosticTool;
+    
+    this.diagnosticTools.set(tool.id, newTool);
+    return newTool;
+  }
+
+  async updateDiagnosticTool(id: string, updates: Partial<InsertDiagnosticTool>): Promise<DiagnosticTool> {
+    const existingTool = this.diagnosticTools.get(id);
+    if (!existingTool) {
+      throw new Error("Diagnostic tool not found");
+    }
+
+    const updatedTool = {
+      ...existingTool,
+      ...updates,
+      updatedAt: new Date()
+    };
+
+    this.diagnosticTools.set(id, updatedTool);
+    return updatedTool;
+  }
+
+  async deleteDiagnosticTool(id: string): Promise<void> {
+    if (!this.diagnosticTools.has(id)) {
+      throw new Error("Diagnostic tool not found");
+    }
+    this.diagnosticTools.delete(id);
+  }
+
+  async toggleDiagnosticTool(id: string, isActive: boolean): Promise<DiagnosticTool> {
+    const tool = this.diagnosticTools.get(id);
+    if (!tool) {
+      throw new Error("Diagnostic tool not found");
+    }
+
+    const updatedTool = {
+      ...tool,
+      isActive,
+      updatedAt: new Date()
+    };
+
+    this.diagnosticTools.set(id, updatedTool);
+    return updatedTool;
+  }
+
+  private initializeDiagnosticTools() {
+    // Initialize with sample diagnostic tools for demo
+    const sampleTools = [
+      {
+        id: "network-speed-test",
+        title: "Network Speed Test",
+        description: "Test your internet connection speed to diagnose slow browsing or streaming issues",
+        category: "network",
+        icon: "Wifi",
+        isActive: true,
+        steps: [
+          {
+            id: "step1",
+            title: "Close all applications",
+            description: "Close all running applications and browser tabs to get accurate results",
+            order: 1
+          },
+          {
+            id: "step2",
+            title: "Run speed test",
+            description: "Visit speedtest.net or fast.com and run the speed test",
+            order: 2
+          },
+          {
+            id: "step3",
+            title: "Check results",
+            description: "Compare your results with your internet plan speed. If significantly lower, contact your ISP",
+            order: 3
+          }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: "computer-restart",
+        title: "Computer Restart Fix",
+        description: "Resolve common computer issues by performing a proper restart",
+        category: "hardware",
+        icon: "RotateCcw",
+        isActive: true,
+        steps: [
+          {
+            id: "step1",
+            title: "Save your work",
+            description: "Save all open documents and close all applications",
+            order: 1
+          },
+          {
+            id: "step2",
+            title: "Restart computer",
+            description: "Click Start menu > Power > Restart (not Shut down)",
+            order: 2
+          },
+          {
+            id: "step3",
+            title: "Wait for full startup",
+            description: "Allow the computer to fully boot up before opening applications",
+            order: 3
+          }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: "printer-connection",
+        title: "Printer Connection Check",
+        description: "Diagnose and fix printer connectivity issues",
+        category: "hardware",
+        icon: "Printer",
+        isActive: true,
+        steps: [
+          {
+            id: "step1",
+            title: "Check power and cables",
+            description: "Ensure printer is powered on and all cables are securely connected",
+            order: 1
+          },
+          {
+            id: "step2",
+            title: "Check printer status",
+            description: "Go to Settings > Printers & Scanners and verify printer appears in the list",
+            order: 2
+          },
+          {
+            id: "step3",
+            title: "Print test page",
+            description: "Right-click on your printer and select 'Print test page'",
+            order: 3
+          }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: "browser-cleanup",
+        title: "Browser Cleanup",
+        description: "Clear browser cache and cookies to fix loading issues",
+        category: "software",
+        icon: "Globe",
+        isActive: true,
+        steps: [
+          {
+            id: "step1",
+            title: "Open browser settings",
+            description: "Click on the three dots menu and select Settings",
+            order: 1
+          },
+          {
+            id: "step2",
+            title: "Clear browsing data",
+            description: "Find 'Clear browsing data' or 'Privacy and security' section",
+            order: 2
+          },
+          {
+            id: "step3",
+            title: "Select data to clear",
+            description: "Check 'Cookies' and 'Cached images and files', then click Clear data",
+            order: 3
+          }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: "password-reset",
+        title: "Password Reset Guide",
+        description: "Safely reset forgotten passwords for common services",
+        category: "security",
+        icon: "Key",
+        isActive: true,
+        steps: [
+          {
+            id: "step1",
+            title: "Go to login page",
+            description: "Visit the official login page for the service you need to reset",
+            order: 1
+          },
+          {
+            id: "step2",
+            title: "Click 'Forgot Password'",
+            description: "Look for 'Forgot Password' or 'Reset Password' link",
+            order: 2
+          },
+          {
+            id: "step3",
+            title: "Check your email",
+            description: "Check your email for reset instructions and follow the link provided",
+            order: 3
+          }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+
+    sampleTools.forEach(tool => {
+      this.diagnosticTools.set(tool.id, tool as DiagnosticTool);
+    });
   }
 }
 
