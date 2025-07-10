@@ -958,10 +958,17 @@ Last Updated: ${effectiveDate}
     { id: "disputes", label: "Disputes", icon: AlertTriangle },
     { id: "payments", label: "Payments", icon: CreditCard },
     { id: "tax", label: "Tax Management", icon: Settings },
-    { id: "coupons", label: "Coupons", icon: Percent },
-    { id: "notifications", label: "Push Notifications", icon: Bell },
-    { id: "email", label: "Email System", icon: Mail },
-    { id: "system", label: "System", icon: Server },
+    { 
+      id: "system", 
+      label: "System", 
+      icon: Server,
+      subItems: [
+        { id: "coupons", label: "Coupons", icon: Percent },
+        { id: "notifications", label: "Push Notifications", icon: Bell },
+        { id: "email", label: "Email System", icon: Mail },
+        { id: "system-settings", label: "System Settings", icon: Settings }
+      ]
+    },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -2600,7 +2607,7 @@ Last Updated: ${effectiveDate}
 
           {activeTab === "email" && <EmailSystem />}
 
-          {(activeTab === "users" || activeTab === "service-providers" || activeTab === "system" || activeTab === "settings") && (
+          {(activeTab === "users" || activeTab === "service-providers" || activeTab === "system-settings" || activeTab === "settings") && (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Settings className="h-8 w-8 text-gray-400" />
