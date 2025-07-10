@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Phone, CheckCircle } from 'lucide-react';
 import Navigation from '@/components/Navigation';
-import PhoneSupportPricing from '@/components/PhoneSupportPricing';
+import SimplePhoneSupportPricing from '@/components/SimplePhoneSupportPricing';
 
 interface SupportService {
   id: string;
@@ -79,64 +79,10 @@ export default function PhoneSupportPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation title="Phone Support" backTo="/issues" />
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setLocation('/issues')}
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Issues
-              </Button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Phone Support Services</h1>
-                <p className="text-gray-600">Professional technical support with dynamic pricing</p>
-              </div>
-            </div>
-            <Badge className="bg-blue-100 text-blue-700">
-              <Phone className="w-4 h-4 mr-1" />
-              Available 24/7
-            </Badge>
-          </div>
-        </div>
-      </div>
-
+      
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <PhoneSupportPricing onServiceSelected={handleServiceSelected} />
-      </div>
-
-      {/* Features Footer */}
-      <div className="bg-white border-t mt-12">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Phone className="w-6 h-6 text-blue-600" />
-              </div>
-              <h3 className="font-semibold mb-2">Instant Connection</h3>
-              <p className="text-sm text-gray-600">Connect with certified technicians immediately</p>
-            </div>
-            <div className="text-center">
-              <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                <CheckCircle className="w-6 h-6 text-green-600" />
-              </div>
-              <h3 className="font-semibold mb-2">Guaranteed Results</h3>
-              <p className="text-sm text-gray-600">100% satisfaction guarantee or money back</p>
-            </div>
-            <div className="text-center">
-              <div className="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Badge className="w-6 h-6 text-purple-600" />
-              </div>
-              <h3 className="font-semibold mb-2">Expert Support</h3>
-              <p className="text-sm text-gray-600">Certified professionals with years of experience</p>
-            </div>
-          </div>
-        </div>
+      <div className="max-w-md mx-auto px-4 py-6">
+        <SimplePhoneSupportPricing onServiceSelected={handleServiceSelected} />
       </div>
     </div>
   );
