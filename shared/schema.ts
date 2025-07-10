@@ -97,6 +97,24 @@ export const supportTicketMessages = pgTable("support_ticket_messages", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Regional announcements for admins
+export const announcements = pgTable("announcements", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  region: text("region").notNull(), // Ottawa-Gatineau, Toronto, Montreal, Global, etc.
+  priority: text("priority").notNull().default("medium"), // low, medium, high
+  isActive: boolean("is_active").default(true),
+  expiresAt: timestamp("expires_at"),
+  createdBy: integer("created_by").notNull().references(() => adminUsers.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Announcement types
+export type Announcement = typeof announcements.$inferSelect;
+export type InsertAnnouncement = typeof announcements.$inferInsert;
+
 // Diagnostic tools for quick troubleshooting
 export const diagnosticTools = pgTable("diagnostic_tools", {
   id: text("id").primaryKey(),
@@ -1557,3 +1575,12 @@ export type TechnicianApproval = typeof technicianApprovals.$inferSelect;
 export const insertDiagnosticToolSchema = createInsertSchema(diagnosticTools);
 export type InsertDiagnosticTool = z.infer<typeof insertDiagnosticToolSchema>;
 export type DiagnosticTool = typeof diagnosticTools.$inferSelect;
+
+// Announcement schema
+export const insertAnnouncementSchema = createInsertSchema(announcements).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdBy: true
+});
+export type InsertAnnouncementForm = z.infer<typeof insertAnnouncementSchema>;
