@@ -5,6 +5,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import DomainIndicator from './DomainIndicator';
 import CreateTicketButton from './CreateTicketButton';
+import DiagnosticToolsButton from './DiagnosticToolsButton';
 
 interface ChatAreaProps {
   messages: Message[];
@@ -215,12 +216,15 @@ export default function ChatArea({ messages, isLoading, username, typingMessage,
         <div ref={messagesEndRef} />
       </div>
       
-      {/* Support ticket creation button - Always visible when there are messages */}
-      {messages.length > 0 && !isTyping && (
+      {/* Support ticket creation button and diagnostic tools - Always visible when there are messages */}
+      {messages.length > 0 && (
         <div className="p-4 border-t border-gray-200 bg-white sticky bottom-0 z-10">
           <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-600">
-              Need more help? Escalate your chat to a support ticket for priority handling.
+            <div className="flex items-center gap-2">
+              <DiagnosticToolsButton />
+              <div className="text-sm text-gray-600">
+                Need more help? Try quick fixes or create a support ticket for priority handling.
+              </div>
             </div>
             <CreateTicketButton 
               messages={messages} 
