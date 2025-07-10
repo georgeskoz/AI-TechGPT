@@ -97,6 +97,24 @@ export const supportTicketMessages = pgTable("support_ticket_messages", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Diagnostic tools for quick troubleshooting
+export const diagnosticTools = pgTable("diagnostic_tools", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(), // hardware, network, software, security, performance, mobile, general
+  icon: text("icon").notNull(),
+  isActive: boolean("is_active").default(true),
+  steps: jsonb("steps").$type<Array<{
+    id: string;
+    title: string;
+    description: string;
+    order: number;
+  }>>(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Support ticket attachments
 export const supportTicketAttachments = pgTable("support_ticket_attachments", {
   id: serial("id").primaryKey(),
@@ -1534,3 +1552,8 @@ export type InsertBackgroundCheck = z.infer<typeof insertBackgroundCheckSchema>;
 export type BackgroundCheck = typeof backgroundChecks.$inferSelect;
 export type InsertTechnicianApproval = z.infer<typeof insertTechnicianApprovalSchema>;
 export type TechnicianApproval = typeof technicianApprovals.$inferSelect;
+
+// Diagnostic tools
+export const insertDiagnosticToolSchema = createInsertSchema(diagnosticTools);
+export type InsertDiagnosticTool = z.infer<typeof insertDiagnosticToolSchema>;
+export type DiagnosticTool = typeof diagnosticTools.$inferSelect;
