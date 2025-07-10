@@ -95,6 +95,25 @@ export default function ChatArea({ messages, isLoading, username, typingMessage,
 
   return (
     <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden h-full">
+      {/* Support ticket creation button and diagnostic tools - Always visible at top when there are messages */}
+      {messages.length > 0 && (
+        <div className="p-4 border-b border-gray-200 bg-white shadow-sm sticky top-0 z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CreateTicketButton 
+                messages={messages} 
+                username={username} 
+                className="flex-shrink-0"
+              />
+              <DiagnosticToolsButton />
+            </div>
+            <div className="text-sm text-gray-600">
+              Need help? Create a support ticket or try quick fixes.
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div id="chat-messages" className="flex-1 overflow-y-auto p-4 space-y-4 pb-2">
         {/* Welcome message */}
         {messages.length === 0 && (
@@ -216,24 +235,6 @@ export default function ChatArea({ messages, isLoading, username, typingMessage,
         <div ref={messagesEndRef} />
       </div>
       
-      {/* Support ticket creation button and diagnostic tools - Always visible when there are messages */}
-      {messages.length > 0 && (
-        <div className="p-4 border-t border-gray-200 bg-white sticky bottom-0 z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <DiagnosticToolsButton />
-              <div className="text-sm text-gray-600">
-                Need more help? Try quick fixes or create a support ticket for priority handling.
-              </div>
-            </div>
-            <CreateTicketButton 
-              messages={messages} 
-              username={username} 
-              className="ml-4"
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
