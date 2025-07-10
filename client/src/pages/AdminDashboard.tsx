@@ -248,25 +248,41 @@ export default function AdminDashboard() {
     }
 
     try {
-      // Here you would typically make an API call to change the password
-      // await apiRequest("POST", "/api/admin/change-password", {
-      //   currentPassword,
-      //   newPassword
-      // });
-
-      toast({
-        title: "Password changed successfully",
-        description: "Your password has been updated.",
+      const response = await fetch('/api/admin/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword
+        })
       });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast({
+          title: "Password changed successfully",
+          description: "Your password has been updated.",
+        });
 
-      setShowPasswordModal(false);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
+        setShowPasswordModal(false);
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        toast({
+          title: "Failed to change password",
+          description: data.error || "Please check your current password and try again.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
+      console.error('Error changing password:', error);
       toast({
-        title: "Failed to change password",
-        description: "Please try again later.",
+        title: "Network error",
+        description: "Unable to connect to server. Please try again later.",
         variant: "destructive",
       });
     }
