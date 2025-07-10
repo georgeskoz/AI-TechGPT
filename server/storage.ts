@@ -1,6 +1,6 @@
 import { 
   users, messages, technicians, serviceRequests, jobs, jobUpdates, supportCases, supportMessages, issueCategories,
-  bookingSettings, serviceBookings, disputes, disputeMessages, disputeAttachments, diagnosticTools,
+  bookingSettings, serviceBookings, disputes, disputeMessages, disputeAttachments, diagnosticTools, announcements,
   type User, type InsertUser, type UpdateProfile, type Message, type InsertMessage,
   type Technician, type InsertTechnician, type ServiceRequest, type InsertServiceRequest,
   type Job, type InsertJob, type JobUpdate, type InsertJobUpdate,
@@ -8,7 +8,7 @@ import {
   type IssueCategory, type InsertIssueCategory, type BookingSettings, type InsertBookingSettings,
   type ServiceBooking, type InsertServiceBooking, type Dispute, type InsertDispute,
   type DisputeMessage, type InsertDisputeMessage, type DisputeAttachment, type InsertDisputeAttachment,
-  type DiagnosticTool, type InsertDiagnosticTool
+  type DiagnosticTool, type InsertDiagnosticTool, type Announcement, type InsertAnnouncement
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -105,6 +105,15 @@ export interface IStorage {
   updateDiagnosticTool(id: string, updates: Partial<InsertDiagnosticTool>): Promise<DiagnosticTool>;
   deleteDiagnosticTool(id: string): Promise<void>;
   toggleDiagnosticTool(id: string, isActive: boolean): Promise<DiagnosticTool>;
+
+  // Regional announcements management
+  getAllAnnouncements(): Promise<Announcement[]>;
+  getAnnouncement(id: number): Promise<Announcement | undefined>;
+  createAnnouncement(announcement: InsertAnnouncement): Promise<Announcement>;
+  updateAnnouncement(id: number, updates: Partial<InsertAnnouncement>): Promise<Announcement>;
+  deleteAnnouncement(id: number): Promise<void>;
+  toggleAnnouncementStatus(id: number, isActive: boolean): Promise<Announcement>;
+  getActiveAnnouncementsByRegion(region: string): Promise<Announcement[]>;
 
   // Technician approval system
   approveTechnician(technicianId: number, adminId: number, notes?: string): Promise<any>;
@@ -557,6 +566,7 @@ class MemoryStorage implements IStorage {
     this.initializePaymentGateways();
     this.initializeNotifications();
     this.initializeDiagnosticTools();
+    this.initializeAnnouncements();
     console.log(`After initialization: ${this.technicians.size} technicians loaded`);
   }
 
@@ -3930,6 +3940,111 @@ class MemoryStorage implements IStorage {
     sampleTools.forEach(tool => {
       this.diagnosticTools.set(tool.id, tool as DiagnosticTool);
     });
+  }
+
+  // Regional announcements storage
+  private regionAnnouncements = new Map<number, Announcement>();
+
+  private initializeAnnouncements() {
+    const sampleAnnouncements = [
+      {
+        id: 1,
+        title: "On-Site Services Available in Ottawa-Gatineau",
+        content: "We're excited to announce that our on-site technical support services are now available in the Ottawa-Gatineau region. Our certified technicians can visit your location for hardware repairs, network setup, and other technical services.",
+        region: "Ottawa-Gatineau",
+        isActive: true,
+        priority: "high" as const,
+        createdBy: 1,
+        createdAt: new Date("2025-01-10T09:00:00Z").toISOString(),
+        updatedAt: new Date("2025-01-10T09:00:00Z").toISOString(),
+        expiresAt: new Date("2025-03-10T09:00:00Z").toISOString()
+      },
+      {
+        id: 2,
+        title: "Extended Support Hours for Holiday Season",
+        content: "During the holiday season, our support team will be available with extended hours to help you with any technical issues. Chat support available 24/7, phone support available until 10 PM EST.",
+        region: "Canada",
+        isActive: true,
+        priority: "medium" as const,
+        createdBy: 1,
+        createdAt: new Date("2025-01-08T14:30:00Z").toISOString(),
+        updatedAt: new Date("2025-01-08T14:30:00Z").toISOString(),
+        expiresAt: new Date("2025-02-01T14:30:00Z").toISOString()
+      },
+      {
+        id: 3,
+        title: "New Mobile App Available",
+        content: "Download our new mobile app for iOS and Android to access technical support on the go. Get instant chat support, schedule appointments, and track your service requests from your mobile device.",
+        region: "Global",
+        isActive: false,
+        priority: "low" as const,
+        createdBy: 1,
+        createdAt: new Date("2025-01-05T11:15:00Z").toISOString(),
+        updatedAt: new Date("2025-01-05T11:15:00Z").toISOString(),
+        expiresAt: new Date("2025-04-05T11:15:00Z").toISOString()
+      }
+    ];
+
+    sampleAnnouncements.forEach(announcement => {
+      this.regionAnnouncements.set(announcement.id, announcement as Announcement);
+    });
+  }
+
+  // Regional announcements management methods
+  async getAllAnnouncements(): Promise<Announcement[]> {
+    return Array.from(this.regionAnnouncements.values());
+  }
+
+  async getAnnouncement(id: number): Promise<Announcement | undefined> {
+    return this.regionAnnouncements.get(id);
+  }
+
+  async createAnnouncement(announcement: InsertAnnouncement): Promise<Announcement> {
+    const id = Math.max(...Array.from(this.regionAnnouncements.keys()), 0) + 1;
+    const newAnnouncement = {
+      id,
+      ...announcement,
+      createdBy: 1, // Default admin user ID for demo
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    } as Announcement;
+
+    this.regionAnnouncements.set(id, newAnnouncement);
+    return newAnnouncement;
+  }
+
+  async updateAnnouncement(id: number, updates: Partial<InsertAnnouncement>): Promise<Announcement> {
+    const announcement = this.regionAnnouncements.get(id);
+    if (!announcement) {
+      throw new Error('Announcement not found');
+    }
+
+    const updatedAnnouncement = { ...announcement, ...updates } as Announcement;
+    this.regionAnnouncements.set(id, updatedAnnouncement);
+    return updatedAnnouncement;
+  }
+
+  async deleteAnnouncement(id: number): Promise<void> {
+    this.regionAnnouncements.delete(id);
+  }
+
+  async toggleAnnouncementStatus(id: number, isActive: boolean): Promise<Announcement> {
+    const announcement = this.regionAnnouncements.get(id);
+    if (!announcement) {
+      throw new Error('Announcement not found');
+    }
+
+    const updatedAnnouncement = { ...announcement, isActive } as Announcement;
+    this.regionAnnouncements.set(id, updatedAnnouncement);
+    return updatedAnnouncement;
+  }
+
+  async getActiveAnnouncementsByRegion(region: string): Promise<Announcement[]> {
+    const announcements = Array.from(this.regionAnnouncements.values());
+    return announcements.filter(announcement => 
+      announcement.isActive && 
+      (announcement.region === region || announcement.region === "Global")
+    );
   }
 }
 

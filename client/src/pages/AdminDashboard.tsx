@@ -46,6 +46,7 @@ import FinancialStatements from "@/components/FinancialStatements";
 import AdminManagement from "@/components/AdminManagement";
 import NotificationsCenter from "@/components/NotificationsCenter";
 import DiagnosticToolsManagement from "@/components/DiagnosticToolsManagement";
+import AdminAnnouncements from "@/pages/AdminAnnouncements";
 import { 
   Users, 
   Settings, 
@@ -115,7 +116,8 @@ import {
   Unlock,
   Key,
   UserX,
-  UserMinus
+  UserMinus,
+  Megaphone
 } from "lucide-react";
 
 interface AdminUser {
@@ -986,6 +988,7 @@ Last Updated: ${effectiveDate}
         { id: "coupons", label: "Coupons", icon: Percent },
         { id: "notifications", label: "Push Notifications", icon: Bell },
         { id: "email", label: "Email System", icon: Mail },
+        { id: "regional-announcements", label: "Regional Announcements", icon: Megaphone },
         { id: "system-settings", label: "System Settings", icon: Settings }
       ]
     },
@@ -2647,6 +2650,8 @@ Last Updated: ${effectiveDate}
           {activeTab === "notifications" && <PushNotifications />}
 
           {activeTab === "email" && <EmailSystem />}
+
+          {activeTab === "regional-announcements" && <AdminAnnouncements />}
 
           {activeTab === "price-management" && <PriceManagement />}
 
