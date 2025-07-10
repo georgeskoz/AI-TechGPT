@@ -215,9 +215,9 @@ export default function ChatArea({ messages, isLoading, username, typingMessage,
         <div ref={messagesEndRef} />
       </div>
       
-      {/* Support ticket creation button */}
-      {messages.length > 0 && (
-        <div className="p-4 border-t border-gray-200 bg-white">
+      {/* Support ticket creation button - Always visible when there are messages */}
+      {messages.length > 0 && !isTyping && (
+        <div className="p-4 border-t border-gray-200 bg-white sticky bottom-0 z-10">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
               Need more help? Escalate your chat to a support ticket for priority handling.
