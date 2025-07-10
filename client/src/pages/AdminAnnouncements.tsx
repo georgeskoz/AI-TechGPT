@@ -13,8 +13,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, MapPin, Globe, Calendar, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit, Trash2, MapPin, Globe, Calendar, Eye, EyeOff, ArrowLeft, Home } from 'lucide-react';
 import { insertAnnouncementSchema, type InsertAnnouncementForm, type Announcement } from '@shared/schema';
+import { Link, useLocation } from 'wouter';
 
 type AnnouncementFormData = InsertAnnouncementForm;
 
@@ -157,6 +158,26 @@ export default function AdminAnnouncements() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {/* Navigation Header */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link href="/admin" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+              <span>Back to Admin Dashboard</span>
+            </Link>
+            <div className="text-gray-400">|</div>
+            <Link href="/chat" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+              <Home className="w-5 h-5" />
+              <span>Home</span>
+            </Link>
+          </div>
+          <div className="text-sm text-gray-500">
+            Admin Panel / Regional Announcements
+          </div>
+        </div>
+      </div>
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Regional Announcements</h1>
