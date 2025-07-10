@@ -39,6 +39,11 @@ import TaxManagement from "@/components/TaxManagement";
 import CouponsManagement from "@/components/CouponsManagement";
 import PushNotifications from "@/components/PushNotifications";
 import EmailSystem from "@/components/EmailSystem";
+import PriceManagement from "@/components/PriceManagement";
+import NewsletterManagement from "@/components/NewsletterManagement";
+import StatisticsPanel from "@/components/StatisticsPanel";
+import FinancialStatements from "@/components/FinancialStatements";
+import AdminManagement from "@/components/AdminManagement";
 import { 
   Users, 
   Settings, 
@@ -102,7 +107,13 @@ import {
   FolderX,
   Edit3,
   ExternalLink,
-  Percent
+  Percent,
+  BarChart,
+  Lock,
+  Unlock,
+  Key,
+  UserX,
+  UserMinus
 } from "lucide-react";
 
 interface AdminUser {
@@ -974,6 +985,11 @@ Last Updated: ${effectiveDate}
       icon: Settings,
       subItems: [
         { id: "tax", label: "Tax Management", icon: Receipt },
+        { id: "price-management", label: "Price Management", icon: DollarSign },
+        { id: "newsletters", label: "Newsletters", icon: Mail },
+        { id: "statistics", label: "Statistics", icon: BarChart },
+        { id: "financial-statements", label: "Financial Statements", icon: FileText },
+        { id: "admin-management", label: "Admin Management", icon: Users },
         { id: "general-settings", label: "General Settings", icon: Settings }
       ]
     },
@@ -2613,6 +2629,16 @@ Last Updated: ${effectiveDate}
           {activeTab === "notifications" && <PushNotifications />}
 
           {activeTab === "email" && <EmailSystem />}
+
+          {activeTab === "price-management" && <PriceManagement />}
+
+          {activeTab === "newsletters" && <NewsletterManagement />}
+
+          {activeTab === "statistics" && <StatisticsPanel />}
+
+          {activeTab === "financial-statements" && <FinancialStatements />}
+
+          {activeTab === "admin-management" && <AdminManagement />}
 
           {(activeTab === "users" || activeTab === "service-providers" || activeTab === "system-settings" || activeTab === "general-settings") && (
             <div className="text-center py-12">
