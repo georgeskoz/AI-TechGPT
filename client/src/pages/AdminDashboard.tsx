@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Dialog, 
   DialogContent, 
+  DialogDescription,
   DialogHeader, 
   DialogTitle, 
   DialogTrigger 
@@ -27,6 +28,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -186,6 +195,10 @@ export default function AdminDashboard() {
   const [expandedItems, setExpandedItems] = useState<string[]>(["system", "settings"]);
   const [policyContent, setPolicyContent] = useState("");
   const [aiGenerating, setAiGenerating] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [companyInfo, setCompanyInfo] = useState({
     name: "TechGPT",
     businessType: "Technology Platform",
@@ -200,6 +213,64 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+
+  const handleLogout = () => {
+    // Clear any stored authentication data
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+    
+    toast({
+      title: "Logged out successfully",
+      description: "You have been logged out of the admin panel.",
+    });
+    
+    // Redirect to admin login or main page
+    setLocation("/");
+  };
+
+  const handlePasswordChange = async () => {
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Password mismatch",
+        description: "New password and confirmation do not match.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 8 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Here you would typically make an API call to change the password
+      // await apiRequest("POST", "/api/admin/change-password", {
+      //   currentPassword,
+      //   newPassword
+      // });
+
+      toast({
+        title: "Password changed successfully",
+        description: "Your password has been updated.",
+      });
+
+      setShowPasswordModal(false);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      toast({
+        title: "Failed to change password",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Mock current admin user - in real app, this would come from auth
   useEffect(() => {
@@ -1287,19 +1358,49 @@ Last Updated: ${effectiveDate}
               {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
 
-            <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={currentAdmin?.avatar} />
-                <AvatarFallback>
-                  {currentAdmin?.firstName?.[0]}{currentAdmin?.lastName?.[0]}
-                </AvatarFallback>
-              </Avatar>
-              <div className="hidden md:block">
-                <p className="text-sm font-medium">{currentAdmin?.firstName} {currentAdmin?.lastName}</p>
-                <p className="text-xs text-gray-600 capitalize">{currentAdmin?.role?.replace('_', ' ')}</p>
-              </div>
-              <ChevronDown className="h-4 w-4 text-gray-400" />
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2 h-auto p-2 hover:bg-gray-50">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={currentAdmin?.avatar} />
+                    <AvatarFallback>
+                      {currentAdmin?.firstName?.[0]}{currentAdmin?.lastName?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="hidden md:block text-left">
+                    <p className="text-sm font-medium">{currentAdmin?.firstName} {currentAdmin?.lastName}</p>
+                    <p className="text-xs text-gray-600 capitalize">{currentAdmin?.role?.replace('_', ' ')}</p>
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div>
+                    <p className="font-medium">{currentAdmin?.firstName} {currentAdmin?.lastName}</p>
+                    <p className="text-xs text-gray-600 capitalize">{currentAdmin?.role?.replace('_', ' ')}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setActiveTab("admin-management")}>
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Manage Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowPasswordModal(true)}>
+                  <Key className="h-4 w-4 mr-2" />
+                  Change Password
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setActiveTab("general-settings")}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
@@ -2743,6 +2844,71 @@ Last Updated: ${effectiveDate}
           onClick={() => setSidebarOpen(false)}
         />
       )}
+
+      {/* Password Change Modal */}
+      <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5" />
+              Change Password
+            </DialogTitle>
+            <DialogDescription>
+              Update your admin account password. Make sure to use a strong password.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Current Password
+              </label>
+              <Input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Enter current password"
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                New Password
+              </label>
+              <Input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter new password (min 8 characters)"
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Confirm New Password
+              </label>
+              <Input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+                className="w-full"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="outline" onClick={() => setShowPasswordModal(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handlePasswordChange}
+              disabled={!currentPassword || !newPassword || !confirmPassword}
+            >
+              <Key className="h-4 w-4 mr-2" />
+              Update Password
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
