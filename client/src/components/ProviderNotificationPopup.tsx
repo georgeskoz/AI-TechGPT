@@ -17,7 +17,8 @@ import {
   Timer,
   Route,
   Wrench,
-  User
+  User,
+  X
 } from 'lucide-react';
 
 interface JobDispatchNotification {
@@ -58,6 +59,7 @@ interface ProviderNotificationPopupProps {
   onAccept: (notificationId: number) => void;
   onReject: (notificationId: number) => void;
   onTimeout: (notificationId: number) => void;
+  onClose?: () => void;
 }
 
 export default function ProviderNotificationPopup({
@@ -65,7 +67,8 @@ export default function ProviderNotificationPopup({
   isOpen,
   onAccept,
   onReject,
-  onTimeout
+  onTimeout,
+  onClose
 }: ProviderNotificationPopupProps) {
   const [timeLeft, setTimeLeft] = useState(60);
   const [responded, setResponded] = useState(false);
@@ -125,6 +128,13 @@ export default function ProviderNotificationPopup({
     setResponded(true);
     setIsExpired(true);
     onTimeout(notification.id);
+  };
+
+  const handleClose = () => {
+    setResponded(true);
+    if (onClose) {
+      onClose();
+    }
   };
 
   const openNavigationApp = (location: any) => {
@@ -212,12 +222,22 @@ export default function ProviderNotificationPopup({
               </div>
               <span>New Job Request</span>
             </div>
-            {!responded && !isExpired && (
-              <div className={`flex items-center gap-2 font-mono text-lg ${getTimeLeftColor(timeLeft)}`}>
-                <Timer className="h-5 w-5" />
-                {formatTime(timeLeft)}
-              </div>
-            )}
+            <div className="flex items-center gap-3">
+              {!responded && !isExpired && (
+                <div className={`flex items-center gap-2 font-mono text-lg ${getTimeLeftColor(timeLeft)}`}>
+                  <Timer className="h-5 w-5" />
+                  {formatTime(timeLeft)}
+                </div>
+              )}
+              <Button
+                onClick={handleClose}
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 hover:bg-gray-100"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </DialogTitle>
         </DialogHeader>
 
