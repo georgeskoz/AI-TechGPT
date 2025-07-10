@@ -61,6 +61,8 @@ const AdminManagement: React.FC = () => {
     firstName: "",
     lastName: "",
     email: "",
+    password: "",
+    confirmPassword: "",
     role: "customer_service_admin",
     country: "",
     stateProvince: "",
@@ -375,10 +377,28 @@ const AdminManagement: React.FC = () => {
   ];
 
   const handleAddAdmin = () => {
-    if (!newAdmin.firstName || !newAdmin.lastName || !newAdmin.email || !newAdmin.role) {
+    if (!newAdmin.firstName || !newAdmin.lastName || !newAdmin.email || !newAdmin.role || !newAdmin.password || !newAdmin.confirmPassword) {
       toast({
         title: "Validation Error",
-        description: "Please fill in all required fields.",
+        description: "Please fill in all required fields including password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newAdmin.password !== newAdmin.confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "Password and confirm password do not match.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newAdmin.password.length < 8) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 8 characters long.",
         variant: "destructive",
       });
       return;
@@ -393,6 +413,8 @@ const AdminManagement: React.FC = () => {
       firstName: "",
       lastName: "",
       email: "",
+      password: "",
+      confirmPassword: "",
       role: "customer_service_admin",
       country: "",
       stateProvince: "",
@@ -507,6 +529,28 @@ const AdminManagement: React.FC = () => {
                   onChange={(e) => setNewAdmin({...newAdmin, email: e.target.value})}
                   placeholder="Enter email address"
                 />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={newAdmin.password}
+                    onChange={(e) => setNewAdmin({...newAdmin, password: e.target.value})}
+                    placeholder="Enter password"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={newAdmin.confirmPassword}
+                    onChange={(e) => setNewAdmin({...newAdmin, confirmPassword: e.target.value})}
+                    placeholder="Confirm password"
+                  />
+                </div>
               </div>
               <div>
                 <Label htmlFor="role">Admin Role</Label>
