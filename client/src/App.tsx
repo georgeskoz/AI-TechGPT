@@ -38,6 +38,7 @@ import OnboardingWizard from "@/pages/OnboardingWizard";
 import RegisterPage from "@/pages/RegisterPage";
 import TestNotificationSystem from "@/pages/TestNotificationSystem";
 import NotificationsDashboard from "@/pages/NotificationsDashboard";
+import QuickTechnicianRequest from "@/pages/QuickTechnicianRequest";
 
 
 function Router() {
@@ -68,6 +69,7 @@ function Router() {
       <Route path="/find-expert" component={ExpertTechnicianFinder} />
       <Route path="/book-technician" component={SimpleBooking} />
       <Route path="/book-service" component={BookServicePage} />
+      <Route path="/technician" component={QuickTechnicianRequest} />
       <Route path="/technician-earnings" component={TechnicianEarnings} />
       <Route path="/profile-visibility" component={ProfileVisibilityPage} />
       <Route path="/domains" component={DomainSelector} />

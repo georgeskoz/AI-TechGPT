@@ -1,0 +1,102 @@
+Step-by-Step (User Perspective):
+Start at Home or AI Chat
+
+Entry point: Landing page or embedded AI assistant asks:
+
+"Hi! What kind of help do you need today? (AI answer, live help, or technician on-site?)"
+
+Show 3 big buttons:
+
+🔧 Talk to AI (Free)
+
+💬 Live Chat Support
+
+🧑‍🔧 Request Technician
+
+Click: “Request Technician”
+
+Show a simple 3-step wizard:
+
+Select Category (Hardware, Network, Software, etc.)
+
+Describe Issue Briefly (Optional: 2-line text box)
+
+Enter Zip Code / Location (Auto-detect if allowed)
+
+Technician Matching Screen
+
+Show matched technician(s) with:
+
+Name, skills, rating
+
+“Available Now” badge
+
+“View Profile” / “Request Service” button
+
+Request Booking
+
+User selects technician or clicks Auto-Match
+
+Choose:
+
+Time Slot (ASAP or scheduled)
+
+Contact Info Confirmation
+
+Show price estimate and payment options
+
+Confirmation + Tracking
+
+After booking, user sees:
+
+Technician ETA
+
+Live status (Dispatched → On Route → In Progress)
+
+Chat/Call button for technician
+
+🛠️ Suggested Implementation Tips (Developer Notes):
+1. Direct Technician Path Toggle
+Add /?path=technician or dedicated route /technician
+
+Bypass AI chat and directly open the technician flow
+
+2. Auto-Skip AI Escalation for “Technician” Keywords
+In AI chat logic, if user types:
+
+“I need someone to come fix it” or “Send a technician”
+
+Immediately skip to Step 2 of the wizard above
+
+3. Minimal Category/Issue Steps
+Instead of 9 categories + 63 subcategories upfront, simplify:
+
+Show just the 9 top categories
+
+Subcategories can be inferred later or handled by technician
+
+4. Use Default Options Where Possible
+Default pricing tier (Medium priority)
+
+Auto-fill location from browser
+
+Auto-select nearest available technician
+
+🧠 Optional: Voice UI (Future Enhancement)
+Let users speak the issue, and NLP turns it into structured data:
+
+"My Wi-Fi is broken in my apartment in Brooklyn"
+→ Category: Network → Location: Brooklyn → Escalate to Technician
+
+📋 Summary (as bullet for product spec):
+🎯 Entry points: Home → Technician (1-click)
+
+🧭 Flow: Category → Description → Location → Match → Book
+
+🧠 Use AI only where helpful (triage / fallback)
+
+🧱 Avoid deep menus, use wizards and auto-fill
+
+📱 Optimized for mobile with minimal steps
+
+🚀 Book technician in under 60 seconds
