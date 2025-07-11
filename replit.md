@@ -102,6 +102,18 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
 
 ## Recent Changes
 
+### January 11, 2025 - Service Provider Terminology Update and Quick Access Menu Fix
+- **Complete Terminology Standardization**: Renamed all "technician" references to "service provider" throughout the platform for consistent branding and professional presentation
+  - **Navigation Component Updated**: Fixed Quick Access menu logic to properly detect page context and display appropriate menu items
+  - **QuickTechnicianRequest Renamed**: Component renamed to QuickServiceProviderRequest with all internal references updated
+  - **Interface Updates**: All TypeScript interfaces updated from `Technician` to `ServiceProvider` for consistency  
+  - **Terms of Service Updated**: Legal text updated to reflect "service providers" instead of "technicians"
+  - **UI Text Standardization**: All user-facing text updated including titles, descriptions, and status messages
+  - **Navigation Menu Fixed**: Corrected logic to exclude customer-facing pages from service provider page detection
+  - **Component Import Updated**: App.tsx updated to use renamed component with proper routing
+  - **Professional Branding**: Consistent use of "service provider" terminology across all customer interactions
+  - **Context-Aware Navigation**: Quick Access menu now properly detects customer vs service provider context
+
 ### January 11, 2025 - Customer Portal Streamlining and Navigation Cleanup
 - **Production-Ready Customer Portal**: Streamlined navigation and removed development/testing pages for clean user experience
   - **Route Cleanup**: Removed redundant routes (/support, /home, /triage, /diagnostic) that created confusion in customer journey

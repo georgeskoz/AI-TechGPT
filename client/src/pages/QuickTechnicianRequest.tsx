@@ -49,7 +49,7 @@ interface Category {
   basePrice: number;
 }
 
-interface Technician {
+interface ServiceProvider {
   id: number;
   name: string;
   rating: number;
@@ -73,7 +73,7 @@ const categories: Category[] = [
   { id: "system", name: "System Admin", icon: Settings, description: "Server, system setup", basePrice: 90 }
 ];
 
-const mockTechnicians: Technician[] = [
+const mockServiceProviders: ServiceProvider[] = [
   {
     id: 1,
     name: "Michael Chen",
@@ -112,12 +112,12 @@ const mockTechnicians: Technician[] = [
   }
 ];
 
-export default function QuickTechnicianRequest() {
+export default function QuickServiceProviderRequest() {
   const [step, setStep] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
-  const [selectedTechnician, setSelectedTechnician] = useState<Technician | null>(null);
+  const [selectedServiceProvider, setSelectedServiceProvider] = useState<ServiceProvider | null>(null);
   const [timeSlot, setTimeSlot] = useState("asap");
   const [contactInfo, setContactInfo] = useState({
     name: "",
@@ -181,8 +181,8 @@ export default function QuickTechnicianRequest() {
     }
   };
 
-  const handleTechnicianSelect = (technician: Technician) => {
-    setSelectedTechnician(technician);
+  const handleServiceProviderSelect = (serviceProvider: ServiceProvider) => {
+    setSelectedServiceProvider(serviceProvider);
     setStep(7);
   };
 
@@ -412,7 +412,7 @@ export default function QuickTechnicianRequest() {
             <div>
               <p className="text-sm text-blue-800">
                 <strong>Note:</strong> Hardware/equipment costs are not included in this service fee. 
-                If any parts or equipment are needed, your technician will discuss options and pricing with you before proceeding.
+                If any parts or equipment are needed, your service provider will discuss options and pricing with you before proceeding.
               </p>
             </div>
           </div>
@@ -484,10 +484,10 @@ export default function QuickTechnicianRequest() {
             <p>By using our service, you agree to the following terms:</p>
             <ul className="list-disc list-inside space-y-1 text-gray-700">
               <li>Service fees are due upon completion of work</li>
-              <li>Technicians are independent contractors, not employees</li>
-              <li>We strive to match you with qualified technicians based on your needs</li>
+              <li>Service providers are independent contractors, not employees</li>
+              <li>We strive to match you with qualified service providers based on your needs</li>
               <li>Additional costs for hardware/parts will be discussed before purchase</li>
-              <li>You have the right to cancel service before technician arrives</li>
+              <li>You have the right to cancel service before service provider arrives</li>
               <li>Both parties can leave reviews after service completion</li>
               <li>We protect your privacy and data according to our Privacy Policy</li>
               <li>Disputes will be resolved through our customer service team</li>
@@ -518,7 +518,7 @@ export default function QuickTechnicianRequest() {
           Back
         </Button>
         <Button onClick={handleNext} disabled={!agreementAccepted}>
-          Find Technicians
+          Find Service Providers
           <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
       </div>
@@ -529,13 +529,13 @@ export default function QuickTechnicianRequest() {
   const renderStep6 = () => (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Technicians</h2>
-        <p className="text-gray-600">We found {mockTechnicians.length} qualified technicians in your area</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Service Providers</h2>
+        <p className="text-gray-600">We found {mockServiceProviders.length} qualified service providers in your area</p>
       </div>
 
       <div className="space-y-4">
-        {mockTechnicians.map((technician) => (
-          <Card key={technician.id} className="hover:shadow-md transition-shadow">
+        {mockServiceProviders.map((serviceProvider) => (
+          <Card key={serviceProvider.id} className="hover:shadow-md transition-shadow">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
@@ -543,23 +543,23 @@ export default function QuickTechnicianRequest() {
                     <User className="w-8 h-8 text-gray-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">{technician.name}</h3>
+                    <h3 className="font-semibold text-lg">{serviceProvider.name}</h3>
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                       <div className="flex items-center gap-1">
                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span>{technician.rating} ({technician.completedJobs} jobs)</span>
+                        <span>{serviceProvider.rating} ({serviceProvider.completedJobs} jobs)</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <MapPin className="w-4 h-4" />
-                        <span>{technician.distance} miles away</span>
+                        <span>{serviceProvider.distance} miles away</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
-                        <span>ETA: {technician.eta}</span>
+                        <span>ETA: {serviceProvider.eta}</span>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-1 mt-2">
-                      {technician.skills.map((skill, idx) => (
+                      {serviceProvider.skills.map((skill, idx) => (
                         <Badge key={idx} variant="secondary" className="text-xs">
                           {skill}
                         </Badge>
@@ -568,9 +568,9 @@ export default function QuickTechnicianRequest() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-semibold">${technician.hourlyRate}/hr</div>
+                  <div className="text-lg font-semibold">${serviceProvider.hourlyRate}/hr</div>
                   <Button 
-                    onClick={() => handleTechnicianSelect(technician)}
+                    onClick={() => handleServiceProviderSelect(serviceProvider)}
                     className="mt-2"
                   >
                     Select
@@ -596,12 +596,12 @@ export default function QuickTechnicianRequest() {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Confirm Your Selection</h2>
-        <p className="text-gray-600">Ready to send your request to {selectedTechnician?.name}?</p>
+        <p className="text-gray-600">Ready to send your request to {selectedServiceProvider?.name}?</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Selected Technician</CardTitle>
+          <CardTitle>Selected Service Provider</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center space-x-4">
@@ -609,15 +609,15 @@ export default function QuickTechnicianRequest() {
               <User className="w-8 h-8 text-gray-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-lg">{selectedTechnician?.name}</h3>
+              <h3 className="font-semibold text-lg">{selectedServiceProvider?.name}</h3>
               <div className="flex items-center gap-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span>{selectedTechnician?.rating} rating</span>
+                  <span>{selectedServiceProvider?.rating} rating</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
-                  <span>ETA: {selectedTechnician?.eta}</span>
+                  <span>ETA: {selectedServiceProvider?.eta}</span>
                 </div>
               </div>
             </div>
@@ -667,7 +667,7 @@ export default function QuickTechnicianRequest() {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Request Sent!</h2>
-        <p className="text-gray-600">Waiting for {selectedTechnician?.name} to respond...</p>
+        <p className="text-gray-600">Waiting for {selectedServiceProvider?.name} to respond...</p>
       </div>
 
       <Card>
@@ -683,7 +683,7 @@ export default function QuickTechnicianRequest() {
                   <div className="text-3xl font-bold text-yellow-600 mb-2">{countdown}s</div>
                   <Progress value={((60 - countdown) / 60) * 100} className="w-64" />
                   <p className="text-sm text-gray-600 mt-2">
-                    {selectedTechnician?.name} has 60 seconds to respond
+                    {selectedServiceProvider?.name} has 60 seconds to respond
                   </p>
                 </div>
               </>
@@ -696,7 +696,7 @@ export default function QuickTechnicianRequest() {
                 </div>
                 <div className="text-center">
                   <h3 className="font-semibold text-lg text-orange-600">Request Timed Out</h3>
-                  <p className="text-gray-600">Reassigning to next available technician...</p>
+                  <p className="text-gray-600">Reassigning to next available service provider...</p>
                 </div>
               </>
             )}
@@ -711,7 +711,7 @@ export default function QuickTechnicianRequest() {
             <div>
               <p className="text-sm text-blue-800">
                 <strong>Your request includes:</strong> Job category, estimated duration, your location, 
-                distance from technician, and AI-generated tool recommendations.
+                distance from service provider, and AI-generated tool recommendations.
               </p>
             </div>
           </div>
@@ -725,7 +725,7 @@ export default function QuickTechnicianRequest() {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-green-600 mb-2">Request Accepted!</h2>
-        <p className="text-gray-600">{selectedTechnician?.name} is on the way to your location</p>
+        <p className="text-gray-600">{selectedServiceProvider?.name} is on the way to your location</p>
       </div>
 
       <Card>
@@ -737,7 +737,7 @@ export default function QuickTechnicianRequest() {
             <div className="text-center">
               <h3 className="font-semibold text-lg mb-2">Job Confirmed</h3>
               <p className="text-gray-600">
-                Your technician has been notified and GPS navigation has been activated
+                Your service provider has been notified and GPS navigation has been activated
               </p>
             </div>
           </div>
@@ -746,7 +746,7 @@ export default function QuickTechnicianRequest() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Technician Details</CardTitle>
+          <CardTitle>Service Provider Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-4">
@@ -754,15 +754,15 @@ export default function QuickTechnicianRequest() {
               <User className="w-8 h-8 text-gray-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-lg">{selectedTechnician?.name}</h3>
+              <h3 className="font-semibold text-lg">{selectedServiceProvider?.name}</h3>
               <div className="flex items-center gap-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span>{selectedTechnician?.rating} rating</span>
+                  <span>{selectedServiceProvider?.rating} rating</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
-                  <span>ETA: {selectedTechnician?.eta}</span>
+                  <span>ETA: {selectedServiceProvider?.eta}</span>
                 </div>
               </div>
             </div>
@@ -807,7 +807,7 @@ export default function QuickTechnicianRequest() {
       <div>
         <h2 className="text-2xl font-bold text-gray-900">Booking Complete!</h2>
         <p className="text-gray-600 mt-2">
-          {selectedTechnician?.name} will be with you in {selectedTechnician?.eta}
+          {selectedServiceProvider?.name} will be with you in {selectedServiceProvider?.eta}
         </p>
       </div>
 
@@ -819,8 +819,8 @@ export default function QuickTechnicianRequest() {
               <span className="text-sm font-mono">#TG-{Date.now().toString().slice(-6)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Technician</span>
-              <span className="text-sm font-semibold">{selectedTechnician?.name}</span>
+              <span className="text-sm text-gray-600">Service Provider</span>
+              <span className="text-sm font-semibold">{selectedServiceProvider?.name}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">Service</span>
@@ -828,7 +828,7 @@ export default function QuickTechnicianRequest() {
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">ETA</span>
-              <span className="text-sm">{selectedTechnician?.eta}</span>
+              <span className="text-sm">{selectedServiceProvider?.eta}</span>
             </div>
           </div>
         </CardContent>
@@ -846,7 +846,7 @@ export default function QuickTechnicianRequest() {
           onClick={() => setLocationPath('/technician-dashboard')}
           className="flex-1"
         >
-          View Technician Details
+          View Service Provider Details
         </Button>
       </div>
     </div>
@@ -870,7 +870,7 @@ export default function QuickTechnicianRequest() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation 
-        title="Request Technician" 
+        title="Request Service Provider" 
         showBackButton={true}
         backTo="/"
       />
@@ -879,7 +879,7 @@ export default function QuickTechnicianRequest() {
           {/* Header with Close Button */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Request Technician</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Request Service Provider</h1>
               <p className="text-gray-600">Get professional technical support</p>
             </div>
             <Button

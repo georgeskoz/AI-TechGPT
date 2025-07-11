@@ -39,7 +39,7 @@ import OnboardingWizard from "@/pages/OnboardingWizard";
 import RegisterPage from "@/pages/RegisterPage";
 import TestNotificationSystem from "@/pages/TestNotificationSystem";
 import NotificationsDashboard from "@/pages/NotificationsDashboard";
-import QuickTechnicianRequest from "@/pages/QuickTechnicianRequest";
+import QuickServiceProviderRequest from "@/pages/QuickTechnicianRequest";
 import ScreenSharingPage from "@/pages/ScreenSharingPage";
 
 
@@ -66,7 +66,7 @@ function Router() {
       <Route path="/live-support" component={() => <LiveSupportPage username={getStoredUsername()} />} />
       <Route path="/phone-support" component={PhoneSupportPage} />
       <Route path="/screen-sharing" component={ScreenSharingPage} />
-      <Route path="/technician-request" component={QuickTechnicianRequest} />
+      <Route path="/technician-request" component={QuickServiceProviderRequest} />
       
       {/* Service Provider Portal */}
       <Route path="/technician-home" component={ServiceProviderHomePage} />
