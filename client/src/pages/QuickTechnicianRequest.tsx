@@ -7,6 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
 import { 
   Wrench, 
   Wifi, 
@@ -26,7 +29,14 @@ import {
   Mail,
   CreditCard,
   CheckCircle,
-  Zap
+  Zap,
+  DollarSign,
+  FileText,
+  Navigation,
+  MessageCircle,
+  AlertCircle,
+  Timer,
+  XCircle
 } from "lucide-react";
 
 interface Category {
@@ -112,6 +122,10 @@ export default function QuickTechnicianRequest() {
     phone: "",
     email: ""
   });
+  const [agreementAccepted, setAgreementAccepted] = useState(false);
+  const [jobRequestSent, setJobRequestSent] = useState(false);
+  const [providerResponse, setProviderResponse] = useState<'pending' | 'accepted' | 'rejected' | 'timeout' | null>(null);
+  const [countdown, setCountdown] = useState(60);
   const [, setLocationPath] = useLocation();
 
   // Auto-detect location
@@ -119,7 +133,6 @@ export default function QuickTechnicianRequest() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          // In a real app, you'd use reverse geocoding
           setLocation("Current Location");
         },
         () => {
@@ -129,13 +142,28 @@ export default function QuickTechnicianRequest() {
     }
   }, []);
 
+  // Countdown timer for provider response
+  useEffect(() => {
+    if (providerResponse === 'pending' && countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (providerResponse === 'pending' && countdown === 0) {
+      setProviderResponse('timeout');
+      // In real app, reassign to next provider
+      setTimeout(() => {
+        setProviderResponse('accepted');
+        setStep(8);
+      }, 2000);
+    }
+  }, [providerResponse, countdown]);
+
   const handleCategorySelect = (category: Category) => {
     setSelectedCategory(category);
     setStep(2);
   };
 
   const handleNext = () => {
-    if (step < 4) {
+    if (step < 9) {
       setStep(step + 1);
     }
   };
@@ -148,200 +176,104 @@ export default function QuickTechnicianRequest() {
 
   const handleTechnicianSelect = (technician: Technician) => {
     setSelectedTechnician(technician);
-    setStep(4);
+    setStep(6);
   };
 
-  const handleBooking = () => {
-    // In a real app, this would create the booking
-    console.log("Booking created:", {
-      category: selectedCategory,
-      description,
-      location,
-      technician: selectedTechnician,
-      timeSlot,
-      contactInfo
-    });
-    setStep(5);
+  const handleSendJobRequest = () => {
+    setJobRequestSent(true);
+    setProviderResponse('pending');
+    setCountdown(60);
+    setStep(7);
+    
+    // Simulate provider response after 10 seconds
+    setTimeout(() => {
+      setProviderResponse('accepted');
+      setStep(8);
+    }, 10000);
   };
 
+  const handleBookingComplete = () => {
+    setStep(9);
+  };
+
+  const calculateServiceFee = () => {
+    if (!selectedCategory) return 0;
+    const baseFee = selectedCategory.basePrice;
+    const urgencyMultiplier = timeSlot === "asap" ? 1.2 : 1.0;
+    return Math.round(baseFee * urgencyMultiplier);
+  };
+
+  // Step 1: Category Selection
   const renderStep1 = () => (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900">What do you need help with?</h2>
-        <p className="text-gray-600 mt-2">Select the category that best describes your issue</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">What do you need help with?</h2>
+        <p className="text-gray-600">Select the category that best describes your issue</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {categories.map((category) => {
-          const Icon = category.icon;
-          return (
-            <Card 
-              key={category.id}
-              className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-blue-500"
-              onClick={() => handleCategorySelect(category)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Icon className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{category.name}</h3>
-                    <p className="text-sm text-gray-600">{category.description}</p>
-                    <div className="mt-1">
-                      <Badge variant="secondary">From ${category.basePrice}/hour</Badge>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-    </div>
-  );
-
-  const renderStep2 = () => (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900">Tell us more about your issue</h2>
-        <p className="text-gray-600 mt-2">Optional: Help us find the best technician for you</p>
-      </div>
-
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="description">Describe your issue (optional)</Label>
-          <Textarea
-            id="description"
-            placeholder="e.g., My computer won't start, blue screen error..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="mt-1"
-            rows={3}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="location">Your location</Label>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              id="location"
-              placeholder="Enter your address or ZIP code"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-
-        <div className="flex space-x-3">
-          <Button variant="outline" onClick={handleBack} className="flex-1">
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          <Button onClick={handleNext} className="flex-1">
-            Find Technicians
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderStep3 = () => (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900">Available Technicians</h2>
-        <p className="text-gray-600 mt-2">Choose a technician or let us auto-match</p>
-      </div>
-
-      <div className="space-y-4">
-        {mockTechnicians.map((tech) => (
+        {categories.map((category) => (
           <Card 
-            key={tech.id}
+            key={category.id}
             className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-blue-500"
-            onClick={() => handleTechnicianSelect(tech)}
+            onClick={() => handleCategorySelect(category)}
           >
             <CardContent className="p-4">
-              <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-                  <User className="w-8 h-8 text-gray-600" />
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <category.icon className="w-6 h-6 text-blue-600" />
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900">{tech.name}</h3>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">
-                      <Zap className="w-3 h-3 mr-1" />
-                      Available Now
-                    </Badge>
-                  </div>
-                  <div className="flex items-center space-x-4 mt-1">
-                    <div className="flex items-center">
-                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <span className="text-sm text-gray-600 ml-1">{tech.rating}</span>
-                    </div>
-                    <span className="text-sm text-gray-600">{tech.completedJobs} jobs</span>
-                    <span className="text-sm text-gray-600">{tech.distance} mi away</span>
-                  </div>
-                  <div className="flex items-center justify-between mt-2">
-                    <div className="flex items-center">
-                      <Clock className="w-4 h-4 text-gray-400 mr-1" />
-                      <span className="text-sm text-gray-600">ETA: {tech.eta}</span>
-                    </div>
-                    <span className="font-semibold text-blue-600">${tech.hourlyRate}/hour</span>
-                  </div>
+                  <h3 className="font-semibold text-gray-900">{category.name}</h3>
+                  <p className="text-sm text-gray-600">{category.description}</p>
+                  <p className="text-sm font-medium text-green-600">From ${category.basePrice}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
-
-      <div className="flex space-x-3">
-        <Button variant="outline" onClick={handleBack} className="flex-1">
-          <ChevronLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
-        <Button onClick={() => handleTechnicianSelect(mockTechnicians[0])} className="flex-1">
-          Auto-Match Best Technician
-        </Button>
-      </div>
     </div>
   );
 
-  const renderStep4 = () => (
+  // Step 2: Issue Details
+  const renderStep2 = () => (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900">Confirm & Book</h2>
-        <p className="text-gray-600 mt-2">Final details for your service request</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Tell us about your issue</h2>
+        <p className="text-gray-600">The more details you provide, the better we can help</p>
       </div>
 
-      {selectedTechnician && (
-        <Card className="bg-blue-50 border-blue-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                <User className="w-6 h-6 text-gray-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">{selectedTechnician.name}</h3>
-                <p className="text-sm text-gray-600">
-                  {selectedCategory?.name} • ${selectedTechnician.hourlyRate}/hour
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       <div className="space-y-4">
+        <div>
+          <Label htmlFor="description">Describe your issue</Label>
+          <Textarea
+            id="description"
+            placeholder="Please describe what's happening, what you've tried, and any error messages..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="mt-1"
+            rows={4}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="location">Service location</Label>
+          <Input
+            id="location"
+            placeholder="Enter your address"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="mt-1"
+          />
+        </div>
+
         <div>
           <Label>When do you need help?</Label>
           <RadioGroup value={timeSlot} onValueChange={setTimeSlot} className="mt-2">
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="asap" id="asap" />
-              <Label htmlFor="asap">As soon as possible</Label>
+              <Label htmlFor="asap">As soon as possible (+20% urgency fee)</Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="today" id="today" />
@@ -351,86 +283,479 @@ export default function QuickTechnicianRequest() {
               <RadioGroupItem value="tomorrow" id="tomorrow" />
               <Label htmlFor="tomorrow">Tomorrow</Label>
             </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="flexible" id="flexible" />
+              <Label htmlFor="flexible">I'm flexible</Label>
+            </div>
           </RadioGroup>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <Label htmlFor="contact-name">Your name</Label>
+            <Label htmlFor="name">Your name</Label>
             <Input
-              id="contact-name"
-              placeholder="John Doe"
+              id="name"
+              placeholder="Full name"
               value={contactInfo.name}
               onChange={(e) => setContactInfo({...contactInfo, name: e.target.value})}
               className="mt-1"
             />
           </div>
           <div>
-            <Label htmlFor="contact-phone">Phone number</Label>
+            <Label htmlFor="phone">Phone number</Label>
             <Input
-              id="contact-phone"
+              id="phone"
               placeholder="(555) 123-4567"
               value={contactInfo.phone}
               onChange={(e) => setContactInfo({...contactInfo, phone: e.target.value})}
               className="mt-1"
             />
           </div>
+          <div>
+            <Label htmlFor="email">Email address</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              value={contactInfo.email}
+              onChange={(e) => setContactInfo({...contactInfo, email: e.target.value})}
+              className="mt-1"
+            />
+          </div>
         </div>
+      </div>
 
-        <div>
-          <Label htmlFor="contact-email">Email address</Label>
-          <Input
-            id="contact-email"
-            type="email"
-            placeholder="john@example.com"
-            value={contactInfo.email}
-            onChange={(e) => setContactInfo({...contactInfo, email: e.target.value})}
-            className="mt-1"
-          />
-        </div>
-
-        <Card className="bg-gray-50">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Estimated cost</span>
-              <span className="font-semibold">${selectedTechnician?.hourlyRate}/hour</span>
-            </div>
-            <div className="flex items-center justify-between mt-1">
-              <span className="text-sm text-gray-600">Service fee</span>
-              <span className="text-sm text-gray-600">$5</span>
-            </div>
-            <hr className="my-2" />
-            <div className="flex items-center justify-between">
-              <span className="font-semibold">Total (minimum)</span>
-              <span className="font-semibold text-blue-600">
-                ${(selectedTechnician?.hourlyRate || 0) + 5}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="flex space-x-3">
-          <Button variant="outline" onClick={handleBack} className="flex-1">
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          <Button onClick={handleBooking} className="flex-1">
-            <CreditCard className="w-4 h-4 mr-2" />
-            Book Now
-          </Button>
-        </div>
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={handleBack}>
+          <ChevronLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+        <Button onClick={handleNext} disabled={!description || !location || !contactInfo.name}>
+          Continue
+          <ArrowRight className="w-4 h-4 ml-2" />
+        </Button>
       </div>
     </div>
   );
 
+  // Step 3: Cart Review
+  const renderStep3 = () => (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Review your service request</h2>
+        <p className="text-gray-600">Review the details and pricing before proceeding</p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CreditCard className="w-5 h-5" />
+            Service Summary
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">Service Category</span>
+            <span className="font-semibold">{selectedCategory?.name}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">Base Service Fee</span>
+            <span>${selectedCategory?.basePrice}</span>
+          </div>
+          {timeSlot === "asap" && (
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Urgency Fee (20%)</span>
+              <span>+${Math.round((selectedCategory?.basePrice || 0) * 0.2)}</span>
+            </div>
+          )}
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">Service Location</span>
+            <span className="text-sm">{location}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">Priority</span>
+            <Badge variant={timeSlot === "asap" ? "destructive" : "secondary"}>
+              {timeSlot === "asap" ? "ASAP" : "Standard"}
+            </Badge>
+          </div>
+          <Separator />
+          <div className="flex justify-between items-center text-lg font-semibold">
+            <span>Total Service Fee</span>
+            <span>${calculateServiceFee()}</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-blue-50 border-blue-200">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+            <div>
+              <p className="text-sm text-blue-800">
+                <strong>Note:</strong> Hardware/equipment costs are not included in this service fee. 
+                If any parts or equipment are needed, your technician will discuss options and pricing with you before proceeding.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={handleBack}>
+          <ChevronLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+        <Button onClick={handleNext}>
+          Continue to Agreement
+          <ArrowRight className="w-4 h-4 ml-2" />
+        </Button>
+      </div>
+    </div>
+  );
+
+  // Step 4: Legal Agreement
+  const renderStep4 = () => (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Terms of Service</h2>
+        <p className="text-gray-600">Please review and accept our terms to continue</p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Service Agreement
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="max-h-64 overflow-y-auto bg-gray-50 p-4 rounded-lg text-sm space-y-2">
+            <h4 className="font-semibold">TechGPT Service Terms</h4>
+            <p>By using our service, you agree to the following terms:</p>
+            <ul className="list-disc list-inside space-y-1 text-gray-700">
+              <li>Service fees are due upon completion of work</li>
+              <li>Technicians are independent contractors, not employees</li>
+              <li>We strive to match you with qualified technicians based on your needs</li>
+              <li>Additional costs for hardware/parts will be discussed before purchase</li>
+              <li>You have the right to cancel service before technician arrives</li>
+              <li>Both parties can leave reviews after service completion</li>
+              <li>We protect your privacy and data according to our Privacy Policy</li>
+              <li>Disputes will be resolved through our customer service team</li>
+              <li>Service availability may vary by location</li>
+              <li>Emergency services may incur additional fees</li>
+            </ul>
+            <p className="mt-4 text-xs text-gray-500">
+              Last updated: January 2025. Full terms available at techgpt.com/terms
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="agreement"
+          checked={agreementAccepted}
+          onCheckedChange={(checked) => setAgreementAccepted(checked as boolean)}
+        />
+        <Label htmlFor="agreement" className="text-sm">
+          I have read and agree to the Terms of Service and Privacy Policy
+        </Label>
+      </div>
+
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={handleBack}>
+          <ChevronLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+        <Button onClick={handleNext} disabled={!agreementAccepted}>
+          Find Technicians
+          <ArrowRight className="w-4 h-4 ml-2" />
+        </Button>
+      </div>
+    </div>
+  );
+
+  // Step 5: Provider Matching
   const renderStep5 = () => (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Technicians</h2>
+        <p className="text-gray-600">We found {mockTechnicians.length} qualified technicians in your area</p>
+      </div>
+
+      <div className="space-y-4">
+        {mockTechnicians.map((technician) => (
+          <Card key={technician.id} className="hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                    <User className="w-8 h-8 text-gray-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">{technician.name}</h3>
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        <span>{technician.rating} ({technician.completedJobs} jobs)</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        <span>{technician.distance} miles away</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        <span>ETA: {technician.eta}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {technician.skills.map((skill, idx) => (
+                        <Badge key={idx} variant="secondary" className="text-xs">
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg font-semibold">${technician.hourlyRate}/hr</div>
+                  <Button 
+                    onClick={() => handleTechnicianSelect(technician)}
+                    className="mt-2"
+                  >
+                    Select
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={handleBack}>
+          <ChevronLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+      </div>
+    </div>
+  );
+
+  // Step 6: Send Job Request
+  const renderStep6 = () => (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Confirm Your Selection</h2>
+        <p className="text-gray-600">Ready to send your request to {selectedTechnician?.name}?</p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Selected Technician</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center space-x-4">
+            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+              <User className="w-8 h-8 text-gray-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg">{selectedTechnician?.name}</h3>
+              <div className="flex items-center gap-4 text-sm text-gray-600">
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  <span>{selectedTechnician?.rating} rating</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock className="w-4 h-4" />
+                  <span>ETA: {selectedTechnician?.eta}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Job Summary</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <div className="flex justify-between">
+            <span className="text-gray-600">Category</span>
+            <span>{selectedCategory?.name}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">Issue</span>
+            <span className="text-sm max-w-xs text-right">{description}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">Location</span>
+            <span className="text-sm">{location}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">Service Fee</span>
+            <span className="font-semibold">${calculateServiceFee()}</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={handleBack}>
+          <ChevronLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+        <Button onClick={handleSendJobRequest} className="bg-green-600 hover:bg-green-700">
+          <Zap className="w-4 h-4 mr-2" />
+          Send Job Request
+        </Button>
+      </div>
+    </div>
+  );
+
+  // Step 7: Provider Response
+  const renderStep7 = () => (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Request Sent!</h2>
+        <p className="text-gray-600">Waiting for {selectedTechnician?.name} to respond...</p>
+      </div>
+
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex flex-col items-center space-y-4">
+            {providerResponse === 'pending' && (
+              <>
+                <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
+                  <Timer className="w-8 h-8 text-yellow-600 animate-pulse" />
+                </div>
+                <div className="text-center">
+                  <h3 className="font-semibold text-lg mb-2">Response Timer</h3>
+                  <div className="text-3xl font-bold text-yellow-600 mb-2">{countdown}s</div>
+                  <Progress value={((60 - countdown) / 60) * 100} className="w-64" />
+                  <p className="text-sm text-gray-600 mt-2">
+                    {selectedTechnician?.name} has 60 seconds to respond
+                  </p>
+                </div>
+              </>
+            )}
+            
+            {providerResponse === 'timeout' && (
+              <>
+                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
+                  <XCircle className="w-8 h-8 text-orange-600" />
+                </div>
+                <div className="text-center">
+                  <h3 className="font-semibold text-lg text-orange-600">Request Timed Out</h3>
+                  <p className="text-gray-600">Reassigning to next available technician...</p>
+                </div>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-blue-50 border-blue-200">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+            <div>
+              <p className="text-sm text-blue-800">
+                <strong>Your request includes:</strong> Job category, estimated duration, your location, 
+                distance from technician, and AI-generated tool recommendations.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  // Step 8: Provider Accepted
+  const renderStep8 = () => (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-green-600 mb-2">Request Accepted!</h2>
+        <p className="text-gray-600">{selectedTechnician?.name} is on the way to your location</p>
+      </div>
+
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+              <CheckCircle className="w-8 h-8 text-green-600" />
+            </div>
+            <div className="text-center">
+              <h3 className="font-semibold text-lg mb-2">Job Confirmed</h3>
+              <p className="text-gray-600">
+                Your technician has been notified and GPS navigation has been activated
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Technician Details</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center space-x-4">
+            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+              <User className="w-8 h-8 text-gray-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg">{selectedTechnician?.name}</h3>
+              <div className="flex items-center gap-4 text-sm text-gray-600">
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  <span>{selectedTechnician?.rating} rating</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock className="w-4 h-4" />
+                  <span>ETA: {selectedTechnician?.eta}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <Button variant="outline" className="flex items-center gap-2">
+              <Phone className="w-4 h-4" />
+              Call
+            </Button>
+            <Button variant="outline" className="flex items-center gap-2">
+              <MessageCircle className="w-4 h-4" />
+              Message
+            </Button>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Navigation className="w-4 h-4" />
+              Track
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={() => setLocationPath('/chat')}>
+          AI Support Chat
+        </Button>
+        <Button onClick={handleBookingComplete} className="bg-green-600 hover:bg-green-700">
+          Continue to Dashboard
+          <ArrowRight className="w-4 h-4 ml-2" />
+        </Button>
+      </div>
+    </div>
+  );
+
+  // Step 9: Booking Complete
+  const renderStep9 = () => (
     <div className="text-center space-y-6">
       <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
         <CheckCircle className="w-8 h-8 text-green-600" />
       </div>
       
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Booking Confirmed!</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Booking Complete!</h2>
         <p className="text-gray-600 mt-2">
           {selectedTechnician?.name} will be with you in {selectedTechnician?.eta}
         </p>
@@ -462,7 +787,7 @@ export default function QuickTechnicianRequest() {
       <div className="flex space-x-3">
         <Button 
           variant="outline" 
-          onClick={() => setLocationPath('/dashboard')}
+          onClick={() => setLocationPath('/customer-dashboard')}
           className="flex-1"
         >
           View Dashboard
@@ -477,22 +802,37 @@ export default function QuickTechnicianRequest() {
     </div>
   );
 
+  const getStepTitle = (stepNum: number) => {
+    const titles = [
+      "Category",
+      "Details", 
+      "Review",
+      "Agreement",
+      "Match",
+      "Request",
+      "Response",
+      "Confirmed",
+      "Complete"
+    ];
+    return titles[stepNum - 1];
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-2xl mx-auto p-4">
+      <div className="max-w-3xl mx-auto p-4">
         <div className="bg-white rounded-lg shadow-sm p-6">
           {/* Progress indicator */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
-              {[1, 2, 3, 4, 5].map((num) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                 <div key={num} className="flex items-center">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
                     step >= num ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
                   }`}>
                     {num}
                   </div>
-                  {num < 5 && (
-                    <div className={`w-8 h-1 ${
+                  {num < 9 && (
+                    <div className={`w-6 h-1 ${
                       step > num ? 'bg-blue-600' : 'bg-gray-200'
                     }`} />
                   )}
@@ -500,11 +840,9 @@ export default function QuickTechnicianRequest() {
               ))}
             </div>
             <div className="flex justify-between text-xs text-gray-500 mt-2">
-              <span>Category</span>
-              <span>Details</span>
-              <span>Match</span>
-              <span>Book</span>
-              <span>Done</span>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                <span key={num} className="text-center">{getStepTitle(num)}</span>
+              ))}
             </div>
           </div>
 
@@ -514,6 +852,10 @@ export default function QuickTechnicianRequest() {
           {step === 3 && renderStep3()}
           {step === 4 && renderStep4()}
           {step === 5 && renderStep5()}
+          {step === 6 && renderStep6()}
+          {step === 7 && renderStep7()}
+          {step === 8 && renderStep8()}
+          {step === 9 && renderStep9()}
         </div>
       </div>
     </div>
