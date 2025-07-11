@@ -53,40 +53,57 @@ function Router() {
 
   return (
     <Switch>
+      {/* Main Entry Points */}
       <Route path="/" component={CustomerHomePage} />
-      <Route path="/marketplace" component={() => <MarketplacePage username={getStoredUsername()} />} />
+      <Route path="/home" component={CustomerHomePage} />
+      
+      {/* Customer Portal */}
       <Route path="/chat" component={ChatPage} />
+      <Route path="/dashboard" component={ClientDashboard} />
       <Route path="/issues" component={IssueCategorizationPage} />
-      <Route path="/phone-support" component={PhoneSupportPage} />
-      <Route path="/live-support" component={() => <LiveSupportPage username={getStoredUsername()} />} />
+      <Route path="/support" component={ChatPage} />
       <Route path="/triage" component={TriagePage} />
       <Route path="/diagnostic" component={SimpleDiagnosticPage} />
-      <Route path="/dashboard" component={ClientDashboard} />
-      <Route path="/auth-test" component={AuthTestPage} />
-      <Route path="/technician-register" component={ServiceProviderRegistration} />
-      <Route path="/technician-dashboard" component={TechnicianDetailsPage} />
-      <Route path="/technicians" component={TechnicianLanding} />
+      
+      {/* Support Services */}
+      <Route path="/phone-support" component={PhoneSupportPage} />
+      <Route path="/live-support" component={() => <LiveSupportPage username={getStoredUsername()} />} />
+      <Route path="/technician-request" component={QuickTechnicianRequest} />
       <Route path="/technician-matching" component={TechnicianMatchingPage} />
       <Route path="/find-expert" component={ExpertTechnicianFinder} />
-      <Route path="/book-technician" component={SimpleBooking} />
-      <Route path="/book-service" component={BookServicePage} />
-      <Route path="/technician" component={QuickTechnicianRequest} />
+      <Route path="/marketplace" component={() => <MarketplacePage username={getStoredUsername()} />} />
+      
+      {/* Service Provider Portal */}
+      <Route path="/technician-home" component={ServiceProviderHomePage} />
+      <Route path="/technician-register" component={ServiceProviderRegistration} />
+      <Route path="/technician-dashboard" component={TechnicianDetailsPage} />
       <Route path="/technician-earnings" component={TechnicianEarnings} />
       <Route path="/profile-visibility" component={ProfileVisibilityPage} />
-      <Route path="/domains" component={DomainSelector} />
-      <Route path="/customer-home" component={CustomerHomePage} />
-      <Route path="/technician-home" component={ServiceProviderHomePage} />
+      <Route path="/technicians" component={TechnicianLanding} />
+      
+      {/* Admin Portal */}
       <Route path="/admin-home" component={AdminHomePage} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin-portal" component={AdminNavigation} />
       <Route path="/admin-earnings" component={AdminEarningSettings} />
       <Route path="/admin-categories" component={AdminCategoryManagement} />
       <Route path="/admin/announcements" component={AdminAnnouncements} />
+      
+      {/* Utility Pages */}
+      <Route path="/domains" component={DomainSelector} />
       <Route path="/onboarding" component={OnboardingWizard} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/test-notifications" component={TestNotificationSystem} />
       <Route path="/notifications" component={NotificationsDashboard} />
       <Route path="/:username/profile" component={ProfilePage} />
+      
+      {/* Legacy Routes - Redirect to main paths */}
+      <Route path="/customer-home" component={CustomerHomePage} />
+      <Route path="/technician" component={QuickTechnicianRequest} />
+      <Route path="/book-technician" component={SimpleBooking} />
+      <Route path="/book-service" component={BookServicePage} />
+      <Route path="/auth-test" component={AuthTestPage} />
+      
       <Route component={NotFound} />
     </Switch>
   );
