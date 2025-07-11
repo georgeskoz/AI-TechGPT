@@ -56,6 +56,7 @@ import AdminManagement from "@/components/AdminManagement";
 import NotificationsCenter from "@/components/NotificationsCenter";
 import DiagnosticToolsManagement from "@/components/DiagnosticToolsManagement";
 import AdminAnnouncements from "@/pages/AdminAnnouncements";
+import ServiceManagement from "@/components/ServiceManagement";
 import { 
   Users, 
   Settings, 
@@ -91,6 +92,8 @@ import {
   Download,
   Upload,
   RefreshCw,
+  Grid,
+  List,
   FileText,
   Headphones,
   Wrench,
@@ -1067,6 +1070,18 @@ Last Updated: ${effectiveDate}
     { id: "jobs", label: "Jobs", icon: Briefcase },
     { id: "disputes", label: "Disputes", icon: AlertTriangle },
     { id: "payments", label: "Payments", icon: CreditCard },
+    { 
+      id: "services", 
+      label: "Services Management", 
+      icon: Settings,
+      subItems: [
+        { id: "add-service", label: "Add New Service", icon: Plus },
+        { id: "services-list", label: "Services List", icon: List },
+        { id: "service-categories", label: "Service Categories", icon: Grid },
+        { id: "pricing-rules", label: "Pricing Rules", icon: DollarSign },
+        { id: "service-settings", label: "Service Settings", icon: Settings }
+      ]
+    },
     { 
       id: "system", 
       label: "System", 
@@ -2815,6 +2830,11 @@ Last Updated: ${effectiveDate}
           {activeTab === "payments" && <PaymentGatewayManagement />}
 
           {activeTab === "tax" && <TaxManagement />}
+          
+          {/* Service Management Tabs */}
+          {(activeTab === "add-service" || activeTab === "services-list" || activeTab === "service-categories" || activeTab === "service-settings") && (
+            <ServiceManagement activeTab={activeTab} />
+          )}
 
           {activeTab === "coupons" && <CouponsManagement />}
 
