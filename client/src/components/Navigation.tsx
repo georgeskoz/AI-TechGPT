@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { ArrowLeft, Home, Menu, X, MessageCircle } from "lucide-react";
+import { ArrowLeft, Home, Menu, X, MessageCircle, Users, Shield, User } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
 
 interface NavigationProps {
   showBackButton?: boolean;
@@ -19,7 +20,7 @@ export default function Navigation({
   showHomeButton = true,
   customBackAction 
 }: NavigationProps) {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleBack = () => {
@@ -30,6 +31,12 @@ export default function Navigation({
     }
   };
 
+  // Check if current page is customer-facing (hide Technician Portal link on customer pages)
+  const isCustomerPage = location.includes('/chat') || location.includes('/dashboard') || 
+                         location.includes('/live-support') || location.includes('/phone-support') ||
+                         location.includes('/issues') || location.includes('/diagnostic') ||
+                         location.includes('/triage') || location === '/';
+
   const navigationItems = [
     { label: "Home", path: "/", description: "Customer portal home" },
     { label: "AI Chat Support", path: "/chat", description: "Free AI assistance" },
@@ -38,7 +45,16 @@ export default function Navigation({
     { label: "Live Support", path: "/live-support", description: "Human technician help" },
     { label: "Phone Support", path: "/phone-support", description: "Call-based support" },
     { label: "Issue Tracker", path: "/issues", description: "Manage your requests" },
-    { label: "Technician Portal", path: "/technician-home", description: "Join as a service provider" },
+    // Only show Technician Portal on non-customer pages
+    ...(isCustomerPage ? [] : [{ label: "Technician Portal", path: "/technician-home", description: "Join as a service provider" }]),
+  ];
+
+  // Development role switcher - only show in development
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const roleSwitcherItems = [
+    { label: "Customer View", path: "/", icon: <User className="h-4 w-4" />, description: "Customer portal and services" },
+    { label: "Service Provider", path: "/technician-home", icon: <Users className="h-4 w-4" />, description: "Service provider dashboard" },
+    { label: "Admin Portal", path: "/admin-home", icon: <Shield className="h-4 w-4" />, description: "Admin management console" },
   ];
 
   return (
@@ -125,6 +141,40 @@ export default function Navigation({
                       </div>
                     </Button>
                   ))}
+                  
+                  {/* Development Role Switcher - Mobile */}
+                  {isDevelopment && (
+                    <>
+                      <div className="border-t pt-4 mt-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <h3 className="text-md font-semibold">Development</h3>
+                          <Badge variant="secondary" className="text-xs">DEV</Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-3">Switch between user roles for testing</p>
+                        {roleSwitcherItems.map((item) => (
+                          <Button
+                            key={item.path}
+                            variant={location === item.path || 
+                                   (item.path === "/" && (location === "/" || location.includes("/chat") || location.includes("/dashboard"))) ? 
+                                   "default" : "ghost"}
+                            onClick={() => {
+                              setLocation(item.path);
+                              setIsOpen(false);
+                            }}
+                            className="justify-start text-left h-auto p-3 w-full"
+                          >
+                            <div className="flex items-center gap-3">
+                              {item.icon}
+                              <div>
+                                <div className="font-medium">{item.label}</div>
+                                <div className="text-sm text-gray-500">{item.description}</div>
+                              </div>
+                            </div>
+                          </Button>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>
@@ -159,6 +209,37 @@ export default function Navigation({
                       </div>
                     </Button>
                   ))}
+                  
+                  {/* Development Role Switcher */}
+                  {isDevelopment && (
+                    <>
+                      <div className="border-t pt-4 mt-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <h3 className="text-md font-semibold">Development</h3>
+                          <Badge variant="secondary" className="text-xs">DEV</Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-3">Switch between user roles for testing</p>
+                        {roleSwitcherItems.map((item) => (
+                          <Button
+                            key={item.path}
+                            variant={location === item.path || 
+                                   (item.path === "/" && (location === "/" || location.includes("/chat") || location.includes("/dashboard"))) ? 
+                                   "default" : "ghost"}
+                            onClick={() => setLocation(item.path)}
+                            className="justify-start text-left h-auto p-3 w-full"
+                          >
+                            <div className="flex items-center gap-3">
+                              {item.icon}
+                              <div>
+                                <div className="font-medium">{item.label}</div>
+                                <div className="text-sm text-gray-500">{item.description}</div>
+                              </div>
+                            </div>
+                          </Button>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>
