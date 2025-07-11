@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import Navigation from '@/components/Navigation';
 import { 
   User, 
   Star, 
@@ -11,7 +12,7 @@ import {
   Clock, 
   Phone, 
   MessageCircle, 
-  Navigation,
+  Navigation as NavigationIcon,
   CheckCircle,
   ArrowLeft,
   Calendar,
@@ -22,7 +23,7 @@ export default function TechnicianDashboard() {
   const [, setLocation] = useLocation();
   
   // Mock data - in real app this would come from booking context
-  const assignedTechnician = {
+  const assignedServiceProvider = {
     id: 1,
     name: "Alex Johnson",
     rating: 4.8,
@@ -53,39 +54,39 @@ export default function TechnicianDashboard() {
     window.open(`https://maps.google.com/maps?q=${address}`, '_blank');
   };
 
-  const handleCallTechnician = () => {
-    window.open(`tel:${assignedTechnician.phone}`, '_self');
+  const handleCallServiceProvider = () => {
+    window.open(`tel:${assignedServiceProvider.phone}`, '_self');
   };
 
   const handleSendMessage = () => {
-    // In real app, this would open a direct chat with the technician
+    // In real app, this would open a direct chat with the service provider
     setLocation('/chat');
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <Navigation 
+        showBackButton={true}
+        backTo="/"
+        title="Service Provider Details"
+        showHomeButton={true}
+      />
+      
       <div className="max-w-4xl mx-auto p-4">
         {/* Header */}
         <div className="mb-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => setLocation('/technician')}
-            className="mb-4"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Booking
-          </Button>
-          <h1 className="text-3xl font-bold text-gray-900">Your Technician</h1>
-          <p className="text-gray-600">Booking confirmed - your technician is on the way</p>
+          <h1 className="text-3xl font-bold text-gray-900">Your Service Provider</h1>
+          <p className="text-gray-600">Booking confirmed - your service provider is on the way</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Technician Profile */}
+          {/* Service Provider Profile */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="w-5 h-5" />
-                Technician Profile
+                Service Provider Profile
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -94,10 +95,10 @@ export default function TechnicianDashboard() {
                   <User className="w-8 h-8 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">{assignedTechnician.name}</h3>
+                  <h3 className="font-semibold text-lg">{assignedServiceProvider.name}</h3>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span>{assignedTechnician.rating} ({assignedTechnician.completedJobs} jobs)</span>
+                    <span>{assignedServiceProvider.rating} ({assignedServiceProvider.completedJobs} jobs)</span>
                   </div>
                 </div>
               </div>
@@ -105,18 +106,18 @@ export default function TechnicianDashboard() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="w-4 h-4 text-gray-500" />
-                  <span>{assignedTechnician.experience} experience</span>
+                  <span>{assignedServiceProvider.experience} experience</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin className="w-4 h-4 text-gray-500" />
-                  <span>{assignedTechnician.location}</span>
+                  <span>{assignedServiceProvider.location}</span>
                 </div>
               </div>
 
               <div>
                 <p className="text-sm font-medium text-gray-700 mb-2">Specialties:</p>
                 <div className="flex flex-wrap gap-1">
-                  {assignedTechnician.specialties.map((specialty, index) => (
+                  {assignedServiceProvider.specialties.map((specialty, index) => (
                     <Badge key={index} variant="secondary" className="text-xs">
                       {specialty}
                     </Badge>
@@ -128,12 +129,12 @@ export default function TechnicianDashboard() {
 
               <div className="space-y-3">
                 <Button 
-                  onClick={handleCallTechnician}
+                  onClick={handleCallServiceProvider}
                   className="w-full"
                   variant="default"
                 >
                   <Phone className="w-4 h-4 mr-2" />
-                  Call Technician
+                  Call Service Provider
                 </Button>
                 <Button 
                   onClick={handleSendMessage}
@@ -148,7 +149,7 @@ export default function TechnicianDashboard() {
                   className="w-full"
                   variant="outline"
                 >
-                  <Navigation className="w-4 h-4 mr-2" />
+                  <NavigationIcon className="w-4 h-4 mr-2" />
                   Get Directions
                 </Button>
               </div>
@@ -211,7 +212,7 @@ export default function TechnicianDashboard() {
                   <span className="font-medium text-green-600">Confirmed</span>
                 </div>
                 <p className="text-sm text-gray-600">
-                  ETA: {assignedTechnician.eta}
+                  ETA: {assignedServiceProvider.eta}
                 </p>
               </div>
             </CardContent>
@@ -232,13 +233,13 @@ export default function TechnicianDashboard() {
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-sm">Technician assigned</span>
+                <span className="text-sm">Service Provider assigned</span>
                 <span className="text-xs text-gray-500">1 minute ago</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                <span className="text-sm">Technician on the way</span>
-                <span className="text-xs text-gray-500">Expected in {assignedTechnician.eta}</span>
+                <span className="text-sm">Service Provider on the way</span>
+                <span className="text-xs text-gray-500">Expected in {assignedServiceProvider.eta}</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
