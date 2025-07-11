@@ -1,573 +1,283 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
-import { Progress } from "@/components/ui/progress";
-import Navigation from "@/components/Navigation";
+import { useState } from 'react';
+import { useLocation } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { 
-  DollarSign, 
-  Clock, 
+  User, 
   Star, 
-  Users, 
-  Award, 
-  Bell,
+  MapPin, 
+  Clock, 
+  Phone, 
+  MessageCircle, 
+  Navigation,
   CheckCircle,
-  XCircle,
-  AlertCircle,
-  TrendingUp,
-  MapPin,
-  Calendar,
-  MessageSquare,
-  Settings,
-  Shield,
-  Activity,
   ArrowLeft,
-  Home,
-  X
-} from "lucide-react";
-import { useLocation, Link } from "wouter";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+  Calendar,
+  DollarSign
+} from 'lucide-react';
 
-interface TechnicianStats {
-  totalEarnings: number;
-  completedJobs: number;
-  averageRating: number;
-  responseTime: number;
-  activeJobs: number;
-  pendingJobs: number;
-}
-
-interface JobNotification {
-  id: number;
-  title: string;
-  message: string;
-  type: 'new_job' | 'job_update' | 'payment_received';
-  isRead: boolean;
-  expiresAt?: string;
-  serviceRequest: {
-    id: number;
-    category: string;
-    serviceType: string;
-    location: string;
-    budget: number;
-    urgency: string;
-  };
-}
-
-export default function ServiceProviderDashboard() {
-  const [isAvailable, setIsAvailable] = useState(true);
-  const [selectedTab, setSelectedTab] = useState("overview");
+export default function TechnicianDashboard() {
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
-
-  // Fetch technician profile and stats
-  const { data: technicianData, isLoading: profileLoading } = useQuery({
-    queryKey: ['/api/technicians/profile'],
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/technicians/profile");
-      return await response.json();
-    },
-  });
-
-  // Fetch job notifications
-  const { data: notifications, isLoading: notificationsLoading } = useQuery({
-    queryKey: ['/api/technicians/notifications'],
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/technicians/notifications");
-      return await response.json();
-    },
-  });
-
-  // Fetch earnings data
-  const { data: earnings, isLoading: earningsLoading } = useQuery({
-    queryKey: ['/api/technicians/earnings'],
-    queryFn: async () => {
-      const response = await apiRequest("GET", "/api/technicians/earnings");
-      return await response.json();
-    },
-  });
-
-  // Accept job mutation
-  const acceptJobMutation = useMutation({
-    mutationFn: async (jobId: number) => {
-      const response = await apiRequest("POST", `/api/technicians/jobs/${jobId}/accept`);
-      return await response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Job Accepted",
-        description: "You have successfully accepted this job.",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/technicians/notifications'] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to accept job.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Decline job mutation
-  const declineJobMutation = useMutation({
-    mutationFn: async (jobId: number) => {
-      const response = await apiRequest("POST", `/api/technicians/jobs/${jobId}/decline`);
-      return await response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Job Declined",
-        description: "You have declined this job.",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/technicians/notifications'] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to decline job.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Toggle availability mutation
-  const toggleAvailabilityMutation = useMutation({
-    mutationFn: async (available: boolean) => {
-      const response = await apiRequest("PUT", "/api/technicians/availability", { available });
-      return await response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Availability Updated",
-        description: `You are now ${isAvailable ? 'available' : 'unavailable'} for new jobs.`,
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update availability.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleAvailabilityChange = (available: boolean) => {
-    setIsAvailable(available);
-    toggleAvailabilityMutation.mutate(available);
+  
+  // Mock data - in real app this would come from booking context
+  const assignedTechnician = {
+    id: 1,
+    name: "Alex Johnson",
+    rating: 4.8,
+    completedJobs: 145,
+    experience: "5 years",
+    specialties: ["Hardware Repair", "Network Setup", "System Troubleshooting"],
+    phone: "+1 (555) 123-4567",
+    email: "alex.johnson@techgpt.com",
+    location: "Downtown Ottawa",
+    eta: "25 minutes",
+    status: "On the way",
+    profileImage: "/api/placeholder/120/120"
   };
 
-  const handleAcceptJob = (jobId: number) => {
-    acceptJobMutation.mutate(jobId);
+  const bookingDetails = {
+    bookingId: `TG-${Date.now().toString().slice(-6)}`,
+    category: "Hardware Issues",
+    description: "Computer won't start properly",
+    scheduledTime: "Today, 2:30 PM",
+    estimatedDuration: "1-2 hours",
+    serviceType: "On-site",
+    address: "123 Main St, Ottawa, ON",
+    totalCost: "$85"
   };
 
-  const handleDeclineJob = (jobId: number) => {
-    declineJobMutation.mutate(jobId);
+  const handleStartNavigation = () => {
+    const address = encodeURIComponent(bookingDetails.address);
+    window.open(`https://maps.google.com/maps?q=${address}`, '_blank');
   };
 
-  const mockStats: TechnicianStats = {
-    totalEarnings: 2850.00,
-    completedJobs: 47,
-    averageRating: 4.8,
-    responseTime: 45,
-    activeJobs: 3,
-    pendingJobs: 2,
+  const handleCallTechnician = () => {
+    window.open(`tel:${assignedTechnician.phone}`, '_self');
   };
 
-  const mockNotifications: JobNotification[] = [
-    {
-      id: 1,
-      title: "New Job Opportunity",
-      message: "Hardware repair needed in your area",
-      type: "new_job",
-      isRead: false,
-      expiresAt: new Date(Date.now() + 3600000).toISOString(),
-      serviceRequest: {
-        id: 123,
-        category: "Hardware Issues",
-        serviceType: "onsite",
-        location: "San Francisco, CA",
-        budget: 150,
-        urgency: "medium"
-      }
-    },
-    {
-      id: 2,
-      title: "Job Update",
-      message: "Customer updated requirements for network troubleshooting",
-      type: "job_update",
-      isRead: false,
-      serviceRequest: {
-        id: 124,
-        category: "Network Troubleshooting",
-        serviceType: "remote",
-        location: "Remote",
-        budget: 100,
-        urgency: "high"
-      }
-    }
-  ];
-
-  const mockEarnings = [
-    { month: "Nov", amount: 1200 },
-    { month: "Dec", amount: 1650 },
-    { month: "Jan", amount: 2850 },
-  ];
-
-  if (profileLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-      </div>
-    );
-  }
+  const handleSendMessage = () => {
+    // In real app, this would open a direct chat with the technician
+    setLocation('/chat');
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation 
-        title="Service Provider Dashboard" 
-        backTo="/technician-home" 
-        showHomeButton={false}
-      />
-
-      <div className="container mx-auto p-4 max-w-6xl">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Technician Dashboard</h1>
-            <p className="text-gray-600">Welcome back, {technicianData?.businessName || "Technician"}</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Available for Jobs</span>
-              <Switch
-                checked={isAvailable}
-                onCheckedChange={handleAvailabilityChange}
-              />
-            </div>
-            <Badge variant={isAvailable ? "default" : "secondary"}>
-              {isAvailable ? "Available" : "Away"}
-            </Badge>
-          </div>
+      <div className="max-w-4xl mx-auto p-4">
+        {/* Header */}
+        <div className="mb-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => setLocation('/technician')}
+            className="mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Booking
+          </Button>
+          <h1 className="text-3xl font-bold text-gray-900">Your Technician</h1>
+          <p className="text-gray-600">Booking confirmed - your technician is on the way</p>
         </div>
 
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="jobs">Jobs</TabsTrigger>
-          <TabsTrigger value="earnings">Earnings</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">${mockStats.totalEarnings.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">
-                  +12% from last month
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Completed Jobs</CardTitle>
-                <CheckCircle className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{mockStats.completedJobs}</div>
-                <p className="text-xs text-muted-foreground">
-                  +5 this month
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
-                <Star className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{mockStats.averageRating}</div>
-                <p className="text-xs text-muted-foreground">
-                  From 47 reviews
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Response Time</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{mockStats.responseTime}m</div>
-                <p className="text-xs text-muted-foreground">
-                  Average response
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Recent Activity */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Technician Profile */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                Recent Activity
+                <User className="w-5 h-5" />
+                Technician Profile
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  <div>
-                    <p className="font-medium">Job Completed</p>
-                    <p className="text-sm text-gray-600">Network troubleshooting for ABC Corp - $125</p>
-                  </div>
-                  <span className="text-sm text-gray-500 ml-auto">2 hours ago</span>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                  <User className="w-8 h-8 text-blue-600" />
                 </div>
-                <div className="flex items-center gap-3">
-                  <DollarSign className="h-5 w-5 text-green-600" />
-                  <div>
-                    <p className="font-medium">Payment Received</p>
-                    <p className="text-sm text-gray-600">$125 deposited to your account</p>
+                <div>
+                  <h3 className="font-semibold text-lg">{assignedTechnician.name}</h3>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <span>{assignedTechnician.rating} ({assignedTechnician.completedJobs} jobs)</span>
                   </div>
-                  <span className="text-sm text-gray-500 ml-auto">3 hours ago</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Bell className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="font-medium">New Job Available</p>
-                    <p className="text-sm text-gray-600">Hardware repair in your area</p>
-                  </div>
-                  <span className="text-sm text-gray-500 ml-auto">5 hours ago</span>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <Clock className="w-4 h-4 text-gray-500" />
+                  <span>{assignedTechnician.experience} experience</span>
                 </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="w-4 h-4 text-gray-500" />
+                  <span>{assignedTechnician.location}</span>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">Specialties:</p>
+                <div className="flex flex-wrap gap-1">
+                  {assignedTechnician.specialties.map((specialty, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {specialty}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <Button 
+                  onClick={handleCallTechnician}
+                  className="w-full"
+                  variant="default"
+                >
+                  <Phone className="w-4 h-4 mr-2" />
+                  Call Technician
+                </Button>
+                <Button 
+                  onClick={handleSendMessage}
+                  className="w-full"
+                  variant="outline"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Send Message
+                </Button>
+                <Button 
+                  onClick={handleStartNavigation}
+                  className="w-full"
+                  variant="outline"
+                >
+                  <Navigation className="w-4 h-4 mr-2" />
+                  Get Directions
+                </Button>
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="jobs" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Active Jobs</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="p-4 border rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline">In Progress</Badge>
-                    <span className="text-sm text-gray-500">Started 2 hours ago</span>
-                  </div>
-                  <h3 className="font-semibold">PC Hardware Repair</h3>
-                  <p className="text-gray-600 mb-2">Computer won't boot, suspected motherboard issue</p>
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      San Francisco, CA
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <DollarSign className="h-4 w-4" />
-                      $150
-                    </span>
-                  </div>
-                </div>
-                <div className="text-center text-gray-500 py-8">
-                  No other active jobs
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="earnings" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">This Month</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">$1,250</div>
-                <p className="text-xs text-green-600">+15% from last month</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Pending Payments</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">$340</div>
-                <p className="text-xs text-gray-600">2 payments pending</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Total Earned</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">$12,850</div>
-                <p className="text-xs text-gray-600">Since joining</p>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="notifications" className="space-y-6">
+          {/* Booking Details */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5" />
-                Job Notifications
+                <Calendar className="w-5 h-5" />
+                Booking Details
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {mockNotifications.map((notification) => (
-                  <div key={notification.id} className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Badge variant={notification.type === 'new_job' ? 'default' : 'secondary'}>
-                          {notification.type === 'new_job' ? 'New Job' : 'Update'}
-                        </Badge>
-                        {!notification.isRead && (
-                          <div className="w-2 h-2 bg-blue-600 rounded-full" />
-                        )}
-                      </div>
-                      {notification.expiresAt && (
-                        <span className="text-sm text-red-600">
-                          Expires in {Math.round((new Date(notification.expiresAt).getTime() - Date.now()) / 60000)}m
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="font-semibold">{notification.title}</h3>
-                    <p className="text-gray-600 mb-3">{notification.message}</p>
-                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                      <span>{notification.serviceRequest.category}</span>
-                      <span>{notification.serviceRequest.location}</span>
-                      <span>${notification.serviceRequest.budget}</span>
-                      <Badge variant="outline" className="text-xs">
-                        {notification.serviceRequest.urgency}
-                      </Badge>
-                    </div>
-                    {notification.type === 'new_job' && (
-                      <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
-                          onClick={() => handleAcceptJob(notification.serviceRequest.id)}
-                          disabled={acceptJobMutation.isPending}
-                        >
-                          Accept Job
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={() => handleDeclineJob(notification.serviceRequest.id)}
-                          disabled={declineJobMutation.isPending}
-                        >
-                          Decline
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                ))}
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Booking ID</span>
+                  <span className="text-sm font-mono">{bookingDetails.bookingId}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Category</span>
+                  <span className="text-sm">{bookingDetails.category}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Service Type</span>
+                  <span className="text-sm">{bookingDetails.serviceType}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Scheduled</span>
+                  <span className="text-sm">{bookingDetails.scheduledTime}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Duration</span>
+                  <span className="text-sm">{bookingDetails.estimatedDuration}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Total Cost</span>
+                  <span className="text-sm font-semibold">{bookingDetails.totalCost}</span>
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
-        <TabsContent value="profile" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Profile Overview
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Shield className="h-5 w-5 text-green-600" />
-                  <div>
-                    <p className="font-medium">Verification Status</p>
-                    <p className="text-sm text-green-600">Verified Technician</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Star className="h-5 w-5 text-yellow-600" />
-                  <div>
-                    <p className="font-medium">Rating</p>
-                    <p className="text-sm text-gray-600">4.8 stars (47 reviews)</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Award className="h-5 w-5 text-purple-600" />
-                  <div>
-                    <p className="font-medium">Specialties</p>
-                    <p className="text-sm text-gray-600">Hardware Repair, Network Setup, Software Issues</p>
-                  </div>
-                </div>
-                <div className="flex gap-2 mt-4">
-                  <Button>Edit Profile</Button>
-                  <Link href="/profile-visibility">
-                    <Button variant="outline">
-                      <Users className="h-4 w-4 mr-2" />
-                      View Visibility
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              <Separator />
 
-        <TabsContent value="settings" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Account Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Job Notifications</p>
-                    <p className="text-sm text-gray-600">Receive notifications for new jobs</p>
-                  </div>
-                  <Switch defaultChecked />
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">Service Description:</p>
+                <p className="text-sm text-gray-600">{bookingDetails.description}</p>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">Service Address:</p>
+                <p className="text-sm text-gray-600">{bookingDetails.address}</p>
+              </div>
+
+              <Separator />
+
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <span className="font-medium text-green-600">Confirmed</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Email Updates</p>
-                    <p className="text-sm text-gray-600">Get weekly performance summaries</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Auto-Accept Jobs</p>
-                    <p className="text-sm text-gray-600">Automatically accept matching jobs</p>
-                  </div>
-                  <Switch />
-                </div>
+                <p className="text-sm text-gray-600">
+                  ETA: {assignedTechnician.eta}
+                </p>
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        </div>
+
+        {/* Status Updates */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Service Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm">Booking confirmed</span>
+                <span className="text-xs text-gray-500">Just now</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="text-sm">Technician assigned</span>
+                <span className="text-xs text-gray-500">1 minute ago</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                <span className="text-sm">Technician on the way</span>
+                <span className="text-xs text-gray-500">Expected in {assignedTechnician.eta}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                <span className="text-sm text-gray-400">Service in progress</span>
+                <span className="text-xs text-gray-400">Pending</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                <span className="text-sm text-gray-400">Service completed</span>
+                <span className="text-xs text-gray-400">Pending</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Button 
+            onClick={() => setLocation('/customer-dashboard')}
+            variant="outline"
+          >
+            <User className="w-4 h-4 mr-2" />
+            My Dashboard
+          </Button>
+          <Button 
+            onClick={() => setLocation('/issues')}
+            variant="outline"
+          >
+            <Calendar className="w-4 h-4 mr-2" />
+            View All Bookings
+          </Button>
+          <Button 
+            onClick={() => setLocation('/chat')}
+            variant="outline"
+          >
+            <MessageCircle className="w-4 h-4 mr-2" />
+            AI Support
+          </Button>
+        </div>
       </div>
     </div>
   );
