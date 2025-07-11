@@ -15,6 +15,7 @@ import DomainSelector from '@/components/DomainSelector';
 import SupportOptionsWidget from '@/components/SupportOptionsWidget';
 import ServiceAnnouncementModal from '@/components/ServiceAnnouncementModal';
 import QuickTechnicianButton from '@/components/QuickTechnicianButton';
+import ActiveServiceTracker from '@/components/ActiveServiceTracker';
 
 
 export default function ChatPage() {
@@ -25,6 +26,7 @@ export default function ChatPage() {
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   const [lastUserMessage, setLastUserMessage] = useState<string>('');
   const [showServiceAnnouncement, setShowServiceAnnouncement] = useState(false);
+  const [showActiveService, setShowActiveService] = useState(false);
   const [, setLocation] = useLocation();
   
   // Chat functionality with OpenAI
@@ -42,6 +44,14 @@ export default function ChatPage() {
     const announcementShown = localStorage.getItem('serviceAnnouncementShown');
     if (!announcementShown) {
       setShowServiceAnnouncement(true);
+    }
+  }, []);
+
+  // Check for active service booking
+  useEffect(() => {
+    const hasActiveService = localStorage.getItem('activeServiceBooking');
+    if (hasActiveService) {
+      setShowActiveService(true);
     }
   }, []);
 
@@ -105,6 +115,13 @@ export default function ChatPage() {
   return (
     <div className="flex flex-col h-screen bg-gray-100">
       <Navigation title="AI Chat Support" />
+      
+      {/* Active Service Tracker */}
+      <ActiveServiceTracker 
+        isVisible={showActiveService} 
+        onClose={() => setShowActiveService(false)} 
+      />
+      
       {/* App Header */}
       <TechGPTHeader username={username || 'User'} />
       

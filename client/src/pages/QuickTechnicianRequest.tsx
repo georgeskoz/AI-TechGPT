@@ -194,6 +194,8 @@ export default function QuickTechnicianRequest() {
 
   const handleBookingComplete = () => {
     setStep(9);
+    // Set localStorage flag to show active service tracker
+    localStorage.setItem('activeServiceBooking', 'true');
   };
 
   const calculateServiceFee = () => {
