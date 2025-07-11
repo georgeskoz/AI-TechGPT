@@ -1025,7 +1025,8 @@ Last Updated: ${effectiveDate}
 
   const sidebarItems = [
     { id: "overview", label: "Overview", icon: BarChart3 },
-    { id: "notifications", label: "Push Notifications", icon: Bell },
+    { id: "notifications", label: "Notifications", icon: Bell },
+    { id: "push-notifications", label: "Push Notifications", icon: Bell },
     { 
       id: "users", 
       label: "Users", 
@@ -1573,6 +1574,10 @@ Last Updated: ${effectiveDate}
           )}
 
           {activeTab === "notifications" && (
+            <NotificationsCenter />
+          )}
+
+          {activeTab === "push-notifications" && (
             <PushNotifications />
           )}
 
