@@ -246,12 +246,13 @@ export default function CustomerHomePage() {
 
   const features = [
     {
-      icon: <Calendar className="h-8 w-8 text-green-600" />,
-      title: "Book Service Provider",
-      description: "Complete 3-step booking process to connect with the right service provider",
-      action: "Book Service",
-      route: "/book-service",
-      color: "bg-green-50 border-green-200"
+      icon: <Zap className="h-8 w-8 text-red-600" />,
+      title: "🔧 Request Technician (Fast Track)",
+      description: "Get help in under 60 seconds - streamlined booking process",
+      action: "Request Now",
+      route: "/technician",
+      color: "bg-red-50 border-red-200",
+      featured: true
     },
     {
       icon: <MessageSquare className="h-8 w-8 text-blue-600" />,
@@ -1420,11 +1421,11 @@ export default function CustomerHomePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg" 
-                onClick={() => setLocation("/book-service")}
-                className="bg-green-600 hover:bg-green-700 text-lg px-8"
+                onClick={() => setLocation("/technician")}
+                className="bg-red-600 hover:bg-red-700 text-lg px-8 animate-pulse"
               >
-                <Calendar className="h-5 w-5 mr-2" />
-                Book Service Provider
+                <Zap className="h-5 w-5 mr-2" />
+                🔧 Request Technician (60s)
               </Button>
               <Button 
                 size="lg" 
@@ -1437,11 +1438,11 @@ export default function CustomerHomePage() {
               <Button 
                 size="lg" 
                 variant="outline" 
-                onClick={() => setLocation("/find-expert")}
+                onClick={() => setLocation("/live-support")}
                 className="text-lg px-8"
               >
-                <Users className="h-5 w-5 mr-2" />
-                Find Expert Technician
+                <Headphones className="h-5 w-5 mr-2" />
+                Live Support
               </Button>
             </div>
           </div>
@@ -1479,7 +1480,7 @@ export default function CustomerHomePage() {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {features.map((feature, index) => (
-              <Card key={index} className={`${feature.color} hover:shadow-lg transition-all duration-300 cursor-pointer group`}>
+              <Card key={index} className={`${feature.color} hover:shadow-lg transition-all duration-300 cursor-pointer group ${feature.featured ? 'ring-2 ring-red-500 ring-offset-2 transform scale-105' : ''}`}>
                 <CardHeader className="pb-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-4">

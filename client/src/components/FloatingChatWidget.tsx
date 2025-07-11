@@ -41,7 +41,10 @@ export default function FloatingChatWidget({ username }: FloatingChatWidgetProps
   };
 
   const handleQuickAction = (action: string) => {
-    if (action === "Start Live Support Chat") {
+    if (action === "🔧 Request Technician (Fast Track)") {
+      setLocation("/technician");
+      setIsOpen(false);
+    } else if (action === "Start Live Support Chat") {
       setLocation("/live-support");
       setIsOpen(false);
     } else if (action === "AI Triage Analysis") {
@@ -83,14 +86,14 @@ export default function FloatingChatWidget({ username }: FloatingChatWidgetProps
   };
 
   const quickActions = [
+    "🔧 Request Technician (Fast Track)",
     "AI Triage Analysis",
     "Generate Diagnostic Checklist",
     "Start Live Support Chat", 
     "Help me troubleshoot a network connection issue",
     "I need help with software installation",
     "My computer is running slowly, what should I check?",
-    "How do I set up email on my phone?",
-    "I'm having database connection problems"
+    "How do I set up email on my phone?"
   ];
 
   if (!isOpen) {

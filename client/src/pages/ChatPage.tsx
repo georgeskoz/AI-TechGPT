@@ -14,6 +14,7 @@ import ErrorToast from '@/components/ErrorToast';
 import DomainSelector from '@/components/DomainSelector';
 import SupportOptionsWidget from '@/components/SupportOptionsWidget';
 import ServiceAnnouncementModal from '@/components/ServiceAnnouncementModal';
+import QuickTechnicianButton from '@/components/QuickTechnicianButton';
 
 
 export default function ChatPage() {
@@ -132,6 +133,13 @@ export default function ChatPage() {
           
           {/* Chat Input - Always at the bottom */}
           <div className="sticky bottom-0 w-full z-10">
+            {/* Show quick technician button for users who haven't interacted much */}
+            {messages.length === 0 && (
+              <div className="p-4 bg-white border-t">
+                <QuickTechnicianButton />
+              </div>
+            )}
+            
             <ChatInput 
               onSendMessage={handleSendMessage} 
               isLoading={isLoading} 
