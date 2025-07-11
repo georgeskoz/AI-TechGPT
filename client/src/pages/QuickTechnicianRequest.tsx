@@ -836,7 +836,7 @@ export default function QuickTechnicianRequest() {
       <div className="flex space-x-3">
         <Button 
           variant="outline" 
-          onClick={() => setLocationPath('/customer-dashboard')}
+          onClick={() => setLocationPath('/dashboard')}
           className="flex-1"
         >
           View Dashboard
