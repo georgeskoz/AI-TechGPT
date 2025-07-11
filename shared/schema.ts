@@ -12,6 +12,18 @@ export const users = pgTable("users", {
   bio: text("bio"),
   avatar: text("avatar"),
   userType: text("user_type").notNull().default("customer"), // customer, technician, admin
+  
+  // Payment method configuration
+  paymentMethod: text("payment_method"), // credit_card, paypal, apple_pay, google_pay
+  paymentMethodSetup: boolean("payment_method_setup").default(false),
+  paymentDetails: jsonb("payment_details").$type<{
+    cardLast4?: string;
+    cardBrand?: string;
+    paypalEmail?: string;
+    applePayEnabled?: boolean;
+    googlePayEnabled?: boolean;
+  }>(),
+  
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -944,6 +956,9 @@ export const updateProfileSchema = createInsertSchema(users).pick({
   fullName: true,
   bio: true,
   avatar: true,
+  paymentMethod: true,
+  paymentMethodSetup: true,
+  paymentDetails: true,
 });
 
 export const insertIssueCategorySchema = createInsertSchema(issueCategories).pick({
@@ -1258,6 +1273,19 @@ export const insertSupportTicketMessageSchema = createInsertSchema(supportTicket
 }).extend({
   attachments: z.array(z.string()).optional(),
 });
+
+// Type definitions
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UpdateProfile = z.infer<typeof updateProfileSchema>;
+export type Technician = typeof technicians.$inferSelect;
+export type InsertTechnician = z.infer<typeof insertTechnicianSchema>;
+export type Message = typeof messages.$inferSelect;
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type ServiceRequest = typeof serviceRequests.$inferSelect;
+export type InsertServiceRequest = z.infer<typeof insertServiceRequestSchema>;
+export type Job = typeof jobs.$inferSelect;
+export type InsertJob = z.infer<typeof insertJobSchema>;
 
 export const insertSupportTicketAttachmentSchema = createInsertSchema(supportTicketAttachments).pick({
   ticketId: true,
