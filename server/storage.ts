@@ -905,18 +905,133 @@ class MemoryStorage implements IStorage {
     serviceRadius?: number;
     availability?: boolean;
   }): Promise<Technician[]> {
-    return Array.from(this.technicians.values()).filter(technician => {
-      if (criteria.skills && !criteria.skills.some(skill => technician.skills.includes(skill))) {
+    console.log('Searching technicians with criteria:', criteria);
+    console.log('Available technicians:', this.technicians.size);
+    
+    const results = Array.from(this.technicians.values()).filter(technician => {
+      // Log each technician for debugging
+      console.log(`Checking technician ${technician.firstName} ${technician.lastName}:`, {
+        skills: technician.skills,
+        location: technician.location,
+        isActive: technician.isActive,
+        isVerified: technician.isVerified
+      });
+      
+      // Check if technician is active and verified
+      if (!technician.isActive || !technician.isVerified) {
+        console.log(`Filtered out ${technician.firstName} - not active or verified`);
         return false;
       }
-      if (criteria.location && technician.location !== criteria.location) {
-        return false;
+      
+      // Enhanced skill matching - more flexible
+      if (criteria.skills && criteria.skills.length > 0) {
+        const hasMatchingSkill = criteria.skills.some(searchSkill => {
+          const normalizedSearchSkill = searchSkill.toLowerCase();
+          return technician.skills.some(techSkill => {
+            const normalizedTechSkill = techSkill.toLowerCase();
+            // Check for exact match or partial match
+            return normalizedTechSkill.includes(normalizedSearchSkill) || 
+                   normalizedSearchSkill.includes(normalizedTechSkill) ||
+                   this.skillsMatch(normalizedSearchSkill, normalizedTechSkill);
+          });
+        });
+        
+        if (!hasMatchingSkill) {
+          console.log(`Filtered out ${technician.firstName} - no matching skills`);
+          return false;
+        }
       }
-      if (criteria.availability !== undefined && technician.availability !== criteria.availability) {
-        return false;
+      
+      // Location matching - more flexible
+      if (criteria.location && criteria.location.trim()) {
+        const searchLocation = criteria.location.toLowerCase();
+        const techLocation = technician.location.toLowerCase();
+        const techState = technician.state?.toLowerCase() || '';
+        const techCity = technician.city?.toLowerCase() || '';
+        
+        const locationMatch = techLocation.includes(searchLocation) || 
+                             searchLocation.includes(techLocation) ||
+                             techState.includes(searchLocation) ||
+                             techCity.includes(searchLocation);
+        
+        if (!locationMatch) {
+          console.log(`Filtered out ${technician.firstName} - location mismatch`);
+          return false;
+        }
       }
+      
+      console.log(`${technician.firstName} ${technician.lastName} matches criteria`);
       return true;
     });
+    
+    console.log(`Found ${results.length} matching technicians`);
+    return results;
+  }
+  
+  private skillsMatch(searchSkill: string, techSkill: string): boolean {
+    // Define skill synonyms and related terms
+    const skillMappings: { [key: string]: string[] } = {
+      'remote': ['remote support', 'remote desktop', 'remote troubleshooting', 'remote assistance'],
+      'remote support': ['remote', 'remote desktop', 'remote troubleshooting', 'remote assistance'],
+      'remote_support': ['remote support', 'remote', 'remote desktop', 'remote troubleshooting', 'remote assistance'],
+      'screen sharing': ['remote support', 'remote desktop', 'remote assistance'],
+      'phone': ['phone support', 'phone troubleshooting', 'phone assistance'],
+      'phone support': ['phone', 'phone troubleshooting', 'phone assistance'],
+      'phone_support': ['phone support', 'phone', 'phone troubleshooting', 'phone assistance'],
+      'hardware': ['hardware repair', 'hardware troubleshooting', 'hardware issues'],
+      'hardware_repair': ['hardware repair', 'hardware', 'hardware troubleshooting', 'hardware issues'],
+      'hardware repair': ['hardware', 'hardware_repair', 'hardware troubleshooting', 'hardware issues'],
+      'software': ['software troubleshooting', 'software installation', 'software issues'],
+      'software_troubleshooting': ['software troubleshooting', 'software', 'software installation', 'software issues'],
+      'network': ['network setup', 'network troubleshooting', 'network issues'],
+      'network_setup': ['network setup', 'network', 'network troubleshooting', 'network issues'],
+      'network setup': ['network', 'network_setup', 'network troubleshooting', 'network issues'],
+      'web': ['web development', 'web design', 'web programming'],
+      'web_development': ['web development', 'web', 'web design', 'web programming'],
+      'database': ['database management', 'database administration', 'database help'],
+      'database_management': ['database management', 'database', 'database administration', 'database help'],
+      'mobile': ['mobile device repair', 'mobile device support', 'mobile troubleshooting'],
+      'mobile_device_repair': ['mobile device repair', 'mobile', 'mobile device support', 'mobile troubleshooting'],
+      'security': ['security questions', 'security setup', 'cybersecurity'],
+      'system': ['system administration', 'system management', 'system troubleshooting'],
+      'system_administration': ['system administration', 'system', 'system management', 'system troubleshooting'],
+      
+      // Add format conversions (snake_case to proper case)
+      'hardware_repair': ['hardware repair', 'hardware', 'hardware troubleshooting'],
+      'network_setup': ['network setup', 'network', 'network troubleshooting'],
+      'software_installation': ['software installation', 'software', 'software troubleshooting'],
+      'mobile_device_support': ['mobile device support', 'mobile device repair', 'mobile'],
+      'remote_desktop': ['remote desktop', 'remote support', 'remote'],
+      'phone_troubleshooting': ['phone troubleshooting', 'phone support', 'phone'],
+      'web_development': ['web development', 'web', 'web design'],
+      'database_administration': ['database administration', 'database management', 'database'],
+      'system_management': ['system management', 'system administration', 'system']
+    };
+    
+    // Check if search skill maps to tech skill
+    const searchMappings = skillMappings[searchSkill] || [];
+    const techMappings = skillMappings[techSkill] || [];
+    
+    // Format conversion: snake_case to proper case
+    const convertSnakeToProper = (skill: string) => {
+      return skill.split('_').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ');
+    };
+    
+    const convertProperToSnake = (skill: string) => {
+      return skill.toLowerCase().replace(/ /g, '_');
+    };
+    
+    // Check various matching conditions
+    return searchMappings.includes(techSkill) || 
+           techMappings.includes(searchSkill) ||
+           searchMappings.some(mapping => techSkill.includes(mapping)) ||
+           techMappings.some(mapping => searchSkill.includes(mapping)) ||
+           convertSnakeToProper(searchSkill) === techSkill ||
+           convertProperToSnake(techSkill) === searchSkill ||
+           convertSnakeToProper(searchSkill).toLowerCase() === techSkill.toLowerCase() ||
+           convertProperToSnake(techSkill).toLowerCase() === searchSkill.toLowerCase();
   }
   
   // Service request management
