@@ -31,14 +31,14 @@ export default function Navigation({
   };
 
   const navigationItems = [
-    { label: "Customer Portal", path: "/customer-home", description: "Get technical support" },
-    { label: "Technician Portal", path: "/technician-home", description: "Join as a service provider" },
-    { label: "Admin Dashboard", path: "/admin", description: "Platform management" },
+    { label: "Home", path: "/", description: "Customer portal home" },
     { label: "AI Chat Support", path: "/chat", description: "Free AI assistance" },
+    { label: "My Dashboard", path: "/dashboard", description: "View your account and services" },
+    { label: "Request Technician", path: "/technician-request", description: "Book professional help" },
     { label: "Live Support", path: "/live-support", description: "Human technician help" },
     { label: "Phone Support", path: "/phone-support", description: "Call-based support" },
     { label: "Issue Tracker", path: "/issues", description: "Manage your requests" },
-    { label: "Technician Matching", path: "/technician-matching", description: "Find technicians" },
+    { label: "Technician Portal", path: "/technician-home", description: "Join as a service provider" },
   ];
 
   return (
@@ -67,7 +67,7 @@ export default function Navigation({
           <div className="absolute left-1/2 transform -translate-x-1/2">
             <Button
               variant="ghost"
-              onClick={() => setLocation("/chat")}
+              onClick={() => setLocation("/")}
               className="text-xl font-bold text-blue-600 hover:text-blue-700"
             >
               TechGPT
@@ -89,7 +89,7 @@ export default function Navigation({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setLocation("/chat")}
+                onClick={() => setLocation("/")}
                 className="hidden sm:flex items-center gap-2 text-gray-600 hover:text-gray-900"
               >
                 <Home className="h-4 w-4" />

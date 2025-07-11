@@ -1436,7 +1436,7 @@ export default function CustomerHomePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg" 
-                onClick={() => setLocation("/technician")}
+                onClick={() => setLocation("/technician-request")}
                 className="bg-red-600 hover:bg-red-700 text-lg px-8 animate-pulse"
               >
                 <Zap className="h-5 w-5 mr-2" />
@@ -1569,7 +1569,7 @@ export default function CustomerHomePage() {
             <Button 
               size="lg" 
               variant="outline"
-              onClick={() => setLocation("/technician-matching")}
+              onClick={() => setLocation("/technician-request")}
               className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8"
             >
               <Users className="h-5 w-5 mr-2" />
