@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -32,11 +33,11 @@ import {
   Zap,
   DollarSign,
   FileText,
-  Navigation,
   MessageCircle,
   AlertCircle,
   Timer,
-  XCircle
+  XCircle,
+  X
 } from "lucide-react";
 import PaymentMethodSelector from "@/components/PaymentMethodSelector";
 
@@ -868,8 +869,29 @@ export default function QuickTechnicianRequest() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Navigation 
+        title="Request Technician" 
+        showBackButton={true}
+        backTo="/"
+      />
       <div className="max-w-3xl mx-auto p-4">
         <div className="bg-white rounded-lg shadow-sm p-6">
+          {/* Header with Close Button */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Request Technician</h1>
+              <p className="text-gray-600">Get professional technical support</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setLocationPath('/')}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            >
+              <X className="h-4 w-4" />
+              Close
+            </Button>
+          </div>
           {/* Progress indicator */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
