@@ -1802,3 +1802,47 @@ export type InsertProviderResponseAnalytics = z.infer<typeof insertProviderRespo
 
 export type ProviderRecommendation = typeof providerRecommendations.$inferSelect;
 export type InsertProviderRecommendation = z.infer<typeof insertProviderRecommendationSchema>;
+
+// Screen sharing sessions for remote support
+export const screenSharingSessions = pgTable("screen_sharing_sessions", {
+  id: serial("id").primaryKey(),
+  sessionId: text("session_id").notNull().unique(),
+  customerId: integer("customer_id").references(() => users.id),
+  serviceProviderId: integer("service_provider_id").references(() => technicians.id),
+  jobId: integer("job_id").references(() => jobs.id),
+  sessionType: text("session_type").notNull(), // 'view-only' | 'remote-control' | 'collaboration'
+  status: text("status").default("pending"), // 'pending' | 'active' | 'ended' | 'cancelled'
+  quality: text("quality").default("medium"), // 'low' | 'medium' | 'high'
+  audioEnabled: boolean("audio_enabled").default(false),
+  permissionGranted: boolean("permission_granted").default(false),
+  startTime: timestamp("start_time").defaultNow(),
+  endTime: timestamp("end_time"),
+  duration: integer("duration").default(0), // in seconds
+  customerName: text("customer_name"),
+  serviceProviderName: text("service_provider_name"),
+  recordingPath: text("recording_path"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Screen sharing session events log
+export const screenSharingEvents = pgTable("screen_sharing_events", {
+  id: serial("id").primaryKey(),
+  sessionId: text("session_id").notNull().references(() => screenSharingSessions.sessionId),
+  eventType: text("event_type").notNull(), // 'start', 'end', 'control_request', 'control_granted', 'control_denied', 'quality_change'
+  eventData: jsonb("event_data").$type<Record<string, any>>(),
+  timestamp: timestamp("timestamp").defaultNow(),
+  userId: integer("user_id").references(() => users.id),
+  userRole: text("user_role"), // 'customer' | 'service_provider'
+});
+
+// Create insert schemas for screen sharing tables
+export const insertScreenSharingSessionSchema = createInsertSchema(screenSharingSessions);
+export const insertScreenSharingEventSchema = createInsertSchema(screenSharingEvents);
+
+// Export types for screen sharing tables
+export type ScreenSharingSession = typeof screenSharingSessions.$inferSelect;
+export type InsertScreenSharingSession = z.infer<typeof insertScreenSharingSessionSchema>;
+export type ScreenSharingEvent = typeof screenSharingEvents.$inferSelect;
+export type InsertScreenSharingEvent = z.infer<typeof insertScreenSharingEventSchema>;
