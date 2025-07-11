@@ -17,6 +17,7 @@ import ClientDashboard from "@/pages/ClientDashboard";
 import AuthTestPage from "@/components/AuthTestPage";
 import ServiceProviderRegistration from "@/pages/TechnicianRegistration";
 import ServiceProviderDashboard from "@/pages/TechnicianDashboard";
+import TechnicianDetailsPage from "@/pages/TechnicianDashboard";
 import TechnicianLanding from "@/pages/TechnicianLanding";
 import TechnicianMatchingPage from "@/pages/TechnicianMatchingPage";
 import ExpertTechnicianFinder from "@/pages/ExpertTechnicianFinder";
@@ -63,7 +64,7 @@ function Router() {
       <Route path="/dashboard" component={ClientDashboard} />
       <Route path="/auth-test" component={AuthTestPage} />
       <Route path="/technician-register" component={ServiceProviderRegistration} />
-      <Route path="/technician-dashboard" component={ServiceProviderDashboard} />
+      <Route path="/technician-dashboard" component={TechnicianDetailsPage} />
       <Route path="/technicians" component={TechnicianLanding} />
       <Route path="/technician-matching" component={TechnicianMatchingPage} />
       <Route path="/find-expert" component={ExpertTechnicianFinder} />

@@ -468,10 +468,10 @@ export default function QuickTechnicianRequest() {
           View Dashboard
         </Button>
         <Button 
-          onClick={() => setLocationPath('/chat')}
+          onClick={() => setLocationPath('/technician-dashboard')}
           className="flex-1"
         >
-          Chat with Technician
+          View Technician Details
         </Button>
       </div>
     </div>
