@@ -31,16 +31,51 @@ export default function Navigation({
     }
   };
 
-  const navigationItems = [
-    { label: "Home", path: "/", description: "Customer portal home" },
-    { label: "AI Chat Support", path: "/chat", description: "Free AI assistance" },
-    { label: "My Dashboard", path: "/dashboard", description: "View your account and services" },
-    { label: "Request Technician", path: "/technician-request", description: "Book professional help" },
-    { label: "Live Support", path: "/live-support", description: "Human technician help" },
-    { label: "Phone Support", path: "/phone-support", description: "Call-based support" },
-    { label: "Issue Tracker", path: "/issues", description: "Manage your requests" },
-    { label: "Screen Sharing", path: "/screen-sharing", description: "Remote screen sharing support" },
-  ];
+  // Determine current page type
+  const isServiceProviderPage = location.includes('/technician') || location.includes('/service-provider') || 
+                               location.includes('/provider') || location.includes('/earnings');
+  const isAdminPage = location.includes('/admin');
+
+  // Dynamic navigation items based on current page
+  const getNavigationItems = () => {
+    if (isServiceProviderPage) {
+      return [
+        { label: "Provider Home", path: "/technician-home", description: "Service provider dashboard" },
+        { label: "Provider Dashboard", path: "/technician-dashboard", description: "View jobs and earnings" },
+        { label: "Job Notifications", path: "/notifications-dashboard", description: "Manage job alerts" },
+        { label: "Earnings & Payouts", path: "/technician-earnings", description: "Track earnings and payments" },
+        { label: "Provider Registration", path: "/technician-registration", description: "Update provider profile" },
+        { label: "Profile Visibility", path: "/profile-visibility", description: "Manage profile visibility" },
+        { label: "Test Notifications", path: "/test-notifications", description: "Test notification system" },
+        { label: "Find Opportunities", path: "/technician-matching", description: "Browse available jobs" },
+      ];
+    } else if (isAdminPage) {
+      return [
+        { label: "Admin Home", path: "/admin-home", description: "Admin dashboard overview" },
+        { label: "Admin Dashboard", path: "/admin", description: "Main admin control panel" },
+        { label: "Admin Navigation", path: "/admin-navigation", description: "Admin tools navigation" },
+        { label: "Earning Settings", path: "/admin-earnings", description: "Manage provider earnings" },
+        { label: "Category Management", path: "/admin-categories", description: "Manage service categories" },
+        { label: "Announcements", path: "/admin-announcements", description: "System announcements" },
+        { label: "Diagnostic Tools", path: "/admin-diagnostic", description: "Admin diagnostic tools" },
+        { label: "Test Notifications", path: "/test-notifications", description: "Test system notifications" },
+      ];
+    } else {
+      // Customer pages
+      return [
+        { label: "Home", path: "/", description: "Customer portal home" },
+        { label: "AI Chat Support", path: "/chat", description: "Free AI assistance" },
+        { label: "My Dashboard", path: "/dashboard", description: "View your account and services" },
+        { label: "Request Technician", path: "/technician-request", description: "Book professional help" },
+        { label: "Live Support", path: "/live-support", description: "Human technician help" },
+        { label: "Phone Support", path: "/phone-support", description: "Call-based support" },
+        { label: "Issue Tracker", path: "/issues", description: "Manage your requests" },
+        { label: "Screen Sharing", path: "/screen-sharing", description: "Remote screen sharing support" },
+      ];
+    }
+  };
+
+  const navigationItems = getNavigationItems();
 
   // Development role switcher - only show in development
   const isDevelopment = process.env.NODE_ENV === 'development';
