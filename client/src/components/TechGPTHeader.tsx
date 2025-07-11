@@ -16,7 +16,7 @@ export default function TechGPTHeader({ username }: TechGPTHeaderProps) {
   const [, navigate] = useLocation();
 
   const handleProfileClick = () => {
-    navigate(`/profile/${username}`);
+    navigate(`/${username}/profile`);
   };
   
   const handleLogoClick = () => {
