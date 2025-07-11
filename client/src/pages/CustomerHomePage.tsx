@@ -332,6 +332,14 @@ export default function CustomerHomePage() {
       color: "bg-purple-50 border-purple-200"
     },
     {
+      icon: <Monitor className="h-8 w-8 text-green-600" />,
+      title: "Screen Sharing",
+      description: "Share your screen with service providers for remote assistance and control",
+      action: "Start Screen Sharing",
+      route: "/screen-sharing",
+      color: "bg-green-50 border-green-200"
+    },
+    {
       icon: <MapPin className="h-8 w-8 text-orange-600" />,
       title: "On-Site Services",
       description: "Book service providers to come to your location for hands-on repairs",

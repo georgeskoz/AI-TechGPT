@@ -235,6 +235,15 @@ export interface IStorage {
   deleteNotification(notificationId: string): Promise<void>;
   bulkUpdateNotifications(action: string, notificationIds: string[]): Promise<any>;
   getNotificationStats(): Promise<any>;
+
+  // Screen sharing methods
+  getScreenSharingSessions(userId: number, userRole: string): Promise<any[]>;
+  createScreenSharingSession(session: any): Promise<any>;
+  updateScreenSharingSession(sessionId: string, updates: any): Promise<any>;
+  endScreenSharingSession(sessionId: string): Promise<any>;
+  createScreenSharingEvent(event: any): Promise<any>;
+  getScreenSharingEvents(sessionId: string): Promise<any[]>;
+  getActiveScreenSharingSessions(): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -4257,6 +4266,151 @@ class MemoryStorage implements IStorage {
       announcement.isActive && 
       (announcement.region === region || announcement.region === "Global")
     );
+  }
+
+  // Screen sharing methods
+  private screenSharingSessions = new Map<string, any>();
+  private screenSharingEvents = new Map<string, any[]>();
+
+  async getScreenSharingSessions(userId: number, userRole: string): Promise<any[]> {
+    const sessions = Array.from(this.screenSharingSessions.values());
+    return sessions.filter(session => {
+      if (userRole === 'customer') {
+        return session.customerId === userId;
+      } else if (userRole === 'service_provider') {
+        return session.serviceProviderId === userId;
+      }
+      return false;
+    });
+  }
+
+  async createScreenSharingSession(session: any): Promise<any> {
+    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newSession = {
+      id: this.screenSharingSessions.size + 1,
+      sessionId,
+      customerId: session.customerId,
+      serviceProviderId: session.serviceProviderId,
+      jobId: session.jobId,
+      sessionType: session.sessionType || 'view-only',
+      status: 'pending',
+      quality: session.quality || 'medium',
+      audioEnabled: session.audioEnabled || false,
+      permissionGranted: false,
+      startTime: new Date(),
+      endTime: null,
+      duration: 0,
+      customerName: session.customerName || 'Customer',
+      serviceProviderName: session.serviceProviderName || 'Service Provider',
+      recordingPath: null,
+      notes: session.notes || '',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    this.screenSharingSessions.set(sessionId, newSession);
+    
+    // Initialize events array for this session
+    this.screenSharingEvents.set(sessionId, []);
+    
+    // Create initial event
+    await this.createScreenSharingEvent({
+      sessionId,
+      eventType: 'start',
+      eventData: { sessionType: session.sessionType, quality: session.quality },
+      userId: session.customerId,
+      userRole: 'customer'
+    });
+
+    return newSession;
+  }
+
+  async updateScreenSharingSession(sessionId: string, updates: any): Promise<any> {
+    const session = this.screenSharingSessions.get(sessionId);
+    if (!session) {
+      throw new Error('Screen sharing session not found');
+    }
+
+    const updatedSession = {
+      ...session,
+      ...updates,
+      updatedAt: new Date()
+    };
+
+    this.screenSharingSessions.set(sessionId, updatedSession);
+    
+    // Create event for significant updates
+    if (updates.status || updates.sessionType || updates.permissionGranted !== undefined) {
+      await this.createScreenSharingEvent({
+        sessionId,
+        eventType: updates.status === 'active' ? 'control_granted' : 
+                  updates.status === 'ended' ? 'end' : 'status_change',
+        eventData: updates,
+        userId: session.customerId,
+        userRole: 'customer'
+      });
+    }
+
+    return updatedSession;
+  }
+
+  async endScreenSharingSession(sessionId: string): Promise<any> {
+    const session = this.screenSharingSessions.get(sessionId);
+    if (!session) {
+      throw new Error('Screen sharing session not found');
+    }
+
+    const endTime = new Date();
+    const duration = session.startTime ? 
+      Math.floor((endTime.getTime() - session.startTime.getTime()) / 1000) : 0;
+
+    const updatedSession = {
+      ...session,
+      status: 'ended',
+      endTime,
+      duration,
+      updatedAt: new Date()
+    };
+
+    this.screenSharingSessions.set(sessionId, updatedSession);
+    
+    // Create end event
+    await this.createScreenSharingEvent({
+      sessionId,
+      eventType: 'end',
+      eventData: { duration, endTime },
+      userId: session.customerId,
+      userRole: 'customer'
+    });
+
+    return updatedSession;
+  }
+
+  async createScreenSharingEvent(event: any): Promise<any> {
+    const newEvent = {
+      id: Date.now() + Math.random(),
+      sessionId: event.sessionId,
+      eventType: event.eventType,
+      eventData: event.eventData || {},
+      timestamp: new Date(),
+      userId: event.userId,
+      userRole: event.userRole
+    };
+
+    const sessionEvents = this.screenSharingEvents.get(event.sessionId) || [];
+    sessionEvents.push(newEvent);
+    this.screenSharingEvents.set(event.sessionId, sessionEvents);
+
+    return newEvent;
+  }
+
+  async getScreenSharingEvents(sessionId: string): Promise<any[]> {
+    return this.screenSharingEvents.get(sessionId) || [];
+  }
+
+  async getActiveScreenSharingSessions(): Promise<any[]> {
+    const sessions = Array.from(this.screenSharingSessions.values());
+    return sessions.filter(session => session.status === 'active');
   }
 }
 
