@@ -3,9 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Monitor, Users, Shield, Clock, Activity, Settings } from 'lucide-react';
+import { Monitor, Users, Shield, Clock, Activity, Settings, ArrowLeft, X } from 'lucide-react';
 import ScreenSharingTool from '@/components/ScreenSharingTool';
 import { useQuery } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
+import Navigation from '@/components/Navigation';
 
 interface ScreenSharingSession {
   id: string;
@@ -24,6 +26,7 @@ export default function ScreenSharingPage() {
   const [activeTab, setActiveTab] = useState('current');
   const [userRole, setUserRole] = useState<'customer' | 'service_provider'>('customer');
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
+  const [, setLocation] = useLocation();
 
   // Mock data for demonstration
   const mockSessions: ScreenSharingSession[] = [
@@ -77,16 +80,34 @@ export default function ScreenSharingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Monitor className="h-8 w-8 text-blue-600" />
-            <div>
-              <h1 className="text-3xl font-bold">Screen Sharing Center</h1>
-              <p className="text-gray-600">Remote screen sharing and control for technical support</p>
+    <div className="min-h-screen bg-gray-50">
+      <Navigation 
+        title="Screen Sharing Center" 
+        showBackButton={true}
+        backTo="/"
+      />
+      <div className="p-4">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Monitor className="h-8 w-8 text-blue-600" />
+              <div>
+                <h1 className="text-2xl font-bold">Screen Sharing Center</h1>
+                <p className="text-gray-600">Remote screen sharing and control for technical support</p>
+              </div>
             </div>
+            
+            {/* Close Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setLocation('/')}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            >
+              <X className="h-4 w-4" />
+              Close
+            </Button>
           </div>
           
           <div className="flex items-center gap-4">
@@ -107,10 +128,9 @@ export default function ScreenSharingPage() {
               <span className="text-sm font-medium">System Online</span>
             </div>
           </div>
-        </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -160,155 +180,156 @@ export default function ScreenSharingPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
+          </div>
 
-        {/* Main Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="current">Current Session</TabsTrigger>
-            <TabsTrigger value="active">Active Sessions</TabsTrigger>
-            <TabsTrigger value="history">Session History</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="current" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Screen Sharing Tool</CardTitle>
-                <CardDescription>
-                  Start a new screen sharing session or join an existing one
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScreenSharingTool 
-                  userRole={userRole}
-                  userId={1}
-                  sessionId={selectedSession || undefined}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="active" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Active Sessions</CardTitle>
-                <CardDescription>
-                  Currently running screen sharing sessions
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {activeSessions.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Monitor className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <p className="text-lg font-medium">No active sessions</p>
-                    <p className="text-sm">Start a new session to begin screen sharing</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {activeSessions.map((session) => (
-                      <Card key={session.id} className="border-l-4 border-l-green-500">
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className={`w-3 h-3 rounded-full ${getStatusColor(session.status)}`}></div>
-                              <div>
-                                <h3 className="font-medium">
-                                  {session.customerName} ↔ {session.serviceProviderName}
-                                </h3>
-                                <p className="text-sm text-gray-600">
-                                  Session ID: {session.id}
-                                </p>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center gap-4">
-                              <div className="text-right">
-                                <Badge variant={session.sessionType === 'remote-control' ? 'destructive' : 'secondary'}>
-                                  {session.sessionType}
-                                </Badge>
-                                <p className="text-sm text-gray-600 mt-1">
-                                  {formatDuration(Math.floor((Date.now() - session.startTime.getTime()) / 1000))}
-                                </p>
+          {/* Main Content */}
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="current">Current Session</TabsTrigger>
+              <TabsTrigger value="active">Active Sessions</TabsTrigger>
+              <TabsTrigger value="history">Session History</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="current" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Screen Sharing Tool</CardTitle>
+                  <CardDescription>
+                    Start a new screen sharing session or join an existing one
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ScreenSharingTool 
+                    userRole={userRole}
+                    userId={1}
+                    sessionId={selectedSession || undefined}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="active" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Active Sessions</CardTitle>
+                  <CardDescription>
+                    Currently running screen sharing sessions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {activeSessions.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <Monitor className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                      <p className="text-lg font-medium">No active sessions</p>
+                      <p className="text-sm">Start a new session to begin screen sharing</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {activeSessions.map((session) => (
+                        <Card key={session.id} className="border-l-4 border-l-green-500">
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4">
+                                <div className={`w-3 h-3 rounded-full ${getStatusColor(session.status)}`}></div>
+                                <div>
+                                  <h3 className="font-medium">
+                                    {session.customerName} ↔ {session.serviceProviderName}
+                                  </h3>
+                                  <p className="text-sm text-gray-600">
+                                    Session ID: {session.id}
+                                  </p>
+                                </div>
                               </div>
                               
-                              <Button 
-                                size="sm" 
-                                onClick={() => {
-                                  setSelectedSession(session.id);
-                                  setActiveTab('current');
-                                }}
-                              >
-                                Join Session
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="history" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Session History</CardTitle>
-                <CardDescription>
-                  Previous screen sharing sessions
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {recentSessions.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Clock className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <p className="text-lg font-medium">No session history</p>
-                    <p className="text-sm">Completed sessions will appear here</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {recentSessions.map((session) => (
-                      <Card key={session.id} className="border-l-4 border-l-gray-400">
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className={`w-3 h-3 rounded-full ${getStatusColor(session.status)}`}></div>
-                              <div>
-                                <h3 className="font-medium">
-                                  {session.customerName} ↔ {session.serviceProviderName}
-                                </h3>
-                                <p className="text-sm text-gray-600">
-                                  {session.startTime.toLocaleString()}
-                                </p>
+                              <div className="flex items-center gap-4">
+                                <div className="text-right">
+                                  <Badge variant={session.sessionType === 'remote-control' ? 'destructive' : 'secondary'}>
+                                    {session.sessionType}
+                                  </Badge>
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    {formatDuration(Math.floor((Date.now() - session.startTime.getTime()) / 1000))}
+                                  </p>
+                                </div>
+                                
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => {
+                                    setSelectedSession(session.id);
+                                    setActiveTab('current');
+                                  }}
+                                >
+                                  Join Session
+                                </Button>
                               </div>
                             </div>
-                            
-                            <div className="flex items-center gap-4">
-                              <div className="text-right">
-                                <Badge variant="outline">
-                                  {session.sessionType}
-                                </Badge>
-                                <p className="text-sm text-gray-600 mt-1">
-                                  Duration: {formatDuration(session.duration)}
-                                </p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="history" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Session History</CardTitle>
+                  <CardDescription>
+                    Previous screen sharing sessions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {recentSessions.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <Clock className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                      <p className="text-lg font-medium">No session history</p>
+                      <p className="text-sm">Completed sessions will appear here</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {recentSessions.map((session) => (
+                        <Card key={session.id} className="border-l-4 border-l-gray-400">
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4">
+                                <div className={`w-3 h-3 rounded-full ${getStatusColor(session.status)}`}></div>
+                                <div>
+                                  <h3 className="font-medium">
+                                    {session.customerName} ↔ {session.serviceProviderName}
+                                  </h3>
+                                  <p className="text-sm text-gray-600">
+                                    {session.startTime.toLocaleString()}
+                                  </p>
+                                </div>
                               </div>
                               
-                              <div className="text-right">
-                                <p className="text-sm font-medium">Quality: {session.quality}</p>
-                                <p className="text-sm text-gray-600">Ended</p>
+                              <div className="flex items-center gap-4">
+                                <div className="text-right">
+                                  <Badge variant="outline">
+                                    {session.sessionType}
+                                  </Badge>
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    Duration: {formatDuration(session.duration)}
+                                  </p>
+                                </div>
+                                
+                                <div className="text-right">
+                                  <p className="text-sm font-medium">Quality: {session.quality}</p>
+                                  <p className="text-sm text-gray-600">Ended</p>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );
