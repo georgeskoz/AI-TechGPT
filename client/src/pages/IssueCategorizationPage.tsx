@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, MessageCircle, List, Plus, DollarSign } from 'lucide-react';
+import { ArrowLeft, MessageCircle, List, Plus, DollarSign, CheckCircle, Clock, User } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import IssueCategorization, { TechnicalIssue } from '@/components/IssueCategorization';
 import IssueTracker from '@/components/IssueTracker';
@@ -76,24 +76,37 @@ export default function IssueCategorizationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navigation title="Issue Management" backTo="/" />
-      {/* Main Content */}
-      <div className="max-w-md mx-auto px-4 py-6">
-        <div className="text-center mb-6">
-          <h1 className="text-xl font-bold text-gray-900">Support Options</h1>
-          <div className="flex justify-center gap-2 mt-2">
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
-              {issues.length} Issues
-            </Badge>
-            <Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
-              {issues.filter(i => i.status === 'resolved').length} Resolved
-            </Badge>
+      
+      {/* Header Section */}
+      <div className="bg-white border-b shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Technical Support Center</h1>
+            <p className="text-gray-600 mb-6">Manage your technical issues and get expert help</p>
+            <div className="flex justify-center gap-4">
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 px-4 py-2">
+                <List className="w-4 h-4 mr-2" />
+                {issues.length} Total Issues
+              </Badge>
+              <Badge variant="outline" className="bg-green-50 text-green-700 px-4 py-2">
+                <CheckCircle className="w-4 h-4 mr-2" />
+                {issues.filter(i => i.status === 'resolved').length} Resolved
+              </Badge>
+              <Badge variant="outline" className="bg-orange-50 text-orange-700 px-4 py-2">
+                <Clock className="w-4 h-4 mr-2" />
+                {issues.filter(i => i.status === 'in-progress').length} In Progress
+              </Badge>
+            </div>
           </div>
         </div>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2">
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto mb-8">
             <TabsTrigger value="categorize" className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
               New Issue
@@ -102,49 +115,98 @@ export default function IssueCategorizationPage() {
               <List className="w-4 h-4" />
               My Issues
             </TabsTrigger>
+            <TabsTrigger value="pricing" className="flex items-center gap-2">
+              <DollarSign className="w-4 h-4" />
+              Pricing
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="categorize" className="mt-4">
-            <IssueCategorization
-              onIssueCreated={handleIssueCreated}
-              onCategorySelected={handleCategorySelected}
-            />
+          <TabsContent value="categorize" className="mt-0">
+            <Card className="shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+                <CardTitle className="text-xl">Report New Technical Issue</CardTitle>
+                <p className="text-blue-100">Select your issue category to get started with expert support</p>
+              </CardHeader>
+              <CardContent className="p-6">
+                <IssueCategorization
+                  onIssueCreated={handleIssueCreated}
+                  onCategorySelected={handleCategorySelected}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
 
-          <TabsContent value="tracker" className="mt-4">
-            <IssueTracker
-              issues={issues}
-              onIssueSelect={handleIssueSelect}
-              onStatusUpdate={handleStatusUpdate}
-            />
+          <TabsContent value="tracker" className="mt-0">
+            <Card className="shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-green-500 to-teal-500 text-white">
+                <CardTitle className="text-xl">Issue Tracker</CardTitle>
+                <p className="text-green-100">Monitor and manage all your technical support requests</p>
+              </CardHeader>
+              <CardContent className="p-6">
+                <IssueTracker
+                  issues={issues}
+                  onIssueSelect={handleIssueSelect}
+                  onStatusUpdate={handleStatusUpdate}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="pricing" className="mt-0">
+            <Card className="shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                <CardTitle className="text-xl">Service Pricing Calculator</CardTitle>
+                <p className="text-purple-100">Get instant pricing for technical support services</p>
+              </CardHeader>
+              <CardContent className="p-6">
+                <UniversalPricingCalculator
+                  selectedCategory={selectedCategory}
+                  selectedSubcategory={selectedSubcategory}
+                  onServiceBooked={handleServiceBooked}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
         
-        {/* Quick Help Actions */}
-        <div className="mt-6 space-y-3">
-          <Card>
-            <CardContent className="p-4">
-              <div className="text-center space-y-3">
-                <h3 className="font-semibold">Need Help Right Now?</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button 
-                    onClick={() => setLocation('/chat')}
-                    variant="outline"
-                    className="flex items-center gap-2"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    AI Chat
-                  </Button>
-                  <Button 
-                    onClick={() => setLocation('/phone-support')}
-                    variant="outline"
-                    className="flex items-center gap-2"
-                  >
-                    <DollarSign className="w-4 h-4" />
-                    Phone Support
-                  </Button>
-                </div>
+        {/* Quick Actions Section */}
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/chat')}>
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MessageCircle className="w-6 h-6 text-blue-600" />
               </div>
+              <h3 className="font-semibold text-lg mb-2">AI Chat Support</h3>
+              <p className="text-gray-600 text-sm">Get instant help from our AI assistant</p>
+              <Button variant="outline" className="mt-4 w-full">
+                Start Chat
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/phone-support')}>
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <DollarSign className="w-6 h-6 text-green-600" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">Phone Support</h3>
+              <p className="text-gray-600 text-sm">Talk to a human expert directly</p>
+              <Button variant="outline" className="mt-4 w-full">
+                Call Now
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/technician-request')}>
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <User className="w-6 h-6 text-purple-600" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">Service Provider</h3>
+              <p className="text-gray-600 text-sm">Book an expert technician</p>
+              <Button variant="outline" className="mt-4 w-full">
+                Book Now
+              </Button>
             </CardContent>
           </Card>
         </div>
