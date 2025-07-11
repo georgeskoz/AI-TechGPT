@@ -56,24 +56,17 @@ function Router() {
     <Switch>
       {/* Main Entry Points */}
       <Route path="/" component={CustomerHomePage} />
-      <Route path="/home" component={CustomerHomePage} />
       
-      {/* Customer Portal */}
+      {/* Customer Portal - Core Pages */}
       <Route path="/chat" component={ChatPage} />
       <Route path="/dashboard" component={ClientDashboard} />
       <Route path="/issues" component={IssueCategorizationPage} />
-      <Route path="/support" component={ChatPage} />
-      <Route path="/triage" component={TriagePage} />
-      <Route path="/diagnostic" component={SimpleDiagnosticPage} />
       
-      {/* Support Services */}
-      <Route path="/phone-support" component={PhoneSupportPage} />
+      {/* Support Services - Essential Customer Services */}
       <Route path="/live-support" component={() => <LiveSupportPage username={getStoredUsername()} />} />
+      <Route path="/phone-support" component={PhoneSupportPage} />
       <Route path="/screen-sharing" component={ScreenSharingPage} />
       <Route path="/technician-request" component={QuickTechnicianRequest} />
-      <Route path="/technician-matching" component={TechnicianMatchingPage} />
-      <Route path="/find-expert" component={ExpertTechnicianFinder} />
-      <Route path="/marketplace" component={() => <MarketplacePage username={getStoredUsername()} />} />
       
       {/* Service Provider Portal */}
       <Route path="/technician-home" component={ServiceProviderHomePage} />
@@ -91,20 +84,20 @@ function Router() {
       <Route path="/admin-categories" component={AdminCategoryManagement} />
       <Route path="/admin/announcements" component={AdminAnnouncements} />
       
-      {/* Utility Pages */}
-      <Route path="/domains" component={DomainSelector} />
-      <Route path="/onboarding" component={OnboardingWizard} />
-      <Route path="/register" component={RegisterPage} />
-      <Route path="/test-notifications" component={TestNotificationSystem} />
-      <Route path="/notifications" component={NotificationsDashboard} />
+      {/* User Profile */}
       <Route path="/:username/profile" component={ProfilePage} />
       
-      {/* Legacy Routes - Redirect to main paths */}
-      <Route path="/customer-home" component={CustomerHomePage} />
-      <Route path="/technician" component={QuickTechnicianRequest} />
-      <Route path="/book-technician" component={SimpleBooking} />
-      <Route path="/book-service" component={BookServicePage} />
-      <Route path="/auth-test" component={AuthTestPage} />
+      {/* Development/Testing Pages - Only available in development mode */}
+      {process.env.NODE_ENV === 'development' && (
+        <>
+          <Route path="/domains" component={DomainSelector} />
+          <Route path="/test-notifications" component={TestNotificationSystem} />
+          <Route path="/notifications" component={NotificationsDashboard} />
+          <Route path="/onboarding" component={OnboardingWizard} />
+          <Route path="/register" component={RegisterPage} />
+          <Route path="/auth-test" component={AuthTestPage} />
+        </>
+      )}
       
       <Route component={NotFound} />
     </Switch>

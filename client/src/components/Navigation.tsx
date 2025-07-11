@@ -61,16 +61,15 @@ export default function Navigation({
         { label: "Test Notifications", path: "/test-notifications", description: "Test system notifications" },
       ];
     } else {
-      // Customer pages
+      // Customer pages - Clean production-ready navigation
       return [
         { label: "Home", path: "/", description: "Customer portal home" },
         { label: "AI Chat Support", path: "/chat", description: "Free AI assistance" },
         { label: "My Dashboard", path: "/dashboard", description: "View your account and services" },
         { label: "Request Technician", path: "/technician-request", description: "Book professional help" },
-        { label: "Live Support", path: "/live-support", description: "Human technician help" },
+        { label: "Live Support", path: "/live-support", description: "Chat with human experts" },
         { label: "Phone Support", path: "/phone-support", description: "Call-based support" },
-        { label: "Issue Tracker", path: "/issues", description: "Manage your requests" },
-        { label: "Screen Sharing", path: "/screen-sharing", description: "Remote screen sharing support" },
+        { label: "Screen Sharing", path: "/screen-sharing", description: "Remote screen assistance" },
       ];
     }
   };
