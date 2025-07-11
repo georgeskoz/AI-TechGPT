@@ -38,6 +38,7 @@ import {
   Timer,
   XCircle
 } from "lucide-react";
+import PaymentMethodSelector from "@/components/PaymentMethodSelector";
 
 interface Category {
   id: string;
@@ -127,6 +128,11 @@ export default function QuickTechnicianRequest() {
   const [providerResponse, setProviderResponse] = useState<'pending' | 'accepted' | 'rejected' | 'timeout' | null>(null);
   const [countdown, setCountdown] = useState(60);
   const [, setLocationPath] = useLocation();
+  
+  // Payment method state
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
+  const [paymentMethodDetails, setPaymentMethodDetails] = useState<any>(null);
+  const [isPaymentSetupComplete, setIsPaymentSetupComplete] = useState(false);
 
   // Auto-detect location
   useEffect(() => {
@@ -152,7 +158,7 @@ export default function QuickTechnicianRequest() {
       // In real app, reassign to next provider
       setTimeout(() => {
         setProviderResponse('accepted');
-        setStep(8);
+        setStep(9);
       }, 2000);
     }
   }, [providerResponse, countdown]);
@@ -163,7 +169,7 @@ export default function QuickTechnicianRequest() {
   };
 
   const handleNext = () => {
-    if (step < 9) {
+    if (step < 10) {
       setStep(step + 1);
     }
   };
@@ -176,26 +182,36 @@ export default function QuickTechnicianRequest() {
 
   const handleTechnicianSelect = (technician: Technician) => {
     setSelectedTechnician(technician);
-    setStep(6);
+    setStep(7);
   };
 
   const handleSendJobRequest = () => {
     setJobRequestSent(true);
     setProviderResponse('pending');
     setCountdown(60);
-    setStep(7);
+    setStep(8);
     
     // Simulate provider response after 10 seconds
     setTimeout(() => {
       setProviderResponse('accepted');
-      setStep(8);
+      setStep(9);
     }, 10000);
   };
 
   const handleBookingComplete = () => {
-    setStep(9);
+    setStep(10);
     // Set localStorage flag to show active service tracker
     localStorage.setItem('activeServiceBooking', 'true');
+  };
+
+  const handlePaymentMethodChange = (method: string) => {
+    setSelectedPaymentMethod(method);
+    setIsPaymentSetupComplete(false);
+  };
+
+  const handlePaymentSetupComplete = (method: string, details: any) => {
+    setPaymentMethodDetails(details);
+    setIsPaymentSetupComplete(true);
   };
 
   const calculateServiceFee = () => {
@@ -415,8 +431,39 @@ export default function QuickTechnicianRequest() {
     </div>
   );
 
-  // Step 4: Legal Agreement
+  // Step 4: Payment Method Selection
   const renderStep4 = () => (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Select Payment Method</h2>
+        <p className="text-gray-600">Choose how you'd like to pay for the service</p>
+      </div>
+      
+      <PaymentMethodSelector
+        selectedMethod={selectedPaymentMethod}
+        onMethodChange={handlePaymentMethodChange}
+        onSetupComplete={handlePaymentSetupComplete}
+        isSetupComplete={isPaymentSetupComplete}
+      />
+      
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={handleBack}>
+          <ChevronLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
+        <Button 
+          onClick={handleNext}
+          disabled={!selectedPaymentMethod || !isPaymentSetupComplete}
+        >
+          Continue
+          <ArrowRight className="h-4 w-4 ml-2" />
+        </Button>
+      </div>
+    </div>
+  );
+
+  // Step 5: Legal Agreement
+  const renderStep5 = () => (
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Terms of Service</h2>
@@ -477,8 +524,8 @@ export default function QuickTechnicianRequest() {
     </div>
   );
 
-  // Step 5: Provider Matching
-  const renderStep5 = () => (
+  // Step 6: Provider Matching
+  const renderStep6 = () => (
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Available Technicians</h2>
@@ -543,8 +590,8 @@ export default function QuickTechnicianRequest() {
     </div>
   );
 
-  // Step 6: Send Job Request
-  const renderStep6 = () => (
+  // Step 7: Send Job Request
+  const renderStep7 = () => (
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Confirm Your Selection</h2>
@@ -614,8 +661,8 @@ export default function QuickTechnicianRequest() {
     </div>
   );
 
-  // Step 7: Provider Response
-  const renderStep7 = () => (
+  // Step 8: Provider Response
+  const renderStep8 = () => (
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Request Sent!</h2>
@@ -672,8 +719,8 @@ export default function QuickTechnicianRequest() {
     </div>
   );
 
-  // Step 8: Provider Accepted
-  const renderStep8 = () => (
+  // Step 9: Provider Accepted
+  const renderStep9 = () => (
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-green-600 mb-2">Request Accepted!</h2>
@@ -749,8 +796,8 @@ export default function QuickTechnicianRequest() {
     </div>
   );
 
-  // Step 9: Booking Complete
-  const renderStep9 = () => (
+  // Step 10: Booking Complete
+  const renderStep10 = () => (
     <div className="text-center space-y-6">
       <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
         <CheckCircle className="w-8 h-8 text-green-600" />
@@ -858,6 +905,7 @@ export default function QuickTechnicianRequest() {
           {step === 7 && renderStep7()}
           {step === 8 && renderStep8()}
           {step === 9 && renderStep9()}
+          {step === 10 && renderStep10()}
         </div>
       </div>
     </div>
