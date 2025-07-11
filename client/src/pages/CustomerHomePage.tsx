@@ -249,7 +249,7 @@ export default function CustomerHomePage() {
   const features = [
     {
       icon: <Zap className="h-8 w-8 text-red-600" />,
-      title: "🔧 Request Technician (Fast Track)",
+      title: "🔧 Request Service Provider (Fast Track)",
       description: "Get help in under 60 seconds - streamlined booking process",
       action: "Request Now",
       route: "/technician",
@@ -275,7 +275,7 @@ export default function CustomerHomePage() {
     {
       icon: <MapPin className="h-8 w-8 text-orange-600" />,
       title: "On-Site Services",
-      description: "Book technicians to come to your location for hands-on repairs",
+      description: "Book service providers to come to your location for hands-on repairs",
       action: "Book On-Site",
       route: "/phone-support",
       color: "bg-orange-50 border-orange-200"
@@ -1040,7 +1040,7 @@ export default function CustomerHomePage() {
                                   <strong>Details:</strong> Customer reported desktop computer wouldn't power on. Diagnosed faulty power supply unit (PSU) after testing with multimeter. Replaced 650W PSU with new 750W unit. Verified all components working properly. Tested system stability for 15 minutes.
                                 </p>
                                 <p className="text-sm text-gray-600">
-                                  <strong>Technician:</strong> Mike Johnson • <strong>Service Type:</strong> On-site
+                                  <strong>Service Provider:</strong> Mike Johnson • <strong>Service Type:</strong> On-site
                                 </p>
                                 <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
                                   <span>📅 January 5, 2025</span>
@@ -1065,7 +1065,7 @@ export default function CustomerHomePage() {
                                   <strong>Details:</strong> Set up complete web development environment including Node.js, VS Code, Git, and Docker. Configured development server, installed necessary extensions, and created project templates. Provided documentation and quick start guide.
                                 </p>
                                 <p className="text-sm text-gray-600">
-                                  <strong>Technician:</strong> Sarah Chen • <strong>Service Type:</strong> Remote
+                                  <strong>Service Provider:</strong> Sarah Chen • <strong>Service Type:</strong> Remote
                                 </p>
                                 <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
                                   <span>📅 December 28, 2024</span>
@@ -1090,7 +1090,7 @@ export default function CustomerHomePage() {
                                   <strong>Details:</strong> Configured new mesh Wi-Fi system covering 3000 sq ft home. Set up main router and 2 satellite units. Optimized channel settings for minimal interference. Configured guest network and parental controls. Speed test showed 95% of ISP bandwidth throughout home.
                                 </p>
                                 <p className="text-sm text-gray-600">
-                                  <strong>Technician:</strong> David Martinez • <strong>Service Type:</strong> On-site
+                                  <strong>Service Provider:</strong> David Martinez • <strong>Service Type:</strong> On-site
                                 </p>
                                 <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
                                   <span>📅 December 20, 2024</span>
@@ -1115,7 +1115,7 @@ export default function CustomerHomePage() {
                                   <strong>Details:</strong> Performed full security audit of home network and devices. Updated router firmware, changed default passwords, enabled WPA3 encryption. Installed antivirus on all devices, configured firewalls, and set up automatic security updates. Provided security best practices guide.
                                 </p>
                                 <p className="text-sm text-gray-600">
-                                  <strong>Technician:</strong> Alex Thompson • <strong>Service Type:</strong> Remote + On-site
+                                  <strong>Service Provider:</strong> Alex Thompson • <strong>Service Type:</strong> Remote + On-site
                                 </p>
                                 <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
                                   <span>📅 December 15, 2024</span>
@@ -1440,7 +1440,7 @@ export default function CustomerHomePage() {
                 className="bg-red-600 hover:bg-red-700 text-lg px-8 animate-pulse"
               >
                 <Zap className="h-5 w-5 mr-2" />
-                🔧 Request Technician (60s)
+                🔧 Request Service Provider (60s)
               </Button>
               <Button 
                 size="lg" 
