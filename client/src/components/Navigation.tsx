@@ -185,8 +185,8 @@ export default function Navigation({
                 </Button>
               </SheetTrigger>
               <SheetContent>
-                <div className="flex flex-col gap-4 mt-8">
-                  <div className="flex items-center justify-between mb-4">
+                <div className="flex flex-col gap-2 mt-6">
+                  <div className="flex items-center justify-between mb-3">
                     <h2 className="text-lg font-semibold">Quick Access</h2>
                   </div>
                   {navigationItems.map((item) => (
@@ -194,11 +194,11 @@ export default function Navigation({
                       key={item.path}
                       variant="ghost"
                       onClick={() => setLocation(item.path)}
-                      className="justify-start text-left h-auto p-3"
+                      className="justify-start text-left h-auto p-2"
                     >
                       <div>
-                        <div className="font-medium">{item.label}</div>
-                        <div className="text-sm text-gray-500">{item.description}</div>
+                        <div className="font-medium text-sm">{item.label}</div>
+                        <div className="text-xs text-gray-500">{item.description}</div>
                       </div>
                     </Button>
                   ))}
