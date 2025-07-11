@@ -52,7 +52,7 @@ import { useLocation } from "wouter";
 export default function CustomerHomePage() {
   const [, setLocation] = useLocation();
   const [selectedAccountSection, setSelectedAccountSection] = useState('help');
-  const [showActiveService, setShowActiveService] = useState(true);
+  const [showActiveService, setShowActiveService] = useState(false);
   const [profileData, setProfileData] = useState({
     fullName: '',
     email: '',
@@ -352,11 +352,13 @@ export default function CustomerHomePage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navigation title="Customer Portal" backTo="/domains" />
       
-      {/* Active Service Tracker */}
-      <ActiveServiceTracker 
-        isVisible={showActiveService} 
-        onClose={() => setShowActiveService(false)} 
-      />
+      {/* Active Service Tracker - Only show when explicitly requested */}
+      {showActiveService && (
+        <ActiveServiceTracker 
+          isVisible={showActiveService} 
+          onClose={() => setShowActiveService(false)} 
+        />
+      )}
       {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
@@ -371,13 +373,6 @@ export default function CustomerHomePage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowActiveService(true)}
-                className="flex items-center gap-2"
-              >
-                🔧 Active Service
-              </Button>
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" className="flex items-center gap-2">
