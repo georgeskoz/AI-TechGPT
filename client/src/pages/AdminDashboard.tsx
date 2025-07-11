@@ -42,6 +42,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import Navigation from "@/components/Navigation";
 import AdminDisputeManagement from "@/components/AdminDisputeManagement";
 import PaymentGatewayManagement from "@/components/PaymentGatewayManagement";
 import TaxManagement from "@/components/TaxManagement";
@@ -1341,6 +1342,14 @@ Last Updated: ${effectiveDate}
 
   return (
     <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
+      {/* Navigation */}
+      <Navigation 
+        showBackButton={true}
+        backTo="/"
+        title="Admin Dashboard"
+        showHomeButton={true}
+      />
+      
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
