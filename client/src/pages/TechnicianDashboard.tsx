@@ -257,7 +257,7 @@ export default function TechnicianDashboard() {
         {/* Quick Actions */}
         <div className="mt-6 flex flex-wrap gap-3">
           <Button 
-            onClick={() => setLocation('/customer-dashboard')}
+            onClick={() => setLocation('/dashboard')}
             variant="outline"
           >
             <User className="w-4 h-4 mr-2" />
