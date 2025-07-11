@@ -42,18 +42,6 @@ export default function TechGPTHeader({ username }: TechGPTHeaderProps) {
           <Button 
             variant="outline" 
             size="sm" 
-            onClick={() => {
-              // Simulate active service for demo
-              localStorage.setItem('activeServiceBooking', 'true');
-              window.location.reload();
-            }}
-            className="hidden md:inline-flex bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
-          >
-            🔧 Active Service
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
             onClick={() => navigate('/marketplace')}
             className="hidden md:inline-flex"
           >
