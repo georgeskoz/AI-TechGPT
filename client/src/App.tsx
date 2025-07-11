@@ -41,6 +41,7 @@ import TestNotificationSystem from "@/pages/TestNotificationSystem";
 import NotificationsDashboard from "@/pages/NotificationsDashboard";
 import QuickServiceProviderRequest from "@/pages/QuickTechnicianRequest";
 import ScreenSharingPage from "@/pages/ScreenSharingPage";
+import ReceiptDemo from "@/pages/ReceiptDemo";
 
 
 function Router() {
@@ -96,6 +97,7 @@ function Router() {
           <Route path="/onboarding" component={OnboardingWizard} />
           <Route path="/register" component={RegisterPage} />
           <Route path="/auth-test" component={AuthTestPage} />
+          <Route path="/receipt-demo" component={ReceiptDemo} />
         </>
       )}
       
