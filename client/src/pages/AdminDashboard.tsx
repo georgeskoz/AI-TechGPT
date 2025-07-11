@@ -1025,7 +1025,7 @@ Last Updated: ${effectiveDate}
 
   const sidebarItems = [
     { id: "overview", label: "Overview", icon: BarChart3 },
-    { id: "notifications", label: "Notifications", icon: Bell },
+    { id: "notifications", label: "Push Notifications", icon: Bell },
     { 
       id: "users", 
       label: "Users", 
@@ -1089,7 +1089,6 @@ Last Updated: ${effectiveDate}
       icon: Server,
       subItems: [
         { id: "coupons", label: "Coupons", icon: Percent },
-        { id: "notifications", label: "Push Notifications", icon: Bell },
         { id: "email", label: "Email System", icon: Mail },
         { id: "regional-announcements", label: "Regional Announcements", icon: Megaphone },
         { id: "system-settings", label: "System Settings", icon: Settings }
@@ -1574,7 +1573,7 @@ Last Updated: ${effectiveDate}
           )}
 
           {activeTab === "notifications" && (
-            <NotificationsCenter />
+            <PushNotifications />
           )}
 
           {/* User Management Sections */}
