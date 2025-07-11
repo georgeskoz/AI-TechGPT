@@ -32,8 +32,15 @@ export default function Navigation({
   };
 
   // Determine current page type
-  const isServiceProviderPage = location.includes('/technician') || location.includes('/service-provider') || 
-                               location.includes('/provider') || location.includes('/earnings');
+  const isServiceProviderPage = location.includes('/service-provider') || 
+                               location.includes('/provider') || 
+                               location.includes('/technician-dashboard') ||
+                               location.includes('/technician-earnings') ||
+                               location.includes('/technician-registration') ||
+                               location.includes('/technician-home') ||
+                               location.includes('/technician-matching') ||
+                               location.includes('/profile-visibility') ||
+                               location.includes('/notifications-dashboard');
   const isAdminPage = location.includes('/admin');
 
   // Dynamic navigation items based on current page
@@ -66,7 +73,7 @@ export default function Navigation({
         { label: "Home", path: "/", description: "Customer portal home" },
         { label: "AI Chat Support", path: "/chat", description: "Free AI assistance" },
         { label: "My Dashboard", path: "/dashboard", description: "View your account and services" },
-        { label: "Request Technician", path: "/technician-request", description: "Book professional help" },
+        { label: "Request Service Provider", path: "/technician-request", description: "Book professional help" },
         { label: "Live Support", path: "/live-support", description: "Chat with human experts" },
         { label: "Phone Support", path: "/phone-support", description: "Call-based support" },
         { label: "Screen Sharing", path: "/screen-sharing", description: "Remote screen assistance" },
