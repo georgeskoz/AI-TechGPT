@@ -195,13 +195,72 @@ export default function CustomerHomePage() {
   };
 
   const handleExportPDF = (invoice: any) => {
-    alert(`Exporting invoice for ${invoice.service} (${invoice.date}) to PDF...`);
+    // Generate PDF content
+    const pdfContent = `
+      TechGPT - Service Receipt
+      ========================
+      
+      Invoice #: ${invoice.id}
+      Service: ${invoice.service}
+      Date: ${invoice.date}
+      Amount: ${invoice.amount}
+      Service Provider: ${invoice.provider}
+      Status: ${invoice.status}
+      
+      Service Details:
+      ${invoice.details}
+      
+      Thank you for using TechGPT!
+      
+      Questions? Contact support@techgpt.com
+    `;
+    
+    // Create downloadable PDF
+    const blob = new Blob([pdfContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `TechGPT_Invoice_${invoice.id}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    alert(`Invoice ${invoice.id} exported successfully!`);
   };
 
   const handleEmailInvoice = (invoice: any) => {
     const email = prompt('Enter email address to send invoice:');
     if (email) {
-      alert(`Invoice for ${invoice.service} sent to ${email}`);
+      // Create email content
+      const emailContent = `
+        Subject: TechGPT Service Receipt - Invoice #${invoice.id}
+        
+        Dear Customer,
+        
+        Thank you for using TechGPT services. Please find your service receipt below:
+        
+        Invoice #: ${invoice.id}
+        Service: ${invoice.service}
+        Date: ${invoice.date}
+        Amount: ${invoice.amount}
+        Service Provider: ${invoice.provider}
+        Status: ${invoice.status}
+        
+        Service Details:
+        ${invoice.details}
+        
+        If you have any questions about this invoice, please contact our support team at support@techgpt.com
+        
+        Best regards,
+        TechGPT Team
+      `;
+      
+      // Create mailto link
+      const mailtoLink = `mailto:${email}?subject=TechGPT Service Receipt - Invoice #${invoice.id}&body=${encodeURIComponent(emailContent)}`;
+      window.location.href = mailtoLink;
+      
+      alert(`Invoice ${invoice.id} email prepared for ${email}. Your email client should open with the invoice details.`);
     }
   };
 

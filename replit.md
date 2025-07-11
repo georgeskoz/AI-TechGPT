@@ -102,6 +102,15 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
 
 ## Recent Changes
 
+### January 11, 2025 - Navigation Flow Fixes and Receipt Functionality
+- **Navigation Flow Improvements**: Fixed circular navigation issues by reorganizing App.tsx routes into clear sections (Customer Portal, Support Services, Service Provider Portal, Admin Portal)
+- **Proper Home Navigation**: Updated TechGPT logo and Home button to navigate to "/" instead of "/chat" for consistent user experience
+- **Active Service Window Auto-Close**: Fixed stuck active service popup by adding auto-close functionality when service status reaches "completed"
+- **Receipt System Enhancement**: Activated PDF export and email invoice functionality with actual file downloads and email preparation instead of placeholder alerts
+- **Service Provider Terminology**: Updated "technician" references to "Service Provider" throughout the application for consistent branding
+- **Route Standardization**: Corrected technician request routes to use "/technician-request" consistently across all components
+- **AI Service Troubleshooting**: Identified and resolved OpenAI API quota issues with proper fallback handling and new API key integration
+
 ### January 11, 2025 - Enhanced Service Provider Pool for Testing
 - **Expanded Technician Database**: Added 5 additional service providers for comprehensive testing of remote and phone support
   - **Emily Rodriguez** (Denver, CO): Cloud security specialist, remote support expert, 6+ years experience, $90/hr

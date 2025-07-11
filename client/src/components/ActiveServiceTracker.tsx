@@ -47,16 +47,29 @@ export default function ActiveServiceTracker({ isVisible, onClose }: ActiveServi
     requestedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   };
 
-  // Simulate ETA countdown
+  // Simulate ETA countdown and auto-close when completed
   useEffect(() => {
     if (serviceStatus === 'en-route' && eta > 0) {
       const timer = setInterval(() => {
         setEta(prev => prev - 1);
         setProgress(prev => Math.min(prev + 2, 95));
+        
+        // Auto-advance service status for demo
+        if (prev <= 5) {
+          setServiceStatus('arrived');
+        }
       }, 30000); // Update every 30 seconds for demo
       return () => clearInterval(timer);
     }
-  }, [serviceStatus, eta]);
+    
+    // Auto-close when service is completed
+    if (serviceStatus === 'completed') {
+      const autoCloseTimer = setTimeout(() => {
+        onClose();
+      }, 5000); // Auto-close after 5 seconds
+      return () => clearTimeout(autoCloseTimer);
+    }
+  }, [serviceStatus, eta, onClose]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -174,6 +187,56 @@ export default function ActiveServiceTracker({ isVisible, onClose }: ActiveServi
               <p className="text-sm text-green-700 mt-1">
                 Please rate your experience with {technician.name}
               </p>
+              <div className="flex gap-2 mt-2">
+                <Button 
+                  size="sm" 
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  onClick={() => {
+                    // Generate receipt
+                    const receipt = {
+                      id: serviceDetails.bookingId,
+                      service: serviceDetails.category,
+                      date: new Date().toLocaleDateString(),
+                      amount: serviceDetails.serviceFee,
+                      provider: technician.name,
+                      status: 'Completed',
+                      details: serviceDetails.description
+                    };
+                    
+                    // Show receipt modal or download
+                    const receiptText = `
+TechGPT Service Receipt
+======================
+
+Booking ID: ${receipt.id}
+Service: ${receipt.service}
+Date: ${receipt.date}
+Amount: ${receipt.amount}
+Service Provider: ${receipt.provider}
+Status: ${receipt.status}
+
+Service Details:
+${receipt.details}
+
+Thank you for using TechGPT!
+                    `;
+                    
+                    const blob = new Blob([receiptText], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `TechGPT_Receipt_${receipt.id}.txt`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    alert('Receipt downloaded successfully!');
+                  }}
+                >
+                  📄 Download Receipt
+                </Button>
+              </div>
             </div>
           )}
 
@@ -245,7 +308,7 @@ export default function ActiveServiceTracker({ isVisible, onClose }: ActiveServi
                   else if (serviceStatus === 'working') setServiceStatus('completed');
                 }}
               >
-                📱 View Full Details
+                📱 Update Status
               </Button>
               <Button
                 variant="ghost"
