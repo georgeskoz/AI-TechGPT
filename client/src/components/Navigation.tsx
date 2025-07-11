@@ -31,12 +31,6 @@ export default function Navigation({
     }
   };
 
-  // Check if current page is customer-facing (hide Technician Portal link on customer pages)
-  const isCustomerPage = location.includes('/chat') || location.includes('/dashboard') || 
-                         location.includes('/live-support') || location.includes('/phone-support') ||
-                         location.includes('/issues') || location.includes('/diagnostic') ||
-                         location.includes('/triage') || location === '/';
-
   const navigationItems = [
     { label: "Home", path: "/", description: "Customer portal home" },
     { label: "AI Chat Support", path: "/chat", description: "Free AI assistance" },
@@ -45,8 +39,7 @@ export default function Navigation({
     { label: "Live Support", path: "/live-support", description: "Human technician help" },
     { label: "Phone Support", path: "/phone-support", description: "Call-based support" },
     { label: "Issue Tracker", path: "/issues", description: "Manage your requests" },
-    // Only show Technician Portal on non-customer pages
-    ...(isCustomerPage ? [] : [{ label: "Technician Portal", path: "/technician-home", description: "Join as a service provider" }]),
+    { label: "Screen Sharing", path: "/screen-sharing", description: "Remote screen sharing support" },
   ];
 
   // Development role switcher - only show in development
