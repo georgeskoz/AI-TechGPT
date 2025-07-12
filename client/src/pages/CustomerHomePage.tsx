@@ -19,7 +19,7 @@ import {
   Monitor,
   UserCheck
 } from 'lucide-react';
-import { Navigation } from '@/components/Navigation';
+import Navigation from '@/components/Navigation';
 import { apiRequest } from '@/lib/queryClient';
 import { canadianProvinces, usStates, countries } from '@/data/locations';
 
@@ -275,7 +275,7 @@ export default function CustomerHomePage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <User className="h-5 w-5" />
+              <UserIcon className="h-5 w-5" />
               <span>Profile Management</span>
             </CardTitle>
           </CardHeader>
