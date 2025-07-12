@@ -13,6 +13,20 @@ export const users = pgTable("users", {
   avatar: text("avatar"),
   userType: text("user_type").notNull().default("customer"), // customer, technician, admin
   
+  // Customer contact information
+  phone: text("phone"),
+  address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  zipCode: text("zip_code"),
+  country: text("country").default("Canada"),
+  
+  // Account status fields
+  emailVerified: boolean("email_verified").default(false),
+  phoneVerified: boolean("phone_verified").default(false),
+  identityVerified: boolean("identity_verified").default(false),
+  accountActive: boolean("account_active").default(true),
+  
   // Payment method configuration
   paymentMethod: text("payment_method"), // credit_card, paypal, apple_pay, google_pay
   paymentMethodSetup: boolean("payment_method_setup").default(false),
@@ -24,7 +38,17 @@ export const users = pgTable("users", {
     googlePayEnabled?: boolean;
   }>(),
   
+  // Notification preferences
+  emailNotifications: boolean("email_notifications").default(true),
+  smsNotifications: boolean("sms_notifications").default(false),
+  marketingEmails: boolean("marketing_emails").default(true),
+  
+  // Two-factor authentication
+  twoFactorEnabled: boolean("two_factor_enabled").default(false),
+  twoFactorMethod: text("two_factor_method"), // sms, email, app
+  
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Admin users with roles and permissions
