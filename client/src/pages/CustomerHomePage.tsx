@@ -5,6 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import Navigation from "@/components/Navigation";
 import ActiveServiceTracker from "@/components/ActiveServiceTracker";
 import { 
@@ -95,6 +99,33 @@ export default function CustomerHomePage() {
     accountActive: true
   });
 
+  // Business Information Form Schema
+  const businessInfoSchema = z.object({
+    companyName: z.string().min(2, "Company name must be at least 2 characters").max(100, "Company name must be less than 100 characters"),
+    businessEmail: z.string().email("Please enter a valid business email address"),
+    businessPhone: z.string().min(10, "Phone number must be at least 10 characters").max(15, "Phone number must be less than 15 characters"),
+    taxId: z.string().min(9, "Tax ID must be at least 9 characters").max(20, "Tax ID must be less than 20 characters"),
+    businessAddress: z.string().min(10, "Business address must be at least 10 characters").max(200, "Business address must be less than 200 characters"),
+    industry: z.string().min(2, "Industry must be at least 2 characters").max(50, "Industry must be less than 50 characters"),
+    companySize: z.enum(['1-10', '11-50', '51-200', '201-500', '500+'], {
+      required_error: "Please select your company size",
+    }),
+  });
+
+  // Business Information Form
+  const businessForm = useForm<z.infer<typeof businessInfoSchema>>({
+    resolver: zodResolver(businessInfoSchema),
+    defaultValues: {
+      companyName: '',
+      businessEmail: '',
+      businessPhone: '',
+      taxId: '',
+      businessAddress: '',
+      industry: '',
+      companySize: '1-10',
+    },
+  });
+
   // Load existing user data when component mounts
   useEffect(() => {
     const existingUser = localStorage.getItem('tech_user');
@@ -114,6 +145,33 @@ export default function CustomerHomePage() {
       }
     }
   }, []);
+
+  // Business Information Form Handler
+  const handleBusinessUpdate = async (data: z.infer<typeof businessInfoSchema>) => {
+    try {
+      const response = await apiRequest('POST', '/api/customer-account/setup', data);
+      
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Business information updated successfully!",
+          variant: "default",
+        });
+        
+        // Reset form to show updated data
+        businessForm.reset(data);
+      } else {
+        throw new Error('Failed to update business information');
+      }
+    } catch (error) {
+      console.error('Error updating business information:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update business information. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleProfileUpdate = async () => {
     // Validate required fields
@@ -794,39 +852,117 @@ export default function CustomerHomePage() {
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Company Name</label>
-                              <Input placeholder="Enter company name" />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Business Email</label>
-                              <Input type="email" placeholder="business@company.com" />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Business Phone</label>
-                              <Input type="tel" placeholder="Business phone number" />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Tax ID / EIN</label>
-                              <Input placeholder="Tax identification number" />
-                            </div>
-                            <div className="md:col-span-2">
-                              <label className="block text-sm font-medium mb-1">Business Address</label>
-                              <Input placeholder="Complete business address" />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Industry</label>
-                              <Input placeholder="e.g., Technology, Manufacturing" />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Company Size</label>
-                              <Input placeholder="e.g., 1-10, 11-50, 51-200" />
-                            </div>
-                          </div>
-                          <div className="mt-4">
-                            <Button>Update Business Information</Button>
-                          </div>
+                          <Form {...businessForm}>
+                            <form onSubmit={businessForm.handleSubmit(handleBusinessUpdate)} className="space-y-4">
+                              <div className="grid md:grid-cols-2 gap-4">
+                                <FormField
+                                  control={businessForm.control}
+                                  name="companyName"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Company Name</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="Enter company name" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={businessForm.control}
+                                  name="businessEmail"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Business Email</FormLabel>
+                                      <FormControl>
+                                        <Input type="email" placeholder="business@company.com" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={businessForm.control}
+                                  name="businessPhone"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Business Phone</FormLabel>
+                                      <FormControl>
+                                        <Input type="tel" placeholder="Business phone number" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={businessForm.control}
+                                  name="taxId"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Tax ID / EIN</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="Tax identification number" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={businessForm.control}
+                                  name="businessAddress"
+                                  render={({ field }) => (
+                                    <FormItem className="md:col-span-2">
+                                      <FormLabel>Business Address</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="Complete business address" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={businessForm.control}
+                                  name="industry"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Industry</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="e.g., Technology, Manufacturing" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={businessForm.control}
+                                  name="companySize"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Company Size</FormLabel>
+                                      <FormControl>
+                                        <select 
+                                          {...field} 
+                                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                          <option value="1-10">1-10 employees</option>
+                                          <option value="11-50">11-50 employees</option>
+                                          <option value="51-200">51-200 employees</option>
+                                          <option value="201-500">201-500 employees</option>
+                                          <option value="500+">500+ employees</option>
+                                        </select>
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                              <div className="mt-4">
+                                <Button type="submit" disabled={businessForm.formState.isSubmitting}>
+                                  {businessForm.formState.isSubmitting ? 'Updating...' : 'Update Business Information'}
+                                </Button>
+                              </div>
+                            </form>
+                          </Form>
                         </CardContent>
                       </Card>
                       
