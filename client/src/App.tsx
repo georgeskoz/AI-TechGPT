@@ -57,7 +57,7 @@ function Router() {
   return (
     <Switch>
       {/* Main Entry Points */}
-      <Route path="/" component={CustomerHomePage} />
+      <Route path="/" component={() => <div className="p-8"><h1 className="text-2xl font-bold">TechGPT - Customer Portal</h1><p>System is loading...</p></div>} />
       <Route path="/customer-home" component={CustomerHomePage} />
       
       {/* Customer Portal - Core Pages */}
@@ -134,7 +134,8 @@ function App() {
       <AuthProvider>
         <div className="min-h-screen bg-gray-50">
           <Router />
-          <FloatingChatWidget username={username} />
+          {/* Temporarily disable floating widget to test if it's causing the blank page issue */}
+          {/* <FloatingChatWidget username={username} /> */}
         </div>
         <Toaster />
       </AuthProvider>

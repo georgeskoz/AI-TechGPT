@@ -1,150 +1,113 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import Navigation from "@/components/Navigation";
-import ActiveServiceTracker from "@/components/ActiveServiceTracker";
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from '@/hooks/use-toast';
 import { 
-  MessageSquare, 
-  Users, 
-  Zap, 
-  Shield, 
-  Clock, 
-  Star,
-  ArrowRight,
-  Headphones,
-  Monitor,
-  MapPin,
-  CheckCircle,
-  User,
-  Settings,
-  CreditCard,
-  History,
+  User as UserIcon, 
+  MessageSquare,
   Phone,
-  Home,
-  MessageCircle,
-  HelpCircle,
-  FileText,
-  Book,
-  ExternalLink,
-  Building2,
-  Mail,
-  Globe,
-  DollarSign,
-  TrendingUp,
-  BarChart3,
-  Calendar,
-  Bell,
-  Download,
-  Plus,
-  Trash2,
-  Send,
-  Smartphone,
-  Apple,
-  Lock
-} from "lucide-react";
-import { useLocation } from "wouter";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+  Monitor,
+  UserCheck
+} from 'lucide-react';
+import { Navigation } from '@/components/Navigation';
+import { apiRequest } from '@/lib/queryClient';
+import { canadianProvinces, usStates, countries } from '@/data/locations';
 
-// Country data
-const countries = [
-  { code: 'CA', name: 'Canada', flag: '🇨🇦', phoneCode: '+1' },
-  { code: 'US', name: 'United States', flag: '🇺🇸', phoneCode: '+1' },
-  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', phoneCode: '+44' },
-  { code: 'FR', name: 'France', flag: '🇫🇷', phoneCode: '+33' },
-  { code: 'DE', name: 'Germany', flag: '🇩🇪', phoneCode: '+49' },
-  { code: 'AU', name: 'Australia', flag: '🇦🇺', phoneCode: '+61' },
-  { code: 'JP', name: 'Japan', flag: '🇯🇵', phoneCode: '+81' },
-  { code: 'BR', name: 'Brazil', flag: '🇧🇷', phoneCode: '+55' },
-  { code: 'MX', name: 'Mexico', flag: '🇲🇽', phoneCode: '+52' },
-  { code: 'IN', name: 'India', flag: '🇮🇳', phoneCode: '+91' },
-];
-
-// Canadian provinces
-const canadianProvinces = [
-  'Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador',
-  'Northwest Territories', 'Nova Scotia', 'Nunavut', 'Ontario', 'Prince Edward Island',
-  'Quebec', 'Saskatchewan', 'Yukon'
-];
-
-// US states
-const usStates = [
-  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut',
-  'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
-  'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan',
-  'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
-  'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio',
-  'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota',
-  'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia',
-  'Wisconsin', 'Wyoming'
-];
-
-// Form schema
+// Schema for customer profile form
 const customerProfileSchema = z.object({
-  fullName: z.string().min(2, "Full name is required"),
-  email: z.string().email("Invalid email address"),
-  phoneNumber: z.string().optional(),
-  phoneCountryCode: z.string().optional(),
-  country: z.string().optional(),
-  province: z.string().optional(),
-  city: z.string().optional(),
-  address: z.string().optional(),
-  postalCode: z.string().optional(),
-  preferences: z.object({
-    notifications: z.boolean().default(true),
-    newsletter: z.boolean().default(false),
-    sms: z.boolean().default(false),
-    emailSupport: z.boolean().default(true),
-  }).optional(),
+  firstName: z.string().min(2, 'First name must be at least 2 characters'),
+  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
+  email: z.string().email('Please enter a valid email address'),
+  phoneNumber: z.string().min(10, 'Phone number must be at least 10 digits'),
+  address: z.string().min(5, 'Address must be at least 5 characters'),
+  city: z.string().min(2, 'City must be at least 2 characters'),
+  state: z.string().min(2, 'State/Province is required'),
+  country: z.string().min(2, 'Country is required'),
+  postalCode: z.string().min(5, 'Postal/ZIP code must be at least 5 characters'),
+  preferredContactMethod: z.enum(['email', 'phone', 'text']),
+  timeZone: z.string().min(1, 'Time zone is required'),
   businessInfo: z.object({
-    isBusinessCustomer: z.boolean().default(false),
-    businessName: z.string().optional(),
+    companyName: z.string().optional(),
     businessType: z.string().optional(),
-    taxId: z.string().optional(),
-    billingAddress: z.string().optional(),
+    industry: z.string().optional(),
+    employeeCount: z.string().optional(),
+    annualRevenue: z.string().optional(),
+    businessHours: z.string().optional(),
+    website: z.string().optional(),
+    taxId: z.string().optional()
   }).optional(),
+  preferences: z.object({
+    communicationFrequency: z.enum(['daily', 'weekly', 'monthly', 'asNeeded']),
+    serviceTypes: z.array(z.string()),
+    techExpertiseLevel: z.enum(['beginner', 'intermediate', 'advanced', 'expert']),
+    preferredLanguage: z.enum(['en', 'fr', 'es', 'de', 'it', 'pt', 'zh', 'ja', 'ko', 'ru']),
+    newsletter: z.boolean(),
+    promotionalEmails: z.boolean(),
+    smsNotifications: z.boolean(),
+    pushNotifications: z.boolean()
+  }).optional(),
+  emergencyContact: z.object({
+    name: z.string().optional(),
+    relationship: z.string().optional(),
+    phoneNumber: z.string().optional(),
+    email: z.string().optional()
+  }).optional(),
+  notes: z.string().optional()
 });
 
 type CustomerProfileForm = z.infer<typeof customerProfileSchema>;
 
 export default function CustomerHomePage() {
-  const [, setLocation] = useLocation();
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [showServiceAnnouncement, setShowServiceAnnouncement] = useState(false);
-  const [recentActivity, setRecentActivity] = useState([]);
   const [profileData, setProfileData] = useState<CustomerProfileForm>({
-    fullName: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phoneNumber: '',
-    phoneCountryCode: '+1',
-    country: 'CA',
-    province: '',
-    city: '',
     address: '',
+    city: '',
+    state: '',
+    country: '',
     postalCode: '',
-    preferences: {
-      notifications: true,
-      newsletter: false,
-      sms: false,
-      emailSupport: true,
-    },
+    preferredContactMethod: 'email',
+    timeZone: '',
     businessInfo: {
-      isBusinessCustomer: false,
-      businessName: '',
+      companyName: '',
       businessType: '',
-      taxId: '',
-      billingAddress: '',
+      industry: '',
+      employeeCount: '',
+      annualRevenue: '',
+      businessHours: '',
+      website: '',
+      taxId: ''
     },
+    preferences: {
+      communicationFrequency: 'asNeeded',
+      serviceTypes: [],
+      techExpertiseLevel: 'intermediate',
+      preferredLanguage: 'en',
+      newsletter: false,
+      promotionalEmails: false,
+      smsNotifications: false,
+      pushNotifications: false
+    },
+    emergencyContact: {
+      name: '',
+      relationship: '',
+      phoneNumber: '',
+      email: ''
+    },
+    notes: ''
   });
 
   const form = useForm<CustomerProfileForm>({
@@ -156,8 +119,8 @@ export default function CustomerHomePage() {
 
   // Handle input changes
   const handleInputChange = (field: keyof CustomerProfileForm, value: any) => {
-    setProfileData(prev => ({
-      ...prev,
+    setProfileData(prevData => ({
+      ...prevData,
       [field]: value
     }));
     form.setValue(field, value);
@@ -165,10 +128,10 @@ export default function CustomerHomePage() {
 
   // Handle nested object changes
   const handleNestedChange = (parent: string, field: string, value: any) => {
-    setProfileData(prev => ({
-      ...prev,
+    setProfileData(prevData => ({
+      ...prevData,
       [parent]: {
-        ...prev[parent as keyof CustomerProfileForm],
+        ...(prevData[parent as keyof CustomerProfileForm] as any),
         [field]: value
       }
     }));
@@ -203,20 +166,19 @@ export default function CustomerHomePage() {
       if (result.success) {
         toast({
           title: "Profile Updated",
-          description: "Your profile has been saved successfully.",
+          description: "Your profile has been successfully updated.",
         });
       } else {
         toast({
           title: "Error",
-          description: result.message || "Failed to save profile.",
+          description: result.error || "Failed to update profile.",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Error saving profile:', error);
       toast({
         title: "Error",
-        description: "An error occurred while saving your profile.",
+        description: "Failed to save profile. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -224,649 +186,530 @@ export default function CustomerHomePage() {
     }
   };
 
-  // Service announcement modal
-  useEffect(() => {
-    const hasSeenAnnouncement = localStorage.getItem('hasSeenServiceAnnouncement');
-    if (!hasSeenAnnouncement) {
-      setShowServiceAnnouncement(true);
+  // Get states/provinces based on country
+  const getStateOptions = () => {
+    if (watchedCountry === 'CA') {
+      return canadianProvinces.map(province => ({
+        value: province.code,
+        label: province.name
+      }));
+    } else if (watchedCountry === 'US') {
+      return usStates.map(state => ({
+        value: state.code,
+        label: state.name
+      }));
     }
-  }, []);
-
-  const handleCloseAnnouncement = () => {
-    setShowServiceAnnouncement(false);
-    localStorage.setItem('hasSeenServiceAnnouncement', 'true');
+    return [];
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <ActiveServiceTracker />
       
-      {/* Service Announcement Modal */}
-      <Dialog open={showServiceAnnouncement} onOpenChange={setShowServiceAnnouncement}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-center">
-              Service Availability Notice
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg">
-              <MapPin className="h-5 w-5 text-blue-600 mt-0.5" />
-              <div>
-                <h4 className="font-semibold text-blue-900">Onsite Services</h4>
-                <p className="text-sm text-blue-700">
-                  Available in the Ottawa–Gatineau region only
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3 p-3 bg-green-50 rounded-lg">
-              <Globe className="h-5 w-5 text-green-600 mt-0.5" />
-              <div>
-                <h4 className="font-semibold text-green-900">Online Services</h4>
-                <p className="text-sm text-green-700">
-                  Available across Canada and United States
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <Button onClick={handleCloseAnnouncement}>
-              Got it, thanks!
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Welcome Section */}
         <div className="mb-8">
-          <div className="bg-white rounded-lg shadow-sm p-6 border">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Welcome to TechGPT</h1>
-                <p className="text-gray-600">Your comprehensive technical support platform</p>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Badge variant="secondary">Customer Portal</Badge>
-                <Badge variant="outline">Free Tier</Badge>
-              </div>
-            </div>
-            
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">24/7</div>
-                <div className="text-sm text-blue-700">AI Support</div>
-              </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">500+</div>
-                <div className="text-sm text-green-700">Experts Available</div>
-              </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <div className="text-2xl font-bold text-purple-600">98%</div>
-                <div className="text-sm text-purple-700">Issue Resolution</div>
-              </div>
-              <div className="text-center p-4 bg-orange-50 rounded-lg">
-                <div className="text-2xl font-bold text-orange-600">5min</div>
-                <div className="text-sm text-orange-700">Average Response</div>
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button 
-                onClick={() => setLocation('/chat')}
-                className="h-auto py-4 flex flex-col items-center space-y-2"
-              >
-                <MessageSquare className="h-6 w-6" />
-                <span>Start AI Chat</span>
-              </Button>
-              <Button 
-                onClick={() => setLocation('/live-support')}
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-center space-y-2"
-              >
-                <Headphones className="h-6 w-6" />
-                <span>Live Support</span>
-              </Button>
-              <Button 
-                onClick={() => setLocation('/technician-request')}
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-center space-y-2 border-red-200 text-red-600 hover:bg-red-50"
-              >
-                <Users className="h-6 w-6" />
-                <span>Request Technician</span>
-              </Button>
-            </div>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Customer Portal</h1>
+          <p className="text-gray-600">Manage your profile and access technical support services</p>
         </div>
 
-        {/* Main Content Tabs */}
-        <Tabs defaultValue="services" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="services">Services</TabsTrigger>
-            <TabsTrigger value="account">Account</TabsTrigger>
-            <TabsTrigger value="help">Help</TabsTrigger>
-            <TabsTrigger value="personal">Profile</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="services" className="space-y-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* AI Chat Support */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5 text-blue-600" />
-                    AI Chat Support
-                  </CardTitle>
-                  <CardDescription>
-                    Get instant help with our AI-powered technical assistant
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Availability</span>
-                      <Badge variant="secondary">24/7</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Cost</span>
-                      <Badge variant="secondary">Free</Badge>
-                    </div>
-                    <Button onClick={() => setLocation('/chat')} className="w-full">
-                      Start Chat
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Live Support */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Headphones className="h-5 w-5 text-green-600" />
-                    Live Support
-                  </CardTitle>
-                  <CardDescription>
-                    Connect with human experts for complex issues
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">First 10 minutes</span>
-                      <Badge variant="secondary">Free</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">After 10 minutes</span>
-                      <Badge variant="outline">$2/min</Badge>
-                    </div>
-                    <Button onClick={() => setLocation('/live-support')} className="w-full">
-                      Start Live Chat
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Phone Support */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Phone className="h-5 w-5 text-purple-600" />
-                    Phone Support
-                  </CardTitle>
-                  <CardDescription>
-                    Professional phone support for urgent issues
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Starting at</span>
-                      <Badge variant="outline">$25/call</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Response time</span>
-                      <Badge variant="secondary">Under 5 min</Badge>
-                    </div>
-                    <Button onClick={() => setLocation('/phone-support')} className="w-full">
-                      Call Support
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Screen Sharing */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Monitor className="h-5 w-5 text-orange-600" />
-                    Screen Sharing
-                  </CardTitle>
-                  <CardDescription>
-                    Let experts see and control your screen remotely
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Session rate</span>
-                      <Badge variant="outline">$35/session</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Secure connection</span>
-                      <Badge variant="secondary">WebRTC</Badge>
-                    </div>
-                    <Button onClick={() => setLocation('/screen-sharing')} className="w-full">
-                      Start Screen Share
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Onsite Support */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-red-600" />
-                    Onsite Support
-                  </CardTitle>
-                  <CardDescription>
-                    Professional technicians come to your location
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Starting at</span>
-                      <Badge variant="outline">$75/visit</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Service area</span>
-                      <Badge variant="secondary">Ottawa–Gatineau</Badge>
-                    </div>
-                    <Button onClick={() => setLocation('/technician-request')} className="w-full">
-                      Request Technician
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Issue Tracking */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-indigo-600" />
-                    Issue Tracking
-                  </CardTitle>
-                  <CardDescription>
-                    Track and manage your technical issues
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Active issues</span>
-                      <Badge variant="outline">0</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Resolved issues</span>
-                      <Badge variant="secondary">0</Badge>
-                    </div>
-                    <Button onClick={() => setLocation('/issues')} className="w-full">
-                      View Issues
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="account" className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Account Overview</CardTitle>
-                  <CardDescription>
-                    Your account status and subscription details
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">Account Type</span>
-                      <Badge variant="secondary">Free</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">Status</span>
-                      <Badge variant="outline">Active</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">Member since</span>
-                      <span className="text-sm text-gray-600">Today</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">Total Services Used</span>
-                      <span className="text-sm text-gray-600">0</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                  <CardDescription>
-                    Manage your account settings and preferences
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button variant="outline" size="sm" className="h-auto py-3 flex flex-col gap-1">
-                      <Settings className="h-4 w-4" />
-                      <span className="text-xs">Settings</span>
-                    </Button>
-                    <Button variant="outline" size="sm" className="h-auto py-3 flex flex-col gap-1">
-                      <CreditCard className="h-4 w-4" />
-                      <span className="text-xs">Billing</span>
-                    </Button>
-                    <Button variant="outline" size="sm" className="h-auto py-3 flex flex-col gap-1">
-                      <History className="h-4 w-4" />
-                      <span className="text-xs">History</span>
-                    </Button>
-                    <Button variant="outline" size="sm" className="h-auto py-3 flex flex-col gap-1">
-                      <Download className="h-4 w-4" />
-                      <span className="text-xs">Export</span>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="help" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <HelpCircle className="h-5 w-5" />
-                  Help & Support Center
-                </CardTitle>
-                <CardDescription>
-                  Get assistance with your account and technical issues
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-4">
-                    <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                      <div className="flex items-center gap-3 mb-2">
-                        <MessageCircle className="h-5 w-5 text-blue-600" />
-                        <h3 className="font-medium">Live Chat Support</h3>
-                      </div>
-                      <p className="text-sm text-gray-600">Start a conversation with our support team</p>
-                      <Button size="sm" className="mt-2" onClick={() => setLocation('/live-support')}>
-                        Start Chat
-                      </Button>
-                    </div>
-                    
-                    <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                      <div className="flex items-center gap-3 mb-2">
-                        <Phone className="h-5 w-5 text-green-600" />
-                        <h3 className="font-medium">Phone Support</h3>
-                      </div>
-                      <p className="text-sm text-gray-600">Call our technical support hotline</p>
-                      <p className="text-sm font-medium text-green-600">1-800-TECHGPT</p>
-                    </div>
-                    
-                    <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                      <div className="flex items-center gap-3 mb-2">
-                        <Mail className="h-5 w-5 text-purple-600" />
-                        <h3 className="font-medium">Email Support</h3>
-                      </div>
-                      <p className="text-sm text-gray-600">Send us an email for detailed assistance</p>
-                      <p className="text-sm font-medium text-purple-600">support@techgpt.com</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                      <div className="flex items-center gap-3 mb-2">
-                        <Book className="h-5 w-5 text-orange-600" />
-                        <h3 className="font-medium">Knowledge Base</h3>
-                      </div>
-                      <p className="text-sm text-gray-600">Browse our comprehensive help articles</p>
-                      <Button size="sm" variant="outline" className="mt-2">
-                        <ExternalLink className="h-4 w-4 mr-1" />
-                        Browse Articles
-                      </Button>
-                    </div>
-                    
-                    <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                      <div className="flex items-center gap-3 mb-2">
-                        <FileText className="h-5 w-5 text-indigo-600" />
-                        <h3 className="font-medium">Submit a Ticket</h3>
-                      </div>
-                      <p className="text-sm text-gray-600">Create a support ticket for complex issues</p>
-                      <Button size="sm" variant="outline" className="mt-2">
-                        Create Ticket
-                      </Button>
-                    </div>
-                    
-                    <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                      <div className="flex items-center gap-3 mb-2">
-                        <Users className="h-5 w-5 text-pink-600" />
-                        <h3 className="font-medium">Community Forum</h3>
-                      </div>
-                      <p className="text-sm text-gray-600">Connect with other customers and experts</p>
-                      <Button size="sm" variant="outline" className="mt-2">
-                        <ExternalLink className="h-4 w-4 mr-1" />
-                        Join Forum
-                      </Button>
-                    </div>
-                  </div>
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-blue-100 rounded-lg">
+                  <MessageSquare className="h-6 w-6 text-blue-600" />
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                <div>
+                  <h3 className="font-semibold text-gray-900">AI Chat Support</h3>
+                  <p className="text-sm text-gray-600">Get instant help from AI</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          <TabsContent value="personal" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Personal Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(handleSaveProfile)} className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="fullName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Full Name *</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter your full name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email Address *</FormLabel>
-                            <FormControl>
-                              <Input type="email" placeholder="Enter your email" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-green-100 rounded-lg">
+                  <Phone className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Phone Support</h3>
+                  <p className="text-sm text-gray-600">Talk to an expert</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-purple-100 rounded-lg">
+                  <Monitor className="h-6 w-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Screen Sharing</h3>
+                  <p className="text-sm text-gray-600">Remote assistance</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-orange-100 rounded-lg">
+                  <UserCheck className="h-6 w-6 text-orange-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Service Provider</h3>
+                  <p className="text-sm text-gray-600">Book a technician</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Profile Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <User className="h-5 w-5" />
+              <span>Profile Management</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={form.handleSubmit(handleSaveProfile)} className="space-y-6">
+              <Tabs defaultValue="personal" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="personal">Personal Info</TabsTrigger>
+                  <TabsTrigger value="business">Business Info</TabsTrigger>
+                  <TabsTrigger value="preferences">Preferences</TabsTrigger>
+                  <TabsTrigger value="emergency">Emergency Contact</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="personal" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        value={profileData.firstName}
+                        onChange={(e) => handleInputChange('firstName', e.target.value)}
+                        placeholder="Enter your first name"
                       />
                     </div>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="phoneCountryCode"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Phone Country Code</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select country code" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {countries.map((country) => (
-                                  <SelectItem key={country.code} value={country.phoneCode}>
-                                    {country.flag} {country.phoneCode} {country.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="phoneNumber"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Phone Number</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter your phone number" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        value={profileData.lastName}
+                        onChange={(e) => handleInputChange('lastName', e.target.value)}
+                        placeholder="Enter your last name"
                       />
                     </div>
+                  </div>
 
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="country"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Country</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select country" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {countries.map((country) => (
-                                  <SelectItem key={country.code} value={country.code}>
-                                    {country.flag} {country.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="province"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Province/State</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select province/state" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {watchedCountry === 'CA' && canadianProvinces.map((province) => (
-                                  <SelectItem key={province} value={province}>
-                                    {province}
-                                  </SelectItem>
-                                ))}
-                                {watchedCountry === 'US' && usStates.map((state) => (
-                                  <SelectItem key={state} value={state}>
-                                    {state}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={profileData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        placeholder="Enter your email"
                       />
                     </div>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="city"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>City</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter your city" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="postalCode"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Postal Code</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter your postal code" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                    <div className="space-y-2">
+                      <Label htmlFor="phoneNumber">Phone Number</Label>
+                      <Input
+                        id="phoneNumber"
+                        value={profileData.phoneNumber}
+                        onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                        placeholder="Enter your phone number"
                       />
                     </div>
+                  </div>
 
-                    <FormField
-                      control={form.control}
-                      name="address"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Address</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter your full address" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Address</Label>
+                    <Input
+                      id="address"
+                      value={profileData.address}
+                      onChange={(e) => handleInputChange('address', e.target.value)}
+                      placeholder="Enter your address"
                     />
+                  </div>
 
-                    <div className="flex justify-end">
-                      <Button type="submit" disabled={isLoading}>
-                        {isLoading ? "Saving..." : "Save Profile"}
-                      </Button>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="city">City</Label>
+                      <Input
+                        id="city"
+                        value={profileData.city}
+                        onChange={(e) => handleInputChange('city', e.target.value)}
+                        placeholder="Enter your city"
+                      />
                     </div>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                    <div className="space-y-2">
+                      <Label htmlFor="country">Country</Label>
+                      <Select value={profileData.country} onValueChange={(value) => handleInputChange('country', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select country" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {countries.map((country) => (
+                            <SelectItem key={country.code} value={country.code}>
+                              {country.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="state">State/Province</Label>
+                      <Select value={profileData.state} onValueChange={(value) => handleInputChange('state', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select state/province" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getStateOptions().map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="postalCode">Postal/ZIP Code</Label>
+                      <Input
+                        id="postalCode"
+                        value={profileData.postalCode}
+                        onChange={(e) => handleInputChange('postalCode', e.target.value)}
+                        placeholder="Enter postal/ZIP code"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="preferredContactMethod">Preferred Contact Method</Label>
+                      <Select value={profileData.preferredContactMethod} onValueChange={(value) => handleInputChange('preferredContactMethod', value)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="email">Email</SelectItem>
+                          <SelectItem value="phone">Phone</SelectItem>
+                          <SelectItem value="text">Text Message</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="timeZone">Time Zone</Label>
+                    <Select value={profileData.timeZone} onValueChange={(value) => handleInputChange('timeZone', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select time zone" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
+                        <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
+                        <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
+                        <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
+                        <SelectItem value="America/Anchorage">Alaska Time (AKT)</SelectItem>
+                        <SelectItem value="Pacific/Honolulu">Hawaii Time (HT)</SelectItem>
+                        <SelectItem value="America/Toronto">Eastern Time Canada</SelectItem>
+                        <SelectItem value="America/Winnipeg">Central Time Canada</SelectItem>
+                        <SelectItem value="America/Edmonton">Mountain Time Canada</SelectItem>
+                        <SelectItem value="America/Vancouver">Pacific Time Canada</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="business" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="companyName">Company Name</Label>
+                      <Input
+                        id="companyName"
+                        value={profileData.businessInfo?.companyName || ''}
+                        onChange={(e) => handleNestedChange('businessInfo', 'companyName', e.target.value)}
+                        placeholder="Enter company name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="businessType">Business Type</Label>
+                      <Select value={profileData.businessInfo?.businessType || ''} onValueChange={(value) => handleNestedChange('businessInfo', 'businessType', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select business type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="sole_proprietorship">Sole Proprietorship</SelectItem>
+                          <SelectItem value="partnership">Partnership</SelectItem>
+                          <SelectItem value="corporation">Corporation</SelectItem>
+                          <SelectItem value="llc">LLC</SelectItem>
+                          <SelectItem value="non_profit">Non-Profit</SelectItem>
+                          <SelectItem value="government">Government</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="industry">Industry</Label>
+                      <Select value={profileData.businessInfo?.industry || ''} onValueChange={(value) => handleNestedChange('businessInfo', 'industry', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select industry" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="technology">Technology</SelectItem>
+                          <SelectItem value="healthcare">Healthcare</SelectItem>
+                          <SelectItem value="finance">Finance</SelectItem>
+                          <SelectItem value="retail">Retail</SelectItem>
+                          <SelectItem value="manufacturing">Manufacturing</SelectItem>
+                          <SelectItem value="education">Education</SelectItem>
+                          <SelectItem value="real_estate">Real Estate</SelectItem>
+                          <SelectItem value="construction">Construction</SelectItem>
+                          <SelectItem value="hospitality">Hospitality</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="employeeCount">Employee Count</Label>
+                      <Select value={profileData.businessInfo?.employeeCount || ''} onValueChange={(value) => handleNestedChange('businessInfo', 'employeeCount', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select employee count" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">1 (Just me)</SelectItem>
+                          <SelectItem value="2-10">2-10</SelectItem>
+                          <SelectItem value="11-50">11-50</SelectItem>
+                          <SelectItem value="51-200">51-200</SelectItem>
+                          <SelectItem value="201-500">201-500</SelectItem>
+                          <SelectItem value="501-1000">501-1000</SelectItem>
+                          <SelectItem value="1000+">1000+</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="annualRevenue">Annual Revenue</Label>
+                      <Select value={profileData.businessInfo?.annualRevenue || ''} onValueChange={(value) => handleNestedChange('businessInfo', 'annualRevenue', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select revenue range" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="under_100k">Under $100K</SelectItem>
+                          <SelectItem value="100k_500k">$100K - $500K</SelectItem>
+                          <SelectItem value="500k_1m">$500K - $1M</SelectItem>
+                          <SelectItem value="1m_5m">$1M - $5M</SelectItem>
+                          <SelectItem value="5m_10m">$5M - $10M</SelectItem>
+                          <SelectItem value="10m_50m">$10M - $50M</SelectItem>
+                          <SelectItem value="50m_plus">$50M+</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="website">Website</Label>
+                      <Input
+                        id="website"
+                        value={profileData.businessInfo?.website || ''}
+                        onChange={(e) => handleNestedChange('businessInfo', 'website', e.target.value)}
+                        placeholder="https://example.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="businessHours">Business Hours</Label>
+                      <Input
+                        id="businessHours"
+                        value={profileData.businessInfo?.businessHours || ''}
+                        onChange={(e) => handleNestedChange('businessInfo', 'businessHours', e.target.value)}
+                        placeholder="Mon-Fri 9AM-5PM"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="taxId">Tax ID</Label>
+                      <Input
+                        id="taxId"
+                        value={profileData.businessInfo?.taxId || ''}
+                        onChange={(e) => handleNestedChange('businessInfo', 'taxId', e.target.value)}
+                        placeholder="Enter tax ID"
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="preferences" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="communicationFrequency">Communication Frequency</Label>
+                      <Select value={profileData.preferences?.communicationFrequency || 'asNeeded'} onValueChange={(value) => handleNestedChange('preferences', 'communicationFrequency', value)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="weekly">Weekly</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                          <SelectItem value="asNeeded">As Needed</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="techExpertiseLevel">Technical Expertise Level</Label>
+                      <Select value={profileData.preferences?.techExpertiseLevel || 'intermediate'} onValueChange={(value) => handleNestedChange('preferences', 'techExpertiseLevel', value)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="beginner">Beginner</SelectItem>
+                          <SelectItem value="intermediate">Intermediate</SelectItem>
+                          <SelectItem value="advanced">Advanced</SelectItem>
+                          <SelectItem value="expert">Expert</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="preferredLanguage">Preferred Language</Label>
+                    <Select value={profileData.preferences?.preferredLanguage || 'en'} onValueChange={(value) => handleNestedChange('preferences', 'preferredLanguage', value)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="fr">French</SelectItem>
+                        <SelectItem value="es">Spanish</SelectItem>
+                        <SelectItem value="de">German</SelectItem>
+                        <SelectItem value="it">Italian</SelectItem>
+                        <SelectItem value="pt">Portuguese</SelectItem>
+                        <SelectItem value="zh">Chinese</SelectItem>
+                        <SelectItem value="ja">Japanese</SelectItem>
+                        <SelectItem value="ko">Korean</SelectItem>
+                        <SelectItem value="ru">Russian</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label>Notification Preferences</Label>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="newsletter">Newsletter</Label>
+                        <Switch
+                          id="newsletter"
+                          checked={profileData.preferences?.newsletter || false}
+                          onCheckedChange={(checked) => handleNestedChange('preferences', 'newsletter', checked)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="promotionalEmails">Promotional Emails</Label>
+                        <Switch
+                          id="promotionalEmails"
+                          checked={profileData.preferences?.promotionalEmails || false}
+                          onCheckedChange={(checked) => handleNestedChange('preferences', 'promotionalEmails', checked)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="smsNotifications">SMS Notifications</Label>
+                        <Switch
+                          id="smsNotifications"
+                          checked={profileData.preferences?.smsNotifications || false}
+                          onCheckedChange={(checked) => handleNestedChange('preferences', 'smsNotifications', checked)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="pushNotifications">Push Notifications</Label>
+                        <Switch
+                          id="pushNotifications"
+                          checked={profileData.preferences?.pushNotifications || false}
+                          onCheckedChange={(checked) => handleNestedChange('preferences', 'pushNotifications', checked)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="emergency" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="emergencyName">Emergency Contact Name</Label>
+                      <Input
+                        id="emergencyName"
+                        value={profileData.emergencyContact?.name || ''}
+                        onChange={(e) => handleNestedChange('emergencyContact', 'name', e.target.value)}
+                        placeholder="Enter emergency contact name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="emergencyRelationship">Relationship</Label>
+                      <Input
+                        id="emergencyRelationship"
+                        value={profileData.emergencyContact?.relationship || ''}
+                        onChange={(e) => handleNestedChange('emergencyContact', 'relationship', e.target.value)}
+                        placeholder="e.g., Spouse, Parent, Sibling"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="emergencyPhone">Emergency Contact Phone</Label>
+                      <Input
+                        id="emergencyPhone"
+                        value={profileData.emergencyContact?.phoneNumber || ''}
+                        onChange={(e) => handleNestedChange('emergencyContact', 'phoneNumber', e.target.value)}
+                        placeholder="Enter emergency contact phone"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="emergencyEmail">Emergency Contact Email</Label>
+                      <Input
+                        id="emergencyEmail"
+                        type="email"
+                        value={profileData.emergencyContact?.email || ''}
+                        onChange={(e) => handleNestedChange('emergencyContact', 'email', e.target.value)}
+                        placeholder="Enter emergency contact email"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="notes">Additional Notes</Label>
+                    <Textarea
+                      id="notes"
+                      value={profileData.notes || ''}
+                      onChange={(e) => handleInputChange('notes', e.target.value)}
+                      placeholder="Any additional information or special requirements"
+                      rows={4}
+                    />
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              <div className="flex justify-end">
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? 'Saving...' : 'Save Profile'}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
