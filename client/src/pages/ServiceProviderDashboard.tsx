@@ -134,7 +134,7 @@ export default function ServiceProviderDashboard() {
     <div className="min-h-screen bg-gray-50">
       <Navigation 
         showBackButton={true}
-        backTo="/"
+        backTo="/technician-dashboard"
         title="Service Provider Dashboard"
         showHomeButton={true}
       />
