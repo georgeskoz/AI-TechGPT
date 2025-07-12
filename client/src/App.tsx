@@ -73,10 +73,14 @@ function Router() {
       {/* Service Provider Portal */}
       <Route path="/technician-home" component={ServiceProviderHomePage} />
       <Route path="/technician-register" component={ServiceProviderRegistration} />
+      <Route path="/technician-registration" component={ServiceProviderRegistration} />
       <Route path="/technician-dashboard" component={TechnicianDetailsPage} />
       <Route path="/technician-earnings" component={TechnicianEarnings} />
       <Route path="/profile-visibility" component={ProfileVisibilityPage} />
       <Route path="/technicians" component={TechnicianLanding} />
+      <Route path="/notifications-dashboard" component={NotificationsDashboard} />
+      <Route path="/technician-matching" component={TechnicianMatchingPage} />
+      <Route path="/test-notifications" component={TestNotificationSystem} />
       
       {/* Admin Portal */}
       <Route path="/admin-home" component={AdminHomePage} />
@@ -93,7 +97,7 @@ function Router() {
       {process.env.NODE_ENV === 'development' && (
         <>
           <Route path="/domains" component={DomainSelector} />
-          <Route path="/test-notifications" component={TestNotificationSystem} />
+
           <Route path="/notifications" component={NotificationsDashboard} />
           <Route path="/onboarding" component={OnboardingWizard} />
           <Route path="/register" component={RegisterPage} />
