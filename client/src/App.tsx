@@ -42,6 +42,7 @@ import NotificationsDashboard from "@/pages/NotificationsDashboard";
 import QuickServiceProviderRequest from "@/pages/QuickTechnicianRequest";
 import ScreenSharingPage from "@/pages/ScreenSharingPage";
 import ReceiptDemo from "@/pages/ReceiptDemo";
+import InvoiceModificationDemo from "@/pages/InvoiceModificationDemo";
 
 
 function Router() {
@@ -98,6 +99,7 @@ function Router() {
           <Route path="/register" component={RegisterPage} />
           <Route path="/auth-test" component={AuthTestPage} />
           <Route path="/receipt-demo" component={ReceiptDemo} />
+          <Route path="/invoice-demo" component={InvoiceModificationDemo} />
         </>
       )}
       
