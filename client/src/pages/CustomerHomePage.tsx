@@ -149,25 +149,57 @@ export default function CustomerHomePage() {
   // Business Information Form Handler
   const handleBusinessUpdate = async (data: z.infer<typeof businessInfoSchema>) => {
     try {
-      const response = await apiRequest('POST', '/api/customer-account/setup', data);
+      // Get current user data from localStorage
+      const currentUser = JSON.parse(localStorage.getItem('tech_user') || '{}');
+      const userId = currentUser.id || 1; // Default to user ID 1 if not set
+      
+      // Structure the data as expected by the API
+      const requestData = {
+        userId: userId,
+        businessInfo: {
+          businessName: data.companyName, // Map companyName to businessName
+          companyName: data.companyName,
+          email: data.businessEmail, // Map businessEmail to email
+          phone: data.businessPhone, // Map businessPhone to phone
+          businessType: 'company', // Set a default business type
+          businessSize: data.companySize,
+          industry: data.industry,
+          address: data.businessAddress, // Map businessAddress to address
+          website: '', // Set empty default
+          taxId: data.taxId
+        }
+      };
+      
+      const response = await apiRequest('POST', '/api/customer-account/setup', requestData);
       
       if (response.ok) {
+        const result = await response.json();
+        
         toast({
           title: "Success",
           description: "Business information updated successfully!",
           variant: "default",
         });
         
+        // Update localStorage with new business information
+        const updatedUserData = {
+          ...currentUser,
+          ...result.user,
+          lastUpdated: new Date().toISOString()
+        };
+        localStorage.setItem('tech_user', JSON.stringify(updatedUserData));
+        
         // Reset form to show updated data
         businessForm.reset(data);
       } else {
-        throw new Error('Failed to update business information');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update business information');
       }
     } catch (error) {
       console.error('Error updating business information:', error);
       toast({
         title: "Error",
-        description: "Failed to update business information. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to update business information. Please try again.",
         variant: "destructive",
       });
     }
