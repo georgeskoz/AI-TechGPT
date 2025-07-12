@@ -58,6 +58,7 @@ function Router() {
     <Switch>
       {/* Main Entry Points */}
       <Route path="/" component={CustomerHomePage} />
+      <Route path="/customer-home" component={CustomerHomePage} />
       
       {/* Customer Portal - Core Pages */}
       <Route path="/chat" component={ChatPage} />
