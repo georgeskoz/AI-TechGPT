@@ -49,6 +49,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function CustomerHomePage() {
   const [, setLocation] = useLocation();
@@ -114,7 +115,7 @@ export default function CustomerHomePage() {
     }
   }, []);
 
-  const handleProfileUpdate = () => {
+  const handleProfileUpdate = async () => {
     // Validate required fields
     if (!profileData.fullName || !profileData.email || !profileData.username) {
       toast({
@@ -137,34 +138,49 @@ export default function CustomerHomePage() {
     }
 
     try {
-      // Save to localStorage
+      // Get current user data from localStorage
       const currentUser = JSON.parse(localStorage.getItem('tech_user') || '{}');
-      const updatedUser = {
-        ...currentUser,
+      const userId = currentUser.id || 1; // Default to user ID 1 if not set
+      
+      // Update profile via API
+      const response = await apiRequest('PUT', `/api/users/${userId}`, {
         fullName: profileData.fullName,
         email: profileData.email,
         phone: profileData.phone,
         username: profileData.username,
         address: profileData.address,
-        lastUpdated: new Date().toISOString()
-      };
-      
-      localStorage.setItem('tech_user', JSON.stringify(updatedUser));
-      
-      // Update account status to reflect changes
-      setAccountStatus(prev => ({
-        ...prev,
-        profileComplete: 95,
-        lastLogin: 'Just now'
-      }));
-
-      toast({
-        title: "Profile Updated",
-        description: "Your personal information has been updated successfully!",
       });
       
-      console.log('Profile updated:', updatedUser);
+      if (response.ok) {
+        const updatedUser = await response.json();
+        
+        // Update localStorage with new data
+        const updatedUserData = {
+          ...currentUser,
+          ...updatedUser,
+          lastUpdated: new Date().toISOString()
+        };
+        
+        localStorage.setItem('tech_user', JSON.stringify(updatedUserData));
+        
+        // Update account status to reflect changes
+        setAccountStatus(prev => ({
+          ...prev,
+          profileComplete: 95,
+          lastLogin: 'Just now'
+        }));
+
+        toast({
+          title: "Profile Updated",
+          description: "Your personal information has been updated successfully!",
+        });
+        
+        console.log('Profile updated:', updatedUser);
+      } else {
+        throw new Error('Failed to update profile');
+      }
     } catch (error) {
+      console.error('Profile update error:', error);
       toast({
         title: "Error",
         description: "Failed to update profile. Please try again.",

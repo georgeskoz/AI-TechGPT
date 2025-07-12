@@ -20,6 +20,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateProfile(username: string, profile: UpdateProfile): Promise<User>;
+  updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
   
   // Message management
   createMessage(message: InsertMessage): Promise<Message>;
@@ -813,6 +814,19 @@ class MemoryStorage implements IStorage {
     if (!user) throw new Error("User not found");
     const updatedUser = { ...user, ...profile };
     this.users.set(user.id, updatedUser);
+    return updatedUser;
+  }
+
+  async updateUser(id: number, updates: Partial<User>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { 
+      ...user, 
+      ...updates, 
+      updatedAt: new Date() 
+    };
+    this.users.set(id, updatedUser);
     return updatedUser;
   }
   
