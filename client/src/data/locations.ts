@@ -354,3 +354,7 @@ export function getCitiesByState(countryCode: string, stateCode: string): string
   const state = getStateByCode(countryCode, stateCode);
   return state?.cities || [];
 }
+
+// Export US states and Canadian provinces for backward compatibility
+export const usStates = countries.find(c => c.code === "US")?.states || [];
+export const canadianProvinces = countries.find(c => c.code === "CA")?.states || [];
