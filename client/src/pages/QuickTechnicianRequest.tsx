@@ -37,7 +37,8 @@ import {
   AlertCircle,
   Timer,
   XCircle,
-  X
+  X,
+  Navigation as NavigationIcon
 } from "lucide-react";
 import PaymentMethodSelector from "@/components/PaymentMethodSelector";
 
@@ -232,12 +233,12 @@ export default function QuickServiceProviderRequest() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {categories.map((category) => (
-          <Card 
+          <div 
             key={category.id}
-            className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-blue-500"
+            className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-blue-500 rounded-lg border-gray-200 bg-white"
             onClick={() => handleCategorySelect(category)}
           >
-            <CardContent className="p-4">
+            <div className="p-4">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-blue-100 rounded-lg">
                   <category.icon className="w-6 h-6 text-blue-600" />
@@ -248,8 +249,8 @@ export default function QuickServiceProviderRequest() {
                   <p className="text-sm font-medium text-green-600">From ${category.basePrice}</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ))}
       </div>
     </div>
@@ -778,7 +779,7 @@ export default function QuickServiceProviderRequest() {
               Message
             </Button>
             <Button variant="outline" className="flex items-center gap-2">
-              <Navigation className="w-4 h-4" />
+              <NavigationIcon className="w-4 h-4" />
               Track
             </Button>
           </div>
