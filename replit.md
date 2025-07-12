@@ -102,6 +102,25 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
 
 ## Recent Changes
 
+### January 11, 2025 - Service Provider Invoice Modification System
+- **Complete Invoice Modification Interface**: Implemented comprehensive system for service providers to add hardware items and additional services to customer invoices before job completion
+  - **InvoiceModificationModal Component**: Full-featured modal with tabbed interface for adding hardware items and additional services during job execution
+  - **ServiceProviderJobActions Component**: Job management interface with invoice modification integration and job status controls
+  - **Real-time Tax Calculation**: Automatic Quebec tax calculation (GST 5% + TVQ 9.975%) with live total updates as items are added
+  - **Dual-Tab Interface**: Separate tabs for hardware items and additional services with specialized forms for each type
+  - **Professional Invoice Preview**: Live preview of invoice changes with detailed breakdown of subtotals, taxes, and final total
+  - **Customer Notification System**: Automatic customer notification when invoice modifications are made
+  - **Job Status Integration**: Seamless integration with job workflow - modifications must be completed before job can be marked as completed
+  - **API Backend Support**: Complete API endpoints for invoice modification, job status updates, and customer notifications
+  - **Demo Interface**: Comprehensive demo at /invoice-demo showing the complete service provider workflow
+- **Pre-Completion Invoice Control**: Service providers can only complete jobs after reviewing and finalizing all invoice modifications
+  - **Mandatory Invoice Review**: "Complete & Invoice" button opens modification interface first, ensuring all charges are captured
+  - **Hardware Item Management**: Add individual hardware items with name, description, quantity, unit price, and automatic total calculation
+  - **Additional Service Tracking**: Add extra services with duration, hourly rate, and service description
+  - **Remove Items Capability**: Service providers can remove mistakenly added items before finalizing
+  - **Professional Workflow**: Clean, intuitive interface that guides service providers through the invoice modification process
+  - **Integration Ready**: System designed to integrate with existing job management and receipt generation systems
+
 ### January 11, 2025 - Service Provider Terminology Update and Navigation Improvements
 - **Complete Terminology Standardization**: Renamed all "technician" references to "service provider" throughout the platform for consistent branding and professional presentation
   - **Navigation Component Updated**: Fixed Quick Access menu logic to properly detect page context and display appropriate menu items
