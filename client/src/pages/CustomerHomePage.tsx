@@ -142,11 +142,11 @@ export default function CustomerHomePage() {
   useEffect(() => {
     const loadProfileData = async () => {
       try {
-        const response = await apiRequest('GET', '/api/customer/profile');
+        const response = await apiRequest('GET', '/api/customer/profile?userId=1');
         const data = await response.json();
-        if (data.success) {
-          setProfileData(data.profile);
-          form.reset(data.profile);
+        if (data) {
+          setProfileData(data);
+          form.reset(data);
         }
       } catch (error) {
         console.error('Error loading profile:', error);
@@ -160,10 +160,11 @@ export default function CustomerHomePage() {
   const handleSaveProfile = async (data: CustomerProfileForm) => {
     setIsLoading(true);
     try {
-      const response = await apiRequest('POST', '/api/customer/profile', data);
+      const profileDataWithUserId = { ...data, userId: 1 };
+      const response = await apiRequest('POST', '/api/customer/profile', profileDataWithUserId);
       const result = await response.json();
       
-      if (result.success) {
+      if (result) {
         toast({
           title: "Profile Updated",
           description: "Your profile has been successfully updated.",
