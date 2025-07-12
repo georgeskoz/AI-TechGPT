@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Receipt, Plus, CheckCircle } from "lucide-react";
+import { Receipt, Plus, CheckCircle, ArrowRight, Home, Menu, Settings } from "lucide-react";
 import JobCompletionModal from "@/components/JobCompletionModal";
 import CustomerReceipt from "@/components/CustomerReceipt";
+import { Link } from "wouter";
 
 export default function ReceiptDemo() {
   const [showJobCompletion, setShowJobCompletion] = useState(false);
@@ -87,6 +88,39 @@ export default function ReceiptDemo() {
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-6xl mx-auto">
+        {/* Navigation Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Link href="/">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Home className="h-4 w-4" />
+                Home
+              </Button>
+            </Link>
+            <Link href="/invoice-demo">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <ArrowRight className="h-4 w-4" />
+                Invoice Demo
+              </Button>
+            </Link>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Link href="/technician-dashboard">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Menu className="h-4 w-4" />
+                Service Provider Dashboard
+              </Button>
+            </Link>
+            <Link href="/admin">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Admin Panel
+              </Button>
+            </Link>
+          </div>
+        </div>
+
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             TechGPT Receipt System Demo
