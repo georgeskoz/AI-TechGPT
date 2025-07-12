@@ -868,13 +868,13 @@ export default function QuickServiceProviderRequest() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-8">
       <Navigation 
         title="Request Service Provider" 
         showBackButton={true}
         backTo="/"
       />
-      <div className="max-w-3xl mx-auto p-4">
+      <div className="max-w-3xl mx-auto p-4 pb-8">
         <div className="bg-white rounded-lg shadow-sm p-6">
           {/* Header with Close Button */}
           <div className="flex items-center justify-between mb-6">
