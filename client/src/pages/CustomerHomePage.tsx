@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -48,9 +48,11 @@ import {
   ExternalLink
 } from "lucide-react";
 import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CustomerHomePage() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [selectedAccountSection, setSelectedAccountSection] = useState('help');
   const [showActiveService, setShowActiveService] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -92,36 +94,136 @@ export default function CustomerHomePage() {
     accountActive: true
   });
 
+  // Load existing user data when component mounts
+  useEffect(() => {
+    const existingUser = localStorage.getItem('tech_user');
+    if (existingUser) {
+      try {
+        const userData = JSON.parse(existingUser);
+        setProfileData(prev => ({
+          ...prev,
+          fullName: userData.fullName || '',
+          email: userData.email || '',
+          phone: userData.phone || '',
+          username: userData.username || '',
+          address: userData.address || ''
+        }));
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    }
+  }, []);
+
   const handleProfileUpdate = () => {
     // Validate required fields
     if (!profileData.fullName || !profileData.email || !profileData.username) {
-      alert('Please fill in all required fields (Full Name, Email, Username)');
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields (Full Name, Email, Username)",
+        variant: "destructive",
+      });
       return;
     }
 
-    // Simulate profile update
-    alert('Profile updated successfully!');
-    console.log('Profile data:', profileData);
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(profileData.email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Save to localStorage
+      const currentUser = JSON.parse(localStorage.getItem('tech_user') || '{}');
+      const updatedUser = {
+        ...currentUser,
+        fullName: profileData.fullName,
+        email: profileData.email,
+        phone: profileData.phone,
+        username: profileData.username,
+        address: profileData.address,
+        lastUpdated: new Date().toISOString()
+      };
+      
+      localStorage.setItem('tech_user', JSON.stringify(updatedUser));
+      
+      // Update account status to reflect changes
+      setAccountStatus(prev => ({
+        ...prev,
+        profileComplete: 95,
+        lastLogin: 'Just now'
+      }));
+
+      toast({
+        title: "Profile Updated",
+        description: "Your personal information has been updated successfully!",
+      });
+      
+      console.log('Profile updated:', updatedUser);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handlePasswordChange = () => {
     if (!profileData.currentPassword || !profileData.newPassword || !profileData.confirmPassword) {
-      alert('Please fill in all password fields');
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all password fields",
+        variant: "destructive",
+      });
       return;
     }
 
     if (profileData.newPassword !== profileData.confirmPassword) {
-      alert('New passwords do not match');
+      toast({
+        title: "Password Mismatch",
+        description: "New passwords do not match",
+        variant: "destructive",
+      });
       return;
     }
 
     if (profileData.newPassword.length < 8) {
-      alert('New password must be at least 8 characters long');
+      toast({
+        title: "Password Too Short",
+        description: "New password must be at least 8 characters long",
+        variant: "destructive",
+      });
       return;
     }
 
-    alert('Password changed successfully!');
-    setProfileData(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
+    try {
+      // Update password in localStorage (in a real app, this would be an API call)
+      const currentUser = JSON.parse(localStorage.getItem('tech_user') || '{}');
+      const updatedUser = {
+        ...currentUser,
+        passwordLastChanged: new Date().toISOString()
+      };
+      
+      localStorage.setItem('tech_user', JSON.stringify(updatedUser));
+      
+      toast({
+        title: "Password Updated",
+        description: "Your password has been changed successfully!",
+      });
+      
+      setProfileData(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update password. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
