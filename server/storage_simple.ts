@@ -382,6 +382,104 @@ export class MemoryStorage implements IStorage {
     return messages.filter(message => message.username === username);
   }
 
+  // Customer Profile methods
+  async getCustomerProfile(userId: number): Promise<any> {
+    const user = this.users.get(userId);
+    if (!user) {
+      return null;
+    }
+    
+    return {
+      id: user.id,
+      userId: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      phoneNumber: user.phoneNumber || '',
+      phoneCountryCode: '+1',
+      country: user.country || 'CA',
+      province: user.state || '',
+      city: user.city || '',
+      address: user.address || '',
+      postalCode: user.postalCode || '',
+      preferences: user.preferences || {
+        notifications: true,
+        newsletter: false,
+        sms: false,
+        emailSupport: true,
+      },
+      businessInfo: user.businessInfo || {
+        isBusinessCustomer: false,
+        businessName: '',
+        businessType: '',
+        taxId: '',
+        billingAddress: '',
+      },
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    };
+  }
+
+  async updateCustomerProfile(userId: number, profileData: any): Promise<any> {
+    const user = this.users.get(userId);
+    if (!user) {
+      return null;
+    }
+
+    const updatedUser: User = {
+      ...user,
+      fullName: profileData.fullName || user.fullName,
+      email: profileData.email || user.email,
+      phoneNumber: profileData.phoneNumber || user.phoneNumber,
+      country: profileData.country || user.country,
+      state: profileData.province || user.state,
+      city: profileData.city || user.city,
+      address: profileData.address || user.address,
+      postalCode: profileData.postalCode || user.postalCode,
+      preferences: profileData.preferences || user.preferences,
+      businessInfo: profileData.businessInfo || user.businessInfo,
+      updatedAt: new Date()
+    };
+
+    this.users.set(userId, updatedUser);
+    return this.getCustomerProfile(userId);
+  }
+
+  async createCustomerProfile(profileData: any): Promise<any> {
+    const newUser: User = {
+      id: this.nextUserId++,
+      username: profileData.email || `user${this.nextUserId}`,
+      fullName: profileData.fullName,
+      email: profileData.email,
+      phoneNumber: profileData.phoneNumber,
+      address: profileData.address,
+      bio: null,
+      avatar: null,
+      city: profileData.city,
+      state: profileData.province,
+      country: profileData.country,
+      postalCode: profileData.postalCode,
+      timezone: "America/Toronto",
+      language: "en",
+      newsletter: true,
+      lastLogin: null,
+      isActive: true,
+      emailVerified: false,
+      phoneVerified: false,
+      twoFactorEnabled: false,
+      paymentMethod: null,
+      paymentMethodSetup: false,
+      paymentDetails: null,
+      businessInfo: profileData.businessInfo,
+      preferences: profileData.preferences,
+      metadata: null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    this.users.set(newUser.id, newUser);
+    return this.getCustomerProfile(newUser.id);
+  }
+
   // Technician methods
   async createTechnician(technician: InsertTechnician): Promise<Technician> {
     const newTechnician: Technician = {
