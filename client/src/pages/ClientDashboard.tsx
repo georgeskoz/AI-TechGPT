@@ -23,7 +23,10 @@ import {
   DollarSign,
   Filter,
   Search,
-  Plus
+  Plus,
+  Edit2,
+  Save,
+  X
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -39,6 +42,8 @@ export default function ClientDashboard() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editValues, setEditValues] = useState<any>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -98,6 +103,98 @@ export default function ClientDashboard() {
 
   const handleNewRequest = () => {
     setLocation('/issues');
+  };
+
+  const handleStartEdit = (field: string, currentValue: string) => {
+    setEditingField(field);
+    setEditValues({ ...editValues, [field]: currentValue });
+  };
+
+  const handleSaveEdit = async (field: string) => {
+    try {
+      const updatedUser = { ...currentUser, [field]: editValues[field] };
+      // Update localStorage
+      localStorage.setItem('tech_user', JSON.stringify(updatedUser));
+      setCurrentUser(updatedUser);
+      setEditingField(null);
+      setEditValues({});
+      toast({
+        title: "Profile Updated",
+        description: `${field.charAt(0).toUpperCase() + field.slice(1)} has been updated successfully.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingField(null);
+    setEditValues({});
+  };
+
+  const InlineEditField = ({ field, label, value, placeholder = "Not provided" }: {
+    field: string;
+    label: string;
+    value: string;
+    placeholder?: string;
+  }) => {
+    const isEditing = editingField === field;
+    
+    return (
+      <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
+        <div className="flex-1">
+          <div className="text-sm font-medium text-gray-700 mb-1">{label}</div>
+          {isEditing ? (
+            <Input
+              value={editValues[field] || ''}
+              onChange={(e) => setEditValues({ ...editValues, [field]: e.target.value })}
+              className="max-w-sm"
+              autoFocus
+            />
+          ) : (
+            <div className="text-gray-900">
+              {value || <span className="text-gray-400 italic">{placeholder}</span>}
+            </div>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-2">
+          {isEditing ? (
+            <>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => handleSaveEdit(field)}
+                className="h-8 w-8 p-0"
+              >
+                <Save className="h-4 w-4" />
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={handleCancelEdit}
+                className="h-8 w-8 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </>
+          ) : (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={() => handleStartEdit(field, value || '')}
+              className="h-8 w-8 p-0"
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+    );
   };
 
   const getStatusColor = (status: string) => {
@@ -671,27 +768,37 @@ export default function ClientDashboard() {
                   Personal Information
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                  <Input value={currentUser.fullName || ''} readOnly />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <Input value={currentUser.email || ''} readOnly />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                  <Input value={currentUser.phone || ''} readOnly />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                  <Input value={currentUser.address || ''} readOnly />
-                </div>
-                <Button className="w-full">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
+              <CardContent className="space-y-2">
+                <InlineEditField
+                  field="fullName"
+                  label="Full Name"
+                  value={currentUser.fullName || ''}
+                  placeholder="Enter your full name"
+                />
+                <InlineEditField
+                  field="email"
+                  label="Email Address"
+                  value={currentUser.email || ''}
+                  placeholder="Enter your email"
+                />
+                <InlineEditField
+                  field="phone"
+                  label="Phone Number"
+                  value={currentUser.phone || ''}
+                  placeholder="Enter your phone number"
+                />
+                <InlineEditField
+                  field="address"
+                  label="Home Address"
+                  value={currentUser.address || ''}
+                  placeholder="Enter your address"
+                />
+                <InlineEditField
+                  field="username"
+                  label="Username"
+                  value={currentUser.username || ''}
+                  placeholder="Choose a username"
+                />
               </CardContent>
             </Card>
 
