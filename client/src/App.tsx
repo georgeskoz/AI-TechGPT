@@ -16,7 +16,7 @@ import SimpleDiagnosticPage from "@/pages/SimpleDiagnosticPage";
 import ClientDashboard from "@/pages/ClientDashboard";
 import AuthTestPage from "@/components/AuthTestPage";
 import ServiceProviderRegistration from "@/pages/TechnicianRegistration";
-import ServiceProviderDashboard from "@/pages/TechnicianDashboard";
+import ServiceProviderDashboard from "@/pages/ServiceProviderDashboard";
 import TechnicianDetailsPage from "@/pages/TechnicianDashboard";
 import TechnicianLanding from "@/pages/TechnicianLanding";
 import TechnicianMatchingPage from "@/pages/TechnicianMatchingPage";
@@ -75,6 +75,7 @@ function Router() {
       <Route path="/technician-register" component={ServiceProviderRegistration} />
       <Route path="/technician-registration" component={ServiceProviderRegistration} />
       <Route path="/technician-dashboard" component={TechnicianDetailsPage} />
+      <Route path="/service-provider-dashboard" component={ServiceProviderDashboard} />
       <Route path="/technician-earnings" component={TechnicianEarnings} />
       <Route path="/profile-visibility" component={ProfileVisibilityPage} />
       <Route path="/technicians" component={TechnicianLanding} />
