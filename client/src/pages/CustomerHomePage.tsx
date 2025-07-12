@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -27,1953 +28,846 @@ import {
   Settings,
   CreditCard,
   History,
-  Bell,
-  Mail,
   Phone,
   Home,
-  Calendar,
-  Lock,
-  Plus,
-  Trash2,
-  Download,
-  Send,
-  Apple,
-  Smartphone,
+  MessageCircle,
   HelpCircle,
   FileText,
+  Book,
+  ExternalLink,
   Building2,
+  Mail,
   Globe,
   DollarSign,
   TrendingUp,
   BarChart3,
-  HeadphonesIcon,
-  MessageCircle,
-  Book,
-  ExternalLink
+  Calendar,
+  Bell,
+  Download,
+  Plus,
+  Trash2,
+  Send,
+  Smartphone,
+  Apple,
+  Lock
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
+// Country data
+const countries = [
+  { code: 'CA', name: 'Canada', flag: '🇨🇦', phoneCode: '+1' },
+  { code: 'US', name: 'United States', flag: '🇺🇸', phoneCode: '+1' },
+  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', phoneCode: '+44' },
+  { code: 'FR', name: 'France', flag: '🇫🇷', phoneCode: '+33' },
+  { code: 'DE', name: 'Germany', flag: '🇩🇪', phoneCode: '+49' },
+  { code: 'AU', name: 'Australia', flag: '🇦🇺', phoneCode: '+61' },
+  { code: 'JP', name: 'Japan', flag: '🇯🇵', phoneCode: '+81' },
+  { code: 'BR', name: 'Brazil', flag: '🇧🇷', phoneCode: '+55' },
+  { code: 'MX', name: 'Mexico', flag: '🇲🇽', phoneCode: '+52' },
+  { code: 'IN', name: 'India', flag: '🇮🇳', phoneCode: '+91' },
+];
+
+// Canadian provinces
+const canadianProvinces = [
+  'Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador',
+  'Northwest Territories', 'Nova Scotia', 'Nunavut', 'Ontario', 'Prince Edward Island',
+  'Quebec', 'Saskatchewan', 'Yukon'
+];
+
+// US states
+const usStates = [
+  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut',
+  'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
+  'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan',
+  'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
+  'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio',
+  'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota',
+  'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia',
+  'Wisconsin', 'Wyoming'
+];
+
+// Form schema
+const customerProfileSchema = z.object({
+  fullName: z.string().min(2, "Full name is required"),
+  email: z.string().email("Invalid email address"),
+  phoneNumber: z.string().optional(),
+  phoneCountryCode: z.string().optional(),
+  country: z.string().optional(),
+  province: z.string().optional(),
+  city: z.string().optional(),
+  address: z.string().optional(),
+  postalCode: z.string().optional(),
+  preferences: z.object({
+    notifications: z.boolean().default(true),
+    newsletter: z.boolean().default(false),
+    sms: z.boolean().default(false),
+    emailSupport: z.boolean().default(true),
+  }).optional(),
+  businessInfo: z.object({
+    isBusinessCustomer: z.boolean().default(false),
+    businessName: z.string().optional(),
+    businessType: z.string().optional(),
+    taxId: z.string().optional(),
+    billingAddress: z.string().optional(),
+  }).optional(),
+});
+
+type CustomerProfileForm = z.infer<typeof customerProfileSchema>;
+
 export default function CustomerHomePage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [selectedAccountSection, setSelectedAccountSection] = useState('help');
-  const [showActiveService, setShowActiveService] = useState(false);
-  const [profileData, setProfileData] = useState({
+  const [isLoading, setIsLoading] = useState(false);
+  const [showServiceAnnouncement, setShowServiceAnnouncement] = useState(false);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [profileData, setProfileData] = useState<CustomerProfileForm>({
     fullName: '',
     email: '',
-    phone: '',
-    username: '',
+    phoneNumber: '',
+    phoneCountryCode: '+1',
+    country: 'CA',
+    province: '',
+    city: '',
     address: '',
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-
-  const [twoFactorSettings, setTwoFactorSettings] = useState({
-    smsEnabled: false,
-    emailEnabled: false
-  });
-
-  const [notifications, setNotifications] = useState({
-    emailNotifications: true,
-    smsNotifications: false,
-    marketingEmails: true
-  });
-
-  const [paymentMethods, setPaymentMethods] = useState([
-    { id: 1, type: 'card', last4: '1234', brand: 'Visa', expiry: '12/26', isDefault: true },
-    { id: 2, type: 'card', last4: '5678', brand: 'Mastercard', expiry: '08/25', isDefault: false }
-  ]);
-
-  const [accountStatus, setAccountStatus] = useState({
-    accountType: 'Standard Customer',
-    memberSince: 'January 2025',
-    emailVerified: true,
-    phoneVerified: true,
-    identityVerified: false,
-    profileComplete: 85,
-    lastLogin: '2 hours ago',
-    totalServices: 12,
-    accountActive: true
-  });
-
-  // Business Information Form Schema
-  const businessInfoSchema = z.object({
-    companyName: z.string().min(2, "Company name must be at least 2 characters").max(100, "Company name must be less than 100 characters"),
-    businessEmail: z.string().email("Please enter a valid business email address"),
-    businessPhone: z.string().min(10, "Phone number must be at least 10 characters").max(15, "Phone number must be less than 15 characters"),
-    taxId: z.string().min(9, "Tax ID must be at least 9 characters").max(20, "Tax ID must be less than 20 characters"),
-    businessAddress: z.string().min(10, "Business address must be at least 10 characters").max(200, "Business address must be less than 200 characters"),
-    industry: z.string().min(2, "Industry must be at least 2 characters").max(50, "Industry must be less than 50 characters"),
-    companySize: z.enum(['1-10', '11-50', '51-200', '201-500', '500+'], {
-      required_error: "Please select your company size",
-    }),
-  });
-
-  // Business Information Form
-  const businessForm = useForm<z.infer<typeof businessInfoSchema>>({
-    resolver: zodResolver(businessInfoSchema),
-    defaultValues: {
-      companyName: '',
-      businessEmail: '',
-      businessPhone: '',
+    postalCode: '',
+    preferences: {
+      notifications: true,
+      newsletter: false,
+      sms: false,
+      emailSupport: true,
+    },
+    businessInfo: {
+      isBusinessCustomer: false,
+      businessName: '',
+      businessType: '',
       taxId: '',
-      businessAddress: '',
-      industry: '',
-      companySize: '1-10',
+      billingAddress: '',
     },
   });
 
-  // Load existing user data when component mounts
-  useEffect(() => {
-    const existingUser = localStorage.getItem('tech_user');
-    if (existingUser) {
-      try {
-        const userData = JSON.parse(existingUser);
-        setProfileData(prev => ({
-          ...prev,
-          fullName: userData.fullName || '',
-          email: userData.email || '',
-          phone: userData.phone || '',
-          username: userData.username || '',
-          address: userData.address || ''
-        }));
-      } catch (error) {
-        console.error('Error loading user data:', error);
+  const form = useForm<CustomerProfileForm>({
+    resolver: zodResolver(customerProfileSchema),
+    defaultValues: profileData,
+  });
+
+  const watchedCountry = form.watch('country');
+
+  // Handle input changes
+  const handleInputChange = (field: keyof CustomerProfileForm, value: any) => {
+    setProfileData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    form.setValue(field, value);
+  };
+
+  // Handle nested object changes
+  const handleNestedChange = (parent: string, field: string, value: any) => {
+    setProfileData(prev => ({
+      ...prev,
+      [parent]: {
+        ...prev[parent as keyof CustomerProfileForm],
+        [field]: value
       }
+    }));
+    form.setValue(`${parent}.${field}` as any, value);
+  };
+
+  // Load profile data
+  useEffect(() => {
+    const loadProfileData = async () => {
+      try {
+        const response = await apiRequest('GET', '/api/customer/profile');
+        const data = await response.json();
+        if (data.success) {
+          setProfileData(data.profile);
+          form.reset(data.profile);
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      }
+    };
+
+    loadProfileData();
+  }, []);
+
+  // Save profile data
+  const handleSaveProfile = async (data: CustomerProfileForm) => {
+    setIsLoading(true);
+    try {
+      const response = await apiRequest('POST', '/api/customer/profile', data);
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({
+          title: "Profile Updated",
+          description: "Your profile has been saved successfully.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.message || "Failed to save profile.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      toast({
+        title: "Error",
+        description: "An error occurred while saving your profile.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Service announcement modal
+  useEffect(() => {
+    const hasSeenAnnouncement = localStorage.getItem('hasSeenServiceAnnouncement');
+    if (!hasSeenAnnouncement) {
+      setShowServiceAnnouncement(true);
     }
   }, []);
 
-  // Business Information Form Handler
-  const handleBusinessUpdate = async (data: z.infer<typeof businessInfoSchema>) => {
-    try {
-      // Get current user data from localStorage
-      const currentUser = JSON.parse(localStorage.getItem('tech_user') || '{}');
-      const userId = currentUser.id || 1; // Default to user ID 1 if not set
-      
-      // Structure the data as expected by the API
-      const requestData = {
-        userId: userId,
-        businessInfo: {
-          businessName: data.companyName, // Map companyName to businessName
-          companyName: data.companyName,
-          email: data.businessEmail, // Map businessEmail to email
-          phone: data.businessPhone, // Map businessPhone to phone
-          businessType: 'company', // Set a default business type
-          businessSize: data.companySize,
-          industry: data.industry,
-          address: data.businessAddress, // Map businessAddress to address
-          website: '', // Set empty default
-          taxId: data.taxId
-        }
-      };
-      
-      const response = await apiRequest('POST', '/api/customer-account/setup', requestData);
-      
-      if (response.ok) {
-        const result = await response.json();
-        
-        toast({
-          title: "Success",
-          description: "Business information updated successfully!",
-          variant: "default",
-        });
-        
-        // Update localStorage with new business information
-        const updatedUserData = {
-          ...currentUser,
-          ...result.user,
-          lastUpdated: new Date().toISOString()
-        };
-        localStorage.setItem('tech_user', JSON.stringify(updatedUserData));
-        
-        // Reset form to show updated data
-        businessForm.reset(data);
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update business information');
-      }
-    } catch (error) {
-      console.error('Error updating business information:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update business information. Please try again.",
-        variant: "destructive",
-      });
-    }
+  const handleCloseAnnouncement = () => {
+    setShowServiceAnnouncement(false);
+    localStorage.setItem('hasSeenServiceAnnouncement', 'true');
   };
-
-  const handleProfileUpdate = async () => {
-    // Validate required fields
-    if (!profileData.fullName || !profileData.email || !profileData.username) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields (Full Name, Email, Username)",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(profileData.email)) {
-      toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // Get current user data from localStorage
-      const currentUser = JSON.parse(localStorage.getItem('tech_user') || '{}');
-      const userId = currentUser.id || 1; // Default to user ID 1 if not set
-      
-      // Update profile via API
-      const response = await apiRequest('PUT', `/api/users/${userId}`, {
-        fullName: profileData.fullName,
-        email: profileData.email,
-        phone: profileData.phone,
-        username: profileData.username,
-        address: profileData.address,
-      });
-      
-      if (response.ok) {
-        const updatedUser = await response.json();
-        
-        // Update localStorage with new data
-        const updatedUserData = {
-          ...currentUser,
-          ...updatedUser,
-          lastUpdated: new Date().toISOString()
-        };
-        
-        localStorage.setItem('tech_user', JSON.stringify(updatedUserData));
-        
-        // Update account status to reflect changes
-        setAccountStatus(prev => ({
-          ...prev,
-          profileComplete: 95,
-          lastLogin: 'Just now'
-        }));
-
-        toast({
-          title: "Profile Updated",
-          description: "Your personal information has been updated successfully!",
-        });
-        
-        console.log('Profile updated:', updatedUser);
-      } else {
-        throw new Error('Failed to update profile');
-      }
-    } catch (error) {
-      console.error('Profile update error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handlePasswordChange = () => {
-    if (!profileData.currentPassword || !profileData.newPassword || !profileData.confirmPassword) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all password fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (profileData.newPassword !== profileData.confirmPassword) {
-      toast({
-        title: "Password Mismatch",
-        description: "New passwords do not match",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (profileData.newPassword.length < 8) {
-      toast({
-        title: "Password Too Short",
-        description: "New password must be at least 8 characters long",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // Update password in localStorage (in a real app, this would be an API call)
-      const currentUser = JSON.parse(localStorage.getItem('tech_user') || '{}');
-      const updatedUser = {
-        ...currentUser,
-        passwordLastChanged: new Date().toISOString()
-      };
-      
-      localStorage.setItem('tech_user', JSON.stringify(updatedUser));
-      
-      toast({
-        title: "Password Updated",
-        description: "Your password has been changed successfully!",
-      });
-      
-      setProfileData(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update password. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    setProfileData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleTwoFactorToggle = (method: 'sms' | 'email') => {
-    if (method === 'sms') {
-      if (!twoFactorSettings.smsEnabled) {
-        // Enable SMS 2FA
-        const phoneNumber = profileData.phone || prompt('Please enter your phone number for SMS authentication:');
-        if (phoneNumber) {
-          setTwoFactorSettings(prev => ({ ...prev, smsEnabled: true }));
-          alert('SMS Two-Factor Authentication enabled successfully! You will receive a verification code via SMS when logging in.');
-        }
-      } else {
-        // Disable SMS 2FA
-        if (confirm('Are you sure you want to disable SMS Two-Factor Authentication?')) {
-          setTwoFactorSettings(prev => ({ ...prev, smsEnabled: false }));
-          alert('SMS Two-Factor Authentication has been disabled.');
-        }
-      }
-    } else if (method === 'email') {
-      if (!twoFactorSettings.emailEnabled) {
-        // Enable Email 2FA
-        const email = profileData.email || prompt('Please enter your email address for email authentication:');
-        if (email) {
-          setTwoFactorSettings(prev => ({ ...prev, emailEnabled: true }));
-          alert('Email Two-Factor Authentication enabled successfully! You will receive a verification code via email when logging in.');
-        }
-      } else {
-        // Disable Email 2FA
-        if (confirm('Are you sure you want to disable Email Two-Factor Authentication?')) {
-          setTwoFactorSettings(prev => ({ ...prev, emailEnabled: false }));
-          alert('Email Two-Factor Authentication has been disabled.');
-        }
-      }
-    }
-  };
-
-  const handleNotificationToggle = (setting: 'emailNotifications' | 'smsNotifications' | 'marketingEmails') => {
-    setNotifications(prev => ({ ...prev, [setting]: !prev[setting] }));
-    const settingName = setting === 'emailNotifications' ? 'Email Notifications' : 
-                       setting === 'smsNotifications' ? 'SMS Notifications' : 'Marketing Emails';
-    const newStatus = !notifications[setting] ? 'enabled' : 'disabled';
-    alert(`${settingName} has been ${newStatus}.`);
-  };
-
-  const handleRemoveCard = (cardId: number) => {
-    if (confirm('Are you sure you want to remove this payment method?')) {
-      setPaymentMethods(prev => prev.filter(card => card.id !== cardId));
-      alert('Payment method removed successfully.');
-    }
-  };
-
-  const handleAddCard = () => {
-    const newCard = {
-      id: Date.now(),
-      type: 'card',
-      last4: '9999',
-      brand: 'Visa',
-      expiry: '12/27',
-      isDefault: false
-    };
-    setPaymentMethods(prev => [...prev, newCard]);
-    alert('New payment method added successfully.');
-  };
-
-  const handleApplePay = () => {
-    alert('Apple Pay setup initiated. Please complete the setup on your device.');
-  };
-
-  const handleExportPDF = (invoice: any) => {
-    // Generate PDF content
-    const pdfContent = `
-      TechGPT - Service Receipt
-      ========================
-      
-      Invoice #: ${invoice.id}
-      Service: ${invoice.service}
-      Date: ${invoice.date}
-      Amount: ${invoice.amount}
-      Service Provider: ${invoice.provider}
-      Status: ${invoice.status}
-      
-      Service Details:
-      ${invoice.details}
-      
-      Thank you for using TechGPT!
-      
-      Questions? Contact support@techgpt.com
-    `;
-    
-    // Create downloadable PDF
-    const blob = new Blob([pdfContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `TechGPT_Invoice_${invoice.id}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    alert(`Invoice ${invoice.id} exported successfully!`);
-  };
-
-  const handleEmailInvoice = (invoice: any) => {
-    const email = prompt('Enter email address to send invoice:');
-    if (email) {
-      // Create email content
-      const emailContent = `
-        Subject: TechGPT Service Receipt - Invoice #${invoice.id}
-        
-        Dear Customer,
-        
-        Thank you for using TechGPT services. Please find your service receipt below:
-        
-        Invoice #: ${invoice.id}
-        Service: ${invoice.service}
-        Date: ${invoice.date}
-        Amount: ${invoice.amount}
-        Service Provider: ${invoice.provider}
-        Status: ${invoice.status}
-        
-        Service Details:
-        ${invoice.details}
-        
-        If you have any questions about this invoice, please contact our support team at support@techgpt.com
-        
-        Best regards,
-        TechGPT Team
-      `;
-      
-      // Create mailto link
-      const mailtoLink = `mailto:${email}?subject=TechGPT Service Receipt - Invoice #${invoice.id}&body=${encodeURIComponent(emailContent)}`;
-      window.location.href = mailtoLink;
-      
-      alert(`Invoice ${invoice.id} email prepared for ${email}. Your email client should open with the invoice details.`);
-    }
-  };
-
-  const handleDownloadAccountData = () => {
-    alert('Preparing your account data for download. This may take a few minutes. You will receive an email when your data is ready.');
-  };
-
-  const handlePrivacySettings = () => {
-    alert('Privacy settings updated. You can control data sharing, visibility, and communication preferences.');
-  };
-
-  const handleDeleteAccount = () => {
-    const confirmation = confirm('Are you sure you want to delete your account? This action cannot be undone and will permanently remove all your data.');
-    if (confirmation) {
-      const finalConfirmation = confirm('This will permanently delete your account and all associated data. Type "DELETE" to confirm.');
-      if (finalConfirmation) {
-        alert('Account deletion initiated. You will receive a confirmation email within 24 hours.');
-      }
-    }
-  };
-
-  const handleVerifyEmail = () => {
-    alert('Verification email sent! Check your inbox and click the verification link.');
-    setAccountStatus(prev => ({ ...prev, emailVerified: true }));
-  };
-
-  const handleVerifyPhone = () => {
-    const phone = prompt('Enter your phone number to receive verification code:');
-    if (phone) {
-      alert(`Verification code sent to ${phone}. Enter the code to verify your phone number.`);
-      setAccountStatus(prev => ({ ...prev, phoneVerified: true }));
-    }
-  };
-
-  const handleVerifyIdentity = () => {
-    alert('Identity verification initiated. You will be redirected to our secure verification partner.');
-    setAccountStatus(prev => ({ ...prev, identityVerified: true }));
-  };
-
-  const handleUpgradeAccount = () => {
-    alert('Account upgrade initiated. You will receive premium features and priority support.');
-    setAccountStatus(prev => ({ ...prev, accountType: 'Premium Customer' }));
-  };
-
-  const features = [
-    {
-      icon: <Zap className="h-8 w-8 text-red-600" />,
-      title: "🔧 Request Service Provider (Fast Track)",
-      description: "Get help in under 60 seconds - streamlined booking process",
-      action: "Request Now",
-      route: "/technician",
-      color: "bg-red-50 border-red-200",
-      featured: true
-    },
-    {
-      icon: <MessageSquare className="h-8 w-8 text-blue-600" />,
-      title: "AI-Powered Chat Support",
-      description: "Get instant help from our advanced AI assistant for common technical issues",
-      action: "Start Chat",
-      route: "/chat",
-      color: "bg-blue-50 border-blue-200"
-    },
-    {
-      icon: <Headphones className="h-8 w-8 text-purple-600" />,
-      title: "Live Support Chat",
-      description: "Real-time chat with technical experts for immediate assistance",
-      action: "Start Live Chat",
-      route: "/live-support",
-      color: "bg-purple-50 border-purple-200"
-    },
-    {
-      icon: <Monitor className="h-8 w-8 text-green-600" />,
-      title: "Screen Sharing",
-      description: "Share your screen with service providers for remote assistance and control",
-      action: "Start Screen Sharing",
-      route: "/screen-sharing",
-      color: "bg-green-50 border-green-200"
-    },
-    {
-      icon: <MapPin className="h-8 w-8 text-orange-600" />,
-      title: "On-Site Services",
-      description: "Book service providers to come to your location for hands-on repairs",
-      action: "Book On-Site",
-      route: "/phone-support",
-      color: "bg-orange-50 border-orange-200"
-    }
-  ];
-
-  const stats = [
-    { label: "Happy Customers", value: "25,000+", icon: <Users className="h-5 w-5" /> },
-    { label: "Issues Resolved", value: "150,000+", icon: <CheckCircle className="h-5 w-5" /> },
-    { label: "Average Response", value: "< 2 min", icon: <Clock className="h-5 w-5" /> },
-    { label: "Customer Rating", value: "4.9/5", icon: <Star className="h-5 w-5" /> }
-  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <Navigation title="Customer Portal" backTo="/domains" />
+    <div className="min-h-screen bg-gray-50">
+      <Navigation />
+      <ActiveServiceTracker />
       
-      {/* Active Service Tracker - Only show when explicitly requested */}
-      {showActiveService && (
-        <ActiveServiceTracker 
-          isVisible={showActiveService} 
-          onClose={() => setShowActiveService(false)} 
-        />
-      )}
-      {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-blue-600 p-2 rounded-lg">
-                <Zap className="h-6 w-6 text-white" />
-              </div>
+      {/* Service Announcement Modal */}
+      <Dialog open={showServiceAnnouncement} onOpenChange={setShowServiceAnnouncement}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-center">
+              Service Availability Notice
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg">
+              <MapPin className="h-5 w-5 text-blue-600 mt-0.5" />
               <div>
-                <h1 className="text-xl font-bold text-gray-900">TechGPT</h1>
-                <p className="text-sm text-gray-600">Customer Support</p>
+                <h4 className="font-semibold text-blue-900">Onsite Services</h4>
+                <p className="text-sm text-blue-700">
+                  Available in the Ottawa–Gatineau region only
+                </p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    Customer Account
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Customer Account Management</DialogTitle>
-                  </DialogHeader>
-                  <Tabs value={selectedAccountSection} onValueChange={setSelectedAccountSection}>
-                    <TabsList className="grid w-full grid-cols-6">
-                      <TabsTrigger value="help">Help</TabsTrigger>
-                      <TabsTrigger value="personal">Personal</TabsTrigger>
-                      <TabsTrigger value="business">Business</TabsTrigger>
-                      <TabsTrigger value="history">History</TabsTrigger>
-                      <TabsTrigger value="billing">Billing</TabsTrigger>
-                      <TabsTrigger value="settings">Settings</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="help" className="space-y-6">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <HelpCircle className="h-5 w-5" />
-                            Help & Support Center
-                          </CardTitle>
-                          <CardDescription>
-                            Get assistance with your account and technical issues
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <div className="space-y-4">
-                              <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                <div className="flex items-center gap-3 mb-2">
-                                  <MessageCircle className="h-5 w-5 text-blue-600" />
-                                  <h3 className="font-medium">Live Chat Support</h3>
-                                </div>
-                                <p className="text-sm text-gray-600">Start a conversation with our support team</p>
-                                <Button size="sm" className="mt-2" onClick={() => setLocation('/live-support')}>
-                                  Start Chat
-                                </Button>
-                              </div>
-                              
-                              <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                <div className="flex items-center gap-3 mb-2">
-                                  <HeadphonesIcon className="h-5 w-5 text-green-600" />
-                                  <h3 className="font-medium">Phone Support</h3>
-                                </div>
-                                <p className="text-sm text-gray-600">Call our technical support hotline</p>
-                                <p className="text-sm font-medium text-green-600">1-800-TECHGPT</p>
-                              </div>
-                              
-                              <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                <div className="flex items-center gap-3 mb-2">
-                                  <Mail className="h-5 w-5 text-purple-600" />
-                                  <h3 className="font-medium">Email Support</h3>
-                                </div>
-                                <p className="text-sm text-gray-600">Send us an email for detailed assistance</p>
-                                <p className="text-sm font-medium text-purple-600">support@techgpt.com</p>
-                              </div>
-                            </div>
-                            
-                            <div className="space-y-4">
-                              <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                <div className="flex items-center gap-3 mb-2">
-                                  <Book className="h-5 w-5 text-orange-600" />
-                                  <h3 className="font-medium">Knowledge Base</h3>
-                                </div>
-                                <p className="text-sm text-gray-600">Browse our comprehensive help articles</p>
-                                <Button size="sm" variant="outline" className="mt-2">
-                                  <ExternalLink className="h-4 w-4 mr-1" />
-                                  Browse Articles
-                                </Button>
-                              </div>
-                              
-                              <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                <div className="flex items-center gap-3 mb-2">
-                                  <FileText className="h-5 w-5 text-indigo-600" />
-                                  <h3 className="font-medium">Submit a Ticket</h3>
-                                </div>
-                                <p className="text-sm text-gray-600">Create a support ticket for complex issues</p>
-                                <Button size="sm" variant="outline" className="mt-2">
-                                  Create Ticket
-                                </Button>
-                              </div>
-                              
-                              <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                <div className="flex items-center gap-3 mb-2">
-                                  <Users className="h-5 w-5 text-pink-600" />
-                                  <h3 className="font-medium">Community Forum</h3>
-                                </div>
-                                <p className="text-sm text-gray-600">Connect with other customers and experts</p>
-                                <Button size="sm" variant="outline" className="mt-2">
-                                  <ExternalLink className="h-4 w-4 mr-1" />
-                                  Join Forum
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Quick Actions</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            <Button variant="outline" size="sm" className="h-auto py-3 flex flex-col gap-1">
-                              <Settings className="h-4 w-4" />
-                              <span className="text-xs">Account Settings</span>
-                            </Button>
-                            <Button variant="outline" size="sm" className="h-auto py-3 flex flex-col gap-1">
-                              <CreditCard className="h-4 w-4" />
-                              <span className="text-xs">Billing</span>
-                            </Button>
-                            <Button variant="outline" size="sm" className="h-auto py-3 flex flex-col gap-1">
-                              <History className="h-4 w-4" />
-                              <span className="text-xs">Service History</span>
-                            </Button>
-                            <Button variant="outline" size="sm" className="h-auto py-3 flex flex-col gap-1">
-                              <Download className="h-4 w-4" />
-                              <span className="text-xs">Download Data</span>
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-                    
-                    <TabsContent value="personal" className="space-y-6">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <User className="h-5 w-5" />
-                            Personal Information
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Full Name *</label>
-                              <Input 
-                                placeholder="Enter your full name" 
-                                value={profileData.fullName}
-                                onChange={(e) => handleInputChange('fullName', e.target.value)}
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Email Address *</label>
-                              <Input 
-                                type="email" 
-                                placeholder="Enter your email" 
-                                value={profileData.email}
-                                onChange={(e) => handleInputChange('email', e.target.value)}
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Phone Number</label>
-                              <Input 
-                                type="tel" 
-                                placeholder="Enter your phone number" 
-                                value={profileData.phone}
-                                onChange={(e) => handleInputChange('phone', e.target.value)}
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Username *</label>
-                              <Input 
-                                placeholder="Choose a username" 
-                                value={profileData.username}
-                                onChange={(e) => handleInputChange('username', e.target.value)}
-                              />
-                            </div>
-                            <div className="md:col-span-2">
-                              <label className="block text-sm font-medium mb-1">Home Address</label>
-                              <Input 
-                                placeholder="Enter your address (for onsite services)" 
-                                value={profileData.address}
-                                onChange={(e) => handleInputChange('address', e.target.value)}
-                              />
-                            </div>
-                          </div>
-                          <div className="mt-4">
-                            <Button onClick={handleProfileUpdate}>Update Personal Information</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Settings className="h-5 w-5" />
-                            Account Status & Verification
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                              <div>
-                                <p className="font-medium">Account Type</p>
-                                <p className="text-sm text-gray-600">Current subscription level</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge variant={accountStatus.accountType === 'Premium Customer' ? 'default' : 'outline'}>
-                                  {accountStatus.accountType}
-                                </Badge>
-                                {accountStatus.accountType === 'Standard Customer' && (
-                                  <Button size="sm" onClick={handleUpgradeAccount}>
-                                    Upgrade
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center justify-between p-3 border rounded-lg">
-                              <div>
-                                <p className="font-medium">Email Verification</p>
-                                <p className="text-sm text-gray-600">Secure your account</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {accountStatus.emailVerified ? (
-                                  <CheckCircle className="h-4 w-4 text-green-600" />
-                                ) : (
-                                  <Button size="sm" onClick={handleVerifyEmail}>
-                                    Verify
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center justify-between p-3 border rounded-lg">
-                              <div>
-                                <p className="font-medium">Phone Verification</p>
-                                <p className="text-sm text-gray-600">Two-factor authentication</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {accountStatus.phoneVerified ? (
-                                  <CheckCircle className="h-4 w-4 text-green-600" />
-                                ) : (
-                                  <Button size="sm" onClick={handleVerifyPhone}>
-                                    Verify
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center justify-between p-3 border rounded-lg">
-                              <div>
-                                <p className="font-medium">Identity Verification</p>
-                                <p className="text-sm text-gray-600">Enhanced security level</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {accountStatus.identityVerified ? (
-                                  <CheckCircle className="h-4 w-4 text-green-600" />
-                                ) : (
-                                  <Button size="sm" onClick={handleVerifyIdentity}>
-                                    Verify
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="p-3 bg-blue-50 rounded-lg">
-                              <div className="flex items-center justify-between mb-2">
-                                <p className="font-medium">Profile Completion</p>
-                                <span className="text-sm text-blue-600">{accountStatus.profileComplete}%</span>
-                              </div>
-                              <div className="w-full bg-gray-200 rounded-full h-2">
-                                <div 
-                                  className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                                  style={{ width: `${accountStatus.profileComplete}%` }}
-                                ></div>
-                              </div>
-                              <p className="text-xs text-gray-600 mt-1">Complete your profile to unlock all features</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-                    
-                    <TabsContent value="business" className="space-y-6">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Building2 className="h-5 w-5" />
-                            Business Account Information
-                          </CardTitle>
-                          <CardDescription>
-                            Manage your business account details and enterprise features
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <Form {...businessForm}>
-                            <form onSubmit={businessForm.handleSubmit(handleBusinessUpdate)} className="space-y-4">
-                              <div className="grid md:grid-cols-2 gap-4">
-                                <FormField
-                                  control={businessForm.control}
-                                  name="companyName"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Company Name</FormLabel>
-                                      <FormControl>
-                                        <Input placeholder="Enter company name" {...field} />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                <FormField
-                                  control={businessForm.control}
-                                  name="businessEmail"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Business Email</FormLabel>
-                                      <FormControl>
-                                        <Input type="email" placeholder="business@company.com" {...field} />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                <FormField
-                                  control={businessForm.control}
-                                  name="businessPhone"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Business Phone</FormLabel>
-                                      <FormControl>
-                                        <Input type="tel" placeholder="Business phone number" {...field} />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                <FormField
-                                  control={businessForm.control}
-                                  name="taxId"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Tax ID / EIN</FormLabel>
-                                      <FormControl>
-                                        <Input placeholder="Tax identification number" {...field} />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                <FormField
-                                  control={businessForm.control}
-                                  name="businessAddress"
-                                  render={({ field }) => (
-                                    <FormItem className="md:col-span-2">
-                                      <FormLabel>Business Address</FormLabel>
-                                      <FormControl>
-                                        <Input placeholder="Complete business address" {...field} />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                <FormField
-                                  control={businessForm.control}
-                                  name="industry"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Industry</FormLabel>
-                                      <FormControl>
-                                        <Input placeholder="e.g., Technology, Manufacturing" {...field} />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                <FormField
-                                  control={businessForm.control}
-                                  name="companySize"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Company Size</FormLabel>
-                                      <FormControl>
-                                        <select 
-                                          {...field} 
-                                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                        >
-                                          <option value="1-10">1-10 employees</option>
-                                          <option value="11-50">11-50 employees</option>
-                                          <option value="51-200">51-200 employees</option>
-                                          <option value="201-500">201-500 employees</option>
-                                          <option value="500+">500+ employees</option>
-                                        </select>
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                              </div>
-                              <div className="mt-4">
-                                <Button type="submit" disabled={businessForm.formState.isSubmitting}>
-                                  {businessForm.formState.isSubmitting ? 'Updating...' : 'Update Business Information'}
-                                </Button>
-                              </div>
-                            </form>
-                          </Form>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <TrendingUp className="h-5 w-5" />
-                            Enterprise Features
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <div className="p-4 border rounded-lg">
-                              <div className="flex items-center gap-3 mb-3">
-                                <Users className="h-5 w-5 text-blue-600" />
-                                <h3 className="font-medium">Team Management</h3>
-                              </div>
-                              <p className="text-sm text-gray-600 mb-3">Manage multiple users under your business account</p>
-                              <Button size="sm" variant="outline">Manage Team</Button>
-                            </div>
-                            
-                            <div className="p-4 border rounded-lg">
-                              <div className="flex items-center gap-3 mb-3">
-                                <BarChart3 className="h-5 w-5 text-green-600" />
-                                <h3 className="font-medium">Usage Analytics</h3>
-                              </div>
-                              <p className="text-sm text-gray-600 mb-3">Track service usage and team performance</p>
-                              <Button size="sm" variant="outline">View Analytics</Button>
-                            </div>
-                            
-                            <div className="p-4 border rounded-lg">
-                              <div className="flex items-center gap-3 mb-3">
-                                <DollarSign className="h-5 w-5 text-purple-600" />
-                                <h3 className="font-medium">Bulk Billing</h3>
-                              </div>
-                              <p className="text-sm text-gray-600 mb-3">Consolidated billing for all team members</p>
-                              <Button size="sm" variant="outline">Configure Billing</Button>
-                            </div>
-                            
-                            <div className="p-4 border rounded-lg">
-                              <div className="flex items-center gap-3 mb-3">
-                                <Globe className="h-5 w-5 text-orange-600" />
-                                <h3 className="font-medium">API Access</h3>
-                              </div>
-                              <p className="text-sm text-gray-600 mb-3">Integrate TechGPT with your business systems</p>
-                              <Button size="sm" variant="outline">API Documentation</Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Business Subscription</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
-                            <div className="flex items-center justify-between mb-3">
-                              <div>
-                                <h3 className="font-medium">Current Plan: Business Pro</h3>
-                                <p className="text-sm text-gray-600">Advanced features for growing businesses</p>
-                              </div>
-                              <Badge variant="default">Active</Badge>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4 text-center mb-4">
-                              <div>
-                                <p className="text-2xl font-bold text-blue-600">50</p>
-                                <p className="text-xs text-gray-600">Team Members</p>
-                              </div>
-                              <div>
-                                <p className="text-2xl font-bold text-green-600">24/7</p>
-                                <p className="text-xs text-gray-600">Priority Support</p>
-                              </div>
-                              <div>
-                                <p className="text-2xl font-bold text-purple-600">API</p>
-                                <p className="text-xs text-gray-600">Integration</p>
-                              </div>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button size="sm">Upgrade Plan</Button>
-                              <Button size="sm" variant="outline">View Details</Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-                    
-                    <TabsContent value="profile" className="space-y-6">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <User className="h-5 w-5" />
-                            Personal Information
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Full Name *</label>
-                              <Input 
-                                placeholder="Enter your full name" 
-                                value={profileData.fullName}
-                                onChange={(e) => handleInputChange('fullName', e.target.value)}
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Email Address *</label>
-                              <Input 
-                                type="email" 
-                                placeholder="Enter your email" 
-                                value={profileData.email}
-                                onChange={(e) => handleInputChange('email', e.target.value)}
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Phone Number</label>
-                              <Input 
-                                type="tel" 
-                                placeholder="Enter your phone number" 
-                                value={profileData.phone}
-                                onChange={(e) => handleInputChange('phone', e.target.value)}
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Username *</label>
-                              <Input 
-                                placeholder="Choose a username" 
-                                value={profileData.username}
-                                onChange={(e) => handleInputChange('username', e.target.value)}
-                              />
-                            </div>
-                            <div className="md:col-span-2">
-                              <label className="block text-sm font-medium mb-1">Address</label>
-                              <Input 
-                                placeholder="Enter your address (for onsite services)" 
-                                value={profileData.address}
-                                onChange={(e) => handleInputChange('address', e.target.value)}
-                              />
-                            </div>
-                          </div>
-                          <div className="mt-4">
-                            <Button onClick={handleProfileUpdate}>Update Profile</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Settings className="h-5 w-5" />
-                            Account Status
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                              <div>
-                                <p className="font-medium">Account Type</p>
-                                <p className="text-sm text-gray-600">Current subscription level</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge variant={accountStatus.accountType === 'Premium Customer' ? 'default' : 'outline'}>
-                                  {accountStatus.accountType}
-                                </Badge>
-                                {accountStatus.accountType === 'Standard Customer' && (
-                                  <Button size="sm" onClick={handleUpgradeAccount}>
-                                    Upgrade
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center justify-between p-3 border rounded-lg">
-                              <div>
-                                <p className="font-medium">Member Since</p>
-                                <p className="text-sm text-gray-600">Account creation date</p>
-                              </div>
-                              <span className="text-sm text-gray-600">{accountStatus.memberSince}</span>
-                            </div>
-                            
-                            <div className="flex items-center justify-between p-3 border rounded-lg">
-                              <div>
-                                <p className="font-medium">Email Verification</p>
-                                <p className="text-sm text-gray-600">Secure your account</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {accountStatus.emailVerified ? (
-                                  <CheckCircle className="h-4 w-4 text-green-600" />
-                                ) : (
-                                  <Button size="sm" onClick={handleVerifyEmail}>
-                                    Verify
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center justify-between p-3 border rounded-lg">
-                              <div>
-                                <p className="font-medium">Phone Verification</p>
-                                <p className="text-sm text-gray-600">Two-factor authentication</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {accountStatus.phoneVerified ? (
-                                  <CheckCircle className="h-4 w-4 text-green-600" />
-                                ) : (
-                                  <Button size="sm" onClick={handleVerifyPhone}>
-                                    Verify
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center justify-between p-3 border rounded-lg">
-                              <div>
-                                <p className="font-medium">Identity Verification</p>
-                                <p className="text-sm text-gray-600">Enhanced security level</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {accountStatus.identityVerified ? (
-                                  <CheckCircle className="h-4 w-4 text-green-600" />
-                                ) : (
-                                  <Button size="sm" onClick={handleVerifyIdentity}>
-                                    Verify
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="p-3 bg-blue-50 rounded-lg">
-                              <div className="flex items-center justify-between mb-2">
-                                <p className="font-medium">Profile Completion</p>
-                                <span className="text-sm text-blue-600">{accountStatus.profileComplete}%</span>
-                              </div>
-                              <div className="w-full bg-gray-200 rounded-full h-2">
-                                <div 
-                                  className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                                  style={{ width: `${accountStatus.profileComplete}%` }}
-                                ></div>
-                              </div>
-                              <p className="text-xs text-gray-600 mt-1">Complete your profile to unlock all features</p>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="p-3 border rounded-lg text-center">
-                                <p className="text-2xl font-bold text-blue-600">{accountStatus.totalServices}</p>
-                                <p className="text-sm text-gray-600">Total Services</p>
-                              </div>
-                              <div className="p-3 border rounded-lg text-center">
-                                <p className="text-sm text-gray-600">Last Login</p>
-                                <p className="font-medium">{accountStatus.lastLogin}</p>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                              <div>
-                                <p className="font-medium text-green-800">Account Status</p>
-                                <p className="text-sm text-green-600">Your account is active and secure</p>
-                              </div>
-                              <Badge variant="default" className="bg-green-600">
-                                {accountStatus.accountActive ? 'Active' : 'Inactive'}
-                              </Badge>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-                    
-                    <TabsContent value="security" className="space-y-6">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Lock className="h-5 w-5" />
-                            Password & Security
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Current Password</label>
-                              <Input 
-                                type="password" 
-                                placeholder="Enter current password" 
-                                value={profileData.currentPassword}
-                                onChange={(e) => handleInputChange('currentPassword', e.target.value)}
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium mb-1">New Password</label>
-                              <Input 
-                                type="password" 
-                                placeholder="Enter new password (min 8 characters)" 
-                                value={profileData.newPassword}
-                                onChange={(e) => handleInputChange('newPassword', e.target.value)}
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Confirm New Password</label>
-                              <Input 
-                                type="password" 
-                                placeholder="Confirm new password" 
-                                value={profileData.confirmPassword}
-                                onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                              />
-                            </div>
-                            <Button onClick={handlePasswordChange}>Change Password</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Two-Factor Authentication</CardTitle>
-                          <CardDescription>
-                            Add an extra layer of security to your account
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between p-3 border rounded-lg">
-                              <div>
-                                <p className="font-medium">SMS Authentication</p>
-                                <p className="text-sm text-gray-600">
-                                  {twoFactorSettings.smsEnabled 
-                                    ? 'Receive codes via SMS' 
-                                    : 'Get verification codes sent to your phone'}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {twoFactorSettings.smsEnabled && (
-                                  <Badge variant="secondary">Active</Badge>
-                                )}
-                                <Button 
-                                  variant={twoFactorSettings.smsEnabled ? "destructive" : "default"}
-                                  size="sm"
-                                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
-                                  onClick={() => handleTwoFactorToggle('sms')}
-                                >
-                                  {twoFactorSettings.smsEnabled ? '🔓 Disable' : '🔒 Enable'}
-                                </Button>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between p-3 border rounded-lg">
-                              <div>
-                                <p className="font-medium">Email Authentication</p>
-                                <p className="text-sm text-gray-600">
-                                  {twoFactorSettings.emailEnabled 
-                                    ? 'Receive codes via email' 
-                                    : 'Get verification codes sent to your email'}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {twoFactorSettings.emailEnabled && (
-                                  <Badge variant="secondary">Active</Badge>
-                                )}
-                                <Button 
-                                  variant={twoFactorSettings.emailEnabled ? "destructive" : "default"}
-                                  size="sm"
-                                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
-                                  onClick={() => handleTwoFactorToggle('email')}
-                                >
-                                  {twoFactorSettings.emailEnabled ? '🔓 Disable' : '🔒 Enable'}
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-                    
-                    <TabsContent value="history" className="space-y-6">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <History className="h-5 w-5" />
-                            Service History
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="border rounded-lg p-4 bg-gray-50">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                  <Monitor className="h-5 w-5 text-blue-600" />
-                                  <span className="font-semibold text-lg">Hardware Troubleshooting</span>
-                                </div>
-                                <Badge variant="outline" className="bg-green-100 text-green-800">Completed</Badge>
-                              </div>
-                              <div className="space-y-2">
-                                <p className="text-sm text-gray-700 font-medium">Issue: Computer not starting - resolved with power supply replacement</p>
-                                <p className="text-sm text-gray-600">
-                                  <strong>Details:</strong> Customer reported desktop computer wouldn't power on. Diagnosed faulty power supply unit (PSU) after testing with multimeter. Replaced 650W PSU with new 750W unit. Verified all components working properly. Tested system stability for 15 minutes.
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                  <strong>Service Provider:</strong> Mike Johnson • <strong>Service Type:</strong> On-site
-                                </p>
-                                <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
-                                  <span>📅 January 5, 2025</span>
-                                  <span>⏱️ Duration: 45 minutes</span>
-                                  <span>💰 Cost: $65.00</span>
-                                  <span>⭐ Rating: 5/5</span>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="border rounded-lg p-4 bg-gray-50">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                  <Settings className="h-5 w-5 text-purple-600" />
-                                  <span className="font-semibold text-lg">Software Installation</span>
-                                </div>
-                                <Badge variant="outline" className="bg-green-100 text-green-800">Completed</Badge>
-                              </div>
-                              <div className="space-y-2">
-                                <p className="text-sm text-gray-700 font-medium">Issue: Installing and configuring development environment</p>
-                                <p className="text-sm text-gray-600">
-                                  <strong>Details:</strong> Set up complete web development environment including Node.js, VS Code, Git, and Docker. Configured development server, installed necessary extensions, and created project templates. Provided documentation and quick start guide.
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                  <strong>Service Provider:</strong> Sarah Chen • <strong>Service Type:</strong> Remote
-                                </p>
-                                <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
-                                  <span>📅 December 28, 2024</span>
-                                  <span>⏱️ Duration: 30 minutes</span>
-                                  <span>💰 Cost: $45.00</span>
-                                  <span>⭐ Rating: 4/5</span>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="border rounded-lg p-4 bg-gray-50">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                  <MapPin className="h-5 w-5 text-green-600" />
-                                  <span className="font-semibold text-lg">Network Setup</span>
-                                </div>
-                                <Badge variant="outline" className="bg-green-100 text-green-800">Completed</Badge>
-                              </div>
-                              <div className="space-y-2">
-                                <p className="text-sm text-gray-700 font-medium">Issue: Wi-Fi configuration and router setup</p>
-                                <p className="text-sm text-gray-600">
-                                  <strong>Details:</strong> Configured new mesh Wi-Fi system covering 3000 sq ft home. Set up main router and 2 satellite units. Optimized channel settings for minimal interference. Configured guest network and parental controls. Speed test showed 95% of ISP bandwidth throughout home.
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                  <strong>Service Provider:</strong> David Martinez • <strong>Service Type:</strong> On-site
-                                </p>
-                                <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
-                                  <span>📅 December 20, 2024</span>
-                                  <span>⏱️ Duration: 60 minutes</span>
-                                  <span>💰 Cost: $85.00</span>
-                                  <span>⭐ Rating: 5/5</span>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="border rounded-lg p-4 bg-gray-50">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                  <Shield className="h-5 w-5 text-red-600" />
-                                  <span className="font-semibold text-lg">Security Audit</span>
-                                </div>
-                                <Badge variant="outline" className="bg-green-100 text-green-800">Completed</Badge>
-                              </div>
-                              <div className="space-y-2">
-                                <p className="text-sm text-gray-700 font-medium">Issue: Comprehensive security assessment and hardening</p>
-                                <p className="text-sm text-gray-600">
-                                  <strong>Details:</strong> Performed full security audit of home network and devices. Updated router firmware, changed default passwords, enabled WPA3 encryption. Installed antivirus on all devices, configured firewalls, and set up automatic security updates. Provided security best practices guide.
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                  <strong>Service Provider:</strong> Alex Thompson • <strong>Service Type:</strong> Remote + On-site
-                                </p>
-                                <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
-                                  <span>📅 December 15, 2024</span>
-                                  <span>⏱️ Duration: 90 minutes</span>
-                                  <span>💰 Cost: $120.00</span>
-                                  <span>⭐ Rating: 5/5</span>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="border rounded-lg p-4 bg-gray-50">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                  <Phone className="h-5 w-5 text-orange-600" />
-                                  <span className="font-semibold text-lg">Phone Support Session</span>
-                                </div>
-                                <Badge variant="outline" className="bg-green-100 text-green-800">Completed</Badge>
-                              </div>
-                              <div className="space-y-2">
-                                <p className="text-sm text-gray-700 font-medium">Issue: Email client configuration and troubleshooting</p>
-                                <p className="text-sm text-gray-600">
-                                  <strong>Details:</strong> Guided customer through Outlook setup with new email provider. Configured IMAP settings, SSL encryption, and folder synchronization. Resolved sending issues by updating SMTP port settings. Tested email functionality and set up mobile sync.
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                  <strong>Technician:</strong> Lisa Rodriguez • <strong>Service Type:</strong> Phone Support
-                                </p>
-                                <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
-                                  <span>📅 December 10, 2024</span>
-                                  <span>⏱️ Duration: 25 minutes</span>
-                                  <span>💰 Cost: $35.00</span>
-                                  <span>⭐ Rating: 4/5</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-                    
-                    <TabsContent value="billing" className="space-y-6">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <CreditCard className="h-5 w-5" />
-                            Payment Information
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-6">
-                            <div className="space-y-4">
-                              <h3 className="font-medium text-gray-900 mb-3">Saved Payment Methods</h3>
-                              {paymentMethods.map((method) => (
-                                <div key={method.id} className="flex items-center justify-between p-3 border rounded-lg">
-                                  <div className="flex items-center gap-3">
-                                    <CreditCard className="h-5 w-5 text-gray-600" />
-                                    <div>
-                                      <p className="font-medium">{method.brand} •••• {method.last4}</p>
-                                      <p className="text-sm text-gray-600">Expires {method.expiry}</p>
-                                    </div>
-                                    {method.isDefault && (
-                                      <Badge variant="secondary">Default</Badge>
-                                    )}
-                                  </div>
-                                  <Button 
-                                    variant="destructive" 
-                                    size="sm"
-                                    onClick={() => handleRemoveCard(method.id)}
-                                    className="flex items-center gap-1"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                    Remove
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                            
-                            <div className="space-y-3">
-                              <h3 className="font-medium text-gray-900">Add New Payment Method</h3>
-                              <div className="grid grid-cols-2 gap-3">
-                                <Button 
-                                  variant="outline" 
-                                  onClick={handleAddCard}
-                                  className="flex items-center gap-2"
-                                >
-                                  <Plus className="h-4 w-4" />
-                                  Add Card
-                                </Button>
-                                <Button 
-                                  variant="outline" 
-                                  onClick={handleApplePay}
-                                  className="flex items-center gap-2"
-                                >
-                                  <Apple className="h-4 w-4" />
-                                  Apple Pay
-                                </Button>
-                              </div>
-                            </div>
-                            
-                            <div className="space-y-4 pt-4 border-t">
-                              <h3 className="font-medium text-gray-900">Add New Card</h3>
-                              <div>
-                                <label className="block text-sm font-medium mb-1">Card Number</label>
-                                <Input placeholder="1234 5678 9012 3456" />
-                              </div>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-sm font-medium mb-1">Expiry Date</label>
-                                  <Input placeholder="MM/YY" />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-medium mb-1">CVV</label>
-                                  <Input placeholder="123" />
-                                </div>
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium mb-1">Billing Address</label>
-                                <Input placeholder="Enter billing address" />
-                              </div>
-                              <Button className="w-full">Add Payment Method</Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Billing History</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            {[
-                              { id: 1, service: 'Hardware Support', date: 'January 5, 2025', amount: '$65.00', invoice: 'INV-2025-001' },
-                              { id: 2, service: 'Software Installation', date: 'December 28, 2024', amount: '$45.00', invoice: 'INV-2024-089' },
-                              { id: 3, service: 'Network Setup', date: 'December 20, 2024', amount: '$85.00', invoice: 'INV-2024-088' },
-                              { id: 4, service: 'Security Audit', date: 'December 15, 2024', amount: '$120.00', invoice: 'INV-2024-087' },
-                              { id: 5, service: 'Phone Support', date: 'December 10, 2024', amount: '$35.00', invoice: 'INV-2024-086' }
-                            ].map((invoice) => (
-                              <div key={invoice.id} className="flex items-center justify-between p-3 border rounded-lg">
-                                <div className="flex-1">
-                                  <div className="flex items-center justify-between">
-                                    <div>
-                                      <p className="font-medium">{invoice.service}</p>
-                                      <p className="text-sm text-gray-600">{invoice.date} • {invoice.invoice}</p>
-                                    </div>
-                                    <span className="font-medium text-lg">{invoice.amount}</span>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2 ml-4">
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => handleExportPDF(invoice)}
-                                    className="flex items-center gap-1"
-                                  >
-                                    <Download className="h-4 w-4" />
-                                    PDF
-                                  </Button>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => handleEmailInvoice(invoice)}
-                                    className="flex items-center gap-1"
-                                  >
-                                    <Send className="h-4 w-4" />
-                                    Email
-                                  </Button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-                    
-                    <TabsContent value="settings" className="space-y-6">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Bell className="h-5 w-5" />
-                            Notification Preferences
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between p-3 border rounded-lg">
-                              <div>
-                                <p className="font-medium">Email Notifications</p>
-                                <p className="text-sm text-gray-600">Receive updates about your support requests</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {notifications.emailNotifications && (
-                                  <Badge variant="secondary">Active</Badge>
-                                )}
-                                <Button 
-                                  variant={notifications.emailNotifications ? "destructive" : "default"}
-                                  size="sm"
-                                  className="bg-green-600 hover:bg-green-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
-                                  onClick={() => handleNotificationToggle('emailNotifications')}
-                                >
-                                  {notifications.emailNotifications ? '🔕 Disable' : '🔔 Enable'}
-                                </Button>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between p-3 border rounded-lg">
-                              <div>
-                                <p className="font-medium">SMS Notifications</p>
-                                <p className="text-sm text-gray-600">Get text messages for urgent updates</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {notifications.smsNotifications && (
-                                  <Badge variant="secondary">Active</Badge>
-                                )}
-                                <Button 
-                                  variant={notifications.smsNotifications ? "destructive" : "default"}
-                                  size="sm"
-                                  className="bg-green-600 hover:bg-green-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
-                                  onClick={() => handleNotificationToggle('smsNotifications')}
-                                >
-                                  {notifications.smsNotifications ? '🔕 Disable' : '🔔 Enable'}
-                                </Button>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between p-3 border rounded-lg">
-                              <div>
-                                <p className="font-medium">Marketing Emails</p>
-                                <p className="text-sm text-gray-600">Receive promotional offers and updates</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {notifications.marketingEmails && (
-                                  <Badge variant="secondary">Active</Badge>
-                                )}
-                                <Button 
-                                  variant={notifications.marketingEmails ? "destructive" : "default"}
-                                  size="sm"
-                                  className="bg-green-600 hover:bg-green-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
-                                  onClick={() => handleNotificationToggle('marketingEmails')}
-                                >
-                                  {notifications.marketingEmails ? '🔕 Disable' : '🔔 Enable'}
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Account Actions</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-3">
-                            <Button 
-                              variant="outline" 
-                              className="w-full justify-start hover:bg-purple-50 hover:text-purple-700 transition-colors"
-                              onClick={() => setLocation("/onboarding")}
-                            >
-                              <Settings className="h-4 w-4 mr-2" />
-                              Personalize Experience
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              className="w-full justify-start hover:bg-blue-50 hover:text-blue-700 transition-colors"
-                              onClick={handleDownloadAccountData}
-                            >
-                              <Download className="h-4 w-4 mr-2" />
-                              Download Account Data
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              className="w-full justify-start hover:bg-gray-50 hover:text-gray-700 transition-colors"
-                              onClick={handlePrivacySettings}
-                            >
-                              <Settings className="h-4 w-4 mr-2" />
-                              Privacy Settings
-                            </Button>
-                            <Button 
-                              variant="destructive" 
-                              className="w-full justify-start hover:bg-red-600 hover:text-white transition-colors"
-                              onClick={handleDeleteAccount}
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete Account
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-                  </Tabs>
-                </DialogContent>
-              </Dialog>
-              
-              <Button variant="outline" onClick={() => setLocation("/dashboard")}>
-                Dashboard
-              </Button>
-              <Button onClick={() => setLocation("/chat")}>
-                Get Help Now
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Hero Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-4xl mx-auto">
-            <Badge className="bg-blue-100 text-blue-800 border-blue-300 mb-6">
-              ⚡ Instant Technical Support
-            </Badge>
-            <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
-              Get Technical Help
-              <span className="text-blue-600"> Instantly</span>
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-              From AI-powered instant solutions to expert technician support - we've got you covered. 
-              Get help with hardware issues, software problems, and everything in between.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
-                onClick={() => setLocation("/technician-request")}
-                className="bg-red-600 hover:bg-red-700 text-lg px-8 animate-pulse"
-              >
-                <Zap className="h-5 w-5 mr-2" />
-                🔧 Request Service Provider (60s)
-              </Button>
-              <Button 
-                size="lg" 
-                onClick={() => setLocation("/chat")}
-                className="bg-blue-600 hover:bg-blue-700 text-lg px-8"
-              >
-                <MessageSquare className="h-5 w-5 mr-2" />
-                Start Free AI Chat
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                onClick={() => setLocation("/live-support")}
-                className="text-lg px-8"
-              >
-                <Headphones className="h-5 w-5 mr-2" />
-                Live Support
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-12 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="flex items-center justify-center mb-2 text-blue-600">
-                  {stat.icon}
-                </div>
-                <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
-                <div className="text-sm text-gray-600">{stat.label}</div>
+            <div className="flex items-start space-x-3 p-3 bg-green-50 rounded-lg">
+              <Globe className="h-5 w-5 text-green-600 mt-0.5" />
+              <div>
+                <h4 className="font-semibold text-green-900">Online Services</h4>
+                <p className="text-sm text-green-700">
+                  Available across Canada and United States
+                </p>
               </div>
-            ))}
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={handleCloseAnnouncement}>
+              Got it, thanks!
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <div className="bg-white rounded-lg shadow-sm p-6 border">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Welcome to TechGPT</h1>
+                <p className="text-gray-600">Your comprehensive technical support platform</p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Badge variant="secondary">Customer Portal</Badge>
+                <Badge variant="outline">Free Tier</Badge>
+              </div>
+            </div>
+            
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="text-2xl font-bold text-blue-600">24/7</div>
+                <div className="text-sm text-blue-700">AI Support</div>
+              </div>
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-2xl font-bold text-green-600">500+</div>
+                <div className="text-sm text-green-700">Experts Available</div>
+              </div>
+              <div className="text-center p-4 bg-purple-50 rounded-lg">
+                <div className="text-2xl font-bold text-purple-600">98%</div>
+                <div className="text-sm text-purple-700">Issue Resolution</div>
+              </div>
+              <div className="text-center p-4 bg-orange-50 rounded-lg">
+                <div className="text-2xl font-bold text-orange-600">5min</div>
+                <div className="text-sm text-orange-700">Average Response</div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Button 
+                onClick={() => setLocation('/chat')}
+                className="h-auto py-4 flex flex-col items-center space-y-2"
+              >
+                <MessageSquare className="h-6 w-6" />
+                <span>Start AI Chat</span>
+              </Button>
+              <Button 
+                onClick={() => setLocation('/live-support')}
+                variant="outline"
+                className="h-auto py-4 flex flex-col items-center space-y-2"
+              >
+                <Headphones className="h-6 w-6" />
+                <span>Live Support</span>
+              </Button>
+              <Button 
+                onClick={() => setLocation('/technician-request')}
+                variant="outline"
+                className="h-auto py-4 flex flex-col items-center space-y-2 border-red-200 text-red-600 hover:bg-red-50"
+              >
+                <Users className="h-6 w-6" />
+                <span>Request Technician</span>
+              </Button>
+            </div>
           </div>
         </div>
-      </section>
 
-      {/* Features Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Multiple Ways to Get Help
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Choose the support option that works best for your situation and urgency level
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {features.map((feature, index) => (
-              <Card key={index} className={`${feature.color} hover:shadow-lg transition-all duration-300 cursor-pointer group ${feature.featured ? 'ring-2 ring-red-500 ring-offset-2 transform scale-105' : ''}`}>
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 bg-white rounded-lg shadow-sm group-hover:scale-110 transition-transform">
-                        {feature.icon}
-                      </div>
-                      <div>
-                        <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
-                        <CardDescription className="text-gray-600">
-                          {feature.description}
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </div>
+        {/* Main Content Tabs */}
+        <Tabs defaultValue="services" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="services">Services</TabsTrigger>
+            <TabsTrigger value="account">Account</TabsTrigger>
+            <TabsTrigger value="help">Help</TabsTrigger>
+            <TabsTrigger value="personal">Profile</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="services" className="space-y-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* AI Chat Support */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5 text-blue-600" />
+                    AI Chat Support
+                  </CardTitle>
+                  <CardDescription>
+                    Get instant help with our AI-powered technical assistant
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button 
-                    onClick={() => setLocation(feature.route)}
-                    className="w-full group-hover:scale-105 transition-transform"
-                    variant="default"
-                  >
-                    {feature.action}
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Availability</span>
+                      <Badge variant="secondary">24/7</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Cost</span>
+                      <Badge variant="secondary">Free</Badge>
+                    </div>
+                    <Button onClick={() => setLocation('/chat')} className="w-full">
+                      Start Chat
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Trust Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="flex items-center justify-center mb-6">
-              <Shield className="h-12 w-12 text-green-600" />
+              {/* Live Support */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Headphones className="h-5 w-5 text-green-600" />
+                    Live Support
+                  </CardTitle>
+                  <CardDescription>
+                    Connect with human experts for complex issues
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">First 10 minutes</span>
+                      <Badge variant="secondary">Free</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">After 10 minutes</span>
+                      <Badge variant="outline">$2/min</Badge>
+                    </div>
+                    <Button onClick={() => setLocation('/live-support')} className="w-full">
+                      Start Live Chat
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Phone Support */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Phone className="h-5 w-5 text-purple-600" />
+                    Phone Support
+                  </CardTitle>
+                  <CardDescription>
+                    Professional phone support for urgent issues
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Starting at</span>
+                      <Badge variant="outline">$25/call</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Response time</span>
+                      <Badge variant="secondary">Under 5 min</Badge>
+                    </div>
+                    <Button onClick={() => setLocation('/phone-support')} className="w-full">
+                      Call Support
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Screen Sharing */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Monitor className="h-5 w-5 text-orange-600" />
+                    Screen Sharing
+                  </CardTitle>
+                  <CardDescription>
+                    Let experts see and control your screen remotely
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Session rate</span>
+                      <Badge variant="outline">$35/session</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Secure connection</span>
+                      <Badge variant="secondary">WebRTC</Badge>
+                    </div>
+                    <Button onClick={() => setLocation('/screen-sharing')} className="w-full">
+                      Start Screen Share
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Onsite Support */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-red-600" />
+                    Onsite Support
+                  </CardTitle>
+                  <CardDescription>
+                    Professional technicians come to your location
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Starting at</span>
+                      <Badge variant="outline">$75/visit</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Service area</span>
+                      <Badge variant="secondary">Ottawa–Gatineau</Badge>
+                    </div>
+                    <Button onClick={() => setLocation('/technician-request')} className="w-full">
+                      Request Technician
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Issue Tracking */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-indigo-600" />
+                    Issue Tracking
+                  </CardTitle>
+                  <CardDescription>
+                    Track and manage your technical issues
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Active issues</span>
+                      <Badge variant="outline">0</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Resolved issues</span>
+                      <Badge variant="secondary">0</Badge>
+                    </div>
+                    <Button onClick={() => setLocation('/issues')} className="w-full">
+                      View Issues
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">Trusted by Thousands</h3>
-            <p className="text-lg text-gray-600 mb-8">
-              Our platform connects you with verified, experienced technicians who have helped solve 
-              over 150,000 technical issues. All technicians are background-checked and rated by customers.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Badge variant="outline" className="bg-white">✓ 24/7 Availability</Badge>
-              <Badge variant="outline" className="bg-white">✓ Verified Technicians</Badge>
-              <Badge variant="outline" className="bg-white">✓ Money-Back Guarantee</Badge>
-              <Badge variant="outline" className="bg-white">✓ Secure Platform</Badge>
+          </TabsContent>
+
+          <TabsContent value="account" className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Account Overview</CardTitle>
+                  <CardDescription>
+                    Your account status and subscription details
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">Account Type</span>
+                      <Badge variant="secondary">Free</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">Status</span>
+                      <Badge variant="outline">Active</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">Member since</span>
+                      <span className="text-sm text-gray-600">Today</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">Total Services Used</span>
+                      <span className="text-sm text-gray-600">0</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                  <CardDescription>
+                    Manage your account settings and preferences
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button variant="outline" size="sm" className="h-auto py-3 flex flex-col gap-1">
+                      <Settings className="h-4 w-4" />
+                      <span className="text-xs">Settings</span>
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-auto py-3 flex flex-col gap-1">
+                      <CreditCard className="h-4 w-4" />
+                      <span className="text-xs">Billing</span>
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-auto py-3 flex flex-col gap-1">
+                      <History className="h-4 w-4" />
+                      <span className="text-xs">History</span>
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-auto py-3 flex flex-col gap-1">
+                      <Download className="h-4 w-4" />
+                      <span className="text-xs">Export</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </div>
-        </div>
-      </section>
+          </TabsContent>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h3 className="text-4xl font-bold mb-4">Ready to Solve Your Tech Problems?</h3>
-          <p className="text-xl mb-8 opacity-90">
-            Start with our free AI assistant or connect directly with a human expert
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              variant="secondary"
-              onClick={() => setLocation("/chat")}
-              className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8"
-            >
-              <MessageSquare className="h-5 w-5 mr-2" />
-              Try AI Assistant (Free)
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              onClick={() => setLocation("/technician-request")}
-              className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8"
-            >
-              <Users className="h-5 w-5 mr-2" />
-              Get Human Expert
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="bg-blue-600 p-1 rounded">
-                  <Zap className="h-4 w-4 text-white" />
+          <TabsContent value="help" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <HelpCircle className="h-5 w-5" />
+                  Help & Support Center
+                </CardTitle>
+                <CardDescription>
+                  Get assistance with your account and technical issues
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-4">
+                    <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                      <div className="flex items-center gap-3 mb-2">
+                        <MessageCircle className="h-5 w-5 text-blue-600" />
+                        <h3 className="font-medium">Live Chat Support</h3>
+                      </div>
+                      <p className="text-sm text-gray-600">Start a conversation with our support team</p>
+                      <Button size="sm" className="mt-2" onClick={() => setLocation('/live-support')}>
+                        Start Chat
+                      </Button>
+                    </div>
+                    
+                    <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Phone className="h-5 w-5 text-green-600" />
+                        <h3 className="font-medium">Phone Support</h3>
+                      </div>
+                      <p className="text-sm text-gray-600">Call our technical support hotline</p>
+                      <p className="text-sm font-medium text-green-600">1-800-TECHGPT</p>
+                    </div>
+                    
+                    <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Mail className="h-5 w-5 text-purple-600" />
+                        <h3 className="font-medium">Email Support</h3>
+                      </div>
+                      <p className="text-sm text-gray-600">Send us an email for detailed assistance</p>
+                      <p className="text-sm font-medium text-purple-600">support@techgpt.com</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Book className="h-5 w-5 text-orange-600" />
+                        <h3 className="font-medium">Knowledge Base</h3>
+                      </div>
+                      <p className="text-sm text-gray-600">Browse our comprehensive help articles</p>
+                      <Button size="sm" variant="outline" className="mt-2">
+                        <ExternalLink className="h-4 w-4 mr-1" />
+                        Browse Articles
+                      </Button>
+                    </div>
+                    
+                    <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                      <div className="flex items-center gap-3 mb-2">
+                        <FileText className="h-5 w-5 text-indigo-600" />
+                        <h3 className="font-medium">Submit a Ticket</h3>
+                      </div>
+                      <p className="text-sm text-gray-600">Create a support ticket for complex issues</p>
+                      <Button size="sm" variant="outline" className="mt-2">
+                        Create Ticket
+                      </Button>
+                    </div>
+                    
+                    <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Users className="h-5 w-5 text-pink-600" />
+                        <h3 className="font-medium">Community Forum</h3>
+                      </div>
+                      <p className="text-sm text-gray-600">Connect with other customers and experts</p>
+                      <Button size="sm" variant="outline" className="mt-2">
+                        <ExternalLink className="h-4 w-4 mr-1" />
+                        Join Forum
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                <span className="font-bold">TechGPT</span>
-              </div>
-              <p className="text-gray-400 text-sm">
-                AI-powered technical support platform connecting users with instant solutions and expert technicians.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Support Options</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="/chat" className="hover:text-white">AI Chat Support</a></li>
-                <li><a href="/live-support" className="hover:text-white">Live Chat</a></li>
-                <li><a href="/technician-matching" className="hover:text-white">Find Technician</a></li>
-                <li><a href="/phone-support" className="hover:text-white">Phone Support</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Resources</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="/issues" className="hover:text-white">Issue Categories</a></li>
-                <li><a href="/triage" className="hover:text-white">AI Triage</a></li>
-                <li><a href="/diagnostic" className="hover:text-white">Diagnostics</a></li>
-                <li><a href="/dashboard" className="hover:text-white">Dashboard</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">For Technicians</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="/technicians" className="hover:text-white">Join Platform</a></li>
-                <li><a href="/technician-register" className="hover:text-white">Register</a></li>
-                <li><a href="/technician-dashboard" className="hover:text-white">Dashboard</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
-            <p>&copy; 2025 TechGPT. All rights reserved. Instant technical support powered by AI.</p>
-          </div>
-        </div>
-      </footer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="personal" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Personal Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(handleSaveProfile)} className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="fullName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Full Name *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter your full name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email Address *</FormLabel>
+                            <FormControl>
+                              <Input type="email" placeholder="Enter your email" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="phoneCountryCode"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Phone Country Code</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select country code" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {countries.map((country) => (
+                                  <SelectItem key={country.code} value={country.phoneCode}>
+                                    {country.flag} {country.phoneCode} {country.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="phoneNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Phone Number</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter your phone number" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="country"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Country</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select country" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {countries.map((country) => (
+                                  <SelectItem key={country.code} value={country.code}>
+                                    {country.flag} {country.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="province"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Province/State</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select province/state" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {watchedCountry === 'CA' && canadianProvinces.map((province) => (
+                                  <SelectItem key={province} value={province}>
+                                    {province}
+                                  </SelectItem>
+                                ))}
+                                {watchedCountry === 'US' && usStates.map((state) => (
+                                  <SelectItem key={state} value={state}>
+                                    {state}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="city"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>City</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter your city" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="postalCode"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Postal Code</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter your postal code" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="address"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Address</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter your full address" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="flex justify-end">
+                      <Button type="submit" disabled={isLoading}>
+                        {isLoading ? "Saving..." : "Save Profile"}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

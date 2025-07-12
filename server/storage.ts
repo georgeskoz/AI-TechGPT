@@ -1,6 +1,7 @@
 import { 
   users, messages, technicians, serviceRequests, jobs, jobUpdates, supportCases, supportMessages, issueCategories,
   bookingSettings, serviceBookings, disputes, disputeMessages, disputeAttachments, diagnosticTools, announcements,
+  supportTickets, supportTicketMessages, supportTicketAttachments,
   type User, type InsertUser, type UpdateProfile, type Message, type InsertMessage,
   type Technician, type InsertTechnician, type ServiceRequest, type InsertServiceRequest,
   type Job, type InsertJob, type JobUpdate, type InsertJobUpdate,
@@ -8,7 +9,9 @@ import {
   type IssueCategory, type InsertIssueCategory, type BookingSettings, type InsertBookingSettings,
   type ServiceBooking, type InsertServiceBooking, type Dispute, type InsertDispute,
   type DisputeMessage, type InsertDisputeMessage, type DisputeAttachment, type InsertDisputeAttachment,
-  type DiagnosticTool, type InsertDiagnosticTool, type Announcement, type InsertAnnouncement
+  type DiagnosticTool, type InsertDiagnosticTool, type Announcement, type InsertAnnouncement,
+  type SupportTicket, type InsertSupportTicket, type SupportTicketMessage, type InsertSupportTicketMessage,
+  type SupportTicketAttachment, type InsertSupportTicketAttachment
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
