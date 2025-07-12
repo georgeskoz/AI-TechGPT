@@ -9,9 +9,13 @@ import {
   MapPin, 
   Phone, 
   Settings,
-  AlertCircle
+  AlertCircle,
+  ArrowLeft,
+  Home,
+  Menu
 } from "lucide-react";
 import ServiceProviderJobActions from "@/components/ServiceProviderJobActions";
+import { Link } from "wouter";
 
 export default function InvoiceModificationDemo() {
   const [currentJob, setCurrentJob] = useState({
@@ -107,6 +111,39 @@ export default function InvoiceModificationDemo() {
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-7xl mx-auto">
+        {/* Navigation Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Link href="/">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Home className="h-4 w-4" />
+                Home
+              </Button>
+            </Link>
+            <Link href="/receipt-demo">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Receipt Demo
+              </Button>
+            </Link>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Link href="/technician-dashboard">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Menu className="h-4 w-4" />
+                Service Provider Dashboard
+              </Button>
+            </Link>
+            <Link href="/admin">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Admin Panel
+              </Button>
+            </Link>
+          </div>
+        </div>
+
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Service Provider Invoice Modification Demo
