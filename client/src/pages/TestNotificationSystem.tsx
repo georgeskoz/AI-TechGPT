@@ -10,6 +10,8 @@ import { Separator } from '@/components/ui/separator';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import TechnicianNotificationService from '@/components/TechnicianNotificationService';
+import Navigation from '@/components/Navigation';
+import { useLocation } from 'wouter';
 import { 
   MapPin, 
   Clock, 
@@ -18,7 +20,7 @@ import {
   WifiOff, 
   Send, 
   TestTube,
-  Navigation,
+  Navigation as NavigationIcon,
   Phone,
   Monitor
 } from 'lucide-react';
@@ -87,22 +89,25 @@ export default function TestNotificationSystem() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Notification Service Component */}
-      <TechnicianNotificationService 
-        technicianId={selectedTechnicianId}
-        isActive={true}
-      />
+    <div className="min-h-screen bg-gray-50">
+      <Navigation title="Test Notification System" backTo="/technician-home" />
+      
+      <div className="container mx-auto px-4 py-8">
+        {/* Notification Service Component */}
+        <TechnicianNotificationService 
+          technicianId={selectedTechnicianId}
+          isActive={true}
+        />
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Real-Time Notification System Test
-        </h1>
-        <p className="text-gray-600">
-          Test the complete job dispatch and provider notification system with AI-powered matching,
-          countdown timers, and automatic job reassignment.
-        </p>
-      </div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Real-Time Notification System Test
+          </h1>
+          <p className="text-gray-600">
+            Test the complete job dispatch and provider notification system with AI-powered matching,
+            countdown timers, and automatic job reassignment.
+          </p>
+        </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* System Status */}
@@ -372,7 +377,7 @@ export default function TestNotificationSystem() {
 
             <div className="flex gap-2">
               <Button onClick={openGoogleMaps} variant="outline" className="flex-1">
-                <Navigation className="h-4 w-4 mr-2" />
+                <NavigationIcon className="h-4 w-4 mr-2" />
                 Open Maps
               </Button>
               <Button onClick={callCustomer} variant="outline" className="flex-1">
@@ -459,6 +464,7 @@ export default function TestNotificationSystem() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
