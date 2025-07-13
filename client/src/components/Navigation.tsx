@@ -25,14 +25,8 @@ export default function Navigation({
   const [location, setLocation] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   
-  // Try to use unified auth, but don't break if not available
-  let isAuthenticated = false;
-  try {
-    const auth = useUnifiedAuth();
-    isAuthenticated = auth.isAuthenticated;
-  } catch (error) {
-    // UnifiedAuth not available, continue without it
-  }
+  // Temporarily bypass auth to prevent loading issues
+  const isAuthenticated = false;
 
   const handleBack = () => {
     if (customBackAction) {

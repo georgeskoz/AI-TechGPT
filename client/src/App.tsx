@@ -139,8 +139,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-gray-50">
         <Router />
-        <FloatingChatWidget username={username} />
-        <AIFeatureDiscoveryWrapper />
+        {/* Temporarily disabled complex components causing loading issues */}
+        {/* <FloatingChatWidget username={username} /> */}
+        {/* <AIFeatureDiscoveryWrapper /> */}
       </div>
       <Toaster />
     </QueryClientProvider>
