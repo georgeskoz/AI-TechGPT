@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -68,7 +69,28 @@ const customerProfileSchema = z.object({
 type CustomerProfileForm = z.infer<typeof customerProfileSchema>;
 
 export default function CustomerHomePage() {
+  const [, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Navigation handlers for service cards
+  const handleServiceClick = (service: string) => {
+    switch (service) {
+      case 'ai-chat':
+        setLocation('/chat');
+        break;
+      case 'phone-support':
+        setLocation('/phone-support');
+        break;
+      case 'screen-sharing':
+        setLocation('/screen-sharing');
+        break;
+      case 'service-provider':
+        setLocation('/technician-request');
+        break;
+      default:
+        break;
+    }
+  };
   const [profileData, setProfileData] = useState<CustomerProfileForm>({
     firstName: '',
     lastName: '',
@@ -218,7 +240,7 @@ export default function CustomerHomePage() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleServiceClick('ai-chat')}>
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-blue-100 rounded-lg">
@@ -232,7 +254,7 @@ export default function CustomerHomePage() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleServiceClick('phone-support')}>
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-green-100 rounded-lg">
@@ -246,7 +268,7 @@ export default function CustomerHomePage() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleServiceClick('screen-sharing')}>
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-purple-100 rounded-lg">
@@ -260,7 +282,7 @@ export default function CustomerHomePage() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleServiceClick('service-provider')}>
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-orange-100 rounded-lg">
