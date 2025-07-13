@@ -20,7 +20,7 @@ import {
   Monitor,
   UserCheck
 } from 'lucide-react';
-import Navigation from '@/components/Navigation';
+import SimpleNavigation from '@/components/SimpleNavigation';
 import { apiRequest } from '@/lib/queryClient';
 import { canadianProvinces, usStates, countries } from '@/data/locations';
 
@@ -230,7 +230,7 @@ export default function CustomerHomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
+      <SimpleNavigation />
       
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">

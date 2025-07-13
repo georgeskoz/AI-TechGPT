@@ -23,7 +23,7 @@ import {
   Zap,
   Search
 } from 'lucide-react';
-import { Navigation } from '@/components/Navigation';
+import SimpleNavigation from '@/components/SimpleNavigation';
 // Auth context handled by parent components
 import { useFeatureDiscovery } from '@/hooks/useFeatureDiscovery';
 import { featureDiscoveryService } from '@/services/featureDiscoveryService';
@@ -121,7 +121,7 @@ export default function FeatureDiscoveryPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
+      <SimpleNavigation />
       
       <div className="max-w-7xl mx-auto p-6">
         <div className="mb-8">

@@ -42,7 +42,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import Navigation from "@/components/Navigation";
+import SimpleNavigation from "@/components/SimpleNavigation";
 import AdminDisputeManagement from "@/components/AdminDisputeManagement";
 import PaymentGatewayManagement from "@/components/PaymentGatewayManagement";
 import TaxManagement from "@/components/TaxManagement";
