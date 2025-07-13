@@ -238,7 +238,12 @@ export default function LiveSupportPage({ username }: LiveSupportPageProps) {
                 <p className="text-sm text-gray-600 mb-3">
                   Direct phone consultation with specialists
                 </p>
-                <Button variant="outline" size="sm" className="w-full">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => setLocation('/phone-support')}
+                >
                   Call Now
                 </Button>
               </div>
@@ -253,7 +258,12 @@ export default function LiveSupportPage({ username }: LiveSupportPageProps) {
                 <p className="text-sm text-gray-600 mb-3">
                   Remote screen sharing for complex issues
                 </p>
-                <Button variant="outline" size="sm" className="w-full">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => setLocation('/screen-sharing')}
+                >
                   Share Screen
                 </Button>
               </div>
