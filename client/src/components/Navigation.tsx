@@ -4,8 +4,9 @@ import { ArrowLeft, Home, Menu, X, MessageCircle, Users, Shield, User } from "lu
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import RoleBasedNavigation from "@/components/RoleBasedNavigation";
-import { useUnifiedAuth } from "@/components/UnifiedAuthProvider";
+// Temporarily remove problematic imports
+// import RoleBasedNavigation from "@/components/RoleBasedNavigation";
+// import { useUnifiedAuth } from "@/components/UnifiedAuthProvider";
 
 interface NavigationProps {
   showBackButton?: boolean;

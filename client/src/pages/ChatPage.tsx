@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tag, List } from 'lucide-react';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useChat } from '@/hooks/useChat';
-import Navigation from '@/components/Navigation';
+import SimpleNavigation from '@/components/SimpleNavigation';
 import TechGPTHeader from '@/components/TechGPTHeader';
 import TopicSidebar from '@/components/TopicSidebar';
 import ChatArea from '@/components/ChatArea';
@@ -114,7 +114,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
-      <Navigation title="AI Chat Support" />
+      <SimpleNavigation title="AI Chat Support" />
       
       {/* Active Service Tracker */}
       <ActiveServiceTracker 
