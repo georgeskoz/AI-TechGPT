@@ -276,7 +276,8 @@ export default function LiveSupportChat({
         console.log('Attempting WebSocket connection to:', wsUrl);
         
         try {
-          console.log('WebSocket temporarily disabled - port mismatch issue');
+          // Temporarily disable WebSocket until port configuration is fixed
+          console.log('WebSocket disabled - port mismatch between server (5000) and client (80)');
           return;
           // wsRef.current = new WebSocket(wsUrl);
           

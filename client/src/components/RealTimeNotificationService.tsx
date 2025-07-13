@@ -57,10 +57,6 @@ const RealTimeNotificationService: React.FC<RealTimeNotificationServiceProps> = 
 
     setConnectionStatus('connecting');
     
-    console.log('RealTimeNotificationService WebSocket temporarily disabled - port mismatch issue');
-    setConnectionStatus('disconnected');
-    return;
-    
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.hostname;
     const port = window.location.port || (window.location.protocol === "https:" ? "443" : "80");
@@ -68,7 +64,11 @@ const RealTimeNotificationService: React.FC<RealTimeNotificationServiceProps> = 
     const wsPort = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "5000" : port;
     const wsUrl = `${protocol}//${host}:${wsPort}/ws/notifications`;
     
-    // wsRef.current = new WebSocket(wsUrl); // Disabled due to port mismatch
+    // Temporarily disable WebSocket until port configuration is fixed
+    console.log('WebSocket disabled - port mismatch between server (5000) and client (80)');
+    setConnectionStatus('disconnected');
+    return;
+    // wsRef.current = new WebSocket(wsUrl);
 
     wsRef.current.onopen = () => {
       console.log('NotificationService WebSocket connected');
