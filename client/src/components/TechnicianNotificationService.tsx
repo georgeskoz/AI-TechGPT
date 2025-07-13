@@ -93,7 +93,7 @@ export default function TechnicianNotificationService({
       const wsPort = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "5000" : port;
       const wsUrl = `${protocol}//${host}:${wsPort}/ws`;
       
-      const ws = new WebSocket(wsUrl);
+      // const ws = new WebSocket(wsUrl); // Disabled due to port mismatch
       wsRef.current = ws;
 
       ws.onopen = () => {
