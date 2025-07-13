@@ -83,7 +83,11 @@ export default function TechnicianNotificationService({
   const connectWebSocket = () => {
     try {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/ws`;
+      const host = window.location.hostname;
+      const port = window.location.port || (window.location.protocol === "https:" ? "443" : "80");
+      // In development, use port 5000, in production use current port
+      const wsPort = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "5000" : port;
+      const wsUrl = `${protocol}//${host}:${wsPort}/ws`;
       
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
