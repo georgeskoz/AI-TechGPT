@@ -57,7 +57,7 @@ const RealTimeNotificationService: React.FC<RealTimeNotificationServiceProps> = 
 
     setConnectionStatus('connecting');
     
-    console.log('RealTimeNotificationService WebSocket connection temporarily disabled for debugging');
+    console.log('RealTimeNotificationService WebSocket temporarily disabled - port mismatch issue');
     setConnectionStatus('disconnected');
     return;
     
