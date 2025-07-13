@@ -57,6 +57,10 @@ const RealTimeNotificationService: React.FC<RealTimeNotificationServiceProps> = 
 
     setConnectionStatus('connecting');
     
+    console.log('RealTimeNotificationService WebSocket connection temporarily disabled for debugging');
+    setConnectionStatus('disconnected');
+    return;
+    
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.hostname;
     const port = window.location.port || (window.location.protocol === "https:" ? "443" : "80");

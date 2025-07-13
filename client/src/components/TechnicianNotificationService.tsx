@@ -82,6 +82,10 @@ export default function TechnicianNotificationService({
 
   const connectWebSocket = () => {
     try {
+      console.log('TechnicianNotificationService WebSocket connection temporarily disabled for debugging');
+      setConnectionError('WebSocket disabled for debugging');
+      return;
+      
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const host = window.location.hostname;
       const port = window.location.port || (window.location.protocol === "https:" ? "443" : "80");
