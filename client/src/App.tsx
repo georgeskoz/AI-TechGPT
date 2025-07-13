@@ -30,7 +30,7 @@ import ProfileVisibilityPage from "@/pages/ProfileVisibilityPage";
 import CustomerHomePage from "@/pages/CustomerHomePage";
 import ServiceProviderHomePage from "@/pages/TechnicianHomePage";
 import AdminHomePage from "@/pages/AdminHomePage";
-import SimpleHome from "@/pages/SimpleHome";
+
 import DomainSelector from "@/pages/DomainSelector";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminNavigation from "@/components/AdminNavigation";
@@ -62,7 +62,7 @@ function Router() {
   return (
     <Switch>
       {/* Main Entry Points */}
-      <Route path="/" component={SimpleHome} />
+      <Route path="/" component={CustomerHomePage} />
       <Route path="/customer-home" component={CustomerHomePage} />
       
       {/* Customer Portal - Core Pages */}
@@ -139,8 +139,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-gray-50">
         <Router />
-        {/* <FloatingChatWidget username={username} /> */}
-        {/* <AIFeatureDiscoveryWrapper /> */}
+        <FloatingChatWidget username={username} />
+        <AIFeatureDiscoveryWrapper />
       </div>
       <Toaster />
     </QueryClientProvider>
