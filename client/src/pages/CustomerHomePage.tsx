@@ -164,11 +164,14 @@ export default function CustomerHomePage() {
       const response = await apiRequest('POST', '/api/customer/profile', profileDataWithUserId);
       const result = await response.json();
       
-      if (result) {
+      if (result.success) {
         toast({
           title: "Profile Updated",
           description: "Your profile has been successfully updated.",
         });
+        // Update the form with the saved data
+        setProfileData(result.profile);
+        form.reset(result.profile);
       } else {
         toast({
           title: "Error",
