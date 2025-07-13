@@ -4,6 +4,8 @@ import { ArrowLeft, Home, Menu, X, MessageCircle, Users, Shield, User } from "lu
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import RoleBasedNavigation from "@/components/RoleBasedNavigation";
+import { useUnifiedAuth } from "@/components/UnifiedAuthProvider";
 
 interface NavigationProps {
   showBackButton?: boolean;
@@ -22,6 +24,15 @@ export default function Navigation({
 }: NavigationProps) {
   const [location, setLocation] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  
+  // Try to use unified auth, but don't break if not available
+  let isAuthenticated = false;
+  try {
+    const auth = useUnifiedAuth();
+    isAuthenticated = auth.isAuthenticated;
+  } catch (error) {
+    // UnifiedAuth not available, continue without it
+  }
 
   const handleBack = () => {
     if (customBackAction) {
@@ -138,8 +149,15 @@ export default function Navigation({
             </Button>
           </div>
 
-          {/* Right side - Chat, Home button and Menu */}
+          {/* Right side - Authentication, Chat, Home button and Menu */}
           <div className="flex items-center gap-2">
+            {/* Role-based navigation for authenticated users */}
+            {isAuthenticated && (
+              <div className="hidden sm:block">
+                <RoleBasedNavigation />
+              </div>
+            )}
+            
             <Button
               variant="ghost"
               size="sm"
