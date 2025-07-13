@@ -68,7 +68,7 @@ const RealTimeNotificationService: React.FC<RealTimeNotificationServiceProps> = 
     const wsPort = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "5000" : port;
     const wsUrl = `${protocol}//${host}:${wsPort}/ws/notifications`;
     
-    wsRef.current = new WebSocket(wsUrl);
+    // wsRef.current = new WebSocket(wsUrl); // Disabled due to port mismatch
 
     wsRef.current.onopen = () => {
       console.log('NotificationService WebSocket connected');

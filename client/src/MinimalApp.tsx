@@ -2,14 +2,12 @@ import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import { useState, useEffect } from "react";
-import SimpleChatPage from "@/pages/SimpleChatPage";
+import SimpleHome from "@/pages/SimpleHome";
 
-function Router() {
+function MinimalRouter() {
   return (
     <Switch>
-      <Route path="/" component={SimpleChatPage} />
-      <Route path="/chat" component={SimpleChatPage} />
+      <Route path="/" component={SimpleHome} />
       <Route>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
@@ -22,26 +20,15 @@ function Router() {
   );
 }
 
-function SimpleApp() {
-  const [username, setUsername] = useState<string>("Guest");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUsername = localStorage.getItem("username");
-      if (storedUsername) {
-        setUsername(storedUsername);
-      }
-    }
-  }, []);
-
+function MinimalApp() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-gray-50">
-        <Router />
+        <MinimalRouter />
       </div>
       <Toaster />
     </QueryClientProvider>
   );
 }
 
-export default SimpleApp;
+export default MinimalApp;
