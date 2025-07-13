@@ -37,14 +37,20 @@ export default function Navigation({
                                location.includes('/technician-dashboard') ||
                                location.includes('/technician-earnings') ||
                                location.includes('/technician-registration') ||
+                               location.includes('/technician-register') ||
                                location.includes('/technician-home') ||
                                location.includes('/technician-matching') ||
+                               location.includes('/technicians') ||
                                location.includes('/profile-visibility') ||
                                location.includes('/notifications-dashboard');
   const isAdminPage = location.includes('/admin');
 
   // Get context-aware home path
   const getHomePath = () => {
+    console.log('Current location:', location);
+    console.log('Is service provider page:', isServiceProviderPage);
+    console.log('Is admin page:', isAdminPage);
+    
     if (isServiceProviderPage) {
       return "/technician-home";
     } else if (isAdminPage) {
