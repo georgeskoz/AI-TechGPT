@@ -77,6 +77,23 @@ export interface IStorage {
   // Business Information
   updateBusinessInfo(userId: number, businessInfo: any): Promise<User>;
   getBusinessInfo(userId: number): Promise<any>;
+  
+  // Cross-Role Integration Methods
+  getUserByEmail(email: string): Promise<User | undefined>;
+  updateUserLastLogin(userId: number): Promise<void>;
+  updateUserRole(userId: number, role: string): Promise<User>;
+  getCustomerProfile(userId: number): Promise<any>;
+  getJobsByCustomer(customerId: number): Promise<Job[]>;
+  getJobsByServiceProvider(serviceProviderId: number): Promise<Job[]>;
+  getTicketsByUser(userId: number): Promise<SupportTicket[]>;
+  getServiceProviderProfile(userId: number): Promise<any>;
+  getServiceProviderEarnings(userId: number): Promise<any>;
+  getPlatformStats(): Promise<any>;
+  getUserNotifications(userId: number): Promise<any[]>;
+  getSystemMessages(): Promise<any[]>;
+  createNotification(notification: any): Promise<any>;
+  createSupportTicket(ticketData: any): Promise<SupportTicket>;
+  updateJobStatus(jobId: number, status: string, notes?: string): Promise<Job>;
 }
 
 export class MemoryStorage implements IStorage {
@@ -772,6 +789,193 @@ export class MemoryStorage implements IStorage {
 
   async getAllDisputes(): Promise<Dispute[]> {
     return Array.from(this.disputes.values());
+  }
+
+  // Cross-Role Integration Methods Implementation
+  async updateUserLastLogin(userId: number): Promise<void> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.updatedAt = new Date();
+      this.users.set(userId, user);
+    }
+  }
+
+  async updateUserRole(userId: number, role: string): Promise<User> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    const updatedUser: User = {
+      ...user,
+      userType: role as any,
+      updatedAt: new Date()
+    };
+    this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+
+  async getCustomerProfile(userId: number): Promise<any> {
+    const user = this.users.get(userId);
+    if (!user) return null;
+    
+    return {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      fullName: user.fullName,
+      phone: user.phone,
+      address: user.address,
+      city: user.city,
+      state: user.state,
+      zipCode: user.zipCode,
+      country: user.country,
+      emailVerified: user.emailVerified,
+      phoneVerified: user.phoneVerified,
+      accountActive: user.accountActive,
+      paymentMethod: user.paymentMethod,
+      paymentMethodSetup: user.paymentMethodSetup,
+      createdAt: user.createdAt
+    };
+  }
+
+  async getJobsByServiceProvider(serviceProviderId: number): Promise<Job[]> {
+    return Array.from(this.jobs.values()).filter(job => job.technicianId === serviceProviderId);
+  }
+
+  async getTicketsByUser(userId: number): Promise<SupportTicket[]> {
+    return Array.from(this.supportTickets.values()).filter(ticket => ticket.userId === userId);
+  }
+
+  async getServiceProviderProfile(userId: number): Promise<any> {
+    const user = this.users.get(userId);
+    const technician = Array.from(this.technicians.values()).find(t => t.userId === userId);
+    
+    if (!user || !technician) return null;
+    
+    return {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      fullName: user.fullName,
+      phone: user.phone,
+      bio: user.bio,
+      avatar: user.avatar,
+      specialties: technician.specialties,
+      serviceTypes: technician.serviceTypes,
+      hourlyRate: technician.hourlyRate,
+      availability: technician.availability,
+      rating: technician.rating,
+      completedJobs: technician.completedJobs,
+      responseTimeMinutes: technician.responseTimeMinutes,
+      location: technician.location,
+      serviceRadius: technician.serviceRadius,
+      verified: technician.verified,
+      createdAt: technician.createdAt
+    };
+  }
+
+  async getServiceProviderEarnings(userId: number): Promise<any> {
+    const providerJobs = await this.getJobsByServiceProvider(userId);
+    const completedJobs = providerJobs.filter(job => job.status === 'completed');
+    const totalEarnings = completedJobs.reduce((sum, job) => sum + (job.totalCost || 0), 0);
+    const pendingJobs = providerJobs.filter(job => job.status === 'in_progress');
+    const pendingEarnings = pendingJobs.reduce((sum, job) => sum + (job.totalCost || 0), 0);
+    
+    return {
+      totalEarnings,
+      pendingEarnings,
+      completedJobs: completedJobs.length,
+      activeJobs: pendingJobs.length,
+      monthlyEarnings: Math.floor(totalEarnings / 3), // Mock monthly calculation
+      averageJobValue: completedJobs.length > 0 ? totalEarnings / completedJobs.length : 0
+    };
+  }
+
+  async getPlatformStats(): Promise<any> {
+    return {
+      totalUsers: this.users.size,
+      totalServiceProviders: this.technicians.size,
+      totalJobs: this.jobs.size,
+      completedJobs: Array.from(this.jobs.values()).filter(job => job.status === 'completed').length,
+      activeJobs: Array.from(this.jobs.values()).filter(job => job.status === 'in_progress').length,
+      totalRevenue: Array.from(this.jobs.values())
+        .filter(job => job.status === 'completed')
+        .reduce((sum, job) => sum + (job.totalCost || 0), 0),
+      averageRating: 4.5,
+      customerSatisfaction: 95,
+      supportTickets: this.supportTickets.size,
+      openTickets: Array.from(this.supportTickets.values()).filter(ticket => ticket.status === 'open').length
+    };
+  }
+
+  async getUserNotifications(userId: number): Promise<any[]> {
+    // Mock notifications for the user
+    return [
+      {
+        id: 1,
+        userId,
+        title: "New job available",
+        message: "A new job matching your skills is available in your area",
+        type: "job_opportunity",
+        read: false,
+        createdAt: new Date(Date.now() - 30 * 60 * 1000) // 30 minutes ago
+      },
+      {
+        id: 2,
+        userId,
+        title: "Payment received",
+        message: "You have received payment for job #12345",
+        type: "payment",
+        read: true,
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
+      }
+    ];
+  }
+
+  async getSystemMessages(): Promise<any[]> {
+    return [
+      {
+        id: 1,
+        title: "System Maintenance",
+        message: "Scheduled maintenance will occur tonight from 2 AM to 4 AM EST",
+        type: "maintenance",
+        priority: "medium",
+        createdAt: new Date(Date.now() - 60 * 60 * 1000) // 1 hour ago
+      },
+      {
+        id: 2,
+        title: "New Features Available",
+        message: "Check out the new invoice modification system for service providers",
+        type: "feature",
+        priority: "low",
+        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000) // 24 hours ago
+      }
+    ];
+  }
+
+  async createNotification(notification: any): Promise<any> {
+    const newNotification = {
+      id: Date.now(),
+      ...notification,
+      read: false,
+      createdAt: new Date()
+    };
+    
+    // In a real implementation, this would be stored in a notifications table
+    return newNotification;
+  }
+
+  async createSupportTicket(ticketData: any): Promise<SupportTicket> {
+    const newTicket: SupportTicket = {
+      id: this.nextSupportTicketId++,
+      ...ticketData,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    this.supportTickets.set(newTicket.id, newTicket);
+    return newTicket;
   }
 }
 

@@ -3,6 +3,8 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/components/UserAuthProvider";
+import { UnifiedAuthProvider } from "@/components/UnifiedAuthProvider";
+import { CrossRoleDataBridge } from "@/components/CrossRoleDataBridge";
 import { useState, useEffect } from "react";
 import NotFound from "@/pages/not-found";
 import ChatPage from "@/pages/ChatPage";
@@ -131,13 +133,17 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <div className="min-h-screen bg-gray-50">
-          <Router />
-          <FloatingChatWidget username={username} />
-        </div>
-        <Toaster />
-      </AuthProvider>
+      <UnifiedAuthProvider>
+        <CrossRoleDataBridge>
+          <AuthProvider>
+            <div className="min-h-screen bg-gray-50">
+              <Router />
+              <FloatingChatWidget username={username} />
+            </div>
+            <Toaster />
+          </AuthProvider>
+        </CrossRoleDataBridge>
+      </UnifiedAuthProvider>
     </QueryClientProvider>
   );
 }
