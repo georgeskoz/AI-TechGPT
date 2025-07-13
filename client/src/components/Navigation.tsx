@@ -27,7 +27,8 @@ export default function Navigation({
     if (customBackAction) {
       customBackAction();
     } else {
-      setLocation(backTo);
+      // Use browser history to go back to previous page
+      window.history.back();
     }
   };
 
@@ -47,10 +48,6 @@ export default function Navigation({
 
   // Get context-aware home path
   const getHomePath = () => {
-    console.log('Current location:', location);
-    console.log('Is service provider page:', isServiceProviderPage);
-    console.log('Is admin page:', isAdminPage);
-    
     if (isServiceProviderPage) {
       return "/technician-home";
     } else if (isAdminPage) {
