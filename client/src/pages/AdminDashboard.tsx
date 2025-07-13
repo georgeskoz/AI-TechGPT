@@ -58,6 +58,9 @@ import NotificationsCenter from "@/components/NotificationsCenter";
 import DiagnosticToolsManagement from "@/components/DiagnosticToolsManagement";
 import AdminAnnouncements from "@/pages/AdminAnnouncements";
 import ServiceManagement from "@/components/ServiceManagement";
+import AdminIssueTracking from "@/components/AdminIssueTracking";
+import AdminLiveChatMonitoring from "@/components/AdminLiveChatMonitoring";
+import AdminScreenSharingSessions from "@/components/AdminScreenSharingSessions";
 import { 
   Users, 
   Settings, 
@@ -73,13 +76,24 @@ import {
   MoreHorizontal,
   Eye,
   Edit,
+  MessageCircle,
+  Activity,
+  Wifi,
+  Heart,
+  Monitor,
+  Phone,
+  Grid,
+  Layout,
+  Menu,
+  Image,
+  ToggleRight,
+  Calendar,
+  User,
   Trash2,
   CheckCircle,
   XCircle,
   Home,
   BarChart3,
-  Activity,
-  Calendar,
   Target,
   Zap,
   Award,
@@ -93,7 +107,6 @@ import {
   Download,
   Upload,
   RefreshCw,
-  Grid,
   List,
   FileText,
   Headphones,
@@ -103,12 +116,10 @@ import {
   PhoneCall,
   Mail,
   MapPin,
-  Wifi,
   Database,
   Server,
   Moon,
   Sun,
-  Menu,
   X,
   ChevronRight,
   Loader2,
@@ -1034,6 +1045,8 @@ Last Updated: ${effectiveDate}
       subItems: [
         { id: "add-user", label: "Add New User", icon: UserPlus },
         { id: "users-list", label: "Users List", icon: Users },
+        { id: "customer-profiles", label: "Customer Profiles", icon: User },
+        { id: "customer-bookings", label: "Customer Bookings", icon: Calendar },
         { id: "register-business", label: "Register Business", icon: Building },
         { id: "refund-policy", label: "Refund Policy", icon: FileText },
         { id: "privacy-policy", label: "Privacy Policy", icon: Shield },
@@ -1073,6 +1086,32 @@ Last Updated: ${effectiveDate}
     { id: "disputes", label: "Disputes", icon: AlertTriangle },
     { id: "payments", label: "Payments", icon: CreditCard },
     { 
+      id: "support", 
+      label: "Support Management", 
+      icon: MessageCircle,
+      subItems: [
+        { id: "issue-tracking", label: "Issue Tracking", icon: List },
+        { id: "live-chat-monitoring", label: "Live Chat Monitoring", icon: MessageSquare },
+        { id: "screen-sharing-sessions", label: "Screen Sharing Sessions", icon: Monitor },
+        { id: "ai-chat-analytics", label: "AI Chat Analytics", icon: BarChart },
+        { id: "phone-support-logs", label: "Phone Support Logs", icon: Phone },
+        { id: "support-categories", label: "Support Categories", icon: Grid },
+        { id: "response-templates", label: "Response Templates", icon: FileText }
+      ]
+    },
+    { 
+      id: "real-time", 
+      label: "Real-Time Monitoring", 
+      icon: Activity,
+      subItems: [
+        { id: "websocket-connections", label: "WebSocket Connections", icon: Wifi },
+        { id: "active-sessions", label: "Active Sessions", icon: Clock },
+        { id: "notification-status", label: "Notification Status", icon: Bell },
+        { id: "system-health", label: "System Health", icon: Heart },
+        { id: "performance-metrics", label: "Performance Metrics", icon: TrendingUp }
+      ]
+    },
+    { 
       id: "services", 
       label: "Services Management", 
       icon: Settings,
@@ -1081,7 +1120,20 @@ Last Updated: ${effectiveDate}
         { id: "services-list", label: "Services List", icon: List },
         { id: "service-categories", label: "Service Categories", icon: Grid },
         { id: "pricing-rules", label: "Pricing Rules", icon: DollarSign },
-        { id: "service-settings", label: "Service Settings", icon: Settings }
+        { id: "service-settings", label: "Service Settings", icon: Settings },
+        { id: "regional-availability", label: "Regional Availability", icon: Globe }
+      ]
+    },
+    { 
+      id: "content", 
+      label: "Content Management", 
+      icon: FileText,
+      subItems: [
+        { id: "page-content", label: "Page Content", icon: Layout },
+        { id: "navigation-menus", label: "Navigation Menus", icon: Menu },
+        { id: "homepage-banners", label: "Homepage Banners", icon: Image },
+        { id: "feature-toggles", label: "Feature Toggles", icon: ToggleRight },
+        { id: "maintenance-mode", label: "Maintenance Mode", icon: Wrench }
       ]
     },
     { 
@@ -2866,6 +2918,225 @@ Last Updated: ${effectiveDate}
           {activeTab === "financial-statements" && <FinancialStatements />}
 
           {activeTab === "admin-management" && <AdminManagement />}
+
+          {/* Support Management Section */}
+          {activeTab === "issue-tracking" && <AdminIssueTracking />}
+          
+          {activeTab === "live-chat-monitoring" && <AdminLiveChatMonitoring />}
+          
+          {activeTab === "screen-sharing-sessions" && <AdminScreenSharingSessions />}
+          
+          {activeTab === "ai-chat-analytics" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">AI Chat Analytics</h2>
+                <p className="text-gray-600">Analyze AI chat performance and user interactions</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600">Total AI Chats</p>
+                      <p className="text-3xl font-bold text-blue-600">2,847</p>
+                      <p className="text-xs text-gray-500 mt-1">+15% this week</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600">Avg Resolution Rate</p>
+                      <p className="text-3xl font-bold text-green-600">78%</p>
+                      <p className="text-xs text-gray-500 mt-1">AI resolved issues</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600">Escalation Rate</p>
+                      <p className="text-3xl font-bold text-orange-600">22%</p>
+                      <p className="text-xs text-gray-500 mt-1">To human agents</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600">Avg Satisfaction</p>
+                      <p className="text-3xl font-bold text-purple-600">4.2/5</p>
+                      <p className="text-xs text-gray-500 mt-1">User ratings</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "phone-support-logs" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Phone Support Logs</h2>
+                <p className="text-gray-600">Monitor and analyze phone support activities</p>
+              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Phone Support Sessions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8 text-gray-600">
+                    Phone support monitoring interface coming soon
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Real-Time Monitoring Section */}
+          {activeTab === "websocket-connections" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">WebSocket Connections</h2>
+                <p className="text-gray-600">Monitor real-time WebSocket connections and status</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600">Active Connections</p>
+                      <p className="text-3xl font-bold text-green-600">147</p>
+                      <p className="text-xs text-gray-500 mt-1">Online now</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600">Service Providers</p>
+                      <p className="text-3xl font-bold text-blue-600">23</p>
+                      <p className="text-xs text-gray-500 mt-1">Connected</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600">Customers</p>
+                      <p className="text-3xl font-bold text-purple-600">124</p>
+                      <p className="text-xs text-gray-500 mt-1">Active sessions</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600">Uptime</p>
+                      <p className="text-3xl font-bold text-green-600">99.8%</p>
+                      <p className="text-xs text-gray-500 mt-1">Last 24h</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "active-sessions" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Active Sessions</h2>
+                <p className="text-gray-600">Monitor all active user sessions across the platform</p>
+              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Current Active Sessions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8 text-gray-600">
+                    Active session monitoring interface will be displayed here
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Content Management Section */}
+          {activeTab === "page-content" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Page Content Management</h2>
+                <p className="text-gray-600">Manage content across all customer and service provider pages</p>
+              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Content Pages</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card>
+                      <CardContent className="p-4">
+                        <h3 className="font-medium">Customer Home Page</h3>
+                        <p className="text-sm text-gray-600 mt-1">Main landing page content</p>
+                        <Button className="mt-3" size="sm">Edit Content</Button>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <h3 className="font-medium">Service Provider Portal</h3>
+                        <p className="text-sm text-gray-600 mt-1">Provider onboarding content</p>
+                        <Button className="mt-3" size="sm">Edit Content</Button>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <h3 className="font-medium">Chat Interface</h3>
+                        <p className="text-sm text-gray-600 mt-1">AI chat responses and prompts</p>
+                        <Button className="mt-3" size="sm">Edit Content</Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "feature-toggles" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Feature Toggles</h2>
+                <p className="text-gray-600">Enable or disable platform features for customers and service providers</p>
+              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Platform Features</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h3 className="font-medium">AI Chat Support</h3>
+                        <p className="text-sm text-gray-600">Enable AI-powered chat assistance</p>
+                      </div>
+                      <Button variant="outline">Enabled</Button>
+                    </div>
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h3 className="font-medium">Screen Sharing</h3>
+                        <p className="text-sm text-gray-600">WebRTC screen sharing functionality</p>
+                      </div>
+                      <Button variant="outline">Enabled</Button>
+                    </div>
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h3 className="font-medium">Service Provider Booking</h3>
+                        <p className="text-sm text-gray-600">Professional service provider requests</p>
+                      </div>
+                      <Button variant="outline">Enabled</Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {(activeTab === "users" || activeTab === "service-providers" || activeTab === "system-settings" || activeTab === "general-settings") && (
             <div className="text-center py-12">
