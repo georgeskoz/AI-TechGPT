@@ -23,7 +23,7 @@ import {
   Zap,
   Search
 } from 'lucide-react';
-import Navigation from '@/components/Navigation';
+import { Navigation } from '@/components/Navigation';
 // Auth context handled by parent components
 import { useFeatureDiscovery } from '@/hooks/useFeatureDiscovery';
 import { featureDiscoveryService } from '@/services/featureDiscoveryService';
