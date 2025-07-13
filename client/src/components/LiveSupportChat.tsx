@@ -273,26 +273,36 @@ export default function LiveSupportChat({
         const wsPort = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "5000" : port;
         const wsUrl = `${protocol}//${host}:${wsPort}/ws`;
         
-        console.log('WebSocket connection temporarily disabled for debugging');
-        // wsRef.current = new WebSocket(wsUrl);
+        console.log('Attempting WebSocket connection to:', wsUrl);
         
-        /* WebSocket handlers - temporarily disabled
-        wsRef.current.onopen = () => {
-          try {
-            wsRef.current?.send(JSON.stringify({
-              type: "join_case",
-              caseId: currentCase.id,
-            }));
-          } catch (error) {
-            console.error('Error sending join_case message:', error);
-          }
-        };
-        
-        wsRef.current.onerror = (error) => {
-          console.error('WebSocket error:', error);
-          // Don't throw - just log the error
-        };
-        */
+        try {
+          console.log('WebSocket temporarily disabled - port mismatch issue');
+          return;
+          // wsRef.current = new WebSocket(wsUrl);
+          
+          wsRef.current.onopen = () => {
+            console.log('WebSocket connected successfully');
+            try {
+              wsRef.current?.send(JSON.stringify({
+                type: "join_case",
+                caseId: currentCase.id,
+              }));
+            } catch (error) {
+              console.error('Error sending join_case message:', error);
+            }
+          };
+          
+          wsRef.current.onerror = (error) => {
+            console.error('WebSocket error:', error);
+            // Don't throw - just log the error
+          };
+          
+          wsRef.current.onclose = () => {
+            console.log('WebSocket connection closed');
+          };
+        } catch (error) {
+          console.error('Failed to create WebSocket:', error);
+        }
         
         wsRef.current.onmessage = (event) => {
           try {

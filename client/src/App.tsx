@@ -61,7 +61,7 @@ function Router() {
   return (
     <Switch>
       {/* Main Entry Points */}
-      <Route path="/" component={CustomerHomePage} />
+      <Route path="/" component={ClientDashboard} />
       <Route path="/customer-home" component={CustomerHomePage} />
       
       {/* Customer Portal - Core Pages */}
