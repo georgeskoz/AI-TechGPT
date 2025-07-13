@@ -43,6 +43,17 @@ export default function Navigation({
                                location.includes('/notifications-dashboard');
   const isAdminPage = location.includes('/admin');
 
+  // Get context-aware home path
+  const getHomePath = () => {
+    if (isServiceProviderPage) {
+      return "/technician-home";
+    } else if (isAdminPage) {
+      return "/admin-home";
+    } else {
+      return "/";
+    }
+  };
+
   // Dynamic navigation items based on current page
   const getNavigationItems = () => {
     if (isServiceProviderPage) {
@@ -117,7 +128,7 @@ export default function Navigation({
           <div className="absolute left-1/2 transform -translate-x-1/2">
             <Button
               variant="ghost"
-              onClick={() => setLocation("/")}
+              onClick={() => setLocation(getHomePath())}
               className="text-xl font-bold text-blue-600 hover:text-blue-700"
             >
               TechGPT
@@ -139,7 +150,7 @@ export default function Navigation({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setLocation("/")}
+                onClick={() => setLocation(getHomePath())}
                 className="hidden sm:flex items-center gap-2 text-gray-600 hover:text-gray-900"
               >
                 <Home className="h-4 w-4" />
