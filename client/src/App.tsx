@@ -135,14 +135,45 @@ function App() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-gray-50">
-        <Router />
-        {/* <FloatingChatWidget username={username} /> */}
-        {/* <AIFeatureDiscoveryWrapper /> */}
+    <div className="min-h-screen bg-gray-50">
+      <div className="p-8">
+        <h1 className="text-3xl font-bold text-center mb-8">TechGPT - Customer Portal</h1>
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4">AI Chat Support</h2>
+              <p className="text-gray-600 mb-4">Get instant help with technical questions</p>
+              <button 
+                onClick={() => window.location.href = '/chat'} 
+                className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+              >
+                Start Chat
+              </button>
+            </div>
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4">Phone Support</h2>
+              <p className="text-gray-600 mb-4">Talk to our technical experts</p>
+              <button 
+                onClick={() => window.location.href = '/phone-support'} 
+                className="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+              >
+                Call Support
+              </button>
+            </div>
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4">Live Support</h2>
+              <p className="text-gray-600 mb-4">Real-time chat with technicians</p>
+              <button 
+                onClick={() => window.location.href = '/live-support'} 
+                className="w-full bg-purple-500 text-white py-2 px-4 rounded hover:bg-purple-600"
+              >
+                Start Live Chat
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-      <Toaster />
-    </QueryClientProvider>
+    </div>
   );
 }
 
