@@ -13,9 +13,84 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 
 export default function IssueCategorizationPage() {
   const [, setLocation] = useLocation();
-  const [issues, setIssues] = useLocalStorage<TechnicalIssue[]>('techgpt_issues', []);
+  
+  // Create sample issues for demonstration if localStorage is empty
+  const sampleIssues: TechnicalIssue[] = [
+    {
+      id: '1',
+      title: 'Wi-Fi Connection Keeps Dropping',
+      description: 'My wireless connection intermittently drops every 10-15 minutes, requiring manual reconnection.',
+      category: 'Network Troubleshooting',
+      subcategory: 'Wireless Network Issues',
+      priority: 'medium',
+      status: 'open',
+      domain: 'Network Troubleshooting',
+      keywords: ['wifi', 'wireless', 'connection', 'dropping', 'intermittent'],
+      estimatedResolutionTime: '30 minutes',
+      reportedBy: 'user',
+      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
+    },
+    {
+      id: '2',
+      title: 'Database Query Performance Issues',
+      description: 'SELECT queries are taking too long to execute, especially with large datasets over 10,000 records.',
+      category: 'Database Help',
+      subcategory: 'Query Optimization',
+      priority: 'high',
+      status: 'in-progress',
+      domain: 'Database Help',
+      keywords: ['database', 'query', 'performance', 'slow', 'optimization'],
+      estimatedResolutionTime: '45 minutes',
+      reportedBy: 'user',
+      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000) // 4 hours ago
+    },
+    {
+      id: '3',
+      title: 'Hard Drive Making Clicking Sounds',
+      description: 'My computer hard drive is making unusual clicking sounds and boot times are very slow.',
+      category: 'Hardware Issues',
+      subcategory: 'Hard Drive Problems',
+      priority: 'urgent',
+      status: 'open',
+      domain: 'Hardware Issues',
+      keywords: ['hard drive', 'clicking', 'sounds', 'slow', 'boot'],
+      estimatedResolutionTime: '60 minutes',
+      reportedBy: 'user',
+      timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000) // 1 hour ago
+    },
+    {
+      id: '4',
+      title: 'Website CSS Layout Breaking on Mobile',
+      description: 'The responsive design breaks on mobile devices below 768px width, causing content overflow.',
+      category: 'Web Development',
+      subcategory: 'Frontend Development',
+      priority: 'medium',
+      status: 'resolved',
+      domain: 'Web Development',
+      keywords: ['css', 'mobile', 'responsive', 'layout', 'breaking'],
+      estimatedResolutionTime: '25 minutes',
+      reportedBy: 'user',
+      timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000) // 6 hours ago
+    },
+    {
+      id: '5',
+      title: 'Mobile App Crashes on iOS 17',
+      description: 'The mobile application crashes immediately upon launch on iOS 17 devices.',
+      category: 'Mobile Devices',
+      subcategory: 'App Development',
+      priority: 'high',
+      status: 'in-progress',
+      domain: 'Mobile Devices',
+      keywords: ['mobile', 'app', 'crash', 'ios', 'launch'],
+      estimatedResolutionTime: '90 minutes',
+      reportedBy: 'user',
+      timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000) // 3 hours ago
+    }
+  ];
+
+  const [issues, setIssues] = useLocalStorage<TechnicalIssue[]>('techgpt_issues', sampleIssues);
   const [selectedIssue, setSelectedIssue] = useState<TechnicalIssue | null>(null);
-  const [activeTab, setActiveTab] = useState('categorize');
+  const [activeTab, setActiveTab] = useState('tracker'); // Start with tracker tab to show sample issues
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
 
