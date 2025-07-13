@@ -45,6 +45,8 @@ import QuickServiceProviderRequest from "@/pages/QuickTechnicianRequest";
 import ScreenSharingPage from "@/pages/ScreenSharingPage";
 import ReceiptDemo from "@/pages/ReceiptDemo";
 import InvoiceModificationDemo from "@/pages/InvoiceModificationDemo";
+import AIFeatureDiscoveryWrapper from "@/components/AIFeatureDiscoveryWrapper";
+import FeatureDiscoveryPage from "@/pages/FeatureDiscoveryPage";
 
 
 function Router() {
@@ -72,6 +74,7 @@ function Router() {
       <Route path="/phone-support" component={PhoneSupportPage} />
       <Route path="/screen-sharing" component={ScreenSharingPage} />
       <Route path="/technician-request" component={QuickServiceProviderRequest} />
+      <Route path="/feature-discovery" component={FeatureDiscoveryPage} />
       
       {/* Service Provider Portal */}
       <Route path="/technician-home" component={ServiceProviderHomePage} />
@@ -133,17 +136,12 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <UnifiedAuthProvider>
-        <CrossRoleDataBridge>
-          <AuthProvider>
-            <div className="min-h-screen bg-gray-50">
-              <Router />
-              <FloatingChatWidget username={username} />
-            </div>
-            <Toaster />
-          </AuthProvider>
-        </CrossRoleDataBridge>
-      </UnifiedAuthProvider>
+      <div className="min-h-screen bg-gray-50">
+        <Router />
+        {/* <FloatingChatWidget username={username} /> */}
+        {/* <AIFeatureDiscoveryWrapper /> */}
+      </div>
+      <Toaster />
     </QueryClientProvider>
   );
 }
