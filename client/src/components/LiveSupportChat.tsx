@@ -262,7 +262,7 @@ export default function LiveSupportChat({
     };
   }, [chatStartTime, currentCase?.status]);
 
-  // WebSocket connection
+  // WebSocket connection - temporarily disabled for debugging
   useEffect(() => {
     if (currentCase) {
       try {
@@ -273,8 +273,10 @@ export default function LiveSupportChat({
         const wsPort = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "5000" : port;
         const wsUrl = `${protocol}//${host}:${wsPort}/ws`;
         
-        wsRef.current = new WebSocket(wsUrl);
+        console.log('WebSocket connection temporarily disabled for debugging');
+        // wsRef.current = new WebSocket(wsUrl);
         
+        /* WebSocket handlers - temporarily disabled
         wsRef.current.onopen = () => {
           try {
             wsRef.current?.send(JSON.stringify({
@@ -285,6 +287,12 @@ export default function LiveSupportChat({
             console.error('Error sending join_case message:', error);
           }
         };
+        
+        wsRef.current.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          // Don't throw - just log the error
+        };
+        */
         
         wsRef.current.onmessage = (event) => {
           try {
