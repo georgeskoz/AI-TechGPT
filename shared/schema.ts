@@ -39,7 +39,8 @@ export const users = pgTable("users", {
   }>(),
   
   // Payment method configuration
-  paymentMethod: text("payment_method"), // credit_card, paypal, apple_pay, google_pay
+  paymentMethod: text("payment_method"), // credit_card, paypal, apple_pay, google_pay (legacy single method)
+  paymentMethods: jsonb("payment_methods").$type<string[]>(), // Array of payment methods
   paymentMethodSetup: boolean("payment_method_setup").default(false),
   paymentDetails: jsonb("payment_details").$type<{
     cardLast4?: string;
@@ -1007,6 +1008,7 @@ export const updateProfileSchema = createInsertSchema(users).pick({
   country: true,
   businessInfo: true,
   paymentMethod: true,
+  paymentMethods: true,
   paymentMethodSetup: true,
   paymentDetails: true,
 });
