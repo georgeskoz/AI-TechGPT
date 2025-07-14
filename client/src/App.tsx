@@ -56,6 +56,7 @@ import ReceiptDemo from "@/pages/ReceiptDemo";
 import InvoiceModificationDemo from "@/pages/InvoiceModificationDemo";
 import AIFeatureDiscoveryWrapper from "@/components/AIFeatureDiscoveryWrapper";
 import FeatureDiscoveryPage from "@/pages/FeatureDiscoveryPage";
+import TrackingPage from "@/pages/TrackingPage";
 
 
 // Conditional Profile Route Component
@@ -133,6 +134,7 @@ function Router() {
       <Route path="/phone-support" component={PhoneSupportPage} />
       <Route path="/screen-sharing" component={ScreenSharingPage} />
       <Route path="/technician-request" component={QuickServiceProviderRequest} />
+      <Route path="/tracking" component={TrackingPage} />
       <Route path="/marketplace" component={() => <MarketplacePage username={getStoredUsername()} />} />
       <Route path="/feature-discovery" component={FeatureDiscoveryPage} />
       <Route path="/triage" component={TriagePage} />

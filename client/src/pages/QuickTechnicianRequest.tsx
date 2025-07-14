@@ -236,6 +236,29 @@ export default function QuickServiceProviderRequest() {
     localStorage.setItem('activeServiceBooking', 'true');
   };
 
+  // Handle Call button click
+  const handleCall = () => {
+    if (selectedServiceProvider?.phone) {
+      window.location.href = `tel:${selectedServiceProvider.phone}`;
+    } else {
+      // Generate a mock phone number for demo
+      const demoPhone = `+1-555-0${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}-${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}`;
+      window.location.href = `tel:${demoPhone}`;
+    }
+  };
+
+  // Handle Message button click
+  const handleMessage = () => {
+    // Navigate to chat/messaging interface
+    setLocationPath('/chat');
+  };
+
+  // Handle Track button click
+  const handleTrack = () => {
+    // Navigate to tracking page
+    setLocationPath('/tracking');
+  };
+
   const handlePaymentMethodChange = (method: string) => {
     setSelectedPaymentMethod(method);
     setIsPaymentSetupComplete(false);
@@ -820,15 +843,15 @@ export default function QuickServiceProviderRequest() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2" onClick={handleCall}>
               <Phone className="w-4 h-4" />
               Call
             </Button>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2" onClick={handleMessage}>
               <MessageCircle className="w-4 h-4" />
               Message
             </Button>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2" onClick={handleTrack}>
               <NavigationIcon className="w-4 h-4" />
               Track
             </Button>
