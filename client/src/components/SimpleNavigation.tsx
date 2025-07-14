@@ -31,6 +31,8 @@ export default function SimpleNavigation({
     { label: "Phone Support", path: "/phone-support", icon: <Phone className="h-4 w-4" />, description: "Call-based support" },
     { label: "Screen Sharing", path: "/screen-sharing", icon: <Monitor className="h-4 w-4" />, description: "Remote screen assistance" },
     { label: "Request Service Provider", path: "/technician-request", icon: <Users className="h-4 w-4" />, description: "Book professional help" },
+    { label: "Service Provider Dashboard", path: "/technician-dashboard", icon: <Users className="h-4 w-4" />, description: "Service provider control panel" },
+    { label: "Service Provider Registration", path: "/technician-registration", icon: <Users className="h-4 w-4" />, description: "Register as service provider" },
     { label: "Customer Portal", path: "/customer-home", icon: <Home className="h-4 w-4" />, description: "Customer home page" },
     { label: "Admin Dashboard", path: "/admin", icon: <Shield className="h-4 w-4" />, description: "Admin control panel" },
   ];
