@@ -51,13 +51,15 @@ export default function ActiveServiceTracker({ isVisible, onClose }: ActiveServi
   useEffect(() => {
     if (serviceStatus === 'en-route' && eta > 0) {
       const timer = setInterval(() => {
-        setEta(prev => prev - 1);
+        setEta(prev => {
+          const newEta = prev - 1;
+          // Auto-advance service status for demo
+          if (newEta <= 5) {
+            setServiceStatus('arrived');
+          }
+          return newEta;
+        });
         setProgress(prev => Math.min(prev + 2, 95));
-        
-        // Auto-advance service status for demo
-        if (prev <= 5) {
-          setServiceStatus('arrived');
-        }
       }, 30000); // Update every 30 seconds for demo
       return () => clearInterval(timer);
     }
