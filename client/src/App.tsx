@@ -9,6 +9,10 @@ import { useState, useEffect } from "react";
 import NotFound from "@/pages/not-found";
 import ChatPage from "@/pages/ChatPage";
 import ProfilePage from "@/pages/ProfilePage";
+import ProfilePersonalInfo from "@/pages/ProfilePersonalInfo";
+import ProfileAddress from "@/pages/ProfileAddress";
+import ProfileBusiness from "@/pages/ProfileBusiness";
+import ProfilePayment from "@/pages/ProfilePayment";
 import IssueCategorizationPage from "@/pages/IssueCategorizationPage";
 import PhoneSupportPage from "@/pages/PhoneSupportPage";
 import MarketplacePage from "@/pages/MarketplacePage";
@@ -104,7 +108,14 @@ function Router() {
       <Route path="/admin-categories" component={AdminCategoryManagement} />
       <Route path="/admin/announcements" component={AdminAnnouncements} />
       
-      {/* User Profile */}
+      {/* User Profile - Multi-page flow */}
+      <Route path="/profile/:username" component={ProfilePage} />
+      <Route path="/profile/:username/personal" component={ProfilePersonalInfo} />
+      <Route path="/profile/:username/address" component={ProfileAddress} />
+      <Route path="/profile/:username/business" component={ProfileBusiness} />
+      <Route path="/profile/:username/payment" component={ProfilePayment} />
+      
+      {/* Legacy profile route for compatibility */}
       <Route path="/:username/profile" component={ProfilePage} />
       
       {/* Development/Testing Pages - Only available in development mode */}

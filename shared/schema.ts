@@ -28,6 +28,16 @@ export const users = pgTable("users", {
   identityVerified: boolean("identity_verified").default(false),
   accountActive: boolean("account_active").default(true),
   
+  // Business information (optional for business users)
+  businessInfo: jsonb("business_info").$type<{
+    businessName?: string;
+    businessType?: string;
+    industry?: string;
+    taxId?: string;
+    website?: string;
+    description?: string;
+  }>(),
+  
   // Payment method configuration
   paymentMethod: text("payment_method"), // credit_card, paypal, apple_pay, google_pay
   paymentMethodSetup: boolean("payment_method_setup").default(false),
