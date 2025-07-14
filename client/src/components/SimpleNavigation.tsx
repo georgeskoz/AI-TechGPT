@@ -122,7 +122,7 @@ export default function SimpleNavigation({
             )}
           </div>
 
-          {/* Right side - Home button and Quick Access */}
+          {/* Right side - Home button, Settings, and Quick Access */}
           <div className="flex items-center gap-2">
             {/* Home Button */}
             <Button
@@ -133,6 +133,24 @@ export default function SimpleNavigation({
             >
               <Home className="h-4 w-4" />
               Home
+            </Button>
+
+            {/* Settings Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const username = localStorage.getItem('techgpt_username');
+                if (username) {
+                  setLocation(`/profile/${username}`);
+                } else {
+                  setLocation("/profile/guest");
+                }
+              }}
+              className="flex items-center gap-2"
+            >
+              <Settings className="h-4 w-4" />
+              Settings
             </Button>
 
             {/* Role-Based Quick Access Dropdown */}
