@@ -74,6 +74,15 @@ export default function RegisterPage() {
         const user = await response.json();
         
         // Store user data in localStorage
+        localStorage.setItem('tech_user', JSON.stringify(user));
+        localStorage.setItem('username', user.username);
+        localStorage.setItem('userEmail', user.email);
+        
+        // Redirect to registration success page
+        setLocation('/registration-success');
+        return;
+        
+        // Store user data in localStorage
         localStorage.setItem('currentUser', JSON.stringify(user));
         localStorage.setItem('username', user.username);
         

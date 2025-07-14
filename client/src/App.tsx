@@ -58,6 +58,7 @@ import AIFeatureDiscoveryWrapper from "@/components/AIFeatureDiscoveryWrapper";
 import FeatureDiscoveryPage from "@/pages/FeatureDiscoveryPage";
 import TrackingPage from "@/pages/TrackingPage";
 import ServiceProviderChat from "@/pages/ServiceProviderChat";
+import RegistrationSuccess from "@/pages/RegistrationSuccess";
 
 
 // Conditional Profile Route Component
@@ -129,6 +130,7 @@ function Router() {
       <Route path="/chat" component={ChatPage} />
       <Route path="/dashboard" component={ClientDashboard} />
       <Route path="/issues" component={IssueCategorizationPage} />
+      <Route path="/registration-success" component={RegistrationSuccess} />
       
       {/* Support Services - Essential Customer Services */}
       <Route path="/live-support" component={() => <LiveSupportPage username={getStoredUsername()} />} />
