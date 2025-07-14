@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Brain, ArrowLeft, CheckCircle, Target, Zap } from "lucide-react";
-import Navigation from "@/components/Navigation";
+import SimpleNavigation from "@/components/SimpleNavigation";
 import ChatTriage from "@/components/ChatTriage";
 
 export default function TriagePage() {
@@ -32,7 +32,7 @@ export default function TriagePage() {
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      <Navigation title="AI Triage Analysis" backTo="/" />
+      <SimpleNavigation title="AI Triage Analysis" backTo="/" />
       <div className="flex items-center gap-2 mb-6">
         <Button variant="ghost" size="sm" onClick={() => setLocation('/')}>
           <ArrowLeft className="h-4 w-4 mr-2" />

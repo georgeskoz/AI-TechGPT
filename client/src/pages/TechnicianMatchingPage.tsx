@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
-import Navigation from "@/components/Navigation";
+import SimpleNavigation from "@/components/SimpleNavigation";
 import { 
   MapPin, 
   Star, 
@@ -208,7 +208,7 @@ export default function TechnicianMatchingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation title="Technician Matching" backTo="/" />
+      <SimpleNavigation title="Technician Matching" backTo="/" />
       {/* Navigation Header */}
       <div className="sticky top-0 z-40 bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 py-3">

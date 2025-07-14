@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import NotificationsCenter from '@/components/NotificationsCenter';
 import NotificationStats from '@/components/NotificationStats';
 import RealTimeNotificationService from '@/components/RealTimeNotificationService';
-import Navigation from '@/components/Navigation';
+import SimpleNavigation from '@/components/SimpleNavigation';
 import { Bell, BarChart3, Settings, Zap, Activity, RefreshCw } from 'lucide-react';
 
 const NotificationsDashboard: React.FC = () => {
@@ -20,7 +20,7 @@ const NotificationsDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation title="Notifications Dashboard" backTo="/admin" />
+      <SimpleNavigation title="Notifications Dashboard" backTo="/admin" />
       
       <div className="container mx-auto p-6 max-w-7xl">
         {/* Header */}

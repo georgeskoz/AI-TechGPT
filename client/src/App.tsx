@@ -77,6 +77,11 @@ function Router() {
       <Route path="/technician-request" component={QuickServiceProviderRequest} />
       <Route path="/marketplace" component={() => <MarketplacePage username={getStoredUsername()} />} />
       <Route path="/feature-discovery" component={FeatureDiscoveryPage} />
+      <Route path="/triage" component={TriagePage} />
+      <Route path="/diagnostic" component={SimpleDiagnosticPage} />
+      <Route path="/booking" component={SimpleBooking} />
+      <Route path="/book-service" component={BookServicePage} />
+      <Route path="/expert-technician" component={ExpertTechnicianFinder} />
       
       {/* Service Provider Portal */}
       <Route path="/technician-home" component={ServiceProviderHomePage} />

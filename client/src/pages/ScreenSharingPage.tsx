@@ -7,7 +7,7 @@ import { Monitor, Users, Shield, Clock, Activity, Settings, ArrowLeft, X } from 
 import ScreenSharingTool from '@/components/ScreenSharingTool';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
-import Navigation from '@/components/Navigation';
+import SimpleNavigation from '@/components/SimpleNavigation';
 
 interface ScreenSharingSession {
   id: string;
@@ -81,7 +81,7 @@ export default function ScreenSharingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation 
+      <SimpleNavigation 
         title="Screen Sharing Center" 
         showBackButton={true}
         backTo="/"

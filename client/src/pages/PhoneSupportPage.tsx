@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Phone, CheckCircle } from 'lucide-react';
-import Navigation from '@/components/Navigation';
+import SimpleNavigation from '@/components/SimpleNavigation';
 import SimplePhoneSupportPricing from '@/components/SimplePhoneSupportPricing';
 
 interface SupportService {
@@ -78,7 +78,7 @@ export default function PhoneSupportPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation title="Phone Support" backTo="/issues" />
+      <SimpleNavigation title="Phone Support" backTo="/issues" />
       
       {/* Main Content */}
       <div className="max-w-md mx-auto px-4 py-6">

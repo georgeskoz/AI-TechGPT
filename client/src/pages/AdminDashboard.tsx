@@ -1395,11 +1395,10 @@ Last Updated: ${effectiveDate}
   return (
     <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
       {/* Navigation */}
-      <Navigation 
+      <SimpleNavigation 
         showBackButton={true}
         backTo="/"
         title="Admin Dashboard"
-        showHomeButton={true}
       />
       
       {/* Header */}

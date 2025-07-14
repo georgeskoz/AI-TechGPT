@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import Navigation from '@/components/Navigation';
+import SimpleNavigation from '@/components/SimpleNavigation';
 import { 
   Calendar, 
   DollarSign, 
@@ -132,11 +132,10 @@ export default function ServiceProviderDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation 
+      <SimpleNavigation 
         showBackButton={true}
         backTo="/technician-dashboard"
         title="Service Provider Dashboard"
-        showHomeButton={true}
       />
       
       <div className="container mx-auto px-4 py-6">
