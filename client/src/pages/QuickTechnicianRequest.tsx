@@ -249,8 +249,8 @@ export default function QuickServiceProviderRequest() {
 
   // Handle Message button click
   const handleMessage = () => {
-    // Navigate to chat/messaging interface
-    setLocationPath('/chat');
+    // Navigate to service provider chat
+    setLocationPath('/service-provider-chat');
   };
 
   // Handle Track button click

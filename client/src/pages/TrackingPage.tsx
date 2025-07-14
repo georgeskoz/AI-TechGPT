@@ -56,7 +56,7 @@ export default function TrackingPage() {
   };
 
   const handleMessage = () => {
-    window.location.href = '/chat';
+    window.location.href = '/service-provider-chat';
   };
 
   const handleOpenMaps = () => {
