@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { Technician } from "@shared/schema";
+import NoServiceProvidersModal from "./NoServiceProvidersModal";
 
 interface TechnicianSearchProps {
   category: string;
@@ -42,13 +43,46 @@ export default function TechnicianSearch({
     serviceRadius: 25,
     availability: true
   });
+  
+  const [showNoProvidersModal, setShowNoProvidersModal] = useState(false);
+  
+  // Parse customer location from the location string
+  const parseCustomerLocation = (locationStr: string) => {
+    const parts = locationStr.split(',').map(s => s.trim());
+    if (parts.length >= 2) {
+      return {
+        city: parts[parts.length - 2] || '',
+        state: parts[parts.length - 1] || '',
+        country: 'Canada', // Default to Canada based on your setup
+        address: locationStr
+      };
+    }
+    return {
+      city: locationStr,
+      state: '',
+      country: 'Canada',
+      address: locationStr
+    };
+  };
 
   const searchMutation = useMutation({
     mutationFn: async (criteria: typeof searchCriteria) => {
       const response = await apiRequest("POST", "/api/technicians/search", criteria);
       return response.json();
     },
+    onSuccess: (data) => {
+      if (data.length === 0) {
+        setShowNoProvidersModal(true);
+      }
+    }
   });
+
+  // Auto-search when component mounts
+  useEffect(() => {
+    handleSearch();
+  }, []);
+
+  const customerLocation = parseCustomerLocation(searchCriteria.location);
 
   const handleSearch = () => {
     searchMutation.mutate(searchCriteria);
@@ -260,6 +294,16 @@ export default function TechnicianSearch({
           </CardContent>
         </Card>
       )}
+
+      {/* No Service Providers Modal */}
+      <NoServiceProvidersModal
+        isOpen={showNoProvidersModal}
+        onClose={() => setShowNoProvidersModal(false)}
+        customerLocation={customerLocation}
+        serviceType={serviceType}
+        category={category}
+        subcategory={subcategory}
+      />
     </div>
   );
 }
