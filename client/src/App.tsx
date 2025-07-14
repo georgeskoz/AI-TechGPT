@@ -13,6 +13,7 @@ import ProfilePersonalInfo from "@/pages/ProfilePersonalInfo";
 import ProfileAddress from "@/pages/ProfileAddress";
 import ProfileBusiness from "@/pages/ProfileBusiness";
 import ProfilePayment from "@/pages/ProfilePayment";
+import ProfileReview from "@/pages/ProfileReview";
 import IssueCategorizationPage from "@/pages/IssueCategorizationPage";
 import PhoneSupportPage from "@/pages/PhoneSupportPage";
 import MarketplacePage from "@/pages/MarketplacePage";
@@ -114,6 +115,7 @@ function Router() {
       <Route path="/profile/:username/address" component={ProfileAddress} />
       <Route path="/profile/:username/business" component={ProfileBusiness} />
       <Route path="/profile/:username/payment" component={ProfilePayment} />
+      <Route path="/profile/:username/review" component={ProfileReview} />
       
       {/* Legacy profile route for compatibility */}
       <Route path="/:username/profile" component={ProfilePage} />

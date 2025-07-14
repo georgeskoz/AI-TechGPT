@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import SimpleNavigation from "@/components/SimpleNavigation";
-import { ArrowLeft, Save, CreditCard, Shield } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, CreditCard, Shield } from "lucide-react";
 
 const paymentSchema = z.object({
   paymentMethod: z.string().optional(),
@@ -105,11 +105,8 @@ export default function ProfilePayment() {
     navigate(`/profile/${cleanUsername}/business`);
   };
 
-  const handleFinish = () => {
-    const values = form.getValues();
-    updateProfileMutation.mutate(values);
-    // Navigate back to main profile or dashboard
-    navigate(`/profile/${cleanUsername}`);
+  const handleNext = () => {
+    navigate(`/profile/${cleanUsername}/review`);
   };
 
   const handleSave = () => {
@@ -365,11 +362,11 @@ export default function ProfilePayment() {
                   
                   <Button 
                     type="button"
-                    onClick={handleFinish}
+                    onClick={handleNext}
                     className="flex-1"
                   >
-                    <Save className="h-4 w-4 mr-2" />
-                    Finish
+                    Next: Review
+                    <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </div>
               </form>
