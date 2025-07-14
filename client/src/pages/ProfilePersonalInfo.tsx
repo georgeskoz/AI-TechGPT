@@ -29,10 +29,13 @@ export default function ProfilePersonalInfo() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   
+  // Clean username parameter to handle URL encoding issues
+  const cleanUsername = username?.replace(/^"(.*)"$/, '$1') || username;
+  
   const { data: user, isLoading } = useQuery({
-    queryKey: ["/api/users", username],
+    queryKey: ["/api/users", cleanUsername],
     queryFn: async () => {
-      const res = await fetch(`/api/users/${username}`);
+      const res = await fetch(`/api/users/${encodeURIComponent(cleanUsername)}`);
       if (!res.ok) {
         throw new Error("Failed to fetch user data");
       }
@@ -50,17 +53,29 @@ export default function ProfilePersonalInfo() {
     },
   });
   
-  // Update form values when user data is loaded
+  // Update form values when user data is loaded or from localStorage
   useEffect(() => {
-    if (user) {
-      // Check localStorage for profile picture if user avatar is empty, with error handling
-      let localStorageAvatar = "";
-      try {
-        localStorageAvatar = localStorage.getItem(`techgpt_profile_picture_${username}`) || "";
-      } catch (error) {
-        console.warn('localStorage access error:', error);
-      }
-      
+    // Always try to load from localStorage first
+    let localStorageAvatar = "";
+    let localStorageFormData = null;
+    try {
+      localStorageAvatar = localStorage.getItem(`techgpt_profile_picture_${cleanUsername}`) || "";
+      const savedFormData = localStorage.getItem(`techgpt_personal_info_${cleanUsername}`);
+      localStorageFormData = savedFormData ? JSON.parse(savedFormData) : null;
+    } catch (error) {
+      console.warn('localStorage access error:', error);
+    }
+    
+    // If we have localStorage data, use it even if user doesn't exist
+    if (localStorageFormData) {
+      form.reset({
+        email: localStorageFormData.email || "",
+        fullName: localStorageFormData.fullName || "",
+        bio: localStorageFormData.bio || "",
+        avatar: localStorageAvatar,
+      });
+    } else if (user) {
+      // Otherwise use user data from database
       const avatarValue = user.avatar || localStorageAvatar || "";
       
       form.reset({
@@ -70,11 +85,27 @@ export default function ProfilePersonalInfo() {
         avatar: avatarValue,
       });
     }
-  }, [user, form.reset, username]);
+  }, [user, form.reset, cleanUsername]);
+
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      try {
+        localStorage.setItem(`techgpt_personal_info_${cleanUsername}`, JSON.stringify({
+          email: value.email || "",
+          fullName: value.fullName || "",
+          bio: value.bio || "",
+        }));
+      } catch (error) {
+        console.warn('localStorage save error:', error);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, cleanUsername]);
   
   const updateProfileMutation = useMutation({
     mutationFn: async (values: z.infer<typeof personalInfoSchema>) => {
-      const response = await apiRequest(`/api/users/${username}/profile`, {
+      const response = await apiRequest(`/api/users/${cleanUsername}/profile`, {
         method: "PUT",
         body: values,
       });
@@ -85,7 +116,7 @@ export default function ProfilePersonalInfo() {
         title: "Success",
         description: "Personal information updated successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/users", username] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users", cleanUsername] });
     },
     onError: (error: any) => {
       toast({
@@ -143,7 +174,7 @@ export default function ProfilePersonalInfo() {
             
             // Try to store in localStorage with error handling
             try {
-              localStorage.setItem(`techgpt_profile_picture_${username}`, compressedDataUrl);
+              localStorage.setItem(`techgpt_profile_picture_${cleanUsername}`, compressedDataUrl);
             } catch (storageError) {
               console.warn('localStorage quota exceeded, skipping local storage');
             }
@@ -281,7 +312,7 @@ export default function ProfilePersonalInfo() {
           
           // Try to store in localStorage with error handling
           try {
-            localStorage.setItem(`techgpt_profile_picture_${username}`, imageDataUrl);
+            localStorage.setItem(`techgpt_profile_picture_${cleanUsername}`, imageDataUrl);
           } catch (storageError) {
             console.warn('localStorage quota exceeded, skipping local storage');
           }
@@ -329,7 +360,7 @@ export default function ProfilePersonalInfo() {
   };
 
   const handleNext = () => {
-    navigate(`/profile/${username}/address`);
+    navigate(`/profile/${cleanUsername}/address`);
   };
 
   const handleSave = () => {
