@@ -107,8 +107,28 @@ export default function ProfilePayment() {
     navigate(`/profile/${cleanUsername}/business`);
   };
 
-  const handleNext = () => {
-    navigate(`/profile/${cleanUsername}/review`);
+  const handleNext = async () => {
+    // Validate the form first
+    const isValid = await form.trigger();
+    if (!isValid) {
+      toast({
+        title: "Validation Error",
+        description: "Please correct the errors in the form before proceeding.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Save the data to database before navigating
+    const values = form.getValues();
+    try {
+      await updateProfileMutation.mutateAsync(values);
+      // Navigate only after successful save
+      navigate(`/profile/${cleanUsername}/review`);
+    } catch (error) {
+      // Error toast is already handled in the mutation
+      console.error('Failed to save payment data:', error);
+    }
   };
 
   const handleSave = () => {
@@ -380,10 +400,20 @@ export default function ProfilePayment() {
                   <Button 
                     type="button"
                     onClick={handleNext}
+                    disabled={updateProfileMutation.isPending}
                     className="flex-1"
                   >
-                    Next: Review
-                    <ArrowRight className="h-4 w-4 ml-2" />
+                    {updateProfileMutation.isPending ? (
+                      <>
+                        <span className="animate-spin mr-2">⏳</span>
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        Next: Review
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </>
+                    )}
                   </Button>
                 </div>
               </form>
