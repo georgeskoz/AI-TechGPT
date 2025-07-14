@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import SimpleNavigation from "@/components/SimpleNavigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
+import type { User } from "@shared/schema";
 import { 
   Wrench, 
   Wifi, 
@@ -25,7 +27,7 @@ import {
   Star,
   ArrowRight,
   ChevronLeft,
-  User,
+  User as UserIcon,
   Phone,
   Mail,
   CreditCard,
@@ -136,6 +138,17 @@ export default function QuickServiceProviderRequest() {
   const [paymentMethodDetails, setPaymentMethodDetails] = useState<any>(null);
   const [isPaymentSetupComplete, setIsPaymentSetupComplete] = useState(false);
 
+  // Get username from localStorage
+  const username = localStorage.getItem('username');
+  
+  // Fetch user profile data
+  const { data: user, isLoading: isUserLoading, error: userError } = useQuery({
+    queryKey: [`/api/users/${username}`],
+    enabled: !!username,
+    retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
   // Auto-detect location
   useEffect(() => {
     if (navigator.geolocation) {
@@ -149,6 +162,23 @@ export default function QuickServiceProviderRequest() {
       );
     }
   }, []);
+
+  // Auto-fill contact information from user profile
+  useEffect(() => {
+    if (user) {
+      setContactInfo({
+        name: user.fullName || "",
+        phone: user.phone || "",
+        email: user.email || ""
+      });
+      
+      // Auto-fill location from user's address
+      if (user.street && user.city && user.state) {
+        const fullAddress = `${user.street}${user.apartment ? ', ' + user.apartment : ''}, ${user.city}, ${user.state}`;
+        setLocation(fullAddress);
+      }
+    }
+  }, [user]);
 
   // Countdown timer for provider response
   useEffect(() => {
@@ -285,7 +315,12 @@ export default function QuickServiceProviderRequest() {
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             className="mt-1"
+            readOnly={!!(user?.street && user?.city && user?.state)}
+            disabled={!!(user?.street && user?.city && user?.state)}
           />
+          {user?.street && user?.city && user?.state && (
+            <p className="text-xs text-gray-500 mt-1">Auto-filled from your profile</p>
+          )}
         </div>
 
         <div>
@@ -319,7 +354,12 @@ export default function QuickServiceProviderRequest() {
               value={contactInfo.name}
               onChange={(e) => setContactInfo({...contactInfo, name: e.target.value})}
               className="mt-1"
+              readOnly={!!user?.fullName}
+              disabled={!!user?.fullName}
             />
+            {user?.fullName && (
+              <p className="text-xs text-gray-500 mt-1">Auto-filled from your profile</p>
+            )}
           </div>
           <div>
             <Label htmlFor="phone">Phone number</Label>
@@ -329,7 +369,12 @@ export default function QuickServiceProviderRequest() {
               value={contactInfo.phone}
               onChange={(e) => setContactInfo({...contactInfo, phone: e.target.value})}
               className="mt-1"
+              readOnly={!!user?.phone}
+              disabled={!!user?.phone}
             />
+            {user?.phone && (
+              <p className="text-xs text-gray-500 mt-1">Auto-filled from your profile</p>
+            )}
           </div>
           <div>
             <Label htmlFor="email">Email address</Label>
@@ -340,7 +385,12 @@ export default function QuickServiceProviderRequest() {
               value={contactInfo.email}
               onChange={(e) => setContactInfo({...contactInfo, email: e.target.value})}
               className="mt-1"
+              readOnly={!!user?.email}
+              disabled={!!user?.email}
             />
+            {user?.email && (
+              <p className="text-xs text-gray-500 mt-1">Auto-filled from your profile</p>
+            )}
           </div>
         </div>
       </div>
@@ -541,7 +591,7 @@ export default function QuickServiceProviderRequest() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-                    <User className="w-8 h-8 text-gray-600" />
+                    <UserIcon className="w-8 h-8 text-gray-600" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-lg">{serviceProvider.name}</h3>
@@ -607,7 +657,7 @@ export default function QuickServiceProviderRequest() {
         <CardContent>
           <div className="flex items-center space-x-4">
             <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-              <User className="w-8 h-8 text-gray-600" />
+              <UserIcon className="w-8 h-8 text-gray-600" />
             </div>
             <div>
               <h3 className="font-semibold text-lg">{selectedServiceProvider?.name}</h3>
@@ -752,7 +802,7 @@ export default function QuickServiceProviderRequest() {
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-4">
             <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-              <User className="w-8 h-8 text-gray-600" />
+              <UserIcon className="w-8 h-8 text-gray-600" />
             </div>
             <div>
               <h3 className="font-semibold text-lg">{selectedServiceProvider?.name}</h3>
@@ -882,6 +932,11 @@ export default function QuickServiceProviderRequest() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Request Service Provider</h1>
               <p className="text-gray-600">Get professional technical support</p>
+              {user?.fullName && (
+                <p className="text-sm text-blue-600 mt-1">
+                  Welcome, {user.fullName}
+                </p>
+              )}
             </div>
             <Button
               variant="ghost"
