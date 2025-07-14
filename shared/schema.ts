@@ -1005,6 +1005,7 @@ export const updateProfileSchema = createInsertSchema(users).pick({
   state: true,
   zipCode: true,
   country: true,
+  businessInfo: true,
   paymentMethod: true,
   paymentMethodSetup: true,
   paymentDetails: true,
