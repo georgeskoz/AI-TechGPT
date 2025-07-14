@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import SimpleNavigation from "@/components/SimpleNavigation";
-import { ArrowLeft, Save, User } from "lucide-react";
+import { ArrowLeft, Save, User, Upload, Camera } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
 const profileFormSchema = z.object({
@@ -108,6 +108,178 @@ export default function ProfilePage() {
   function handleBackToChat() {
     navigate("/");
   }
+
+  const handleUploadPicture = () => {
+    // Create a file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = (event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const imageDataUrl = e.target?.result as string;
+          // Update the avatar field in the form
+          form.setValue('avatar', imageDataUrl);
+          // Store the image in localStorage as backup
+          localStorage.setItem(`techgpt_profile_picture_${username}`, imageDataUrl);
+          toast({
+            title: "Picture uploaded",
+            description: "Profile picture has been uploaded successfully.",
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    fileInput.click();
+  };
+
+  const handleTakeLivePhoto = () => {
+    // Check if camera is supported
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast({
+        title: "Camera not supported",
+        description: "Camera is not supported in this browser.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Request camera access
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then((stream) => {
+        // Create a video element to show camera preview
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.autoplay = true;
+        video.style.width = '100%';
+        video.style.maxWidth = '400px';
+        video.style.height = 'auto';
+        video.style.borderRadius = '8px';
+
+        // Create a canvas to capture the photo
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Create a modal-like overlay
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        overlay.style.display = 'flex';
+        overlay.style.flexDirection = 'column';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.zIndex = '9999';
+
+        // Create title
+        const title = document.createElement('h2');
+        title.textContent = 'Take Your Profile Photo';
+        title.style.color = 'white';
+        title.style.marginBottom = '20px';
+        title.style.fontSize = '24px';
+        title.style.fontWeight = 'bold';
+
+        // Create buttons container
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.style.marginTop = '20px';
+        buttonsContainer.style.display = 'flex';
+        buttonsContainer.style.gap = '15px';
+
+        // Create capture button
+        const captureButton = document.createElement('button');
+        captureButton.textContent = '📸 Take Photo';
+        captureButton.style.padding = '12px 24px';
+        captureButton.style.backgroundColor = '#3b82f6';
+        captureButton.style.color = 'white';
+        captureButton.style.border = 'none';
+        captureButton.style.borderRadius = '8px';
+        captureButton.style.cursor = 'pointer';
+        captureButton.style.fontSize = '16px';
+        captureButton.style.fontWeight = '500';
+
+        // Create cancel button
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = '❌ Cancel';
+        cancelButton.style.padding = '12px 24px';
+        cancelButton.style.backgroundColor = '#6b7280';
+        cancelButton.style.color = 'white';
+        cancelButton.style.border = 'none';
+        cancelButton.style.borderRadius = '8px';
+        cancelButton.style.cursor = 'pointer';
+        cancelButton.style.fontSize = '16px';
+        cancelButton.style.fontWeight = '500';
+
+        // Add hover effects
+        captureButton.addEventListener('mouseenter', () => {
+          captureButton.style.backgroundColor = '#2563eb';
+        });
+        captureButton.addEventListener('mouseleave', () => {
+          captureButton.style.backgroundColor = '#3b82f6';
+        });
+
+        cancelButton.addEventListener('mouseenter', () => {
+          cancelButton.style.backgroundColor = '#4b5563';
+        });
+        cancelButton.addEventListener('mouseleave', () => {
+          cancelButton.style.backgroundColor = '#6b7280';
+        });
+
+        // Add event listeners
+        captureButton.addEventListener('click', () => {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          ctx?.drawImage(video, 0, 0);
+          
+          // Convert to data URL
+          const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          
+          // Update the avatar field in the form
+          form.setValue('avatar', imageDataUrl);
+          // Store the image in localStorage as backup
+          localStorage.setItem(`techgpt_profile_picture_${username}`, imageDataUrl);
+          
+          toast({
+            title: "Photo captured",
+            description: "Live photo has been captured successfully.",
+          });
+          
+          // Stop camera stream
+          stream.getTracks().forEach(track => track.stop());
+          
+          // Remove overlay
+          document.body.removeChild(overlay);
+        });
+
+        cancelButton.addEventListener('click', () => {
+          // Stop camera stream
+          stream.getTracks().forEach(track => track.stop());
+          
+          // Remove overlay
+          document.body.removeChild(overlay);
+        });
+
+        // Assemble the UI
+        buttonsContainer.appendChild(captureButton);
+        buttonsContainer.appendChild(cancelButton);
+        overlay.appendChild(title);
+        overlay.appendChild(video);
+        overlay.appendChild(buttonsContainer);
+        document.body.appendChild(overlay);
+      })
+      .catch((error) => {
+        console.error('Error accessing camera:', error);
+        toast({
+          title: "Camera access denied",
+          description: "Unable to access camera. Please check permissions.",
+          variant: "destructive",
+        });
+      });
+  };
   
   if (isLoading) {
     return (
@@ -138,16 +310,38 @@ export default function ProfilePage() {
           <div className="flex flex-col md:flex-row gap-8 mb-6">
             <div className="flex flex-col items-center">
               <Avatar className="h-24 w-24 mb-4">
-                <AvatarImage src={user?.avatar || ""} alt={user?.username} />
+                <AvatarImage src={form.watch('avatar') || user?.avatar || ""} alt={user?.username} />
                 <AvatarFallback className="text-lg">
                   <User className="h-12 w-12" />
                 </AvatarFallback>
               </Avatar>
-              <div className="text-center">
+              <div className="text-center mb-4">
                 <h3 className="font-medium text-lg">{user?.username}</h3>
                 <p className="text-sm text-muted-foreground">
                   Member since {new Date(user?.createdAt).toLocaleDateString()}
                 </p>
+              </div>
+              <div className="flex flex-col gap-2 w-full max-w-[200px]">
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleUploadPicture}
+                  className="flex items-center gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  Upload Picture
+                </Button>
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleTakeLivePhoto}
+                  className="flex items-center gap-2"
+                >
+                  <Camera className="h-4 w-4" />
+                  Take Live Photo
+                </Button>
               </div>
             </div>
             
