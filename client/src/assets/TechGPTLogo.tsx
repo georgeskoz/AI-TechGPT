@@ -18,12 +18,12 @@ export default function TechGPTLogo({ className, width = 200, height = 60 }: Tec
       {/* Main logo container with rounded rectangle */}
       <defs>
         <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#22c55e" />
-          <stop offset="100%" stopColor="#16a34a" />
+          <stop offset="0%" stopColor="#84cc16" />
+          <stop offset="100%" stopColor="#65a30d" />
         </linearGradient>
       </defs>
       
-      {/* Green rounded rectangle background */}
+      {/* Bright green rounded rectangle background matching original */}
       <rect
         x="5"
         y="10"
@@ -47,7 +47,7 @@ export default function TechGPTLogo({ className, width = 200, height = 60 }: Tec
         strokeWidth="2"
       />
       
-      {/* Small yellow/orange square accent */}
+      {/* Small yellow square accent matching original */}
       <rect
         x="28"
         y="25"
@@ -55,24 +55,24 @@ export default function TechGPTLogo({ className, width = 200, height = 60 }: Tec
         height="6"
         rx="1"
         ry="1"
-        fill="#fbbf24"
+        fill="#facc15"
       />
       
-      {/* TechGPT Text */}
-      <text x="55" y="37" fontFamily="Arial, sans-serif" fontSize="24" fontWeight="bold" fill="#fbbf24">
+      {/* TechGPT Text with matching colors */}
+      <text x="55" y="37" fontFamily="Arial, sans-serif" fontSize="24" fontWeight="bold" fill="#facc15">
         Tech
       </text>
-      <text x="108" y="37" fontFamily="Arial, sans-serif" fontSize="24" fontWeight="bold" fill="#22c55e">
+      <text x="108" y="37" fontFamily="Arial, sans-serif" fontSize="24" fontWeight="bold" fill="#84cc16">
         GPT
       </text>
       
       {/* Small tech icon in top right */}
       <g transform="translate(175, 15)">
-        <rect x="0" y="0" width="12" height="8" rx="1" fill="#22c55e" />
+        <rect x="0" y="0" width="12" height="8" rx="1" fill="#84cc16" />
         <rect x="2" y="2" width="8" height="1" fill="#fff" />
         <rect x="2" y="4" width="6" height="1" fill="#fff" />
         <rect x="2" y="6" width="4" height="1" fill="#fff" />
-        <circle cx="14" cy="4" r="2" fill="#22c55e" />
+        <circle cx="14" cy="4" r="2" fill="#84cc16" />
       </g>
     </svg>
   );
