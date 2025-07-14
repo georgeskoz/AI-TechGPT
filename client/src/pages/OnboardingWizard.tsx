@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import Navigation from "@/components/Navigation";
+import SimpleNavigation from "@/components/SimpleNavigation";
 import { 
   User, 
   Zap, 
@@ -206,7 +206,7 @@ export default function OnboardingWizard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <Navigation title="Getting Started" showHomeButton={false} />
+      <SimpleNavigation title="Getting Started" showBackButton={false} />
       
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Progress Header */}

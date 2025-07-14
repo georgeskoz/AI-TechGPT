@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import Navigation from "@/components/Navigation";
+import SimpleNavigation from "@/components/SimpleNavigation";
 import { 
   User, 
   Users,
@@ -250,7 +250,7 @@ export default function ClientDashboard() {
   if (!currentUser) {
     return (
       <div className="container mx-auto p-4 max-w-6xl">
-        <Navigation title="Client Dashboard" backTo="/customer-home" />
+        <SimpleNavigation title="Client Dashboard" backTo="/customer-home" />
         <div className="text-center py-12">
           <div className="max-w-2xl mx-auto">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Welcome to Your Dashboard</h1>
@@ -489,7 +489,7 @@ export default function ClientDashboard() {
 
   return (
     <div className="container mx-auto p-4 max-w-6xl">
-      <Navigation title="Client Dashboard" backTo="/customer-home" />
+      <SimpleNavigation title="Client Dashboard" backTo="/customer-home" />
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

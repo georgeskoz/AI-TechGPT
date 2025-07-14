@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Star, MapPin, Clock, Phone, CheckCircle, ArrowRight, ArrowLeft, Zap, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import Navigation from '@/components/Navigation';
+import SimpleNavigation from '@/components/SimpleNavigation';
 
 interface ServiceProvider {
   id: number;
@@ -230,7 +230,7 @@ export default function BookServicePage() {
   if (!categories) {
     return (
       <div className="container mx-auto p-4 max-w-4xl">
-        <Navigation title="Book Service" backTo="/customer-home" />
+        <SimpleNavigation title="Book Service" backTo="/customer-home" />
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -243,7 +243,7 @@ export default function BookServicePage() {
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
-      <Navigation title="Book Service" backTo="/customer-home" />
+      <SimpleNavigation title="Book Service" backTo="/customer-home" />
       
       {step === 'form' && (
         <Card>

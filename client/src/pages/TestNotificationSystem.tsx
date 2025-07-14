@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import TechnicianNotificationService from '@/components/TechnicianNotificationService';
-import Navigation from '@/components/Navigation';
+import SimpleNavigation from '@/components/SimpleNavigation';
 import { useLocation } from 'wouter';
 import { 
   MapPin, 
@@ -90,7 +90,7 @@ export default function TestNotificationSystem() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation title="Test Notification System" backTo="/technician-home" />
+      <SimpleNavigation title="Test Notification System" backTo="/technician-home" />
       
       <div className="container mx-auto px-4 py-8">
         {/* Notification Service Component */}

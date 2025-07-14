@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import Navigation from "@/components/Navigation";
+import SimpleNavigation from "@/components/SimpleNavigation";
 import { 
   DollarSign, 
   Clock, 
@@ -156,7 +156,7 @@ export default function TechnicianEarnings() {
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
-      <Navigation title="Earnings Dashboard" backTo="/technician-dashboard" />
+      <SimpleNavigation title="Earnings Dashboard" backTo="/technician-dashboard" />
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Earnings & Financial Dashboard</h1>
         <p className="text-gray-600">Track your income, manage payments, and prepare for taxes</p>

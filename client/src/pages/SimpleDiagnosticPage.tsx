@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import Navigation from "@/components/Navigation";
+import SimpleNavigation from "@/components/SimpleNavigation";
 import { 
   Monitor, 
   Wifi, 
@@ -192,7 +192,7 @@ export default function SimpleDiagnosticPage() {
   if (!selectedCategory) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <Navigation title="Quick Diagnostics" />
+        <SimpleNavigation title="Quick Diagnostics" />
         
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <div className="text-center mb-8">
@@ -274,7 +274,7 @@ export default function SimpleDiagnosticPage() {
     
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-        <Navigation title="Diagnostic Results" />
+        <SimpleNavigation title="Diagnostic Results" />
         
         <div className="container mx-auto px-4 py-8 max-w-3xl">
           <Card>
@@ -362,7 +362,7 @@ export default function SimpleDiagnosticPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <Navigation title={`Diagnostic: ${currentCategory?.title}`} />
+      <SimpleNavigation title={`Diagnostic: ${currentCategory?.title}`} />
       
       <div className="container mx-auto px-4 py-8 max-w-3xl">
         <div className="mb-6">

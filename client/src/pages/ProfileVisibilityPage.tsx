@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Navigation from "@/components/Navigation";
+import SimpleNavigation from "@/components/SimpleNavigation";
 import TechnicianProfileVisibility from "@/components/TechnicianProfileVisibility";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -281,7 +281,7 @@ export default function ProfileVisibilityPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation title="Profile Visibility" backTo="/technician-dashboard" />
+      <SimpleNavigation title="Profile Visibility" backTo="/technician-dashboard" />
       
       <div className="container mx-auto px-4 py-6">
         <div className="mb-6">

@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import Navigation from "@/components/Navigation";
+import SimpleNavigation from "@/components/SimpleNavigation";
 import { Plus, Edit, Trash2, Save, X, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -169,7 +169,7 @@ export default function AdminCategoryManagement() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
+      <SimpleNavigation />
       
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
