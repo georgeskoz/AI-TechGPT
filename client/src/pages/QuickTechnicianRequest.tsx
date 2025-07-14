@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import Navigation from "@/components/Navigation";
+import SimpleNavigation from "@/components/SimpleNavigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -870,7 +870,7 @@ export default function QuickServiceProviderRequest() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-8">
-      <Navigation 
+      <SimpleNavigation 
         title="Request Service Provider" 
         showBackButton={true}
         backTo="/"
