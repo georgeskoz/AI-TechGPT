@@ -42,7 +42,7 @@ export default function FloatingChatWidget({ username }: FloatingChatWidgetProps
 
   const handleQuickAction = (action: string) => {
     if (action === "🔧 Request Technician (Fast Track)") {
-      setLocation("/technician");
+      setLocation("/technician-request");
       setIsOpen(false);
     } else if (action === "Start Live Support Chat") {
       setLocation("/live-support");
