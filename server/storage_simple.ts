@@ -78,6 +78,12 @@ export interface IStorage {
   updateBusinessInfo(userId: number, businessInfo: any): Promise<User>;
   getBusinessInfo(userId: number): Promise<any>;
   
+  // Service Booking Management
+  createServiceBooking(booking: InsertServiceBooking): Promise<ServiceBooking>;
+  getServiceBooking(id: number): Promise<ServiceBooking | undefined>;
+  getServiceBookingsByCustomer(customerId: number): Promise<ServiceBooking[]>;
+  updateServiceBooking(id: number, updates: Partial<ServiceBooking>): Promise<ServiceBooking>;
+  
   // Cross-Role Integration Methods
   getUserByEmail(email: string): Promise<User | undefined>;
   updateUserLastLogin(userId: number): Promise<void>;
@@ -976,6 +982,43 @@ export class MemoryStorage implements IStorage {
     
     this.supportTickets.set(newTicket.id, newTicket);
     return newTicket;
+  }
+
+  // Service Booking Management Methods
+  async createServiceBooking(booking: InsertServiceBooking): Promise<ServiceBooking> {
+    const newBooking: ServiceBooking = {
+      id: this.nextServiceBookingId++,
+      ...booking,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    this.serviceBookings.set(newBooking.id, newBooking);
+    return newBooking;
+  }
+
+  async getServiceBooking(id: number): Promise<ServiceBooking | undefined> {
+    return this.serviceBookings.get(id);
+  }
+
+  async getServiceBookingsByCustomer(customerId: number): Promise<ServiceBooking[]> {
+    return Array.from(this.serviceBookings.values()).filter(booking => booking.customerId === customerId);
+  }
+
+  async updateServiceBooking(id: number, updates: Partial<ServiceBooking>): Promise<ServiceBooking> {
+    const booking = this.serviceBookings.get(id);
+    if (!booking) {
+      throw new Error(`Service booking with id ${id} not found`);
+    }
+    
+    const updatedBooking = {
+      ...booking,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.serviceBookings.set(id, updatedBooking);
+    return updatedBooking;
   }
 }
 

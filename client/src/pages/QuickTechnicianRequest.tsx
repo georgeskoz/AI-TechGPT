@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import type { User } from "@shared/schema";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { 
   Wrench, 
   Wifi, 
@@ -138,16 +139,8 @@ export default function QuickServiceProviderRequest() {
   const [paymentMethodDetails, setPaymentMethodDetails] = useState<any>(null);
   const [isPaymentSetupComplete, setIsPaymentSetupComplete] = useState(false);
 
-  // Get username from localStorage
-  const username = localStorage.getItem('username');
-  
-  // Fetch user profile data
-  const { data: user, isLoading: isUserLoading, error: userError } = useQuery({
-    queryKey: [`/api/users/${username}`],
-    enabled: !!username,
-    retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+  // Get current user from unified hook
+  const { user, isLoading: isUserLoading, hasUser } = useCurrentUser();
 
   // Auto-detect location
   useEffect(() => {
