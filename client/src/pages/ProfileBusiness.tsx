@@ -101,8 +101,28 @@ export default function ProfileBusiness() {
     navigate(`/profile/${cleanUsername}/address`);
   };
 
-  const handleNext = () => {
-    navigate(`/profile/${cleanUsername}/payment`);
+  const handleNext = async () => {
+    // Validate the form first
+    const isValid = await form.trigger();
+    if (!isValid) {
+      toast({
+        title: "Validation Error",
+        description: "Please correct the errors in the form before proceeding.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Save the data to database before navigating
+    const values = form.getValues();
+    try {
+      await updateProfileMutation.mutateAsync(values);
+      // Navigate only after successful save
+      navigate(`/profile/${cleanUsername}/payment`);
+    } catch (error) {
+      // Error toast is already handled in the mutation
+      console.error('Failed to save business data:', error);
+    }
   };
 
   const handleSave = () => {

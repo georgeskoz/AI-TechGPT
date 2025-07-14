@@ -142,8 +142,28 @@ export default function ProfileAddress() {
     navigate(`/profile/${cleanUsername}/personal`);
   };
 
-  const handleNext = () => {
-    navigate(`/profile/${cleanUsername}/business`);
+  const handleNext = async () => {
+    // Validate the form first
+    const isValid = await form.trigger();
+    if (!isValid) {
+      toast({
+        title: "Validation Error",
+        description: "Please correct the errors in the form before proceeding.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Save the data to database before navigating
+    const values = form.getValues();
+    try {
+      await updateProfileMutation.mutateAsync(values);
+      // Navigate only after successful save
+      navigate(`/profile/${cleanUsername}/business`);
+    } catch (error) {
+      // Error toast is already handled in the mutation
+      console.error('Failed to save address data:', error);
+    }
   };
 
   const handleSave = () => {
