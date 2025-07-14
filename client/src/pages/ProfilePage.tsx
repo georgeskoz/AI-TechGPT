@@ -53,8 +53,14 @@ export default function ProfilePage() {
   // Update form values when user data is loaded
   useEffect(() => {
     if (user) {
-      // Check localStorage for profile picture if user avatar is empty
-      const localStorageAvatar = localStorage.getItem(`techgpt_profile_picture_${username}`);
+      // Check localStorage for profile picture if user avatar is empty, with error handling
+      let localStorageAvatar = "";
+      try {
+        localStorageAvatar = localStorage.getItem(`techgpt_profile_picture_${username}`) || "";
+      } catch (error) {
+        console.warn('localStorage access error:', error);
+      }
+      
       const avatarValue = user.avatar || localStorageAvatar || "";
       
       form.reset({
@@ -131,19 +137,57 @@ export default function ProfilePage() {
         const reader = new FileReader();
         reader.onload = (e) => {
           const imageDataUrl = e.target?.result as string;
-          // Update the avatar field in the form
-          form.setValue('avatar', imageDataUrl);
-          // Store the image in localStorage as backup
-          localStorage.setItem(`techgpt_profile_picture_${username}`, imageDataUrl);
           
-          // Automatically save the profile with the new avatar
-          const currentFormData = form.getValues();
-          updateProfileMutation.mutate(currentFormData);
+          // Compress the image to reduce size
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          const img = new Image();
           
-          toast({
-            title: "Picture uploaded",
-            description: "Profile picture has been uploaded and saved successfully.",
-          });
+          img.onload = () => {
+            // Resize to max 200x200 for profile pictures
+            const maxSize = 200;
+            let { width, height } = img;
+            
+            if (width > height) {
+              if (width > maxSize) {
+                height = height * (maxSize / width);
+                width = maxSize;
+              }
+            } else {
+              if (height > maxSize) {
+                width = width * (maxSize / height);
+                height = maxSize;
+              }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            ctx?.drawImage(img, 0, 0, width, height);
+            
+            // Convert to compressed format
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+            
+            // Update the avatar field in the form
+            form.setValue('avatar', compressedDataUrl);
+            
+            // Try to store in localStorage with error handling
+            try {
+              localStorage.setItem(`techgpt_profile_picture_${username}`, compressedDataUrl);
+            } catch (storageError) {
+              console.warn('localStorage quota exceeded, skipping local storage');
+            }
+            
+            // Automatically save the profile with the new avatar
+            const currentFormData = form.getValues();
+            updateProfileMutation.mutate(currentFormData);
+            
+            toast({
+              title: "Picture uploaded",
+              description: "Profile picture has been uploaded and saved successfully.",
+            });
+          };
+          
+          img.src = imageDataUrl;
         };
         reader.readAsDataURL(file);
       }
@@ -247,17 +291,38 @@ export default function ProfilePage() {
 
         // Add event listeners
         captureButton.addEventListener('click', () => {
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          ctx?.drawImage(video, 0, 0);
+          // Resize to max 200x200 for profile pictures
+          const maxSize = 200;
+          let { videoWidth: width, videoHeight: height } = video;
           
-          // Convert to data URL
-          const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          if (width > height) {
+            if (width > maxSize) {
+              height = height * (maxSize / width);
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = width * (maxSize / height);
+              height = maxSize;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          ctx?.drawImage(video, 0, 0, width, height);
+          
+          // Convert to compressed data URL
+          const imageDataUrl = canvas.toDataURL('image/jpeg', 0.7);
           
           // Update the avatar field in the form
           form.setValue('avatar', imageDataUrl);
-          // Store the image in localStorage as backup
-          localStorage.setItem(`techgpt_profile_picture_${username}`, imageDataUrl);
+          
+          // Try to store in localStorage with error handling
+          try {
+            localStorage.setItem(`techgpt_profile_picture_${username}`, imageDataUrl);
+          } catch (storageError) {
+            console.warn('localStorage quota exceeded, skipping local storage');
+          }
           
           // Automatically save the profile with the new avatar
           const currentFormData = form.getValues();
@@ -331,7 +396,13 @@ export default function ProfilePage() {
             <div className="flex flex-col items-center">
               <Avatar className="h-24 w-24 mb-4">
                 <AvatarImage 
-                  src={form.watch('avatar') || user?.avatar || localStorage.getItem(`techgpt_profile_picture_${username}`) || ""} 
+                  src={form.watch('avatar') || user?.avatar || (() => {
+                    try {
+                      return localStorage.getItem(`techgpt_profile_picture_${username}`) || "";
+                    } catch (error) {
+                      return "";
+                    }
+                  })()} 
                   alt={user?.username} 
                 />
                 <AvatarFallback className="text-lg">
