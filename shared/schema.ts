@@ -15,7 +15,8 @@ export const users = pgTable("users", {
   
   // Customer contact information
   phone: text("phone"),
-  address: text("address"),
+  street: text("street"),
+  apartment: text("apartment"),
   city: text("city"),
   state: text("state"),
   zipCode: text("zip_code"),
@@ -973,6 +974,13 @@ export const insertUserSchema = createInsertSchema(users).pick({
   bio: true,
   avatar: true,
   userType: true,
+  phone: true,
+  street: true,
+  apartment: true,
+  city: true,
+  state: true,
+  zipCode: true,
+  country: true,
 });
 
 export const updateProfileSchema = createInsertSchema(users).pick({
@@ -980,6 +988,13 @@ export const updateProfileSchema = createInsertSchema(users).pick({
   fullName: true,
   bio: true,
   avatar: true,
+  phone: true,
+  street: true,
+  apartment: true,
+  city: true,
+  state: true,
+  zipCode: true,
+  country: true,
   paymentMethod: true,
   paymentMethodSetup: true,
   paymentDetails: true,

@@ -22,6 +22,13 @@ const profileFormSchema = z.object({
   fullName: z.string().max(100, { message: "Full name must be less than 100 characters" }).optional().or(z.literal("")),
   bio: z.string().max(500, { message: "Bio must be less than 500 characters" }).optional().or(z.literal("")),
   avatar: z.string().optional().or(z.literal("")),
+  phone: z.string().max(20, { message: "Phone number must be less than 20 characters" }).optional().or(z.literal("")),
+  street: z.string().max(100, { message: "Street address must be less than 100 characters" }).optional().or(z.literal("")),
+  apartment: z.string().max(20, { message: "Apartment number must be less than 20 characters" }).optional().or(z.literal("")),
+  city: z.string().max(50, { message: "City must be less than 50 characters" }).optional().or(z.literal("")),
+  state: z.string().max(50, { message: "State/Province must be less than 50 characters" }).optional().or(z.literal("")),
+  zipCode: z.string().max(20, { message: "Zip/Postal code must be less than 20 characters" }).optional().or(z.literal("")),
+  country: z.string().max(50, { message: "Country must be less than 50 characters" }).optional().or(z.literal("")),
 });
 
 export default function ProfilePage() {
@@ -47,6 +54,13 @@ export default function ProfilePage() {
       fullName: "",
       bio: "",
       avatar: "",
+      phone: "",
+      street: "",
+      apartment: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      country: "Canada",
     },
   });
   
@@ -68,6 +82,13 @@ export default function ProfilePage() {
         fullName: user.fullName || "",
         bio: user.bio || "",
         avatar: avatarValue,
+        phone: user.phone || "",
+        street: user.street || "",
+        apartment: user.apartment || "",
+        city: user.city || "",
+        state: user.state || "",
+        zipCode: user.zipCode || "",
+        country: user.country || "Canada",
       });
     }
   }, [user, form.reset, username]);
@@ -518,6 +539,111 @@ export default function ProfilePage() {
                       </FormItem>
                     )}
                   />
+                  
+                  {/* Address Information Section */}
+                  <div className="space-y-6 border-t pt-6">
+                    <h3 className="text-lg font-semibold">Address Information</h3>
+                    
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter your phone number" value={field.value || ""} onChange={field.onChange} name={field.name} ref={field.ref} onBlur={field.onBlur} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="country"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Country</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter your country" value={field.value || ""} onChange={field.onChange} name={field.name} ref={field.ref} onBlur={field.onBlur} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="state"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>State/Province</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter your state or province" value={field.value || ""} onChange={field.onChange} name={field.name} ref={field.ref} onBlur={field.onBlur} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>City/Region</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter your city or region" value={field.value || ""} onChange={field.onChange} name={field.name} ref={field.ref} onBlur={field.onBlur} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="street"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Street Address</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter your street address" value={field.value || ""} onChange={field.onChange} name={field.name} ref={field.ref} onBlur={field.onBlur} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="apartment"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Apartment/Unit</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Apt, Unit, etc." value={field.value || ""} onChange={field.onChange} name={field.name} ref={field.ref} onBlur={field.onBlur} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="zipCode"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Zip/Postal Code</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter postal code" value={field.value || ""} onChange={field.onChange} name={field.name} ref={field.ref} onBlur={field.onBlur} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
                   
                   <Button 
                     type="submit" 
