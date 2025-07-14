@@ -31,6 +31,9 @@ export default function ProfileAddress() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   
+  // Clean username parameter to handle URL encoding issues
+  const cleanUsername = username?.replace(/^"(.*)"$/, '$1') || username;
+  
   // State for dynamic location selection
   const [selectedCountry, setSelectedCountry] = useState("CA");
   const [selectedProvince, setSelectedProvince] = useState("");
@@ -39,9 +42,9 @@ export default function ProfileAddress() {
   const [showCustomCity, setShowCustomCity] = useState(false);
   
   const { data: user, isLoading } = useQuery({
-    queryKey: ["/api/users", username],
+    queryKey: ["/api/users", cleanUsername],
     queryFn: async () => {
-      const res = await fetch(`/api/users/${username}`);
+      const res = await fetch(`/api/users/${encodeURIComponent(cleanUsername)}`);
       if (!res.ok) {
         throw new Error("Failed to fetch user data");
       }
@@ -116,18 +119,15 @@ export default function ProfileAddress() {
   
   const updateProfileMutation = useMutation({
     mutationFn: async (values: z.infer<typeof addressSchema>) => {
-      const response = await apiRequest(`/api/users/${username}/profile`, {
-        method: "PUT",
-        body: values,
-      });
-      return response;
+      const response = await apiRequest("PUT", `/api/users/${cleanUsername}/profile`, values);
+      return response.json();
     },
     onSuccess: () => {
       toast({
         title: "Success",
         description: "Address information updated successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/users", username] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users", cleanUsername] });
     },
     onError: (error: any) => {
       toast({
@@ -139,11 +139,11 @@ export default function ProfileAddress() {
   });
 
   const handlePrevious = () => {
-    navigate(`/profile/${username}/personal`);
+    navigate(`/profile/${cleanUsername}/personal`);
   };
 
   const handleNext = () => {
-    navigate(`/profile/${username}/business`);
+    navigate(`/profile/${cleanUsername}/business`);
   };
 
   const handleSave = () => {

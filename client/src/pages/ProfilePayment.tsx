@@ -33,10 +33,13 @@ export default function ProfilePayment() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   
+  // Clean username parameter to handle URL encoding issues
+  const cleanUsername = username?.replace(/^"(.*)"$/, '$1') || username;
+  
   const { data: user, isLoading } = useQuery({
-    queryKey: ["/api/users", username],
+    queryKey: ["/api/users", cleanUsername],
     queryFn: async () => {
-      const res = await fetch(`/api/users/${username}`);
+      const res = await fetch(`/api/users/${encodeURIComponent(cleanUsername)}`);
       if (!res.ok) {
         throw new Error("Failed to fetch user data");
       }
@@ -79,18 +82,15 @@ export default function ProfilePayment() {
   
   const updateProfileMutation = useMutation({
     mutationFn: async (values: z.infer<typeof paymentSchema>) => {
-      const response = await apiRequest(`/api/users/${username}/profile`, {
-        method: "PUT",
-        body: values,
-      });
-      return response;
+      const response = await apiRequest("PUT", `/api/users/${cleanUsername}/profile`, values);
+      return response.json();
     },
     onSuccess: () => {
       toast({
         title: "Success",
         description: "Payment information updated successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/users", username] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users", cleanUsername] });
     },
     onError: (error: any) => {
       toast({
@@ -102,14 +102,14 @@ export default function ProfilePayment() {
   });
 
   const handlePrevious = () => {
-    navigate(`/profile/${username}/business`);
+    navigate(`/profile/${cleanUsername}/business`);
   };
 
   const handleFinish = () => {
     const values = form.getValues();
     updateProfileMutation.mutate(values);
     // Navigate back to main profile or dashboard
-    navigate(`/profile/${username}`);
+    navigate(`/profile/${cleanUsername}`);
   };
 
   const handleSave = () => {
