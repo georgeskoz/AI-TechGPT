@@ -18,7 +18,7 @@ export default function QuickTechnicianButton() {
           </div>
         </div>
         <Button
-          onClick={() => setLocation("/technician")}
+          onClick={() => setLocation("/technician-request")}
           className="bg-white text-blue-600 hover:bg-blue-50"
         >
           <Zap className="w-4 h-4 mr-2" />
