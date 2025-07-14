@@ -75,6 +75,7 @@ function Router() {
       <Route path="/phone-support" component={PhoneSupportPage} />
       <Route path="/screen-sharing" component={ScreenSharingPage} />
       <Route path="/technician-request" component={QuickServiceProviderRequest} />
+      <Route path="/marketplace" component={() => <MarketplacePage username={getStoredUsername()} />} />
       <Route path="/feature-discovery" component={FeatureDiscoveryPage} />
       
       {/* Service Provider Portal */}
