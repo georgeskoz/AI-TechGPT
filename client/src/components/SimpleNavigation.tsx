@@ -58,8 +58,19 @@ export default function SimpleNavigation({
             )}
           </div>
 
-          {/* Right side - Quick Access and Home button */}
+          {/* Right side - Home button and Quick Access */}
           <div className="flex items-center gap-2">
+            {/* Home Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setLocation("/")}
+              className="flex items-center gap-2"
+            >
+              <Home className="h-4 w-4" />
+              Home
+            </Button>
+
             {/* Quick Access Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -90,17 +101,6 @@ export default function SimpleNavigation({
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-
-            {/* Home Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setLocation("/")}
-              className="flex items-center gap-2"
-            >
-              <Home className="h-4 w-4" />
-              Home
-            </Button>
           </div>
         </div>
       </div>
