@@ -564,4 +564,7 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
-Navigation preferences: TechGPT logo and Home button should navigate to chat page (/chat) instead of main page (/). Added dedicated Chat button beside Home button for easy access to chat page from all pages.
+Navigation preferences: 
+- Chat page (/chat) should be the default home page route (/)
+- TechGPT logo and Home button should navigate to chat page (/chat) instead of main page
+- Added dedicated Chat button beside Home button for easy access to chat page from all pages
