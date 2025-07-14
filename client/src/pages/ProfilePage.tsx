@@ -53,22 +53,33 @@ export default function ProfilePage() {
   // Update form values when user data is loaded
   useEffect(() => {
     if (user) {
+      // Check localStorage for profile picture if user avatar is empty
+      const localStorageAvatar = localStorage.getItem(`techgpt_profile_picture_${username}`);
+      const avatarValue = user.avatar || localStorageAvatar || "";
+      
       form.reset({
         email: user.email || "",
         fullName: user.fullName || "",
         bio: user.bio || "",
-        avatar: user.avatar || "",
+        avatar: avatarValue,
       });
     }
-  }, [user, form.reset]);
+  }, [user, form.reset, username]);
   
   const updateProfileMutation = useMutation({
     mutationFn: async (values: UpdateProfile) => {
-      // Filter out any null values and empty strings
+      // Only include non-empty values, but preserve avatar if it contains data
       const sanitizedValues = Object.fromEntries(
         Object.entries(values)
-          .filter(([_, v]) => v !== null && v !== undefined)
-          .map(([k, v]) => [k, v === null ? "" : v])
+          .filter(([k, v]) => {
+            // Always include avatar if it has content (like base64 data)
+            if (k === 'avatar' && v && v.length > 0) {
+              return true;
+            }
+            // For other fields, exclude null, undefined, or empty strings
+            return v !== null && v !== undefined && v !== "";
+          })
+          .map(([k, v]) => [k, v])
       ) as UpdateProfile;
       
       try {
@@ -124,9 +135,14 @@ export default function ProfilePage() {
           form.setValue('avatar', imageDataUrl);
           // Store the image in localStorage as backup
           localStorage.setItem(`techgpt_profile_picture_${username}`, imageDataUrl);
+          
+          // Automatically save the profile with the new avatar
+          const currentFormData = form.getValues();
+          updateProfileMutation.mutate(currentFormData);
+          
           toast({
             title: "Picture uploaded",
-            description: "Profile picture has been uploaded successfully.",
+            description: "Profile picture has been uploaded and saved successfully.",
           });
         };
         reader.readAsDataURL(file);
@@ -243,9 +259,13 @@ export default function ProfilePage() {
           // Store the image in localStorage as backup
           localStorage.setItem(`techgpt_profile_picture_${username}`, imageDataUrl);
           
+          // Automatically save the profile with the new avatar
+          const currentFormData = form.getValues();
+          updateProfileMutation.mutate(currentFormData);
+          
           toast({
             title: "Photo captured",
-            description: "Live photo has been captured successfully.",
+            description: "Live photo has been captured and saved successfully.",
           });
           
           // Stop camera stream
@@ -310,7 +330,10 @@ export default function ProfilePage() {
           <div className="flex flex-col md:flex-row gap-8 mb-6">
             <div className="flex flex-col items-center">
               <Avatar className="h-24 w-24 mb-4">
-                <AvatarImage src={form.watch('avatar') || user?.avatar || ""} alt={user?.username} />
+                <AvatarImage 
+                  src={form.watch('avatar') || user?.avatar || localStorage.getItem(`techgpt_profile_picture_${username}`) || ""} 
+                  alt={user?.username} 
+                />
                 <AvatarFallback className="text-lg">
                   <User className="h-12 w-12" />
                 </AvatarFallback>
