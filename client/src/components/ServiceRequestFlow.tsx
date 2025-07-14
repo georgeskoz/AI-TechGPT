@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,7 @@ import {
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import TechnicianSearch from "./TechnicianSearch";
-import type { Technician } from "@shared/schema";
+import type { Technician, User as UserType } from "@shared/schema";
 
 interface ServiceRequestFlowProps {
   category: string;
@@ -67,6 +67,25 @@ export default function ServiceRequestFlow({
     location: "",
     budget: 0
   });
+
+  // Get username from localStorage
+  const username = localStorage.getItem('username');
+  
+  // Fetch user profile data
+  const { data: user, isLoading: isUserLoading } = useQuery({
+    queryKey: [`/api/users/${username}`],
+    enabled: !!username,
+    retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Auto-fill location from user profile
+  useEffect(() => {
+    if (user && user.street && user.city && user.state) {
+      const fullAddress = `${user.street}${user.apartment ? ', ' + user.apartment : ''}, ${user.city}, ${user.state}`;
+      setRequestData(prev => ({ ...prev, location: fullAddress }));
+    }
+  }, [user]);
 
   const createRequestMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -171,6 +190,11 @@ export default function ServiceRequestFlow({
           <CardDescription>
             {category} → {subcategory}
           </CardDescription>
+          {user?.fullName && (
+            <p className="text-sm text-blue-600 mt-2">
+              Welcome, {user.fullName}
+            </p>
+          )}
           <div className="mt-4">
             <div className="flex justify-between text-sm text-gray-600 mb-2">
               {STEPS.map((step, index) => (
@@ -279,7 +303,12 @@ export default function ServiceRequestFlow({
                     onChange={(e) => setRequestData(prev => ({ ...prev, location: e.target.value }))}
                     placeholder="Address or general location"
                     required
+                    readOnly={!!(user?.street && user?.city && user?.state)}
+                    disabled={!!(user?.street && user?.city && user?.state)}
                   />
+                  {user?.street && user?.city && user?.state && (
+                    <p className="text-xs text-gray-500 mt-1">Auto-filled from your profile</p>
+                  )}
                 </div>
               )}
             </div>
