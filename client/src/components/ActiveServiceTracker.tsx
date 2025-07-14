@@ -274,8 +274,8 @@ Thank you for using TechGPT!
               size="sm"
               className="flex items-center gap-1"
               onClick={() => {
-                // In real app, open chat with technician
-                console.log("Opening chat with technician");
+                // Navigate to service provider chat
+                window.location.href = '/service-provider-chat';
               }}
             >
               <MessageCircle className="w-4 h-4" />
