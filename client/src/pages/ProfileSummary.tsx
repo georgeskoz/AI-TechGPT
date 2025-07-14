@@ -103,15 +103,20 @@ export default function ProfileSummary() {
   // Clean username parameter
   const cleanUsername = username?.replace(/^"(.*)"$/, '$1') || username;
   
-  const { data: user, isLoading } = useQuery({
+  const { data: user, isLoading, error } = useQuery({
     queryKey: ["/api/users", cleanUsername],
     queryFn: async () => {
       const res = await fetch(`/api/users/${encodeURIComponent(cleanUsername)}`);
       if (!res.ok) {
+        if (res.status === 404) {
+          return null; // User doesn't exist
+        }
         throw new Error("Failed to fetch user data");
       }
       return res.json();
     },
+    retry: false, // Don't retry on 404 errors
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Personal Info Form
@@ -304,6 +309,24 @@ export default function ProfileSummary() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin h-8 w-8 border-t-2 border-blue-500 border-solid rounded-full"></div>
+      </div>
+    );
+  }
+
+  // If user doesn't exist, redirect to profile creation
+  if (!user) {
+    navigate(`/profile/${cleanUsername}/personal`);
+    return null;
+  }
+
+  // If there's an error, show error message
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-red-600 mb-2">Error Loading Profile</h2>
+          <p className="text-gray-600">{error.message}</p>
+        </div>
       </div>
     );
   }
