@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import TechGPTLogo from '@/assets/TechGPTLogo';
 
 interface TechGPTHeaderProps {
   username: string;
@@ -41,13 +42,10 @@ export default function TechGPTHeader({ username }: TechGPTHeaderProps) {
         <div className="flex items-center space-x-2">
           <button 
             onClick={handleLogoClick}
-            className="flex items-center space-x-2 focus:outline-none hover:opacity-80"
+            className="focus:outline-none hover:opacity-80"
             title="Go to Home"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
-            </svg>
-            <h1 className="text-xl font-bold text-gray-800">TechGPT</h1>
+            <TechGPTLogo width={120} height={36} />
           </button>
         </div>
         <div className="flex items-center space-x-4">
