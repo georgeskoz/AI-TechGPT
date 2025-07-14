@@ -11,8 +11,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SimpleNavigation from "@/components/SimpleNavigation";
 import { ArrowRight, ArrowLeft, Save, MapPin } from "lucide-react";
+import { countries, getProvincesByCountry, getCitiesByProvince } from "@/data/locations";
 
 const addressSchema = z.object({
   phone: z.string().max(20, { message: "Phone number must be less than 20 characters" }).optional().or(z.literal("")),
@@ -28,6 +30,13 @@ export default function ProfileAddress() {
   const { username } = useParams();
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  
+  // State for dynamic location selection
+  const [selectedCountry, setSelectedCountry] = useState("CA");
+  const [selectedProvince, setSelectedProvince] = useState("");
+  const [availableProvinces, setAvailableProvinces] = useState(getProvincesByCountry("CA"));
+  const [availableCities, setAvailableCities] = useState<any[]>([]);
+  const [showCustomCity, setShowCustomCity] = useState(false);
   
   const { data: user, isLoading } = useQuery({
     queryKey: ["/api/users", username],
@@ -53,9 +62,46 @@ export default function ProfileAddress() {
     },
   });
   
+  // Update provinces when country changes
+  useEffect(() => {
+    const provinces = getProvincesByCountry(selectedCountry);
+    setAvailableProvinces(provinces);
+    setSelectedProvince("");
+    setAvailableCities([]);
+    form.setValue("state", "");
+    form.setValue("city", "");
+  }, [selectedCountry, form]);
+  
+  // Update cities when province changes
+  useEffect(() => {
+    if (selectedProvince) {
+      const cities = getCitiesByProvince(selectedProvince, selectedCountry);
+      setAvailableCities(cities);
+      form.setValue("city", "");
+    }
+  }, [selectedProvince, selectedCountry, form]);
+  
   // Update form values when user data is loaded
   useEffect(() => {
     if (user) {
+      const userCountry = user.country || "Canada";
+      const userCountryCode = userCountry === "Canada" ? "CA" : userCountry === "United States" ? "US" : "CA";
+      
+      setSelectedCountry(userCountryCode);
+      
+      // Set province if available
+      if (user.state) {
+        const provinces = getProvincesByCountry(userCountryCode);
+        const matchedProvince = provinces.find(p => p.name === user.state);
+        if (matchedProvince) {
+          setSelectedProvince(matchedProvince.code);
+          
+          // Set available cities for the selected province
+          const cities = getCitiesByProvince(matchedProvince.code, userCountryCode);
+          setAvailableCities(cities);
+        }
+      }
+      
       form.reset({
         phone: user.phone || "",
         street: user.street || "",
@@ -63,7 +109,7 @@ export default function ProfileAddress() {
         city: user.city || "",
         state: user.state || "",
         zipCode: user.zipCode || "",
-        country: user.country || "Canada",
+        country: userCountry,
       });
     }
   }, [user, form.reset]);
@@ -152,9 +198,27 @@ export default function ProfileAddress() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Country</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter your country" value={field.value || ""} onChange={field.onChange} name={field.name} ref={field.ref} onBlur={field.onBlur} />
-                      </FormControl>
+                      <Select
+                        value={selectedCountry}
+                        onValueChange={(value) => {
+                          setSelectedCountry(value);
+                          const countryName = countries.find(c => c.code === value)?.name || "";
+                          field.onChange(countryName);
+                        }}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select country" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {countries.map((country) => (
+                            <SelectItem key={country.code} value={country.code}>
+                              {country.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -165,10 +229,31 @@ export default function ProfileAddress() {
                   name="state"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>State/Province</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter your state or province" value={field.value || ""} onChange={field.onChange} name={field.name} ref={field.ref} onBlur={field.onBlur} />
-                      </FormControl>
+                      <FormLabel>
+                        {selectedCountry === "CA" ? "Province" : "State"}
+                      </FormLabel>
+                      <Select
+                        value={selectedProvince}
+                        onValueChange={(value) => {
+                          setSelectedProvince(value);
+                          const provinceName = availableProvinces.find(p => p.code === value)?.name || "";
+                          field.onChange(provinceName);
+                        }}
+                        disabled={!selectedCountry}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={`Select ${selectedCountry === "CA" ? "province" : "state"}`} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {availableProvinces.map((province) => (
+                            <SelectItem key={province.code} value={province.code}>
+                              {province.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -180,9 +265,66 @@ export default function ProfileAddress() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>City/Region</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter your city or region" value={field.value || ""} onChange={field.onChange} name={field.name} ref={field.ref} onBlur={field.onBlur} />
-                      </FormControl>
+                      {showCustomCity ? (
+                        <div className="space-y-2">
+                          <FormControl>
+                            <Input 
+                              placeholder="Enter your city/region" 
+                              value={field.value || ""} 
+                              onChange={field.onChange}
+                            />
+                          </FormControl>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              setShowCustomCity(false);
+                              field.onChange("");
+                            }}
+                          >
+                            Choose from list
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <Select
+                            value={field.value || ""}
+                            onValueChange={(value) => {
+                              if (value === "other") {
+                                setShowCustomCity(true);
+                                field.onChange("");
+                              } else {
+                                field.onChange(value);
+                              }
+                            }}
+                            disabled={!selectedProvince}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select city/region" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {availableCities.map((city) => (
+                                <SelectItem key={city.name} value={city.name}>
+                                  {city.name}
+                                </SelectItem>
+                              ))}
+                              {availableCities.length > 0 && (
+                                <SelectItem value="other">
+                                  Other (Type manually)
+                                </SelectItem>
+                              )}
+                            </SelectContent>
+                          </Select>
+                          {!selectedProvince && (
+                            <p className="text-sm text-gray-500">
+                              Please select a {selectedCountry === "CA" ? "province" : "state"} first
+                            </p>
+                          )}
+                        </div>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
