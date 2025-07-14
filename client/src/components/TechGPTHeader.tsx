@@ -1,5 +1,5 @@
 import { useLocation } from 'wouter';
-import { Settings, User, List, Tag } from 'lucide-react';
+import { Settings, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   DropdownMenu,
@@ -21,6 +21,18 @@ export default function TechGPTHeader({ username }: TechGPTHeaderProps) {
   
   const handleLogoClick = () => {
     navigate('/');
+  };
+
+  const handleLogout = () => {
+    // Clear username from localStorage
+    localStorage.removeItem('techgpt_username');
+    // Clear any other user-specific data
+    localStorage.removeItem('serviceAnnouncementShown');
+    localStorage.removeItem('activeServiceBooking');
+    // Navigate to home page
+    navigate('/');
+    // Reload the page to reset the app state
+    window.location.reload();
   };
 
   return (
@@ -62,13 +74,13 @@ export default function TechGPTHeader({ username }: TechGPTHeaderProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigate('/issues')} className="cursor-pointer">
-                <List className="h-4 w-4 mr-2" />
-                <span>Issue Tracker</span>
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={handleProfileClick} className="cursor-pointer">
                 <User className="h-4 w-4 mr-2" />
                 <span>Edit Profile</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50">
+                <LogOut className="h-4 w-4 mr-2" />
+                <span>Logout</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
