@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SimpleNavigation from "@/components/SimpleNavigation";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { 
   User, 
   Users,
@@ -33,7 +34,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function ClientDashboard() {
   const [, setLocation] = useLocation();
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const { user: currentUser, isLoading: isUserLoading } = useCurrentUser();
   const [serviceRequests, setServiceRequests] = useState<any[]>([]);
   const [jobs, setJobs] = useState<any[]>([]);
   const [serviceBookings, setServiceBookings] = useState<any[]>([]);
@@ -47,26 +48,10 @@ export default function ClientDashboard() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Load user from localStorage or use demo user
-    const userStr = localStorage.getItem('tech_user');
-    let user;
-    
-    if (userStr) {
-      user = JSON.parse(userStr);
-    } else {
-      // Create demo user for testing
-      user = {
-        id: 1,
-        username: "demo_user",
-        email: "demo@example.com",
-        fullName: "Demo User",
-        userType: "customer"
-      };
+    if (currentUser?.id) {
+      loadUserData(currentUser.id);
     }
-    
-    setCurrentUser(user);
-    loadUserData(user.id);
-  }, []);
+  }, [currentUser]);
 
   const loadUserData = async (userId: number) => {
     setIsLoading(true);
