@@ -238,8 +238,21 @@ export default function ProfileReview() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div>
-                    <span className="text-sm font-medium text-gray-700">Payment Method:</span>
-                    <p className="text-sm">{user?.paymentMethod || 'Not provided'}</p>
+                    <span className="text-sm font-medium text-gray-700">Payment Methods:</span>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {user?.paymentMethods && user.paymentMethods.length > 0 ? (
+                        user.paymentMethods.map((method) => (
+                          <Badge key={method} variant="outline" className="text-xs">
+                            {method === 'credit_card' ? 'Credit Card' :
+                             method === 'paypal' ? 'PayPal' :
+                             method === 'apple_pay' ? 'Apple Pay' :
+                             method === 'google_pay' ? 'Google Pay' : method}
+                          </Badge>
+                        ))
+                      ) : (
+                        <p className="text-sm text-gray-500">No payment methods configured</p>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <span className="text-sm font-medium text-gray-700">Setup Status:</span>

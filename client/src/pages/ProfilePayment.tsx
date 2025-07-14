@@ -17,7 +17,7 @@ import SimpleNavigation from "@/components/SimpleNavigation";
 import { ArrowLeft, ArrowRight, Save, CreditCard, Shield } from "lucide-react";
 
 const paymentSchema = z.object({
-  paymentMethod: z.string().optional(),
+  paymentMethods: z.array(z.string()).optional(),
   paymentMethodSetup: z.boolean().optional(),
   paymentDetails: z.object({
     cardLast4: z.string().max(4, { message: "Last 4 digits only" }).optional().or(z.literal("")),
@@ -50,7 +50,7 @@ export default function ProfilePayment() {
   const form = useForm<z.infer<typeof paymentSchema>>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
-      paymentMethod: "",
+      paymentMethods: [],
       paymentMethodSetup: false,
       paymentDetails: {
         cardLast4: "",
@@ -66,8 +66,10 @@ export default function ProfilePayment() {
   useEffect(() => {
     if (user) {
       const paymentDetails = user.paymentDetails || {};
+      // Convert single payment method to array if needed
+      const paymentMethods = user.paymentMethods || (user.paymentMethod ? [user.paymentMethod] : []);
       form.reset({
-        paymentMethod: user.paymentMethod || "",
+        paymentMethods: paymentMethods,
         paymentMethodSetup: user.paymentMethodSetup || false,
         paymentDetails: {
           cardLast4: paymentDetails.cardLast4 || "",
@@ -114,7 +116,7 @@ export default function ProfilePayment() {
     updateProfileMutation.mutate(values);
   };
 
-  const selectedPaymentMethod = form.watch("paymentMethod");
+  const selectedPaymentMethods = form.watch("paymentMethods") || [];
   
   if (isLoading) {
     return (
@@ -145,23 +147,38 @@ export default function ProfilePayment() {
               <form onSubmit={form.handleSubmit(handleSave)} className="space-y-6">
                 <FormField
                   control={form.control}
-                  name="paymentMethod"
+                  name="paymentMethods"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Primary Payment Method</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select payment method" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="credit_card">Credit Card</SelectItem>
-                          <SelectItem value="paypal">PayPal</SelectItem>
-                          <SelectItem value="apple_pay">Apple Pay</SelectItem>
-                          <SelectItem value="google_pay">Google Pay</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Payment Methods</FormLabel>
+                      <FormDescription>Select all payment methods you want to enable</FormDescription>
+                      <div className="grid grid-cols-2 gap-4 mt-4">
+                        {[
+                          { id: "credit_card", label: "Credit Card" },
+                          { id: "paypal", label: "PayPal" },
+                          { id: "apple_pay", label: "Apple Pay" },
+                          { id: "google_pay", label: "Google Pay" },
+                        ].map((method) => (
+                          <FormItem key={method.id} className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(method.id)}
+                                onCheckedChange={(checked) => {
+                                  const currentMethods = field.value || [];
+                                  if (checked) {
+                                    field.onChange([...currentMethods, method.id]);
+                                  } else {
+                                    field.onChange(currentMethods.filter((m) => m !== method.id));
+                                  }
+                                }}
+                              />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel>{method.label}</FormLabel>
+                            </div>
+                          </FormItem>
+                        ))}
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -189,7 +206,7 @@ export default function ProfilePayment() {
                 />
 
                 {/* Credit Card Details */}
-                {selectedPaymentMethod === "credit_card" && (
+                {selectedPaymentMethods.includes("credit_card") && (
                   <div className="space-y-4 border-t pt-4">
                     <h3 className="text-lg font-semibold">Credit Card Details</h3>
                     
@@ -244,7 +261,7 @@ export default function ProfilePayment() {
                 )}
 
                 {/* PayPal Details */}
-                {selectedPaymentMethod === "paypal" && (
+                {selectedPaymentMethods.includes("paypal") && (
                   <div className="space-y-4 border-t pt-4">
                     <h3 className="text-lg font-semibold">PayPal Details</h3>
                     
@@ -273,7 +290,7 @@ export default function ProfilePayment() {
                 )}
 
                 {/* Mobile Payment Options */}
-                {(selectedPaymentMethod === "apple_pay" || selectedPaymentMethod === "google_pay") && (
+                {(selectedPaymentMethods.includes("apple_pay") || selectedPaymentMethods.includes("google_pay")) && (
                   <div className="space-y-4 border-t pt-4">
                     <h3 className="text-lg font-semibold">Mobile Payment Settings</h3>
                     
