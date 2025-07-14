@@ -6,6 +6,8 @@ import { AuthProvider } from "@/components/UserAuthProvider";
 import { UnifiedAuthProvider } from "@/components/UnifiedAuthProvider";
 import { CrossRoleDataBridge } from "@/components/CrossRoleDataBridge";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { isProfileComplete } from "@/utils/profileUtils";
 import NotFound from "@/pages/not-found";
 import ChatPage from "@/pages/ChatPage";
 import ProfilePage from "@/pages/ProfilePage";
@@ -14,6 +16,7 @@ import ProfileAddress from "@/pages/ProfileAddress";
 import ProfileBusiness from "@/pages/ProfileBusiness";
 import ProfilePayment from "@/pages/ProfilePayment";
 import ProfileReview from "@/pages/ProfileReview";
+import ProfileSummary from "@/pages/ProfileSummary";
 import IssueCategorizationPage from "@/pages/IssueCategorizationPage";
 import PhoneSupportPage from "@/pages/PhoneSupportPage";
 import MarketplacePage from "@/pages/MarketplacePage";
@@ -54,6 +57,38 @@ import InvoiceModificationDemo from "@/pages/InvoiceModificationDemo";
 import AIFeatureDiscoveryWrapper from "@/components/AIFeatureDiscoveryWrapper";
 import FeatureDiscoveryPage from "@/pages/FeatureDiscoveryPage";
 
+
+// Conditional Profile Route Component
+function ProfileRoute({ params }: { params: { username: string } }) {
+  const cleanUsername = params.username?.replace(/^"(.*)"$/, '$1') || params.username;
+  
+  const { data: user, isLoading } = useQuery({
+    queryKey: ["/api/users", cleanUsername],
+    queryFn: async () => {
+      const res = await fetch(`/api/users/${encodeURIComponent(cleanUsername)}`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch user data");
+      }
+      return res.json();
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin h-8 w-8 border-t-2 border-blue-500 border-solid rounded-full"></div>
+      </div>
+    );
+  }
+
+  // If profile is complete, show summary page
+  if (isProfileComplete(user)) {
+    return <ProfileSummary />;
+  }
+
+  // Otherwise, show the multi-step form starting with personal info
+  return <ProfilePersonalInfo />;
+}
 
 function Router() {
   // Safe localStorage access for client-side rendering
@@ -109,8 +144,8 @@ function Router() {
       <Route path="/admin-categories" component={AdminCategoryManagement} />
       <Route path="/admin/announcements" component={AdminAnnouncements} />
       
-      {/* User Profile - Multi-page flow */}
-      <Route path="/profile/:username" component={ProfilePage} />
+      {/* User Profile - Conditional routing (Summary vs Multi-step) */}
+      <Route path="/profile/:username" component={ProfileRoute} />
       <Route path="/profile/:username/personal" component={ProfilePersonalInfo} />
       <Route path="/profile/:username/address" component={ProfileAddress} />
       <Route path="/profile/:username/business" component={ProfileBusiness} />
@@ -118,7 +153,7 @@ function Router() {
       <Route path="/profile/:username/review" component={ProfileReview} />
       
       {/* Legacy profile route for compatibility */}
-      <Route path="/:username/profile" component={ProfilePage} />
+      <Route path="/:username/profile" component={ProfileRoute} />
       
       {/* Development/Testing Pages - Only available in development mode */}
       {process.env.NODE_ENV === 'development' && (
