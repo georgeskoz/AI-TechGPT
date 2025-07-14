@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import Navigation from "@/components/Navigation";
+import SimpleNavigation from "@/components/SimpleNavigation";
 import { 
   Users, 
   Search, 
@@ -120,7 +120,7 @@ export default function MarketplacePage({ username }: MarketplacePageProps) {
   // Main Marketplace View
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <Navigation title="Marketplace" backTo="/" />
+      <SimpleNavigation title="Marketplace" backTo="/" />
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
