@@ -105,11 +105,8 @@ export default function ProfilePersonalInfo() {
   
   const updateProfileMutation = useMutation({
     mutationFn: async (values: z.infer<typeof personalInfoSchema>) => {
-      const response = await apiRequest(`/api/users/${cleanUsername}/profile`, {
-        method: "PUT",
-        body: values,
-      });
-      return response;
+      const response = await apiRequest("PUT", `/api/users/${cleanUsername}/profile`, values);
+      return response.json();
     },
     onSuccess: () => {
       toast({
