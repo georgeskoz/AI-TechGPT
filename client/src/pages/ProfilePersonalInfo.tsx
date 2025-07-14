@@ -18,8 +18,10 @@ import { ArrowRight, Save, User, Upload, Camera } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
 const personalInfoSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }).optional().or(z.literal("")),
-  fullName: z.string().max(100, { message: "Full name must be less than 100 characters" }).optional().or(z.literal("")),
+  email: z.string().email({ message: "Please enter a valid email address" }),
+  fullName: z.string().min(2, { message: "Full name must be at least 2 characters" }),
+  phone: z.string().min(10, { message: "Phone number must be at least 10 digits" }),
+  password: z.string().min(8, { message: "Password must be at least 8 characters" }),
   bio: z.string().max(500, { message: "Bio must be less than 500 characters" }).optional().or(z.literal("")),
   avatar: z.string().optional().or(z.literal("")),
 });
@@ -48,6 +50,8 @@ export default function ProfilePersonalInfo() {
     defaultValues: {
       email: "",
       fullName: "",
+      phone: "",
+      password: "",
       bio: "",
       avatar: "",
     },
@@ -71,6 +75,8 @@ export default function ProfilePersonalInfo() {
       form.reset({
         email: localStorageFormData.email || "",
         fullName: localStorageFormData.fullName || "",
+        phone: localStorageFormData.phone || "",
+        password: localStorageFormData.password || "",
         bio: localStorageFormData.bio || "",
         avatar: localStorageAvatar,
       });
@@ -81,6 +87,8 @@ export default function ProfilePersonalInfo() {
       form.reset({
         email: user.email || "",
         fullName: user.fullName || "",
+        phone: user.phone || "",
+        password: user.password || "",
         bio: user.bio || "",
         avatar: avatarValue,
       });
@@ -94,6 +102,8 @@ export default function ProfilePersonalInfo() {
         localStorage.setItem(`techgpt_personal_info_${cleanUsername}`, JSON.stringify({
           email: value.email || "",
           fullName: value.fullName || "",
+          phone: value.phone || "",
+          password: value.password || "",
           bio: value.bio || "",
         }));
       } catch (error) {
@@ -456,6 +466,37 @@ export default function ProfilePersonalInfo() {
                           <FormControl>
                             <Input placeholder="Enter your email" type="email" value={field.value || ""} onChange={field.onChange} name={field.name} ref={field.ref} onBlur={field.onBlur} />
                           </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter your phone number" type="tel" value={field.value || ""} onChange={field.onChange} name={field.name} ref={field.ref} onBlur={field.onBlur} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Password</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter your password" type="password" value={field.value || ""} onChange={field.onChange} name={field.name} ref={field.ref} onBlur={field.onBlur} />
+                          </FormControl>
+                          <FormDescription>
+                            Password must be at least 8 characters long
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
