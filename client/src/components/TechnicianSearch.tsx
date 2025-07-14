@@ -88,6 +88,13 @@ export default function TechnicianSearch({
     searchMutation.mutate(searchCriteria);
   };
 
+  const handleExpandRadius = () => {
+    setSearchCriteria(prev => ({ ...prev, serviceRadius: 50 }));
+    setTimeout(() => {
+      handleSearch();
+    }, 100);
+  };
+
   const getServiceIcon = (type: string) => {
     switch (type) {
       case 'remote': return <Monitor className="h-4 w-4" />;
@@ -303,6 +310,7 @@ export default function TechnicianSearch({
         serviceType={serviceType}
         category={category}
         subcategory={subcategory}
+        onExpandRadius={handleExpandRadius}
       />
     </div>
   );

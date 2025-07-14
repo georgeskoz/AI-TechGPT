@@ -17,6 +17,7 @@ interface NoServiceProvidersModalProps {
   serviceType: string;
   category: string;
   subcategory: string;
+  onExpandRadius?: () => void;
 }
 
 export default function NoServiceProvidersModal({
@@ -25,7 +26,8 @@ export default function NoServiceProvidersModal({
   customerLocation,
   serviceType,
   category,
-  subcategory
+  subcategory,
+  onExpandRadius
 }: NoServiceProvidersModalProps) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
@@ -89,8 +91,12 @@ export default function NoServiceProvidersModal({
     // Handle different option actions
     switch (optionId) {
       case 'expand-radius':
-        // TODO: Implement expanded radius search
-        console.log('Expanding search radius...');
+        // Expand search radius and close modal
+        onClose();
+        // Trigger expanded search callback
+        if (onExpandRadius) {
+          onExpandRadius();
+        }
         break;
       case 'phone-support':
         // TODO: Redirect to phone support
@@ -113,7 +119,7 @@ export default function NoServiceProvidersModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto sm:max-w-[90vw] md:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <AlertCircle className="h-5 w-5 text-orange-500" />
@@ -234,19 +240,36 @@ export default function NoServiceProvidersModal({
             </CardContent>
           </Card>
 
+          {/* Explore More Button - Mobile Style */}
+          <div className="flex flex-col items-center gap-4 py-6">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full blur-md opacity-60 animate-pulse"></div>
+              <Button 
+                onClick={() => handleOptionSelect('expand-radius')}
+                className="relative bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-white font-bold py-6 px-8 rounded-full text-lg shadow-lg transform hover:scale-105 transition-all duration-200"
+              >
+                <MapPin className="h-6 w-6 mr-2" />
+                EXPLORE MORE
+              </Button>
+            </div>
+            <p className="text-sm text-gray-600 text-center">
+              Search in nearby cities and expanded areas
+            </p>
+          </div>
+
           {/* Action Buttons */}
           <div className="flex justify-between">
             <Button variant="outline" onClick={onClose}>
               Close
             </Button>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => handleOptionSelect('expand-radius')}>
-                <MapPin className="h-4 w-4 mr-2" />
-                Expand Search
-              </Button>
-              <Button onClick={() => handleOptionSelect('phone-support')}>
+              <Button variant="outline" onClick={() => handleOptionSelect('phone-support')}>
                 <Phone className="h-4 w-4 mr-2" />
                 Call Support
+              </Button>
+              <Button onClick={() => handleOptionSelect('ai-chat')}>
+                <MessageSquare className="h-4 w-4 mr-2" />
+                AI Assistant
               </Button>
             </div>
           </div>
