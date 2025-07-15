@@ -26,6 +26,11 @@ export interface IStorage {
   getPasswordResetToken(token: string): Promise<{userId: number, expiresAt: Date, used: boolean} | undefined>;
   markPasswordResetTokenUsed(token: string): Promise<void>;
   updateUserPassword(userId: number, newPassword: string): Promise<void>;
+  
+  // Dashboard data methods
+  getServiceRequestsByCustomer(customerId: number): Promise<any[]>;
+  getJobsByCustomer(customerId: number): Promise<any[]>;
+  getServiceBookingsByCustomer(customerId: number): Promise<any[]>;
 }
 
 export class PersistentStorage implements IStorage {
@@ -344,6 +349,22 @@ export class PersistentStorage implements IStorage {
       this.users.set(userId, user);
       await this.saveUsers();
     }
+  }
+
+  // Dashboard data methods - return empty arrays for now
+  async getServiceRequestsByCustomer(customerId: number): Promise<any[]> {
+    // For now, return empty array - this can be expanded later
+    return [];
+  }
+
+  async getJobsByCustomer(customerId: number): Promise<any[]> {
+    // For now, return empty array - this can be expanded later
+    return [];
+  }
+
+  async getServiceBookingsByCustomer(customerId: number): Promise<any[]> {
+    // For now, return empty array - this can be expanded later
+    return [];
   }
 }
 

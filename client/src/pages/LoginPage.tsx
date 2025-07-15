@@ -56,7 +56,7 @@ export default function LoginPage() {
       if (data.userType === 'technician') {
         setLocation("/technician-dashboard");
       } else {
-        setLocation("/dashboard");
+        setLocation("/chat");
       }
     },
     onError: (error: any) => {
@@ -97,7 +97,7 @@ export default function LoginPage() {
       if (data.userType === 'technician') {
         setLocation("/technician-dashboard");
       } else {
-        setLocation("/dashboard");
+        setLocation("/chat");
       }
     },
     onError: (error: any) => {
