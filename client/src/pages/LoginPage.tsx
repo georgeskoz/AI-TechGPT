@@ -45,7 +45,7 @@ export default function LoginPage() {
     },
     onSuccess: (data) => {
       localStorage.setItem("techgpt_username", data.username);
-      localStorage.setItem("techgpt_user_id", data.id);
+      localStorage.setItem("techgpt_user_id", data.id.toString());
       localStorage.setItem("techgpt_auth_method", data.authMethod || "email");
       localStorage.setItem("currentUser", JSON.stringify(data));
       toast({
@@ -73,12 +73,20 @@ export default function LoginPage() {
     mutationFn: async ({ provider, mockData }: { provider: string; mockData: any }) => {
       // In a real app, this would integrate with actual OAuth providers
       // For now, we'll simulate the social login process
-      const response = await apiRequest("POST", "/api/auth/social-login", { provider, userData: mockData });
-      return response.json();
+      console.log("Social login attempt:", { provider, userData: mockData });
+      try {
+        const response = await apiRequest("POST", "/api/auth/social-login", { provider, userData: mockData });
+        const data = await response.json();
+        console.log("Social login response:", data);
+        return data;
+      } catch (error) {
+        console.error("Social login API error:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
       localStorage.setItem("techgpt_username", data.username);
-      localStorage.setItem("techgpt_user_id", data.id);
+      localStorage.setItem("techgpt_user_id", data.id.toString());
       localStorage.setItem("techgpt_auth_method", data.authMethod);
       localStorage.setItem("currentUser", JSON.stringify(data));
       toast({
@@ -93,6 +101,7 @@ export default function LoginPage() {
       }
     },
     onError: (error: any) => {
+      console.error("Social login error details:", error);
       toast({
         title: "Social Login Failed",
         description: error.message || "Social login failed. Please try again.",
