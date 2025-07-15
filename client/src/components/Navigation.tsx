@@ -144,7 +144,7 @@ export default function Navigation({
               <img 
                 src={techGPTLogoPath} 
                 alt="TechGPT Logo" 
-                className="h-16 w-auto"
+                className="h-16 w-48"
               />
             </Button>
           </div>
