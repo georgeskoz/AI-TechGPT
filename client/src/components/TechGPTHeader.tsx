@@ -48,7 +48,7 @@ export default function TechGPTHeader({ username }: TechGPTHeaderProps) {
             <img 
               src={techGPTLogoPath} 
               alt="TechGPT Logo" 
-              className="h-16 w-48"
+              className="h-16 w-32"
             />
           </button>
         </div>
