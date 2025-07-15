@@ -20,11 +20,18 @@ export interface IStorage {
   authenticateUser(emailOrUsername: string, password: string): Promise<User | undefined>;
   getUserBySocialId(provider: string, socialId: string): Promise<User | undefined>;
   createOrUpdateSocialUser(provider: string, userData: any): Promise<User>;
+  
+  // Password reset tokens
+  createPasswordResetToken(userId: number, token: string, expiresAt: Date): Promise<void>;
+  getPasswordResetToken(token: string): Promise<{userId: number, expiresAt: Date, used: boolean} | undefined>;
+  markPasswordResetTokenUsed(token: string): Promise<void>;
+  updateUserPassword(userId: number, newPassword: string): Promise<void>;
 }
 
 export class PersistentStorage implements IStorage {
   private users: Map<number, User> = new Map();
   private nextUserId = 1;
+  private passwordResetTokens: Map<string, {userId: number, expiresAt: Date, used: boolean, createdAt: Date}> = new Map();
 
   constructor() {
     this.loadUsers();
@@ -305,6 +312,38 @@ export class PersistentStorage implements IStorage {
     // Add random suffix to ensure uniqueness
     const suffix = Math.random().toString(36).substring(2, 8);
     return `${username}_${suffix}`;
+  }
+
+  // Password reset token methods
+  async createPasswordResetToken(userId: number, token: string, expiresAt: Date): Promise<void> {
+    this.passwordResetTokens.set(token, {
+      userId,
+      expiresAt,
+      used: false,
+      createdAt: new Date()
+    });
+  }
+
+  async getPasswordResetToken(token: string): Promise<{userId: number, expiresAt: Date, used: boolean} | undefined> {
+    return this.passwordResetTokens.get(token);
+  }
+
+  async markPasswordResetTokenUsed(token: string): Promise<void> {
+    const tokenData = this.passwordResetTokens.get(token);
+    if (tokenData) {
+      tokenData.used = true;
+      this.passwordResetTokens.set(token, tokenData);
+    }
+  }
+
+  async updateUserPassword(userId: number, newPassword: string): Promise<void> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.password = newPassword;
+      user.updatedAt = new Date();
+      this.users.set(userId, user);
+      await this.saveUsers();
+    }
   }
 }
 
