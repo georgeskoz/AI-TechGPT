@@ -341,6 +341,17 @@ export default function ProfileSummary() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
           
+          {/* Action Buttons */}
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold text-gray-900">Profile Complete</h1>
+            <Button 
+              onClick={() => navigate('/login')}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              Go to Login
+            </Button>
+          </div>
+          
           {/* Personal Information Section */}
           <Card>
             <CardHeader>
