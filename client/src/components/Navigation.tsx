@@ -4,7 +4,7 @@ import { ArrowLeft, Home, Menu, X, MessageCircle, Users, Shield, User } from "lu
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import TechGPTLogo from "@/assets/TechGPTLogo";
+import techGPTLogoPath from "@assets/image_1752537953157.png";
 // Temporarily remove problematic imports
 // import RoleBasedNavigation from "@/components/RoleBasedNavigation";
 // import { useUnifiedAuth } from "@/components/UnifiedAuthProvider";
@@ -141,7 +141,11 @@ export default function Navigation({
               onClick={() => setLocation(getHomePath())}
               className="p-2 hover:bg-gray-100"
             >
-              <TechGPTLogo width={140} height={40} />
+              <img 
+                src={techGPTLogoPath} 
+                alt="TechGPT Logo" 
+                className="h-8 w-auto"
+              />
             </Button>
           </div>
 

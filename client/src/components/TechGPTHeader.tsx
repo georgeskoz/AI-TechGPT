@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import TechGPTLogo from '@/assets/TechGPTLogo';
+import techGPTLogoPath from "@assets/image_1752537953157.png";
 
 interface TechGPTHeaderProps {
   username: string;
@@ -45,7 +45,11 @@ export default function TechGPTHeader({ username }: TechGPTHeaderProps) {
             className="focus:outline-none hover:opacity-80"
             title="Go to Home"
           >
-            <TechGPTLogo width={120} height={36} />
+            <img 
+              src={techGPTLogoPath} 
+              alt="TechGPT Logo" 
+              className="h-9 w-auto"
+            />
           </button>
         </div>
         <div className="flex items-center space-x-4">
