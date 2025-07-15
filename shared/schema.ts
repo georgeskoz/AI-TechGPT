@@ -939,6 +939,17 @@ export const disputeEscalationsRelations = relations(disputeEscalations, ({ one 
   }),
 }));
 
+// Password reset tokens for secure password reset functionality
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  usedAt: timestamp("used_at"),
+});
+
 // Tax jurisdictions for countries, states, and provinces
 export const taxJurisdictions = pgTable("tax_jurisdictions", {
   id: serial("id").primaryKey(),
