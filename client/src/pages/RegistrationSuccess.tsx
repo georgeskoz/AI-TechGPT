@@ -13,7 +13,7 @@ export default function RegistrationSuccess() {
     const timer = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
-          setLocation('/chat');
+          setLocation('/login');
           return 0;
         }
         return prev - 1;
@@ -24,7 +24,7 @@ export default function RegistrationSuccess() {
   }, [setLocation]);
 
   const handleContinue = () => {
-    setLocation('/chat');
+    setLocation('/login');
   };
 
   return (
