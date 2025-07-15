@@ -42,7 +42,7 @@ export default function TechGPTHeader({ username }: TechGPTHeaderProps) {
         <div className="flex items-center space-x-2">
           <button 
             onClick={handleLogoClick}
-            className="focus:outline-none hover:opacity-80"
+            className="focus:outline-none hover:bg-white hover:opacity-80"
             title="Go to Home"
           >
             <img 

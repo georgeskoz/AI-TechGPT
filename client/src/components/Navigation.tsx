@@ -139,7 +139,7 @@ export default function Navigation({
             <Button
               variant="ghost"
               onClick={() => setLocation(getHomePath())}
-              className="p-2 hover:bg-gray-100"
+              className="p-2 hover:bg-white"
             >
               <img 
                 src={techGPTLogoPath} 
