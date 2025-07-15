@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import { 
   users, messages, technicians, serviceRequests, jobs, jobUpdates, supportCases, supportMessages, 
   issueCategories, bookingSettings, serviceBookings, disputes, disputeMessages, disputeAttachments, 
@@ -1028,8 +1029,6 @@ export class MemoryStorage implements IStorage {
 
   // Authentication methods
   async authenticateUser(emailOrUsername: string, password: string): Promise<User | undefined> {
-    const bcrypt = require('bcryptjs');
-    
     // Find user by email or username
     let user: User | undefined;
     for (const u of this.users.values()) {
@@ -1067,7 +1066,6 @@ export class MemoryStorage implements IStorage {
   }
 
   async createOrUpdateSocialUser(provider: string, userData: any): Promise<User> {
-    const bcrypt = require('bcryptjs');
     
     // Check if user already exists
     const existingUser = await this.getUserBySocialId(provider, userData.id);
