@@ -6,12 +6,25 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  password: text("password"), // nullable for social login users
   email: text("email"),
   fullName: text("full_name"),
   bio: text("bio"),
   avatar: text("avatar"),
   userType: text("user_type").notNull().default("customer"), // customer, technician, admin
+  
+  // Social media authentication
+  socialProviders: jsonb("social_providers").$type<{
+    google?: { id: string; email: string; name: string; avatar?: string };
+    facebook?: { id: string; email: string; name: string; avatar?: string };
+    apple?: { id: string; email?: string; name?: string; avatar?: string };
+    instagram?: { id: string; username: string; name?: string; avatar?: string };
+    twitter?: { id: string; username: string; name?: string; avatar?: string };
+    github?: { id: string; username: string; name?: string; avatar?: string };
+    linkedin?: { id: string; email: string; name: string; avatar?: string };
+  }>(),
+  authMethod: text("auth_method").notNull().default("email"), // email, google, facebook, apple, instagram, twitter, github, linkedin
+  lastLoginMethod: text("last_login_method"), // tracks which method user last used
   
   // Customer contact information
   phone: text("phone"),
@@ -1326,18 +1339,7 @@ export const insertSupportTicketMessageSchema = createInsertSchema(supportTicket
   attachments: z.array(z.string()).optional(),
 });
 
-// Type definitions
-export type User = typeof users.$inferSelect;
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type UpdateProfile = z.infer<typeof updateProfileSchema>;
-export type Technician = typeof technicians.$inferSelect;
-export type InsertTechnician = z.infer<typeof insertTechnicianSchema>;
-export type Message = typeof messages.$inferSelect;
-export type InsertMessage = z.infer<typeof insertMessageSchema>;
-export type ServiceRequest = typeof serviceRequests.$inferSelect;
-export type InsertServiceRequest = z.infer<typeof insertServiceRequestSchema>;
-export type Job = typeof jobs.$inferSelect;
-export type InsertJob = z.infer<typeof insertJobSchema>;
+// Type definitions (removing duplicates)
 
 export const insertSupportTicketAttachmentSchema = createInsertSchema(supportTicketAttachments).pick({
   ticketId: true,

@@ -48,6 +48,7 @@ import AdminAnnouncements from "@/pages/AdminAnnouncements";
 import FloatingChatWidget from "@/components/FloatingChatWidget";
 import OnboardingWizard from "@/pages/OnboardingWizard";
 import RegisterPage from "@/pages/RegisterPage";
+import LoginPage from "@/pages/LoginPage";
 import TestNotificationSystem from "@/pages/TestNotificationSystem";
 import NotificationsDashboard from "@/pages/NotificationsDashboard";
 import QuickServiceProviderRequest from "@/pages/QuickTechnicianRequest";
@@ -126,6 +127,10 @@ function Router() {
       <Route path="/" component={ChatPage} />
       <Route path="/customer-home" component={CustomerHomePage} />
       
+      {/* Authentication */}
+      <Route path="/login" component={LoginPage} />
+      <Route path="/register" component={RegisterPage} />
+      
       {/* Customer Portal - Core Pages */}
       <Route path="/chat" component={ChatPage} />
       <Route path="/dashboard" component={ClientDashboard} />
@@ -183,10 +188,8 @@ function Router() {
       {process.env.NODE_ENV === 'development' && (
         <>
           <Route path="/domains" component={DomainSelector} />
-
           <Route path="/notifications" component={NotificationsDashboard} />
           <Route path="/onboarding" component={OnboardingWizard} />
-          <Route path="/register" component={RegisterPage} />
           <Route path="/auth-test" component={AuthTestPage} />
           <Route path="/receipt-demo" component={ReceiptDemo} />
           <Route path="/invoice-demo" component={InvoiceModificationDemo} />

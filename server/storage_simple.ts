@@ -23,6 +23,11 @@ export interface IStorage {
   updateProfile(username: string, profile: UpdateProfile): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
   
+  // Authentication
+  authenticateUser(emailOrUsername: string, password: string): Promise<User | undefined>;
+  getUserBySocialId(provider: string, socialId: string): Promise<User | undefined>;
+  createOrUpdateSocialUser(provider: string, userData: any): Promise<User>;
+  
   // Message management
   createMessage(message: InsertMessage): Promise<Message>;
   getMessagesByUsername(username: string): Promise<Message[]>;
@@ -1019,6 +1024,138 @@ export class MemoryStorage implements IStorage {
     
     this.serviceBookings.set(id, updatedBooking);
     return updatedBooking;
+  }
+
+  // Authentication methods
+  async authenticateUser(emailOrUsername: string, password: string): Promise<User | undefined> {
+    const bcrypt = require('bcryptjs');
+    
+    // Find user by email or username
+    let user: User | undefined;
+    for (const u of this.users.values()) {
+      if (u.email === emailOrUsername || u.username === emailOrUsername) {
+        user = u;
+        break;
+      }
+    }
+    
+    if (!user || !user.password) {
+      return undefined;
+    }
+    
+    // Verify password
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+      return undefined;
+    }
+    
+    // Update last login
+    user.lastLogin = new Date();
+    user.lastLoginMethod = "email";
+    this.users.set(user.id, user);
+    
+    return user;
+  }
+
+  async getUserBySocialId(provider: string, socialId: string): Promise<User | undefined> {
+    for (const user of this.users.values()) {
+      if (user.socialProviders && user.socialProviders[provider]?.id === socialId) {
+        return user;
+      }
+    }
+    return undefined;
+  }
+
+  async createOrUpdateSocialUser(provider: string, userData: any): Promise<User> {
+    const bcrypt = require('bcryptjs');
+    
+    // Check if user already exists
+    const existingUser = await this.getUserBySocialId(provider, userData.id);
+    if (existingUser) {
+      // Update existing user
+      existingUser.lastLogin = new Date();
+      existingUser.lastLoginMethod = provider;
+      this.users.set(existingUser.id, existingUser);
+      return existingUser;
+    }
+    
+    // Create new user
+    const username = this.generateUniqueUsername(userData.username || userData.name || `user_${provider}_${userData.id.slice(0, 8)}`);
+    
+    const newUser: User = {
+      id: this.nextUserId++,
+      username,
+      password: null, // No password for social users
+      email: userData.email || null,
+      fullName: userData.name || null,
+      bio: null,
+      avatar: userData.avatar || null,
+      userType: "customer",
+      socialProviders: {
+        [provider]: {
+          id: userData.id,
+          email: userData.email,
+          name: userData.name,
+          avatar: userData.avatar
+        }
+      },
+      authMethod: provider,
+      lastLoginMethod: provider,
+      phone: null,
+      street: null,
+      apartment: null,
+      city: null,
+      state: null,
+      zipCode: null,
+      country: "Canada",
+      emailVerified: true, // Assume verified via social provider
+      phoneVerified: false,
+      identityVerified: false,
+      accountActive: true,
+      businessInfo: null,
+      paymentMethod: null,
+      paymentMethods: null,
+      paymentMethodSetup: false,
+      paymentDetails: null,
+      emailNotifications: true,
+      smsNotifications: false,
+      marketingEmails: true,
+      twoFactorEnabled: false,
+      twoFactorMethod: null,
+      timezone: "America/Toronto",
+      language: "en",
+      newsletter: true,
+      lastLogin: new Date(),
+      isActive: true,
+      preferences: null,
+      metadata: null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    this.users.set(newUser.id, newUser);
+    return newUser;
+  }
+
+  private generateUniqueUsername(baseUsername: string): string {
+    let username = baseUsername.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    let counter = 1;
+    
+    while (this.isUsernameTaken(username)) {
+      username = `${baseUsername}_${counter}`;
+      counter++;
+    }
+    
+    return username;
+  }
+
+  private isUsernameTaken(username: string): boolean {
+    for (const user of this.users.values()) {
+      if (user.username === username) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 

@@ -73,30 +73,13 @@ export default function RegisterPage() {
       if (response.ok) {
         const user = await response.json();
         
-        // Store user data in localStorage
-        localStorage.setItem('tech_user', JSON.stringify(user));
-        localStorage.setItem('username', user.username);
-        localStorage.setItem('userEmail', user.email);
-        
-        // Redirect to registration success page
-        setLocation('/registration-success');
-        return;
-        
-        // Store user data in localStorage
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        localStorage.setItem('username', user.username);
-        
         toast({
           title: "Registration Successful!",
-          description: `Welcome to TechGPT, ${user.fullName}! Your account has been created.`,
+          description: "Welcome to TechGPT! Please log in to your account.",
         });
 
-        // Redirect based on user type
-        if (data.userType === 'technician') {
-          setLocation('/technician-dashboard');
-        } else {
-          setLocation('/dashboard');
-        }
+        // Redirect to login page instead of auto-login
+        setLocation('/login');
       } else {
         throw new Error('Failed to create account');
       }
@@ -411,7 +394,7 @@ export default function RegisterPage() {
           <p>
             Already have an account?{' '}
             <button
-              onClick={() => setLocation('/auth-test')}
+              onClick={() => setLocation('/login')}
               className="text-blue-600 hover:underline font-medium"
             >
               Sign in here
