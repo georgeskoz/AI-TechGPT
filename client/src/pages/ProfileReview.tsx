@@ -43,7 +43,8 @@ export default function ProfileReview() {
   };
 
   const handleFinish = () => {
-    navigate(`/profile/${cleanUsername}`);
+    // After completing all profile information, redirect to login
+    navigate('/login');
   };
 
   const handlePrevious = () => {
@@ -301,7 +302,7 @@ export default function ProfileReview() {
                 className="flex-1"
               >
                 <Check className="h-4 w-4 mr-2" />
-                Complete Profile
+                Complete & Go to Login
               </Button>
             </div>
           </CardContent>
