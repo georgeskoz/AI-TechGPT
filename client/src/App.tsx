@@ -49,6 +49,7 @@ import FloatingChatWidget from "@/components/FloatingChatWidget";
 import OnboardingWizard from "@/pages/OnboardingWizard";
 import RegisterPage from "@/pages/RegisterPage";
 import LoginPage from "@/pages/LoginPage";
+import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import TestNotificationSystem from "@/pages/TestNotificationSystem";
 import NotificationsDashboard from "@/pages/NotificationsDashboard";
 import QuickServiceProviderRequest from "@/pages/QuickTechnicianRequest";
@@ -130,6 +131,7 @@ function Router() {
       {/* Authentication */}
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
+      <Route path="/forgot-password" component={ForgotPasswordPage} />
       
       {/* Customer Portal - Core Pages */}
       <Route path="/chat" component={ChatPage} />
