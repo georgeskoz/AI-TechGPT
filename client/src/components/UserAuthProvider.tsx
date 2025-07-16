@@ -7,6 +7,24 @@ interface User {
   fullName: string;
   phone: string;
   address: string;
+  userType: string;
+  authMethod: string;
+  avatar: string;
+  bio: string;
+  lastLoginMethod: string;
+  street: string;
+  apartment: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  identityVerified: boolean;
+  accountActive: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface AuthContextType {
