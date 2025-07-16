@@ -1,5 +1,5 @@
 import React from 'react';
-import { useUnifiedAuth } from './UnifiedAuthProvider';
+import { useAuth } from './UserAuthProvider';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -101,22 +101,21 @@ const navigationItems: NavigationItem[] = [
 ];
 
 export default function RoleBasedNavigation() {
-  const { user, logout, switchRole } = useUnifiedAuth();
+  const { user, logout } = useAuth();
   const [, setLocation] = useLocation();
 
   if (!user) return null;
 
+  // Use userType from the authenticated user
+  const userType = user.userType || 'customer';
   const userNavigationItems = navigationItems.filter(item => 
-    item.roles.includes(user.userType)
+    item.roles.includes(userType)
   );
 
   const handleRoleSwitch = async (newRole: 'customer' | 'service_provider' | 'admin') => {
-    try {
-      await switchRole(newRole);
-      setLocation('/');
-    } catch (error) {
-      console.error('Role switch failed:', error);
-    }
+    // For now, we'll just redirect to login to switch roles
+    // In a real app, this would need backend support
+    logout();
   };
 
   const getRoleColor = (role: string) => {
@@ -160,9 +159,9 @@ export default function RoleBasedNavigation() {
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="flex items-center gap-2">
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className={getRoleColor(user.userType)}>
-                {getRoleIcon(user.userType)}
-                {user.userType.replace('_', ' ').toUpperCase()}
+              <Badge variant="secondary" className={getRoleColor(userType)}>
+                {getRoleIcon(userType)}
+                {userType.replace('_', ' ').toUpperCase()}
               </Badge>
               <span className="font-medium">{user.fullName || user.username}</span>
             </div>
@@ -204,7 +203,7 @@ export default function RoleBasedNavigation() {
           <DropdownMenuLabel className="text-xs text-gray-500">
             Switch Role
           </DropdownMenuLabel>
-          {user.userType !== 'customer' && (
+          {userType !== 'customer' && (
             <DropdownMenuItem
               onClick={() => handleRoleSwitch('customer')}
               className="flex items-center gap-2"
@@ -213,7 +212,7 @@ export default function RoleBasedNavigation() {
               Switch to Customer
             </DropdownMenuItem>
           )}
-          {user.userType !== 'service_provider' && (
+          {userType !== 'service_provider' && (
             <DropdownMenuItem
               onClick={() => handleRoleSwitch('service_provider')}
               className="flex items-center gap-2"
@@ -222,7 +221,7 @@ export default function RoleBasedNavigation() {
               Switch to Service Provider
             </DropdownMenuItem>
           )}
-          {user.userType !== 'admin' && user.permissions?.includes('admin_access') && (
+          {userType !== 'admin' && (
             <DropdownMenuItem
               onClick={() => handleRoleSwitch('admin')}
               className="flex items-center gap-2"
