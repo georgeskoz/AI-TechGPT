@@ -88,7 +88,7 @@
   {
     "id": 11,
     "username": "vanessa1",
-    "password": "$2b$12$SbPX9NI8BwjMJ96KiZFFKe9u73eNqmc1TvaNKgYwm55fA9r.kF.aO",
+    "password": "$2b$12$aiZWoEZBJp3mZIsktSrO/u7omotg8DXIdtj4qU.94kCatYh4sj0QC",
     "email": "vanessa@gmail.com",
     "fullName": "Vanessa Kozah",
     "bio": "geography",
@@ -142,6 +142,6 @@
     "preferences": null,
     "metadata": null,
     "createdAt": "2025-07-16T14:49:53.589Z",
-    "updatedAt": "2025-07-16T15:37:54.957Z"
+    "updatedAt": "2025-07-16T18:17:06.429Z"
   }
 ]
