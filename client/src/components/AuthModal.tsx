@@ -41,7 +41,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
     
     try {
       const response = await apiRequest('POST', '/api/auth/login', {
-        email: loginData.username, // Use email for login
+        emailOrUsername: loginData.username, // Use emailOrUsername for login
         password: loginData.password
       });
       const user = await response.json();
