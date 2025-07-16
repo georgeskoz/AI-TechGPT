@@ -439,7 +439,7 @@
     "userType": "customer",
     "socialProviders": null,
     "authMethod": "email",
-    "lastLoginMethod": null,
+    "lastLoginMethod": "email",
     "phone": "8193292959",
     "street": "4180 Rideau st",
     "apartment": "106",
@@ -480,11 +480,11 @@
     "timezone": "America/Toronto",
     "language": "en",
     "newsletter": true,
-    "lastLogin": null,
+    "lastLogin": "2025-07-16T12:05:17.307Z",
     "isActive": true,
     "preferences": null,
     "metadata": null,
     "createdAt": "2025-07-16T11:51:36.535Z",
-    "updatedAt": "2025-07-16T11:52:39.381Z"
+    "updatedAt": "2025-07-16T12:05:17.307Z"
   }
 ]

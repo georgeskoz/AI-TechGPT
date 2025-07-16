@@ -117,7 +117,7 @@ function Router() {
   // Safe localStorage access for client-side rendering
   const getStoredUsername = () => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("username") || "Guest";
+      return localStorage.getItem("techgpt_username") || "Guest";
     }
     return "Guest";
   };
@@ -211,7 +211,7 @@ function App() {
   useEffect(() => {
     // Only access localStorage on the client side
     if (typeof window !== "undefined") {
-      const storedUsername = localStorage.getItem("username");
+      const storedUsername = localStorage.getItem("techgpt_username");
       if (storedUsername) {
         setUsername(storedUsername);
       }
