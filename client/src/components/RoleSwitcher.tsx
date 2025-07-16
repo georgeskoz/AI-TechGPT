@@ -215,6 +215,65 @@ export function CustomerInterface() {
 
 // Service Provider Interface Component
 export function ServiceProviderInterface() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginData, setLoginData] = useState({ username: '', password: '' });
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Simple authentication check
+    if (loginData.username === 'vanessa1' && loginData.password === 'password123') {
+      setIsAuthenticated(true);
+    } else {
+      alert('Invalid credentials. Use vanessa1 / password123');
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-md mx-auto">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-center text-green-600">Service Provider Login</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Username</label>
+                  <input
+                    type="text"
+                    value={loginData.username}
+                    onChange={(e) => setLoginData(prev => ({ ...prev, username: e.target.value }))}
+                    className="w-full p-2 border rounded-md"
+                    placeholder="Enter username"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Password</label>
+                  <input
+                    type="password"
+                    value={loginData.password}
+                    onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
+                    className="w-full p-2 border rounded-md"
+                    placeholder="Enter password"
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
+                  Login as Service Provider
+                </Button>
+                <div className="text-center text-sm text-gray-500 mt-2">
+                  Test credentials: vanessa1 / password123
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   const providerStats = {
     totalEarnings: 2850,
     completedJobs: 24,
@@ -222,32 +281,20 @@ export function ServiceProviderInterface() {
     activeJobs: 2
   };
 
-  const providerServices = [
-    {
-      name: "Remote Support",
-      description: "Provide technical assistance remotely",
-      hourlyRate: "$45-75/hr",
-      availability: "Available"
-    },
-    {
-      name: "Phone Support",
-      description: "Offer phone-based technical support",
-      hourlyRate: "$35-65/hr",
-      availability: "Available"
-    },
-    {
-      name: "On-Site Support",
-      description: "Visit customers for hands-on assistance",
-      hourlyRate: "$85-150/hr",
-      availability: "Available"
-    }
-  ];
-
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Service Provider Portal</h2>
-        <p className="text-gray-600">Manage your services, earnings, and customer interactions</p>
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Service Provider Dashboard</h2>
+          <p className="text-gray-600">Welcome back, Vanessa Rodriguez!</p>
+        </div>
+        <Button 
+          onClick={() => setIsAuthenticated(false)}
+          variant="outline"
+          className="text-green-600 border-green-600 hover:bg-green-50"
+        >
+          Logout
+        </Button>
       </div>
 
       {/* Provider Stats */}
@@ -289,36 +336,109 @@ export function ServiceProviderInterface() {
         </Card>
       </div>
 
-      {/* Service Offerings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">Your Service Offerings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {providerServices.map((service, index) => (
-              <div key={index} className="border rounded-lg p-4 flex items-center justify-between">
-                <div>
-                  <h4 className="font-medium">{service.name}</h4>
-                  <p className="text-sm text-gray-600">{service.description}</p>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-medium text-green-600">{service.hourlyRate}</div>
-                  <Badge variant="outline" className="text-xs text-green-600 mt-1">
-                    {service.availability}
-                  </Badge>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-green-600">Manage Services</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600 mb-4">Configure your service offerings and rates</p>
+            <Button className="w-full bg-green-600 hover:bg-green-700">
+              Update Services
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-blue-600">View Jobs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600 mb-4">Check active jobs and requests</p>
+            <Button className="w-full bg-blue-600 hover:bg-blue-700">
+              View Jobs
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-purple-600">Earnings Report</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600 mb-4">Download detailed earnings report</p>
+            <Button className="w-full bg-purple-600 hover:bg-purple-700">
+              Download Report
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
 
 // Administrator Interface Component
 export function AdministratorInterface() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginData, setLoginData] = useState({ username: '', password: '' });
+
+  const handleAdminLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Simple admin authentication check
+    if (loginData.username === 'admin' && loginData.password === 'admin123') {
+      setIsAuthenticated(true);
+    } else {
+      alert('Invalid admin credentials. Use admin / admin123');
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-md mx-auto">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-center text-purple-600">Administrator Login</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleAdminLogin} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Admin Username</label>
+                  <input
+                    type="text"
+                    value={loginData.username}
+                    onChange={(e) => setLoginData(prev => ({ ...prev, username: e.target.value }))}
+                    className="w-full p-2 border rounded-md"
+                    placeholder="Enter admin username"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Admin Password</label>
+                  <input
+                    type="password"
+                    value={loginData.password}
+                    onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
+                    className="w-full p-2 border rounded-md"
+                    placeholder="Enter admin password"
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700">
+                  Login as Administrator
+                </Button>
+                <div className="text-center text-sm text-gray-500 mt-2">
+                  Test credentials: admin / admin123
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   const adminStats = {
     totalUsers: 1247,
     activeProviders: 89,
@@ -326,38 +446,20 @@ export function AdministratorInterface() {
     systemHealth: 98.5
   };
 
-  const adminModules = [
-    {
-      name: "User Management",
-      description: "Manage customer accounts and permissions",
-      icon: UserPlus,
-      count: "1,247 users"
-    },
-    {
-      name: "Provider Management",
-      description: "Oversee service providers and their performance",
-      icon: Wrench,
-      count: "89 providers"
-    },
-    {
-      name: "Revenue Analytics",
-      description: "Track platform revenue and financial metrics",
-      icon: BarChart3,
-      count: "$45,600 this month"
-    },
-    {
-      name: "System Settings",
-      description: "Configure platform settings and preferences",
-      icon: Settings,
-      count: "All systems operational"
-    }
-  ];
-
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Administrator Control Panel</h2>
-        <p className="text-gray-600">Manage platform operations, users, and system settings</p>
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Administrator Control Panel</h2>
+          <p className="text-gray-600">Platform management and system oversight</p>
+        </div>
+        <Button 
+          onClick={() => setIsAuthenticated(false)}
+          variant="outline"
+          className="text-purple-600 border-purple-600 hover:bg-purple-50"
+        >
+          Logout
+        </Button>
       </div>
 
       {/* Admin Stats */}
@@ -399,33 +501,68 @@ export function AdministratorInterface() {
         </Card>
       </div>
 
-      {/* Admin Modules */}
+      {/* Admin Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-purple-600">User Management</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600 mb-4">Manage customer accounts and permissions</p>
+            <Button className="w-full bg-purple-600 hover:bg-purple-700">
+              Manage Users
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-green-600">Provider Oversight</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600 mb-4">Monitor service providers and performance</p>
+            <Button className="w-full bg-green-600 hover:bg-green-700">
+              View Providers
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-blue-600">System Analytics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600 mb-4">Platform performance and revenue reports</p>
+            <Button className="w-full bg-blue-600 hover:bg-blue-700">
+              View Reports
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* System Status */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">Administration Modules</CardTitle>
+          <CardTitle className="text-lg font-semibold">System Status</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {adminModules.map((module, index) => {
-              const Icon = module.icon;
-              return (
-                <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <Icon className="h-5 w-5 text-purple-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium">{module.name}</h4>
-                      <p className="text-xs text-gray-500">{module.count}</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">{module.description}</p>
-                  <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
-                    Manage
-                  </Button>
-                </div>
-              );
-            })}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Database Connection</span>
+              <Badge className="bg-green-100 text-green-800">Online</Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">API Services</span>
+              <Badge className="bg-green-100 text-green-800">Operational</Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">WebSocket Services</span>
+              <Badge className="bg-yellow-100 text-yellow-800">Limited</Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Email Services</span>
+              <Badge className="bg-red-100 text-red-800">Config Required</Badge>
+            </div>
           </div>
         </CardContent>
       </Card>
