@@ -63,6 +63,7 @@ import FeatureDiscoveryPage from "@/pages/FeatureDiscoveryPage";
 import TrackingPage from "@/pages/TrackingPage";
 import ServiceProviderChat from "@/pages/ServiceProviderChat";
 import RegistrationSuccess from "@/pages/RegistrationSuccess";
+import MultiRoleInterface from "@/pages/MultiRoleInterface";
 
 
 // Conditional Profile Route Component
@@ -128,6 +129,7 @@ function Router() {
     <Switch>
       {/* Main Entry Points */}
       <Route path="/" component={RoleBasedRedirect} />
+      <Route path="/multi-role" component={MultiRoleInterface} />
       <Route path="/customer-home" component={CustomerHomePage} />
       
       {/* Authentication */}
