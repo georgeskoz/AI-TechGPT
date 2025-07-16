@@ -104,29 +104,10 @@ export function CustomerInterface() {
     totalSpent: 450
   };
 
-  const customerServices = [
-    {
-      name: "AI Chat Support",
-      description: "Get instant AI-powered technical assistance",
-      icon: MessageSquare,
-      status: "Available",
-      price: "Free"
-    },
-    {
-      name: "Phone Support",
-      description: "Talk directly with technical experts",
-      icon: Phone,
-      status: "Available",
-      price: "From $25/hr"
-    },
-    {
-      name: "On-Site Support",
-      description: "Get technicians to come to your location",
-      icon: User,
-      status: "Available",
-      price: "From $85/visit"
-    }
-  ];
+  const handleStartChat = () => {
+    // Navigate to customer chat page
+    window.location.href = '/chat';
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -174,41 +155,68 @@ export function CustomerInterface() {
         </Card>
       </div>
 
-      {/* Available Services */}
-      <Card>
+      {/* Customer Chat Access */}
+      <Card className="mb-8">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">Available Services</CardTitle>
+          <CardTitle className="text-lg font-semibold text-blue-600">Customer Chat Support</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {customerServices.map((service, index) => {
-              const Icon = service.icon;
-              return (
-                <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Icon className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium">{service.name}</h4>
-                      <Badge variant="outline" className="text-xs text-green-600">
-                        {service.status}
-                      </Badge>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">{service.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-blue-600">{service.price}</span>
-                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                      Get Support
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="text-center py-8">
+            <div className="mb-4">
+              <MessageSquare className="h-16 w-16 text-blue-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Need Technical Support?</h3>
+              <p className="text-gray-600 mb-6">
+                Get instant help from AI or connect with expert technicians
+              </p>
+            </div>
+            <Button 
+              onClick={handleStartChat}
+              className="bg-blue-600 hover:bg-blue-700 px-8 py-3 text-lg"
+            >
+              Start Chat Support
+            </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Quick Services */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-green-600">AI Chat Support</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600 mb-4">Get instant AI-powered technical assistance</p>
+            <Button className="w-full bg-green-600 hover:bg-green-700" onClick={handleStartChat}>
+              Start AI Chat
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-purple-600">Phone Support</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600 mb-4">Talk directly with technical experts</p>
+            <Button className="w-full bg-purple-600 hover:bg-purple-700">
+              Request Call
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-orange-600">On-Site Support</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600 mb-4">Get technicians to come to your location</p>
+            <Button className="w-full bg-orange-600 hover:bg-orange-700">
+              Book Technician
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
@@ -335,6 +343,30 @@ export function ServiceProviderInterface() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Service Provider Chat Access */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-green-600">Service Provider Chat</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <div className="mb-4">
+              <MessageSquare className="h-16 w-16 text-green-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Customer Communication</h3>
+              <p className="text-gray-600 mb-6">
+                Chat with customers and provide technical support
+              </p>
+            </div>
+            <Button 
+              onClick={() => window.location.href = '/service-provider-chat'}
+              className="bg-green-600 hover:bg-green-700 px-8 py-3 text-lg"
+            >
+              Open Chat Interface
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

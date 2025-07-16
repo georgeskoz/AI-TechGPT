@@ -165,6 +165,7 @@ function Router() {
       <Route path="/technician-registration" component={ServiceProviderRegistration} />
       <Route path="/technician-dashboard" component={TechnicianDetailsPage} />
       <Route path="/service-provider-dashboard" component={ServiceProviderDashboard} />
+      <Route path="/service-provider-chat" component={ServiceProviderChat} />
       <Route path="/technician-earnings" component={TechnicianEarnings} />
       <Route path="/profile-visibility" component={ProfileVisibilityPage} />
       <Route path="/technicians" component={TechnicianLanding} />

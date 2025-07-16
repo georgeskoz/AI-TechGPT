@@ -1,124 +1,92 @@
 import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { 
-  MessageCircle, 
+  MessageSquare, 
   Send, 
   Phone, 
-  User, 
-  MapPin, 
-  Clock, 
-  Star,
-  ArrowLeft,
+  Users, 
+  Clock,
   CheckCircle,
   AlertCircle
 } from 'lucide-react';
 
 interface Message {
-  id: string;
-  sender: 'customer' | 'provider';
-  content: string;
+  id: number;
+  text: string;
+  sender: 'provider' | 'customer' | 'system';
   timestamp: Date;
-  type: 'text' | 'status' | 'system';
+  customerName?: string;
+  priority?: 'low' | 'medium' | 'high';
 }
 
 export default function ServiceProviderChat() {
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: '1',
-      sender: 'provider',
-      content: 'Hi! I\'m Michael, your service provider. I\'m currently on my way to your location. I should be there in about 15 minutes.',
-      timestamp: new Date(Date.now() - 300000), // 5 minutes ago
-      type: 'text'
-    },
-    {
-      id: '2',
-      sender: 'customer',
-      content: 'Great! I\'ll be waiting. The issue is with my computer not starting up properly.',
-      timestamp: new Date(Date.now() - 240000), // 4 minutes ago
-      type: 'text'
-    },
-    {
-      id: '3',
-      sender: 'provider',
-      content: 'Thanks for the details. I\'ll bring the necessary diagnostic tools. Can you describe what happens when you press the power button?',
-      timestamp: new Date(Date.now() - 180000), // 3 minutes ago
-      type: 'text'
-    },
-    {
-      id: '4',
+      id: 1,
+      text: "Welcome to Service Provider Chat! You can communicate with customers here.",
       sender: 'system',
-      content: 'Service provider is now 10 minutes away',
-      timestamp: new Date(Date.now() - 120000), // 2 minutes ago
-      type: 'system'
+      timestamp: new Date()
+    },
+    {
+      id: 2,
+      text: "Hi, I'm having trouble with my laptop not connecting to WiFi. Can you help?",
+      sender: 'customer',
+      timestamp: new Date(),
+      customerName: 'John Smith',
+      priority: 'medium'
+    },
+    {
+      id: 3,
+      text: "Of course! I can help you troubleshoot your WiFi connection. Let me ask you a few questions to diagnose the issue.",
+      sender: 'provider',
+      timestamp: new Date()
+    },
+    {
+      id: 4,
+      text: "What operating system are you using? And when did this issue start?",
+      sender: 'provider',
+      timestamp: new Date()
+    },
+    {
+      id: 5,
+      text: "I'm using Windows 11 and this started yesterday evening. The WiFi icon shows but says 'No internet access'.",
+      sender: 'customer',
+      timestamp: new Date(),
+      customerName: 'John Smith',
+      priority: 'medium'
     }
   ]);
 
   const [newMessage, setNewMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+  const [activeCustomers] = useState([
+    { name: 'John Smith', status: 'active', priority: 'medium', duration: '12 min' },
+    { name: 'Sarah Johnson', status: 'waiting', priority: 'high', duration: '3 min' },
+    { name: 'Mike Chen', status: 'active', priority: 'low', duration: '25 min' }
+  ]);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const serviceProvider = {
-    id: 1,
-    name: "Michael Chen",
-    rating: 4.9,
-    completedJobs: 247,
-    phone: "+1 (555) 123-4567",
-    skills: ["Hardware", "Network", "Security"],
-    status: "en-route",
-    eta: "10 minutes"
-  };
-
-  const serviceDetails = {
-    bookingId: "TG-" + Date.now().toString().slice(-6),
-    category: "Hardware Issues",
-    description: "Computer won't start, showing blue screen error",
-    location: "123 Main St, Ottawa, ON",
-    serviceFee: "$90"
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    scrollToBottom();
   }, [messages]);
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
       const message: Message = {
-        id: Date.now().toString(),
-        sender: 'customer',
-        content: newMessage.trim(),
-        timestamp: new Date(),
-        type: 'text'
+        id: messages.length + 1,
+        text: newMessage,
+        sender: 'provider',
+        timestamp: new Date()
       };
-      
-      setMessages(prev => [...prev, message]);
+      setMessages([...messages, message]);
       setNewMessage('');
-      
-      // Simulate provider response
-      setIsTyping(true);
-      setTimeout(() => {
-        const responses = [
-          "Thanks for the information. I'll have the right tools ready.",
-          "I understand. I'll start with a diagnostic check when I arrive.",
-          "Got it. This should be a straightforward fix.",
-          "I'm familiar with this issue. Should be resolved quickly.",
-          "Perfect. I'll update you when I'm 5 minutes away."
-        ];
-        
-        const response: Message = {
-          id: (Date.now() + 1).toString(),
-          sender: 'provider',
-          content: responses[Math.floor(Math.random() * responses.length)],
-          timestamp: new Date(),
-          type: 'text'
-        };
-        
-        setMessages(prev => [...prev, response]);
-        setIsTyping(false);
-      }, 2000);
     }
   };
 
@@ -129,188 +97,161 @@ export default function ServiceProviderChat() {
     }
   };
 
-  const getMessageStyle = (sender: string, type: string) => {
-    if (type === 'system') {
-      return 'bg-blue-50 text-blue-800 text-center text-sm p-2 rounded-md mx-8';
+  const getPriorityColor = (priority?: string) => {
+    switch (priority) {
+      case 'high': return 'text-red-600 bg-red-50';
+      case 'medium': return 'text-yellow-600 bg-yellow-50';
+      case 'low': return 'text-green-600 bg-green-50';
+      default: return 'text-gray-600 bg-gray-50';
     }
-    
-    if (sender === 'customer') {
-      return 'bg-blue-600 text-white ml-auto max-w-xs p-3 rounded-lg rounded-br-sm';
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'active': return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'waiting': return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+      default: return <Clock className="h-4 w-4 text-gray-500" />;
     }
-    
-    return 'bg-gray-100 text-gray-800 mr-auto max-w-xs p-3 rounded-lg rounded-bl-sm';
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => window.history.back()}
-              className="p-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div className="flex-1">
-              <CardTitle className="flex items-center gap-2">
-                <MessageCircle className="h-6 w-6 text-blue-600" />
-                Chat with Service Provider
-              </CardTitle>
-            </div>
-          </div>
-        </CardHeader>
-      </Card>
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Service Provider Chat</h1>
+          <p className="text-gray-600">Communicate with customers and provide technical support</p>
+        </div>
 
-      {/* Service Provider Info */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <User className="h-6 w-6 text-blue-600" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-lg">{serviceProvider.name}</h3>
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
-                  {serviceProvider.status === 'en-route' ? 'En Route' : serviceProvider.status}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-4 text-sm text-gray-600">
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span>{serviceProvider.rating} rating</span>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Active Customers Sidebar */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Users className="h-5 w-5 text-green-600" />
+                  <span>Active Customers</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {activeCustomers.map((customer, index) => (
+                    <div key={index} className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-sm">{customer.name}</span>
+                        {getStatusIcon(customer.status)}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Badge className={`text-xs ${getPriorityColor(customer.priority)}`}>
+                          {customer.priority}
+                        </Badge>
+                        <span className="text-xs text-gray-500">{customer.duration}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  <span>ETA: {serviceProvider.eta}</span>
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle className="text-sm">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <Button className="w-full bg-green-600 hover:bg-green-700" size="sm">
+                    <Phone className="h-4 w-4 mr-2" />
+                    Start Call
+                  </Button>
+                  <Button variant="outline" className="w-full" size="sm">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Send Template
+                  </Button>
+                  <Button variant="outline" className="w-full" size="sm">
+                    Transfer Customer
+                  </Button>
                 </div>
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.open(`tel:${serviceProvider.phone}`)}
-              className="flex items-center gap-2"
-            >
-              <Phone className="w-4 h-4" />
-              Call
-            </Button>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Service Details */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Service Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-gray-600">Booking ID:</span>
-              <span className="font-medium ml-2">{serviceDetails.bookingId}</span>
-            </div>
-            <div>
-              <span className="text-gray-600">Category:</span>
-              <span className="font-medium ml-2">{serviceDetails.category}</span>
-            </div>
-            <div>
-              <span className="text-gray-600">Location:</span>
-              <span className="font-medium ml-2">{serviceDetails.location}</span>
-            </div>
-            <div>
-              <span className="text-gray-600">Service Fee:</span>
-              <span className="font-medium ml-2">{serviceDetails.serviceFee}</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Chat Messages */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Messages</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="h-96 overflow-y-auto p-4 space-y-4">
-            {messages.map((message) => (
-              <div key={message.id} className="flex flex-col">
-                <div className={getMessageStyle(message.sender, message.type)}>
-                  <div className="break-words">{message.content}</div>
-                  <div className="text-xs opacity-70 mt-1">
-                    {message.timestamp.toLocaleTimeString([], { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
+          {/* Chat Interface */}
+          <div className="lg:col-span-3">
+            <Card className="h-[600px] flex flex-col">
+              <CardHeader className="border-b">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                      <span className="text-white font-medium">JS</span>
+                    </div>
+                    <div>
+                      <h3 className="font-medium">John Smith</h3>
+                      <p className="text-sm text-gray-500">WiFi Connection Issue</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge className="bg-yellow-100 text-yellow-800">Medium Priority</Badge>
+                    <Badge className="bg-green-100 text-green-800">Active</Badge>
                   </div>
                 </div>
-              </div>
-            ))}
-            
-            {isTyping && (
-              <div className="flex items-center gap-2 text-gray-500 text-sm">
-                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                  <User className="h-4 w-4" />
-                </div>
-                <div className="bg-gray-100 p-3 rounded-lg">
-                  <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            <div ref={messagesEndRef} />
-          </div>
-          
-          <Separator />
-          
-          {/* Message Input */}
-          <div className="p-4">
-            <div className="flex gap-2">
-              <Input
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your message..."
-                className="flex-1"
-              />
-              <Button 
-                onClick={handleSendMessage}
-                disabled={!newMessage.trim()}
-                className="px-4"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+              </CardHeader>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex justify-between">
-            <Button variant="outline" onClick={() => window.history.back()}>
-              Back to Tracking
-            </Button>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => window.location.href = '/dashboard'}>
-                Dashboard
-              </Button>
-              <Button onClick={() => window.location.href = '/tracking'}>
-                View Tracking
-              </Button>
-            </div>
+              {/* Messages */}
+              <CardContent className="flex-1 overflow-y-auto p-4">
+                <div className="space-y-4">
+                  {messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${message.sender === 'provider' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                          message.sender === 'provider'
+                            ? 'bg-green-600 text-white'
+                            : message.sender === 'customer'
+                            ? 'bg-gray-200 text-gray-800'
+                            : 'bg-blue-100 text-blue-800 text-center'
+                        }`}
+                      >
+                        {message.sender === 'customer' && message.customerName && (
+                          <div className="text-xs opacity-70 mb-1">{message.customerName}</div>
+                        )}
+                        <div className="text-sm">{message.text}</div>
+                        <div className={`text-xs mt-1 ${
+                          message.sender === 'provider' ? 'text-green-100' : 'text-gray-500'
+                        }`}>
+                          {message.timestamp.toLocaleTimeString()}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+              </CardContent>
+
+              {/* Message Input */}
+              <div className="border-t p-4">
+                <div className="flex space-x-2">
+                  <Input
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Type your message to the customer..."
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={handleSendMessage}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
