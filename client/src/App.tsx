@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/components/UserAuthProvider";
 import { UnifiedAuthProvider } from "@/components/UnifiedAuthProvider";
 import { CrossRoleDataBridge } from "@/components/CrossRoleDataBridge";
+import RoleBasedRedirect from "@/components/RoleBasedRedirect";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { isProfileComplete } from "@/utils/profileUtils";
@@ -125,7 +126,7 @@ function Router() {
   return (
     <Switch>
       {/* Main Entry Points */}
-      <Route path="/" component={ChatPage} />
+      <Route path="/" component={RoleBasedRedirect} />
       <Route path="/customer-home" component={CustomerHomePage} />
       
       {/* Authentication */}
