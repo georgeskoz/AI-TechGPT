@@ -39,6 +39,12 @@ export default function ChatPage() {
   // Check if username exists on mount OR if user is authenticated
   useEffect(() => {
     if (isAuthenticated && user) {
+      // If user is a service provider, redirect to technician dashboard
+      if (user.userType === 'service_provider' || user.userType === 'technician') {
+        setLocation('/technician-dashboard');
+        return;
+      }
+      
       // User is authenticated, use their username and don't show modal
       setUsername(user.username || user.fullName || 'User');
       setShowUsernameModal(false);
@@ -46,7 +52,7 @@ export default function ChatPage() {
       // User is not authenticated and no username set, show modal
       setShowUsernameModal(true);
     }
-  }, [username, isAuthenticated, user, setUsername]);
+  }, [username, isAuthenticated, user, setUsername, setLocation]);
 
   // Show service announcement on first visit
   useEffect(() => {
