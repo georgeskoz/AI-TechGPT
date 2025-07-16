@@ -83,21 +83,26 @@ export class DatabaseStorage implements IStorage {
     // Try to find by email first
     if (emailOrUsername.includes('@')) {
       user = await this.getUserByEmail(emailOrUsername);
+      console.log("Found user by email:", !!user);
     } else {
       user = await this.getUserByUsername(emailOrUsername);
+      console.log("Found user by username:", !!user);
     }
     
     // If not found by email, try username
     if (!user && emailOrUsername.includes('@')) {
       user = await this.getUserByUsername(emailOrUsername);
+      console.log("Found user by username (fallback):", !!user);
     }
     
     if (!user || !user.password) {
+      console.log("Authentication failed: user not found or no password");
       return undefined;
     }
     
     // Verify password
     const isValid = await bcrypt.compare(password, user.password);
+    console.log("Password verification result:", isValid);
     if (!isValid) {
       return undefined;
     }
