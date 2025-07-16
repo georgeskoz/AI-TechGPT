@@ -44,16 +44,16 @@ export default function LoginPage() {
       return response.json();
     },
     onSuccess: (data) => {
-      localStorage.setItem("techgpt_username", data.user.username);
-      localStorage.setItem("techgpt_user_id", data.user.id.toString());
-      localStorage.setItem("techgpt_auth_method", data.user.authMethod || "email");
-      localStorage.setItem("currentUser", JSON.stringify(data.user));
+      localStorage.setItem("techgpt_username", data.username);
+      localStorage.setItem("techgpt_user_id", data.id.toString());
+      localStorage.setItem("techgpt_auth_method", data.authMethod || "email");
+      localStorage.setItem("currentUser", JSON.stringify(data));
       toast({
         title: "Login Successful",
         description: "Welcome back to TechGPT!",
       });
       // Redirect based on user type
-      if (data.user.userType === 'technician' || data.user.userType === 'service_provider') {
+      if (data.userType === 'technician' || data.userType === 'service_provider') {
         setLocation("/technician-dashboard");
       } else {
         setLocation("/chat");
@@ -85,16 +85,16 @@ export default function LoginPage() {
       }
     },
     onSuccess: (data) => {
-      localStorage.setItem("techgpt_username", data.user.username);
-      localStorage.setItem("techgpt_user_id", data.user.id.toString());
-      localStorage.setItem("techgpt_auth_method", data.user.authMethod);
-      localStorage.setItem("currentUser", JSON.stringify(data.user));
+      localStorage.setItem("techgpt_username", data.username);
+      localStorage.setItem("techgpt_user_id", data.id.toString());
+      localStorage.setItem("techgpt_auth_method", data.authMethod);
+      localStorage.setItem("currentUser", JSON.stringify(data));
       toast({
         title: "Login Successful",
-        description: `Welcome back via ${data.user.authMethod}!`,
+        description: `Welcome back via ${data.authMethod}!`,
       });
       // Redirect based on user type
-      if (data.user.userType === 'technician' || data.user.userType === 'service_provider') {
+      if (data.userType === 'technician' || data.userType === 'service_provider') {
         setLocation("/technician-dashboard");
       } else {
         setLocation("/chat");
