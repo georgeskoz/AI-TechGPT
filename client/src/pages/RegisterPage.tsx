@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -12,7 +12,7 @@ import { z } from 'zod';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
-import { UserPlus, Users, Wrench, ArrowRight, CheckCircle, Star, Shield } from 'lucide-react';
+import { UserPlus, Users, Wrench, ArrowRight, CheckCircle, Star, Shield, Loader2, X } from 'lucide-react';
 
 const registerSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters'),
@@ -34,6 +34,8 @@ type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [checkingUsername, setCheckingUsername] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
@@ -54,6 +56,35 @@ export default function RegisterPage() {
   });
 
   const selectedUserType = form.watch('userType');
+  const watchedUsername = form.watch('username');
+
+  // Check username availability
+  const checkUsernameAvailability = async (username: string) => {
+    if (username.length < 3) {
+      setUsernameAvailable(null);
+      return;
+    }
+    
+    setCheckingUsername(true);
+    try {
+      const response = await fetch(`/api/users/${username}`);
+      setUsernameAvailable(response.status === 404); // 404 means username is available
+    } catch (error) {
+      setUsernameAvailable(null);
+    } finally {
+      setCheckingUsername(false);
+    }
+  };
+
+  // Check username availability when it changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (watchedUsername) {
+        checkUsernameAvailability(watchedUsername);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [watchedUsername]);
 
   const handleRegister = async (data: RegisterForm) => {
     try {
@@ -88,13 +119,29 @@ export default function RegisterPage() {
         // Redirect to login page instead of auto-login
         setLocation('/login');
       } else {
-        throw new Error('Failed to create account');
+        const errorData = await response.json();
+        throw new Error(errorData.error || errorData.message || 'Failed to create account');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Registration error:', error);
+      
+      let errorMessage = "Failed to create account. Please try again.";
+      
+      if (error.message) {
+        if (error.message.includes('Username already taken')) {
+          errorMessage = "This username is already taken. Please choose a different username.";
+        } else if (error.message.includes('User already exists')) {
+          errorMessage = "An account with this email already exists. Please use a different email or try logging in.";
+        } else if (error.message.includes('email')) {
+          errorMessage = "There's an issue with the email address. Please check and try again.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Registration Failed",
-        description: "Failed to create account. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -254,9 +301,32 @@ export default function RegisterPage() {
                       <FormItem>
                         <FormLabel>Username</FormLabel>
                         <FormControl>
-                          <Input placeholder="Choose a username" {...field} />
+                          <div className="relative">
+                            <Input placeholder="Choose a username" {...field} />
+                            {checkingUsername && (
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                              </div>
+                            )}
+                            {!checkingUsername && usernameAvailable === true && (
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                              </div>
+                            )}
+                            {!checkingUsername && usernameAvailable === false && (
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                <X className="h-4 w-4 text-red-500" />
+                              </div>
+                            )}
+                          </div>
                         </FormControl>
                         <FormMessage />
+                        {!checkingUsername && usernameAvailable === false && (
+                          <p className="text-sm text-red-500 mt-1">Username is already taken</p>
+                        )}
+                        {!checkingUsername && usernameAvailable === true && (
+                          <p className="text-sm text-green-500 mt-1">Username is available</p>
+                        )}
                       </FormItem>
                     )}
                   />
