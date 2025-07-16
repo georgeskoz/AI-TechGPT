@@ -54,12 +54,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       
       // Redirect based on user type
       if (user.userType === 'service_provider') {
-        window.location.href = '/technician-dashboard';
+        window.location.href = '/service-provider-dashboard';
       } else if (user.userType === 'customer') {
-        window.location.href = '/dashboard';
+        window.location.href = '/customer-dashboard';
       } else {
-        // Default to dashboard for other user types
-        window.location.href = '/dashboard';
+        // Default to customer dashboard for other user types
+        window.location.href = '/customer-dashboard';
       }
       
       onSuccess?.();
@@ -105,12 +105,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       
       // Redirect based on user type
       if (user.userType === 'service_provider') {
-        window.location.href = '/technician-dashboard';
+        window.location.href = '/service-provider-dashboard';
       } else if (user.userType === 'customer') {
-        window.location.href = '/dashboard';
+        window.location.href = '/customer-dashboard';
       } else {
-        // Default to dashboard for other user types
-        window.location.href = '/dashboard';
+        // Default to customer dashboard for other user types
+        window.location.href = '/customer-dashboard';
       }
       
       onSuccess?.();

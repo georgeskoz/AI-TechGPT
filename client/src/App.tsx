@@ -29,6 +29,7 @@ import AuthTestPage from "@/components/AuthTestPage";
 import ServiceProviderRegistration from "@/pages/TechnicianRegistration";
 import ServiceProviderDashboard from "@/pages/ServiceProviderDashboard";
 import TechnicianDetailsPage from "@/pages/TechnicianDashboard";
+import CustomerDashboard from "@/pages/CustomerDashboard";
 import TechnicianLanding from "@/pages/TechnicianLanding";
 import TechnicianMatchingPage from "@/pages/TechnicianMatchingPage";
 import ExpertTechnicianFinder from "@/pages/ExpertTechnicianFinder";
@@ -137,6 +138,7 @@ function Router() {
       {/* Customer Portal - Core Pages */}
       <Route path="/chat" component={ChatPage} />
       <Route path="/dashboard" component={ClientDashboard} />
+      <Route path="/customer-dashboard" component={CustomerDashboard} />
       <Route path="/issues" component={IssueCategorizationPage} />
       <Route path="/registration-success" component={RegistrationSuccess} />
       
