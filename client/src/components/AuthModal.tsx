@@ -51,6 +51,17 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
         title: "Login Successful",
         description: "Welcome back!",
       });
+      
+      // Redirect based on user type
+      if (user.userType === 'service_provider') {
+        window.location.href = '/technician-dashboard';
+      } else if (user.userType === 'customer') {
+        window.location.href = '/dashboard';
+      } else {
+        // Default to dashboard for other user types
+        window.location.href = '/dashboard';
+      }
+      
       onSuccess?.();
       onClose();
     } catch (error: any) {
@@ -91,6 +102,17 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
         title: "Registration Successful",
         description: "Your account has been created!",
       });
+      
+      // Redirect based on user type
+      if (user.userType === 'service_provider') {
+        window.location.href = '/technician-dashboard';
+      } else if (user.userType === 'customer') {
+        window.location.href = '/dashboard';
+      } else {
+        // Default to dashboard for other user types
+        window.location.href = '/dashboard';
+      }
+      
       onSuccess?.();
       onClose();
     } catch (error: any) {
