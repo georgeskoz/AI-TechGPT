@@ -5,9 +5,8 @@ import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import techGPTLogoPath from "@assets/image_1752537953157.png";
-// Temporarily remove problematic imports
-// import RoleBasedNavigation from "@/components/RoleBasedNavigation";
-// import { useUnifiedAuth } from "@/components/UnifiedAuthProvider";
+import RoleBasedNavigation from "@/components/RoleBasedNavigation";
+import { useAuth } from "@/components/UserAuthProvider";
 
 interface NavigationProps {
   showBackButton?: boolean;
@@ -27,8 +26,7 @@ export default function Navigation({
   const [location, setLocation] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   
-  // Temporarily bypass auth to prevent loading issues
-  const isAuthenticated = false;
+  const { isAuthenticated } = useAuth();
 
   const handleBack = () => {
     if (customBackAction) {

@@ -42,7 +42,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setUser(null);
+    // Clear all authentication-related localStorage keys
     localStorage.removeItem('tech_user');
+    localStorage.removeItem('techgpt_username');
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('serviceAnnouncementShown');
+    localStorage.removeItem('activeServiceBooking');
+    // Force page reload to reset application state
+    window.location.href = '/';
   };
 
   return (

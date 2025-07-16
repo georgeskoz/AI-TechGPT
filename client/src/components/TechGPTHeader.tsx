@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/components/UserAuthProvider';
 import techGPTLogoPath from "@assets/image_1752537953157.png";
 
 interface TechGPTHeaderProps {
@@ -15,6 +16,7 @@ interface TechGPTHeaderProps {
 
 export default function TechGPTHeader({ username }: TechGPTHeaderProps) {
   const [, navigate] = useLocation();
+  const { logout } = useAuth();
 
   const handleProfileClick = () => {
     navigate(`/${username}/profile`);
@@ -25,15 +27,7 @@ export default function TechGPTHeader({ username }: TechGPTHeaderProps) {
   };
 
   const handleLogout = () => {
-    // Clear username from localStorage
-    localStorage.removeItem('techgpt_username');
-    // Clear any other user-specific data
-    localStorage.removeItem('serviceAnnouncementShown');
-    localStorage.removeItem('activeServiceBooking');
-    // Navigate to home page
-    navigate('/');
-    // Reload the page to reset the app state
-    window.location.reload();
+    logout();
   };
 
   return (
