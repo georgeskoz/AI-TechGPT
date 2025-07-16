@@ -102,6 +102,22 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
 
 ## Recent Changes
 
+### January 16, 2025 - Separate Customer and Service Provider Database Implementation
+- **Complete Database Separation**: Successfully separated customer and service provider accounts into distinct databases and storage systems
+  - **Dual Database Architecture**: Created separate storage classes (CustomerPersistentStorage, ServiceProviderPersistentStorage) with dedicated JSON files
+  - **Separate Authentication Endpoints**: Implemented dedicated login/register endpoints for customers and service providers
+    - Customer endpoints: `/api/auth/customer/login`, `/api/auth/customer/register`
+    - Service provider endpoints: `/api/auth/service-provider/login`, `/api/auth/service-provider/register`
+    - Universal endpoints: `/api/auth/login`, `/api/auth/register` (tries both databases)
+  - **Role-Based Authentication**: Universal login automatically determines user type (customer vs service_provider) and redirects appropriately
+  - **Persistent File Storage**: Customer data saved to `customers.json`, service provider data saved to `service_providers.json`
+  - **Updated Social Login**: Social authentication now supports userType parameter for proper database routing
+  - **Enhanced Password Reset**: Forgot password functionality checks both customer and service provider databases
+  - **User Profile API**: Updated user profile endpoint to search both databases and return appropriate userType
+  - **Registration Flow**: Registration form now uses appropriate endpoint based on selected user type (customer/technician)
+  - **Database Schema**: Enhanced Customer and ServiceProvider tables with comprehensive fields for each user type
+  - **Authentication Flow**: Complete separation ensures customers and service providers have distinct accounts and proper portal routing
+
 ### January 15, 2025 - Authentication System Bug Fix and Data Persistence Implementation
 - **Authentication System Bug Fix**: Fixed critical authentication error that was preventing user login
   - **Fixed bcrypt Import Error**: Resolved "require is not defined" error by properly importing bcrypt module instead of using require() in ES modules

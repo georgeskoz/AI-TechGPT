@@ -16,6 +16,7 @@ export const socialLoginSchema = z.object({
     username: z.string().optional(),
     avatar: z.string().url().optional(),
   }),
+  userType: z.enum(["customer", "service_provider"]).optional(),
 });
 
 export const registerSchema = z.object({
