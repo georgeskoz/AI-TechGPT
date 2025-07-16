@@ -1,0 +1,91 @@
+Issue Report: User Login and Role-Based Routing Inconsistency
+🔐 Issue Summary:
+Upon login, the authenticated user is not routed to the appropriate dashboard or page based on their role. Instead, the system redirects to an incorrect or generic landing page. Additionally, key user information (e.g., username) is missing from the settings/profile page, indicating possible session state or role context issues.
+
+🔍 Observed Behavior:
+Login Redirection Error:
+
+Logged in using valid credentials.
+
+Redirected to a non-role-specific or incorrect page.
+
+Clicking on "Home" navigates to the public landing page rather than the authenticated user dashboard.
+
+Settings Page Anomaly:
+
+Navigating to Settings shows no user-specific data (e.g., username is empty or undefined).
+
+Indicates the user context/session may not be loaded correctly.
+
+Role Confusion:
+
+System does not distinguish between Users, Service Providers, and Administrators.
+
+All are treated uniformly post-authentication, which causes navigation and access control issues.
+
+🎯 Expected Behavior:
+Upon login, users should be routed to their role-specific dashboards:
+
+User ➝ /user/dashboard
+
+Service Provider ➝ /provider/dashboard
+
+Administrator ➝ /admin/dashboard
+
+The Settings page should display:
+
+Username
+
+Role
+
+Email
+
+Other profile-related data
+
+The application should implement strict role separation and contextual UI rendering based on authenticated user role.
+
+✅ Recommended Fixes (AI Agent Instructions):
+Session Handling:
+
+Ensure session stores and persists user role and profile info immediately after login.
+
+Role-Based Routing:
+
+Implement conditional routing logic after login:
+
+javascript
+Copy
+Edit
+if (user.role === 'user') {
+  navigate('/user/dashboard');
+} else if (user.role === 'provider') {
+  navigate('/provider/dashboard');
+} else if (user.role === 'admin') {
+  navigate('/admin/dashboard');
+}
+UI Context Binding:
+
+On app initialization, load user context into global state/store (e.g., Redux, Context API).
+
+Use this to populate pages like Settings, Dashboard, etc.
+
+Access Control Layer:
+
+Implement a route guard (middleware or HOC) that restricts access based on role:
+
+jsx
+Copy
+Edit
+<ProtectedRoute role="admin">
+  <AdminDashboard />
+</ProtectedRoute>
+Separate Account Handling Models:
+
+Refactor account logic to separate user schemas, permissions, and UI components for:
+
+User
+
+Service Provider
+
+Admin
+
