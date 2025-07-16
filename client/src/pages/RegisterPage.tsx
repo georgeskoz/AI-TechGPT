@@ -106,7 +106,12 @@ export default function RegisterPage() {
         userType: data.userType,
       };
 
-      const response = await apiRequest('POST', '/api/auth/register', userData);
+      // Use the appropriate endpoint based on user type
+      const endpoint = data.userType === 'technician' 
+        ? '/api/auth/service-provider/register' 
+        : '/api/auth/customer/register';
+      
+      const response = await apiRequest('POST', endpoint, userData);
       
       if (response.ok) {
         const user = await response.json();

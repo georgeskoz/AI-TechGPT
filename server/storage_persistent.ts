@@ -1,12 +1,65 @@
 import bcrypt from 'bcryptjs';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { type User, type InsertUser, type UpdateProfile } from "@shared/schema";
+import { 
+  type User, type InsertUser, type UpdateProfile,
+  type Customer, type InsertCustomer,
+  type ServiceProvider, type InsertServiceProvider
+} from "@shared/schema";
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const CUSTOMERS_FILE = path.join(DATA_DIR, 'customers.json');
+const SERVICE_PROVIDERS_FILE = path.join(DATA_DIR, 'service_providers.json');
 
-// Interface for storage operations
+// Interface for customer storage operations
+export interface ICustomerStorage {
+  // Customer operations
+  getCustomer(id: number): Promise<Customer | undefined>;
+  getCustomerByUsername(username: string): Promise<Customer | undefined>;
+  getCustomerByEmail(email: string): Promise<Customer | undefined>;
+  createCustomer(customer: InsertCustomer): Promise<Customer>;
+  updateCustomer(id: number, updates: Partial<Customer>): Promise<Customer | undefined>;
+  
+  // Authentication
+  authenticateCustomer(emailOrUsername: string, password: string): Promise<Customer | undefined>;
+  getCustomerBySocialId(provider: string, socialId: string): Promise<Customer | undefined>;
+  createOrUpdateSocialCustomer(provider: string, userData: any): Promise<Customer>;
+  
+  // Password reset tokens
+  createPasswordResetToken(userId: number, token: string, expiresAt: Date): Promise<void>;
+  getPasswordResetToken(token: string): Promise<{userId: number, expiresAt: Date, used: boolean} | undefined>;
+  markPasswordResetTokenUsed(token: string): Promise<void>;
+  updateUserPassword(userId: number, newPassword: string): Promise<void>;
+  
+  // Dashboard data methods
+  getServiceRequestsByCustomer(customerId: number): Promise<any[]>;
+  getJobsByCustomer(customerId: number): Promise<any[]>;
+  getServiceBookingsByCustomer(customerId: number): Promise<any[]>;
+}
+
+// Interface for service provider storage operations
+export interface IServiceProviderStorage {
+  // Service provider operations
+  getServiceProvider(id: number): Promise<ServiceProvider | undefined>;
+  getServiceProviderByUsername(username: string): Promise<ServiceProvider | undefined>;
+  getServiceProviderByEmail(email: string): Promise<ServiceProvider | undefined>;
+  createServiceProvider(serviceProvider: InsertServiceProvider): Promise<ServiceProvider>;
+  updateServiceProvider(id: number, updates: Partial<ServiceProvider>): Promise<ServiceProvider | undefined>;
+  
+  // Authentication
+  authenticateServiceProvider(emailOrUsername: string, password: string): Promise<ServiceProvider | undefined>;
+  getServiceProviderBySocialId(provider: string, socialId: string): Promise<ServiceProvider | undefined>;
+  createOrUpdateSocialServiceProvider(provider: string, userData: any): Promise<ServiceProvider>;
+  
+  // Password reset tokens
+  createPasswordResetToken(userId: number, token: string, expiresAt: Date): Promise<void>;
+  getPasswordResetToken(token: string): Promise<{userId: number, expiresAt: Date, used: boolean} | undefined>;
+  markPasswordResetTokenUsed(token: string): Promise<void>;
+  updateUserPassword(userId: number, newPassword: string): Promise<void>;
+}
+
+// Legacy interface for storage operations
 export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
@@ -368,4 +421,502 @@ export class PersistentStorage implements IStorage {
   }
 }
 
+// Customer persistent storage implementation
+export class CustomerPersistentStorage implements ICustomerStorage {
+  private customers: Map<number, Customer> = new Map();
+  private nextCustomerId = 1;
+  private passwordResetTokens: Map<string, {userId: number, expiresAt: Date, used: boolean, createdAt: Date}> = new Map();
+
+  constructor() {
+    this.loadCustomers();
+  }
+
+  private async ensureDataDir() {
+    try {
+      await fs.mkdir(DATA_DIR, { recursive: true });
+    } catch (error) {
+      // Directory might already exist, ignore error
+    }
+  }
+
+  private async loadCustomers() {
+    try {
+      await this.ensureDataDir();
+      const data = await fs.readFile(CUSTOMERS_FILE, 'utf8');
+      const customersArray = JSON.parse(data);
+      
+      this.customers.clear();
+      customersArray.forEach((customer: Customer) => {
+        this.customers.set(customer.id, {
+          ...customer,
+          createdAt: new Date(customer.createdAt),
+          updatedAt: new Date(customer.updatedAt)
+        });
+        if (customer.id >= this.nextCustomerId) {
+          this.nextCustomerId = customer.id + 1;
+        }
+      });
+      
+      console.log(`Loaded ${this.customers.size} customers from persistent storage`);
+    } catch (error) {
+      console.log('No existing customers file found, starting with empty storage');
+    }
+  }
+
+  private async saveCustomers() {
+    try {
+      await this.ensureDataDir();
+      const customersArray = Array.from(this.customers.values());
+      await fs.writeFile(CUSTOMERS_FILE, JSON.stringify(customersArray, null, 2));
+      console.log(`Saved ${customersArray.length} customers to persistent storage`);
+    } catch (error) {
+      console.error('Error saving customers:', error);
+    }
+  }
+
+  async getCustomer(id: number): Promise<Customer | undefined> {
+    return this.customers.get(id);
+  }
+
+  async getCustomerByUsername(username: string): Promise<Customer | undefined> {
+    for (const customer of this.customers.values()) {
+      if (customer.username === username) {
+        return customer;
+      }
+    }
+    return undefined;
+  }
+
+  async getCustomerByEmail(email: string): Promise<Customer | undefined> {
+    for (const customer of this.customers.values()) {
+      if (customer.email === email) {
+        return customer;
+      }
+    }
+    return undefined;
+  }
+
+  async createCustomer(insertCustomer: InsertCustomer): Promise<Customer> {
+    const customer: Customer = {
+      id: this.nextCustomerId++,
+      username: insertCustomer.username,
+      password: insertCustomer.password || null,
+      email: insertCustomer.email || null,
+      fullName: insertCustomer.fullName || null,
+      bio: insertCustomer.bio || null,
+      avatar: insertCustomer.avatar || null,
+      socialProviders: insertCustomer.socialProviders || null,
+      authMethod: insertCustomer.authMethod || "email",
+      lastLoginMethod: insertCustomer.lastLoginMethod || null,
+      phone: insertCustomer.phone || null,
+      street: insertCustomer.street || null,
+      apartment: insertCustomer.apartment || null,
+      city: insertCustomer.city || null,
+      state: insertCustomer.state || null,
+      zipCode: insertCustomer.zipCode || null,
+      country: insertCustomer.country || "Canada",
+      businessInfo: insertCustomer.businessInfo || null,
+      paymentMethod: insertCustomer.paymentMethod || null,
+      paymentMethods: insertCustomer.paymentMethods || null,
+      paymentMethodSetup: insertCustomer.paymentMethodSetup || false,
+      paymentDetails: insertCustomer.paymentDetails || null,
+      emailVerified: insertCustomer.emailVerified || false,
+      phoneVerified: insertCustomer.phoneVerified || false,
+      identityVerified: insertCustomer.identityVerified || false,
+      accountActive: insertCustomer.accountActive !== undefined ? insertCustomer.accountActive : true,
+      emailNotifications: insertCustomer.emailNotifications !== undefined ? insertCustomer.emailNotifications : true,
+      smsNotifications: insertCustomer.smsNotifications || false,
+      marketingEmails: insertCustomer.marketingEmails !== undefined ? insertCustomer.marketingEmails : true,
+      twoFactorEnabled: insertCustomer.twoFactorEnabled || false,
+      twoFactorMethod: insertCustomer.twoFactorMethod || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    this.customers.set(customer.id, customer);
+    await this.saveCustomers();
+    return customer;
+  }
+
+  async updateCustomer(id: number, updates: Partial<Customer>): Promise<Customer | undefined> {
+    const customer = this.customers.get(id);
+    if (!customer) return undefined;
+
+    const updatedCustomer: Customer = {
+      ...customer,
+      ...updates,
+      id: customer.id,
+      updatedAt: new Date()
+    };
+
+    this.customers.set(id, updatedCustomer);
+    await this.saveCustomers();
+    return updatedCustomer;
+  }
+
+  async authenticateCustomer(emailOrUsername: string, password: string): Promise<Customer | undefined> {
+    let customer = emailOrUsername.includes('@') 
+      ? await this.getCustomerByEmail(emailOrUsername)
+      : await this.getCustomerByUsername(emailOrUsername);
+
+    if (!customer && emailOrUsername.includes('@')) {
+      customer = await this.getCustomerByUsername(emailOrUsername);
+    }
+
+    if (!customer || !customer.password) {
+      return undefined;
+    }
+
+    const isValid = await bcrypt.compare(password, customer.password);
+    if (!isValid) {
+      return undefined;
+    }
+
+    await this.updateCustomer(customer.id, {
+      lastLoginMethod: "email",
+      updatedAt: new Date()
+    });
+
+    return customer;
+  }
+
+  async getCustomerBySocialId(provider: string, socialId: string): Promise<Customer | undefined> {
+    for (const customer of this.customers.values()) {
+      if (customer.socialProviders && customer.socialProviders[provider]?.id === socialId) {
+        return customer;
+      }
+    }
+    return undefined;
+  }
+
+  async createOrUpdateSocialCustomer(provider: string, userData: any): Promise<Customer> {
+    const existingCustomer = await this.getCustomerBySocialId(provider, userData.id);
+    if (existingCustomer) {
+      return await this.updateCustomer(existingCustomer.id, {
+        lastLoginMethod: provider,
+        updatedAt: new Date()
+      }) || existingCustomer;
+    }
+
+    const username = this.generateUniqueUsername(userData.username || userData.name || `user_${provider}_${userData.id.slice(0, 8)}`);
+    
+    return await this.createCustomer({
+      username,
+      password: null,
+      email: userData.email || null,
+      fullName: userData.name || null,
+      avatar: userData.avatar || null,
+      socialProviders: {
+        [provider]: {
+          id: userData.id,
+          email: userData.email,
+          name: userData.name,
+          avatar: userData.avatar
+        }
+      },
+      authMethod: provider,
+      lastLoginMethod: provider
+    });
+  }
+
+  private generateUniqueUsername(baseUsername: string): string {
+    let username = baseUsername.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (username.length < 3) {
+      username = username + Math.random().toString(36).substring(2, 8);
+    }
+    const suffix = Math.random().toString(36).substring(2, 8);
+    return `${username}_${suffix}`;
+  }
+
+  // Password reset token methods
+  async createPasswordResetToken(userId: number, token: string, expiresAt: Date): Promise<void> {
+    this.passwordResetTokens.set(token, {
+      userId,
+      expiresAt,
+      used: false,
+      createdAt: new Date()
+    });
+  }
+
+  async getPasswordResetToken(token: string): Promise<{userId: number, expiresAt: Date, used: boolean} | undefined> {
+    return this.passwordResetTokens.get(token);
+  }
+
+  async markPasswordResetTokenUsed(token: string): Promise<void> {
+    const tokenData = this.passwordResetTokens.get(token);
+    if (tokenData) {
+      tokenData.used = true;
+      this.passwordResetTokens.set(token, tokenData);
+    }
+  }
+
+  async updateUserPassword(userId: number, newPassword: string): Promise<void> {
+    const customer = this.customers.get(userId);
+    if (customer) {
+      customer.password = newPassword;
+      customer.updatedAt = new Date();
+      this.customers.set(userId, customer);
+      await this.saveCustomers();
+    }
+  }
+
+  // Dashboard data methods
+  async getServiceRequestsByCustomer(customerId: number): Promise<any[]> {
+    return [];
+  }
+
+  async getJobsByCustomer(customerId: number): Promise<any[]> {
+    return [];
+  }
+
+  async getServiceBookingsByCustomer(customerId: number): Promise<any[]> {
+    return [];
+  }
+}
+
+// Service Provider persistent storage implementation
+export class ServiceProviderPersistentStorage implements IServiceProviderStorage {
+  private serviceProviders: Map<number, ServiceProvider> = new Map();
+  private nextServiceProviderId = 1;
+  private passwordResetTokens: Map<string, {userId: number, expiresAt: Date, used: boolean, createdAt: Date}> = new Map();
+
+  constructor() {
+    this.loadServiceProviders();
+  }
+
+  private async ensureDataDir() {
+    try {
+      await fs.mkdir(DATA_DIR, { recursive: true });
+    } catch (error) {
+      // Directory might already exist, ignore error
+    }
+  }
+
+  private async loadServiceProviders() {
+    try {
+      await this.ensureDataDir();
+      const data = await fs.readFile(SERVICE_PROVIDERS_FILE, 'utf8');
+      const serviceProvidersArray = JSON.parse(data);
+      
+      this.serviceProviders.clear();
+      serviceProvidersArray.forEach((serviceProvider: ServiceProvider) => {
+        this.serviceProviders.set(serviceProvider.id, {
+          ...serviceProvider,
+          createdAt: new Date(serviceProvider.createdAt),
+          updatedAt: new Date(serviceProvider.updatedAt)
+        });
+        if (serviceProvider.id >= this.nextServiceProviderId) {
+          this.nextServiceProviderId = serviceProvider.id + 1;
+        }
+      });
+      
+      console.log(`Loaded ${this.serviceProviders.size} service providers from persistent storage`);
+    } catch (error) {
+      console.log('No existing service providers file found, starting with empty storage');
+    }
+  }
+
+  private async saveServiceProviders() {
+    try {
+      await this.ensureDataDir();
+      const serviceProvidersArray = Array.from(this.serviceProviders.values());
+      await fs.writeFile(SERVICE_PROVIDERS_FILE, JSON.stringify(serviceProvidersArray, null, 2));
+      console.log(`Saved ${serviceProvidersArray.length} service providers to persistent storage`);
+    } catch (error) {
+      console.error('Error saving service providers:', error);
+    }
+  }
+
+  async getServiceProvider(id: number): Promise<ServiceProvider | undefined> {
+    return this.serviceProviders.get(id);
+  }
+
+  async getServiceProviderByUsername(username: string): Promise<ServiceProvider | undefined> {
+    for (const serviceProvider of this.serviceProviders.values()) {
+      if (serviceProvider.username === username) {
+        return serviceProvider;
+      }
+    }
+    return undefined;
+  }
+
+  async getServiceProviderByEmail(email: string): Promise<ServiceProvider | undefined> {
+    for (const serviceProvider of this.serviceProviders.values()) {
+      if (serviceProvider.email === email) {
+        return serviceProvider;
+      }
+    }
+    return undefined;
+  }
+
+  async createServiceProvider(insertServiceProvider: InsertServiceProvider): Promise<ServiceProvider> {
+    const serviceProvider: ServiceProvider = {
+      id: this.nextServiceProviderId++,
+      username: insertServiceProvider.username,
+      password: insertServiceProvider.password || null,
+      email: insertServiceProvider.email || null,
+      fullName: insertServiceProvider.fullName || null,
+      bio: insertServiceProvider.bio || null,
+      avatar: insertServiceProvider.avatar || null,
+      socialProviders: insertServiceProvider.socialProviders || null,
+      authMethod: insertServiceProvider.authMethod || "email",
+      lastLoginMethod: insertServiceProvider.lastLoginMethod || null,
+      phone: insertServiceProvider.phone || null,
+      street: insertServiceProvider.street || null,
+      apartment: insertServiceProvider.apartment || null,
+      city: insertServiceProvider.city || null,
+      state: insertServiceProvider.state || null,
+      zipCode: insertServiceProvider.zipCode || null,
+      country: insertServiceProvider.country || "Canada",
+      businessInfo: insertServiceProvider.businessInfo || null,
+      emailVerified: insertServiceProvider.emailVerified || false,
+      phoneVerified: insertServiceProvider.phoneVerified || false,
+      identityVerified: insertServiceProvider.identityVerified || false,
+      backgroundCheckVerified: insertServiceProvider.backgroundCheckVerified || false,
+      accountActive: insertServiceProvider.accountActive !== undefined ? insertServiceProvider.accountActive : true,
+      accountApproved: insertServiceProvider.accountApproved || false,
+      rating: insertServiceProvider.rating || "0.00",
+      totalJobs: insertServiceProvider.totalJobs || 0,
+      completedJobs: insertServiceProvider.completedJobs || 0,
+      responseTime: insertServiceProvider.responseTime || 0,
+      emailNotifications: insertServiceProvider.emailNotifications !== undefined ? insertServiceProvider.emailNotifications : true,
+      smsNotifications: insertServiceProvider.smsNotifications || false,
+      marketingEmails: insertServiceProvider.marketingEmails !== undefined ? insertServiceProvider.marketingEmails : true,
+      twoFactorEnabled: insertServiceProvider.twoFactorEnabled || false,
+      twoFactorMethod: insertServiceProvider.twoFactorMethod || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    this.serviceProviders.set(serviceProvider.id, serviceProvider);
+    await this.saveServiceProviders();
+    return serviceProvider;
+  }
+
+  async updateServiceProvider(id: number, updates: Partial<ServiceProvider>): Promise<ServiceProvider | undefined> {
+    const serviceProvider = this.serviceProviders.get(id);
+    if (!serviceProvider) return undefined;
+
+    const updatedServiceProvider: ServiceProvider = {
+      ...serviceProvider,
+      ...updates,
+      id: serviceProvider.id,
+      updatedAt: new Date()
+    };
+
+    this.serviceProviders.set(id, updatedServiceProvider);
+    await this.saveServiceProviders();
+    return updatedServiceProvider;
+  }
+
+  async authenticateServiceProvider(emailOrUsername: string, password: string): Promise<ServiceProvider | undefined> {
+    let serviceProvider = emailOrUsername.includes('@') 
+      ? await this.getServiceProviderByEmail(emailOrUsername)
+      : await this.getServiceProviderByUsername(emailOrUsername);
+
+    if (!serviceProvider && emailOrUsername.includes('@')) {
+      serviceProvider = await this.getServiceProviderByUsername(emailOrUsername);
+    }
+
+    if (!serviceProvider || !serviceProvider.password) {
+      return undefined;
+    }
+
+    const isValid = await bcrypt.compare(password, serviceProvider.password);
+    if (!isValid) {
+      return undefined;
+    }
+
+    await this.updateServiceProvider(serviceProvider.id, {
+      lastLoginMethod: "email",
+      updatedAt: new Date()
+    });
+
+    return serviceProvider;
+  }
+
+  async getServiceProviderBySocialId(provider: string, socialId: string): Promise<ServiceProvider | undefined> {
+    for (const serviceProvider of this.serviceProviders.values()) {
+      if (serviceProvider.socialProviders && serviceProvider.socialProviders[provider]?.id === socialId) {
+        return serviceProvider;
+      }
+    }
+    return undefined;
+  }
+
+  async createOrUpdateSocialServiceProvider(provider: string, userData: any): Promise<ServiceProvider> {
+    const existingServiceProvider = await this.getServiceProviderBySocialId(provider, userData.id);
+    if (existingServiceProvider) {
+      return await this.updateServiceProvider(existingServiceProvider.id, {
+        lastLoginMethod: provider,
+        updatedAt: new Date()
+      }) || existingServiceProvider;
+    }
+
+    const username = this.generateUniqueUsername(userData.username || userData.name || `provider_${provider}_${userData.id.slice(0, 8)}`);
+    
+    return await this.createServiceProvider({
+      username,
+      password: null,
+      email: userData.email || null,
+      fullName: userData.name || null,
+      avatar: userData.avatar || null,
+      socialProviders: {
+        [provider]: {
+          id: userData.id,
+          email: userData.email,
+          name: userData.name,
+          avatar: userData.avatar
+        }
+      },
+      authMethod: provider,
+      lastLoginMethod: provider
+    });
+  }
+
+  private generateUniqueUsername(baseUsername: string): string {
+    let username = baseUsername.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (username.length < 3) {
+      username = username + Math.random().toString(36).substring(2, 8);
+    }
+    const suffix = Math.random().toString(36).substring(2, 8);
+    return `${username}_${suffix}`;
+  }
+
+  // Password reset token methods
+  async createPasswordResetToken(userId: number, token: string, expiresAt: Date): Promise<void> {
+    this.passwordResetTokens.set(token, {
+      userId,
+      expiresAt,
+      used: false,
+      createdAt: new Date()
+    });
+  }
+
+  async getPasswordResetToken(token: string): Promise<{userId: number, expiresAt: Date, used: boolean} | undefined> {
+    return this.passwordResetTokens.get(token);
+  }
+
+  async markPasswordResetTokenUsed(token: string): Promise<void> {
+    const tokenData = this.passwordResetTokens.get(token);
+    if (tokenData) {
+      tokenData.used = true;
+      this.passwordResetTokens.set(token, tokenData);
+    }
+  }
+
+  async updateUserPassword(userId: number, newPassword: string): Promise<void> {
+    const serviceProvider = this.serviceProviders.get(userId);
+    if (serviceProvider) {
+      serviceProvider.password = newPassword;
+      serviceProvider.updatedAt = new Date();
+      this.serviceProviders.set(userId, serviceProvider);
+      await this.saveServiceProviders();
+    }
+  }
+}
+
+// Create storage instances
+export const customerStorage = new CustomerPersistentStorage();
+export const serviceProviderStorage = new ServiceProviderPersistentStorage();
 export const storage = new PersistentStorage();

@@ -3,6 +3,158 @@ import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Customer accounts table
+export const customers = pgTable("customers", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password"), // nullable for social login users
+  email: text("email"),
+  fullName: text("full_name"),
+  bio: text("bio"),
+  avatar: text("avatar"),
+  
+  // Social media authentication
+  socialProviders: jsonb("social_providers").$type<{
+    google?: { id: string; email: string; name: string; avatar?: string };
+    facebook?: { id: string; email: string; name: string; avatar?: string };
+    apple?: { id: string; email?: string; name?: string; avatar?: string };
+    instagram?: { id: string; username: string; name?: string; avatar?: string };
+    twitter?: { id: string; username: string; name?: string; avatar?: string };
+    github?: { id: string; username: string; name?: string; avatar?: string };
+    linkedin?: { id: string; email: string; name: string; avatar?: string };
+  }>(),
+  authMethod: text("auth_method").notNull().default("email"), // email, google, facebook, apple, instagram, twitter, github, linkedin
+  lastLoginMethod: text("last_login_method"), // tracks which method user last used
+  
+  // Customer contact information
+  phone: text("phone"),
+  street: text("street"),
+  apartment: text("apartment"),
+  city: text("city"),
+  state: text("state"),
+  zipCode: text("zip_code"),
+  country: text("country").default("Canada"),
+  
+  // Account status fields
+  emailVerified: boolean("email_verified").default(false),
+  phoneVerified: boolean("phone_verified").default(false),
+  identityVerified: boolean("identity_verified").default(false),
+  accountActive: boolean("account_active").default(true),
+  
+  // Business information (optional for business users)
+  businessInfo: jsonb("business_info").$type<{
+    businessName?: string;
+    businessType?: string;
+    industry?: string;
+    taxId?: string;
+    website?: string;
+    description?: string;
+  }>(),
+  
+  // Payment method configuration
+  paymentMethod: text("payment_method"), // credit_card, paypal, apple_pay, google_pay (legacy single method)
+  paymentMethods: jsonb("payment_methods").$type<string[]>(), // Array of payment methods
+  paymentMethodSetup: boolean("payment_method_setup").default(false),
+  paymentDetails: jsonb("payment_details").$type<{
+    cardLast4?: string;
+    cardBrand?: string;
+    paypalEmail?: string;
+    applePayEnabled?: boolean;
+    googlePayEnabled?: boolean;
+  }>(),
+  
+  // Notification preferences
+  emailNotifications: boolean("email_notifications").default(true),
+  smsNotifications: boolean("sms_notifications").default(false),
+  marketingEmails: boolean("marketing_emails").default(true),
+  
+  // Two-factor authentication
+  twoFactorEnabled: boolean("two_factor_enabled").default(false),
+  twoFactorMethod: text("two_factor_method"), // sms, email, app
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Service Provider accounts table
+export const serviceProviders = pgTable("service_providers", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password"), // nullable for social login users
+  email: text("email"),
+  fullName: text("full_name"),
+  bio: text("bio"),
+  avatar: text("avatar"),
+  
+  // Social media authentication
+  socialProviders: jsonb("social_providers").$type<{
+    google?: { id: string; email: string; name: string; avatar?: string };
+    facebook?: { id: string; email: string; name: string; avatar?: string };
+    apple?: { id: string; email?: string; name?: string; avatar?: string };
+    instagram?: { id: string; username: string; name?: string; avatar?: string };
+    twitter?: { id: string; username: string; name?: string; avatar?: string };
+    github?: { id: string; username: string; name?: string; avatar?: string };
+    linkedin?: { id: string; email: string; name: string; avatar?: string };
+  }>(),
+  authMethod: text("auth_method").notNull().default("email"), // email, google, facebook, apple, instagram, twitter, github, linkedin
+  lastLoginMethod: text("last_login_method"), // tracks which method user last used
+  
+  // Service provider specific fields
+  phone: text("phone"),
+  street: text("street"),
+  apartment: text("apartment"),
+  city: text("city"),
+  state: text("state"),
+  zipCode: text("zip_code"),
+  country: text("country").default("Canada"),
+  
+  // Professional information
+  businessInfo: jsonb("business_info").$type<{
+    businessName?: string;
+    businessType?: string;
+    industry?: string;
+    taxId?: string;
+    website?: string;
+    description?: string;
+    certifications?: string[];
+    skills?: string[];
+    languages?: string[];
+    serviceAreas?: string[];
+    hourlyRates?: {
+      remote?: number;
+      phone?: number;
+      onsite?: number;
+    };
+  }>(),
+  
+  // Account status fields
+  emailVerified: boolean("email_verified").default(false),
+  phoneVerified: boolean("phone_verified").default(false),
+  identityVerified: boolean("identity_verified").default(false),
+  backgroundCheckVerified: boolean("background_check_verified").default(false),
+  accountActive: boolean("account_active").default(true),
+  accountApproved: boolean("account_approved").default(false),
+  
+  // Service provider metrics
+  rating: decimal("rating", { precision: 3, scale: 2 }).default('0.00'),
+  totalJobs: integer("total_jobs").default(0),
+  completedJobs: integer("completed_jobs").default(0),
+  responseTime: integer("response_time").default(0), // in minutes
+  
+  // Notification preferences
+  emailNotifications: boolean("email_notifications").default(true),
+  smsNotifications: boolean("sms_notifications").default(false),
+  marketingEmails: boolean("marketing_emails").default(true),
+  
+  // Two-factor authentication
+  twoFactorEnabled: boolean("two_factor_enabled").default(false),
+  twoFactorMethod: text("two_factor_method"), // sms, email, app
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Legacy users table (for backward compatibility)
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
@@ -1911,3 +2063,9 @@ export type ScreenSharingSession = typeof screenSharingSessions.$inferSelect;
 export type InsertScreenSharingSession = z.infer<typeof insertScreenSharingSessionSchema>;
 export type ScreenSharingEvent = typeof screenSharingEvents.$inferSelect;
 export type InsertScreenSharingEvent = z.infer<typeof insertScreenSharingEventSchema>;
+
+// New separate table types
+export type Customer = typeof customers.$inferSelect;
+export type InsertCustomer = typeof customers.$inferInsert;
+export type ServiceProvider = typeof serviceProviders.$inferSelect;
+export type InsertServiceProvider = typeof serviceProviders.$inferInsert;
