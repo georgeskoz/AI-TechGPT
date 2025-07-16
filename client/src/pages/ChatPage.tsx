@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tag, List } from 'lucide-react';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useChat } from '@/hooks/useChat';
+import { useAuth } from '@/components/UserAuthProvider';
 import SimpleNavigation from '@/components/SimpleNavigation';
 import TechGPTHeader from '@/components/TechGPTHeader';
 import TopicSidebar from '@/components/TopicSidebar';
@@ -29,15 +30,23 @@ export default function ChatPage() {
   const [showActiveService, setShowActiveService] = useState(false);
   const [, setLocation] = useLocation();
   
+  // Authentication context
+  const { user, isAuthenticated } = useAuth();
+  
   // Chat functionality with OpenAI
   const { messages, isLoading, error, typingMessage, isTyping, sendMessage, clearError } = useChat(username);
   
-  // Check if username exists on mount
+  // Check if username exists on mount OR if user is authenticated
   useEffect(() => {
-    if (!username) {
+    if (isAuthenticated && user) {
+      // User is authenticated, use their username and don't show modal
+      setUsername(user.username || user.fullName || 'User');
+      setShowUsernameModal(false);
+    } else if (!username) {
+      // User is not authenticated and no username set, show modal
       setShowUsernameModal(true);
     }
-  }, [username]);
+  }, [username, isAuthenticated, user, setUsername]);
 
   // Show service announcement on first visit
   useEffect(() => {

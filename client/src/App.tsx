@@ -220,13 +220,15 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-gray-50">
-        <Router />
-        {/* Temporarily disabled complex components causing loading issues */}
-        {/* <FloatingChatWidget username={username} /> */}
-        {/* <AIFeatureDiscoveryWrapper /> */}
-      </div>
-      <Toaster />
+      <AuthProvider>
+        <div className="min-h-screen bg-gray-50">
+          <Router />
+          {/* Temporarily disabled complex components causing loading issues */}
+          {/* <FloatingChatWidget username={username} /> */}
+          {/* <AIFeatureDiscoveryWrapper /> */}
+        </div>
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
