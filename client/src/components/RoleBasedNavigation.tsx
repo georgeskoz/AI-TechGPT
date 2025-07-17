@@ -116,15 +116,15 @@ const navigationItems: NavigationItem[] = [
 ];
 
 export default function RoleBasedNavigation() {
-  const { user, logout, setCurrentPortal } = useAuth();
+  const { user, logout, setCurrentPortal, currentPortal } = useAuth();
   const [, setLocation] = useLocation();
 
   if (!user) return null;
 
-  // Use userType from the authenticated user
-  const userType = user.userType || 'customer';
+  // Use currentPortal from auth context instead of user's actual userType
+  const activePortal = currentPortal || 'customer';
   const userNavigationItems = navigationItems.filter(item => 
-    item.roles.includes(userType)
+    item.roles.includes(activePortal)
   );
 
   const handleRoleSwitch = async (newRole: 'customer' | 'service_provider' | 'admin') => {
@@ -196,9 +196,9 @@ export default function RoleBasedNavigation() {
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="flex items-center gap-2">
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className={getRoleColor(userType)}>
-                {getRoleIcon(userType)}
-                {userType.replace('_', ' ').toUpperCase()}
+              <Badge variant="secondary" className={getRoleColor(activePortal)}>
+                {getRoleIcon(activePortal)}
+                {activePortal.replace('_', ' ').toUpperCase()}
               </Badge>
               <span className="font-medium">{user.fullName || user.username}</span>
             </div>
@@ -241,33 +241,33 @@ export default function RoleBasedNavigation() {
           
           {/* Role Switching (if user has multiple roles) */}
           <DropdownMenuLabel className="text-xs text-gray-500">
-            Switch Role
+            Switch Portal
           </DropdownMenuLabel>
-          {userType !== 'customer' && (
+          {activePortal !== 'customer' && (
             <DropdownMenuItem
               onClick={() => handleRoleSwitch('customer')}
               className="flex items-center gap-2 cursor-pointer"
             >
               <User className="h-4 w-4" />
-              Switch to Customer
+              Switch to Customer Portal
             </DropdownMenuItem>
           )}
-          {userType !== 'service_provider' && (
+          {activePortal !== 'service_provider' && (
             <DropdownMenuItem
               onClick={() => handleRoleSwitch('service_provider')}
               className="flex items-center gap-2 cursor-pointer"
             >
               <Briefcase className="h-4 w-4" />
-              Switch to Service Provider
+              Switch to Service Provider Portal
             </DropdownMenuItem>
           )}
-          {userType !== 'admin' && (
+          {activePortal !== 'admin' && (
             <DropdownMenuItem
               onClick={() => handleRoleSwitch('admin')}
               className="flex items-center gap-2 cursor-pointer"
             >
               <Shield className="h-4 w-4" />
-              Switch to Admin
+              Switch to Admin Portal
             </DropdownMenuItem>
           )}
           
