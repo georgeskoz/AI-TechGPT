@@ -66,6 +66,7 @@ import RegistrationSuccess from "@/pages/RegistrationSuccess";
 import MultiRoleInterface from "@/pages/MultiRoleInterface";
 import DevRoleSwitcher from "@/components/DevRoleSwitcher";
 import ServiceProviderChatPage from "@/pages/ServiceProviderChatPage";
+import { PortalAuthGuard } from "@/components/PortalAuthGuard";
 
 
 // Conditional Profile Route Component
@@ -166,23 +167,67 @@ function Router() {
       <Route path="/technician-home" component={ServiceProviderHomePage} />
       <Route path="/technician-register" component={ServiceProviderRegistration} />
       <Route path="/technician-registration" component={ServiceProviderRegistration} />
-      <Route path="/service-provider-dashboard" component={ServiceProviderDashboard} />
-      <Route path="/service-provider-chat" component={ServiceProviderChat} />
-      <Route path="/service-provider-chat-page" component={ServiceProviderChatPage} />
-      <Route path="/technician-earnings" component={TechnicianEarnings} />
-      <Route path="/profile-visibility" component={ProfileVisibilityPage} />
+      <Route path="/service-provider-dashboard" component={() => 
+        <PortalAuthGuard requiredPortal="service_provider">
+          <ServiceProviderDashboard />
+        </PortalAuthGuard>
+      } />
+      <Route path="/service-provider-chat" component={() => 
+        <PortalAuthGuard requiredPortal="service_provider">
+          <ServiceProviderChat />
+        </PortalAuthGuard>
+      } />
+      <Route path="/service-provider-chat-page" component={() => 
+        <PortalAuthGuard requiredPortal="service_provider">
+          <ServiceProviderChatPage />
+        </PortalAuthGuard>
+      } />
+      <Route path="/technician-earnings" component={() => 
+        <PortalAuthGuard requiredPortal="service_provider">
+          <TechnicianEarnings />
+        </PortalAuthGuard>
+      } />
+      <Route path="/profile-visibility" component={() => 
+        <PortalAuthGuard requiredPortal="service_provider">
+          <ProfileVisibilityPage />
+        </PortalAuthGuard>
+      } />
       <Route path="/technicians" component={TechnicianLanding} />
-      <Route path="/notifications-dashboard" component={NotificationsDashboard} />
+      <Route path="/notifications-dashboard" component={() => 
+        <PortalAuthGuard requiredPortal="service_provider">
+          <NotificationsDashboard />
+        </PortalAuthGuard>
+      } />
       <Route path="/technician-matching" component={TechnicianMatchingPage} />
       <Route path="/test-notifications" component={TestNotificationSystem} />
       
       {/* Admin Portal */}
       <Route path="/admin-home" component={AdminHomePage} />
-      <Route path="/admin" component={AdminDashboard} />
-      <Route path="/admin-portal" component={AdminNavigation} />
-      <Route path="/admin-earnings" component={AdminEarningSettings} />
-      <Route path="/admin-categories" component={AdminCategoryManagement} />
-      <Route path="/admin/announcements" component={AdminAnnouncements} />
+      <Route path="/admin" component={() => 
+        <PortalAuthGuard requiredPortal="admin">
+          <AdminDashboard />
+        </PortalAuthGuard>
+      } />
+      <Route path="/admin-portal" component={() => 
+        <PortalAuthGuard requiredPortal="admin">
+          <AdminNavigation />
+        </PortalAuthGuard>
+      } />
+      <Route path="/admin-earnings" component={() => 
+        <PortalAuthGuard requiredPortal="admin">
+          <AdminEarningSettings />
+        </PortalAuthGuard>
+      } />
+      <Route path="/admin-categories" component={() => 
+        <PortalAuthGuard requiredPortal="admin">
+          <AdminCategoryManagement />
+        </PortalAuthGuard>
+      } />
+      <Route path="/admin/announcements" component={() => 
+        <PortalAuthGuard requiredPortal="admin">
+          <AdminAnnouncements />
+        </PortalAuthGuard>
+      } />
       
       {/* User Profile - Conditional routing (Summary vs Multi-step) */}
       <Route path="/profile/:username" component={ProfileRoute} />

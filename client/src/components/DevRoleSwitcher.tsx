@@ -11,7 +11,7 @@ interface DevRoleSwitcherProps {
 }
 
 const DevRoleSwitcher: React.FC<DevRoleSwitcherProps> = ({ className = '' }) => {
-  const { user, login, logout } = useAuth();
+  const { user, login, logout, currentPortal, setCurrentPortal } = useAuth();
   const [, setLocation] = useLocation();
   const [isMinimized, setIsMinimized] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -51,10 +51,9 @@ const DevRoleSwitcher: React.FC<DevRoleSwitcherProps> = ({ className = '' }) => 
   const switchRole = (roleId: string) => {
     if (!user) return;
 
-    const newUser = { ...user, userType: roleId };
-    
-    // Update user in context and localStorage
-    login(newUser);
+    // For development, allow switching portals without changing user type
+    // This simulates switching between different portal views
+    setCurrentPortal(roleId as 'customer' | 'service_provider' | 'admin');
     
     // Navigate to appropriate route
     const role = roles.find(r => r.id === roleId);
@@ -133,13 +132,15 @@ const DevRoleSwitcher: React.FC<DevRoleSwitcherProps> = ({ className = '' }) => 
         {!isMinimized && (
           <>
             <div className="text-xs text-gray-500 mb-3">
-              User: {user.username || 'Unknown'}
+              User: {user.username || 'Unknown'} ({user.userType || 'customer'})
+              <br />
+              Current Portal: {currentPortal.replace('_', ' ')}
             </div>
 
             <div className="space-y-2">
               {roles.map((role) => {
                 const Icon = role.icon;
-                const isActive = user.userType === role.id;
+                const isActive = currentPortal === role.id;
                 
                 return (
                   <Button
