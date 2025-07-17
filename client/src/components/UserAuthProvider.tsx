@@ -40,8 +40,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Check for existing user session
-    const savedUser = localStorage.getItem('tech_user');
+    // Check for existing user session from multiple localStorage keys
+    const savedUser = localStorage.getItem('tech_user') || localStorage.getItem('currentUser');
     if (savedUser) {
       try {
         const userData = JSON.parse(savedUser);
@@ -49,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         console.error('Error parsing saved user data:', error);
         localStorage.removeItem('tech_user');
+        localStorage.removeItem('currentUser');
       }
     }
   }, []);
@@ -56,13 +57,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = (userData: User) => {
     setUser(userData);
     localStorage.setItem('tech_user', JSON.stringify(userData));
+    localStorage.setItem('currentUser', JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
     // Clear all authentication-related localStorage keys
     localStorage.removeItem('tech_user');
+    localStorage.removeItem('currentUser');
     localStorage.removeItem('techgpt_username');
+    localStorage.removeItem('techgpt_user_id');
+    localStorage.removeItem('techgpt_auth_method');
     localStorage.removeItem('auth_token');
     localStorage.removeItem('serviceAnnouncementShown');
     localStorage.removeItem('activeServiceBooking');
