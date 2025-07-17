@@ -19,7 +19,7 @@ import {
   DollarSign
 } from 'lucide-react';
 
-export default function TechnicianDashboard() {
+export default function CustomerServiceTracker() {
   const [, setLocation] = useLocation();
   
   // Mock data - in real app this would come from booking context
@@ -254,22 +254,8 @@ export default function TechnicianDashboard() {
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Button 
-            onClick={() => setLocation('/service-provider-dashboard')}
-            variant="outline"
-          >
-            <User className="w-4 h-4 mr-2" />
-            My Dashboard
-          </Button>
-          <Button 
-            onClick={() => setLocation('/service-provider-dashboard')}
-            variant="outline"
-          >
-            <Calendar className="w-4 h-4 mr-2" />
-            View All Bookings
-          </Button>
+        {/* Quick Actions - AI Support for customers */}
+        <div className="mt-6 flex justify-center">
           <Button 
             onClick={() => setLocation('/chat')}
             variant="outline"

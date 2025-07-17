@@ -102,6 +102,24 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
 
 ## Recent Changes
 
+### January 17, 2025 - Customer Service Tracker Cleanup and Navigation Improvements
+- **Renamed TechnicianDashboard to CustomerServiceTracker**: Clarified that this page is for customers tracking their service providers, not a service provider dashboard
+  - **File Renamed**: `/pages/TechnicianDashboard.tsx` → `/pages/CustomerServiceTracker.tsx`
+  - **Route Updated**: `/technician-dashboard` → `/customer-service-tracker`
+  - **Moved to Customer Portal**: Page now properly categorized under customer portal routes in App.tsx
+- **Removed Service Provider Navigation References**: Eliminated confusing references to this page from service provider dropdown menu
+  - **Removed Provider Dashboard Link**: Eliminated "/technician-dashboard" from service provider navigation items
+  - **Updated Login/Chat Redirects**: Service providers now redirect to `/service-provider-chat-page` instead of dashboard
+- **Cleaned Up Bottom Navigation**: Removed confusing service provider buttons from customer-focused page
+  - **Removed "My Dashboard" Button**: Eliminated service provider dashboard link inappropriate for customer page
+  - **Removed "View All Bookings" Button**: Eliminated service provider booking management link
+  - **Kept AI Support**: Maintained customer-appropriate AI Support button for customer assistance
+- **Updated All References**: Fixed all import statements, route definitions, and navigation links throughout the codebase
+  - **Updated App.tsx**: Fixed component imports and route definitions
+  - **Updated MarketplacePage**: Fixed component references and usage
+  - **Updated LoginPage/ChatPage**: Fixed service provider redirect paths
+  - **Updated TechnicianLinks**: Fixed navigation link to new route
+
 ### January 17, 2025 - Enhanced Authentication System and Role-Based Navigation
 - **Fixed Authentication Context Integration**: Resolved localStorage errors and improved user session handling
   - **Enhanced UserAuthProvider**: Added proper error handling and data validation for localStorage operations

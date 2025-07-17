@@ -39,9 +39,9 @@ export default function ChatPage() {
   // Check if username exists on mount OR if user is authenticated
   useEffect(() => {
     if (isAuthenticated && user) {
-      // If user is a service provider, redirect to technician dashboard
+      // If user is a service provider, redirect to service provider chat page
       if (user.userType === 'service_provider' || user.userType === 'technician') {
-        setLocation('/technician-dashboard');
+        setLocation('/service-provider-chat-page');
         return;
       }
       
