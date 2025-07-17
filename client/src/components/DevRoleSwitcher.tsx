@@ -35,8 +35,8 @@ const DevRoleSwitcher: React.FC<DevRoleSwitcherProps> = ({ className = '' }) => 
       label: 'Service Provider', 
       icon: Wrench, 
       color: 'bg-green-500 hover:bg-green-600',
-      route: '/technician-dashboard',
-      description: 'Service provider dashboard and tools'
+      route: '/service-provider-chat-page',
+      description: 'Service provider chat and tools'
     },
     { 
       id: 'admin', 
