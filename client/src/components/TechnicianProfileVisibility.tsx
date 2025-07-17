@@ -82,8 +82,12 @@ export default function TechnicianProfileVisibility({
   const formatLocation = () => {
     if (technicianData.city && technicianData.state && technicianData.country) {
       const country = getCountryByCode(technicianData.country);
-      const state = country?.states.find(s => s.code === technicianData.state);
-      return `${technicianData.city}, ${state?.name}, ${country?.name}`;
+      if (country && country.states) {
+        const state = country.states.find(s => s.code === technicianData.state);
+        return `${technicianData.city}, ${state?.name || technicianData.state}, ${country.name}`;
+      } else {
+        return `${technicianData.city}, ${technicianData.state}, ${technicianData.country}`;
+      }
     }
     return "Location not specified";
   };
