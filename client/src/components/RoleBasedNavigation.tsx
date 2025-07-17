@@ -116,7 +116,7 @@ const navigationItems: NavigationItem[] = [
 ];
 
 export default function RoleBasedNavigation() {
-  const { user, logout } = useAuth();
+  const { user, logout, setCurrentPortal } = useAuth();
   const [, setLocation] = useLocation();
 
   if (!user) return null;
@@ -129,6 +129,10 @@ export default function RoleBasedNavigation() {
 
   const handleRoleSwitch = async (newRole: 'customer' | 'service_provider' | 'admin') => {
     console.log('Switching to role:', newRole);
+    
+    // Update the current portal in auth context
+    setCurrentPortal(newRole);
+    
     // Navigate to the appropriate home page for the role
     switch (newRole) {
       case 'customer':
