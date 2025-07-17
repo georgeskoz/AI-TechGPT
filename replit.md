@@ -122,6 +122,15 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
   - **Service Provider Login**: Service providers like vanessa1 automatically start in service provider portal
   - **Customer Login**: Customers automatically start in customer portal  
   - **Admin Login**: Admins automatically start in admin portal
+- **Enhanced Login Page with Portal Selection**: Added comprehensive portal selection system to login page
+  - **Portal Selection Interface**: Added three-button portal selector (Customer, Service Provider, Admin) with proper icons
+  - **Portal-Based Authentication**: Login now redirects based on selected portal instead of user type
+  - **Portal State Persistence**: Selected portal is saved to localStorage during login process
+  - **Enhanced User Experience**: Portal selection with blue (Customer), green (Service Provider), and purple (Admin) color coding
+  - **Social Login Integration**: Portal selection applies to both email/password and social login methods
+- **Bug Fixes**: Fixed profile visibility page runtime error and added debugging console logs
+  - **Profile Visibility Fix**: Added proper null checks for country data to prevent undefined states.find() errors
+  - **Debug Logging**: Added console logging to portal switching functionality for troubleshooting
 - **Development Tools**: Enhanced DevRoleSwitcher to show current portal and user type for testing
 - **Customer Service Tracker Cleanup**: Completed earlier cleanup work
   - **File Renamed**: `/pages/TechnicianDashboard.tsx` → `/pages/CustomerServiceTracker.tsx`
