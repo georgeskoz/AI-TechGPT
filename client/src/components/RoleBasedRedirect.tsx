@@ -19,7 +19,7 @@ export default function RoleBasedRedirect() {
         switch (user.userType) {
           case 'service_provider':
           case 'technician':
-            setLocation('/technician-dashboard');
+            setLocation('/service-provider-chat-page');
             break;
           case 'admin':
             setLocation('/admin');

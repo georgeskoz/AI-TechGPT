@@ -65,6 +65,7 @@ import ServiceProviderChat from "@/pages/ServiceProviderChat";
 import RegistrationSuccess from "@/pages/RegistrationSuccess";
 import MultiRoleInterface from "@/pages/MultiRoleInterface";
 import DevRoleSwitcher from "@/components/DevRoleSwitcher";
+import ServiceProviderChatPage from "@/pages/ServiceProviderChatPage";
 
 
 // Conditional Profile Route Component
@@ -167,6 +168,7 @@ function Router() {
       <Route path="/technician-dashboard" component={TechnicianDetailsPage} />
       <Route path="/service-provider-dashboard" component={ServiceProviderDashboard} />
       <Route path="/service-provider-chat" component={ServiceProviderChat} />
+      <Route path="/service-provider-chat-page" component={ServiceProviderChatPage} />
       <Route path="/technician-earnings" component={TechnicianEarnings} />
       <Route path="/profile-visibility" component={ProfileVisibilityPage} />
       <Route path="/technicians" component={TechnicianLanding} />
