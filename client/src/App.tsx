@@ -141,11 +141,31 @@ function Router() {
       <Route path="/forgot-password" component={ForgotPasswordPage} />
       
       {/* Customer Portal - Core Pages */}
-      <Route path="/chat" component={ChatPage} />
-      <Route path="/dashboard" component={ClientDashboard} />
-      <Route path="/customer-dashboard" component={CustomerDashboard} />
-      <Route path="/customer-service-tracker" component={CustomerServiceTracker} />
-      <Route path="/issues" component={IssueCategorizationPage} />
+      <Route path="/chat" component={() => 
+        <PortalAuthGuard requiredPortal="customer">
+          <ChatPage />
+        </PortalAuthGuard>
+      } />
+      <Route path="/dashboard" component={() => 
+        <PortalAuthGuard requiredPortal="customer">
+          <ClientDashboard />
+        </PortalAuthGuard>
+      } />
+      <Route path="/customer-dashboard" component={() => 
+        <PortalAuthGuard requiredPortal="customer">
+          <CustomerDashboard />
+        </PortalAuthGuard>
+      } />
+      <Route path="/customer-service-tracker" component={() => 
+        <PortalAuthGuard requiredPortal="customer">
+          <CustomerServiceTracker />
+        </PortalAuthGuard>
+      } />
+      <Route path="/issues" component={() => 
+        <PortalAuthGuard requiredPortal="customer">
+          <IssueCategorizationPage />
+        </PortalAuthGuard>
+      } />
       <Route path="/registration-success" component={RegistrationSuccess} />
       
       {/* Support Services - Essential Customer Services */}
