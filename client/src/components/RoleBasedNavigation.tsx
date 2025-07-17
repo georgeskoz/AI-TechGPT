@@ -61,13 +61,7 @@ const navigationItems: NavigationItem[] = [
     roles: ["service_provider"],
     description: "AI assistant and dashboard"
   },
-  {
-    label: "Provider Dashboard",
-    path: "/technician-dashboard",
-    icon: <Settings className="h-4 w-4" />,
-    roles: ["service_provider"],
-    description: "Manage jobs and earnings"
-  },
+
   {
     label: "Earnings & Payments",
     path: "/technician-earnings",

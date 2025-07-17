@@ -18,7 +18,7 @@ import {
   TrendingUp
 } from "lucide-react";
 import TechnicianRegistration from "./TechnicianRegistration";
-import TechnicianDashboard from "./TechnicianDashboard";
+import CustomerServiceTracker from "./CustomerServiceTracker";
 import ServiceRequestFlow from "../components/ServiceRequestFlow";
 import IssueCategorization from "../components/IssueCategorization";
 import type { TechnicalIssue } from "../components/IssueCategorization";
@@ -107,13 +107,10 @@ export default function MarketplacePage({ username }: MarketplacePageProps) {
     );
   }
 
-  // Technician Dashboard
+  // Customer Service Tracker
   if (activeView === 'dashboard' && technicianId) {
     return (
-      <TechnicianDashboard
-        technicianId={technicianId}
-        userId={MOCK_USER_ID}
-      />
+      <CustomerServiceTracker />
     );
   }
 

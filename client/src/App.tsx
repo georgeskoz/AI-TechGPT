@@ -28,7 +28,7 @@ import ClientDashboard from "@/pages/ClientDashboard";
 import AuthTestPage from "@/components/AuthTestPage";
 import ServiceProviderRegistration from "@/pages/TechnicianRegistration";
 import ServiceProviderDashboard from "@/pages/ServiceProviderDashboard";
-import TechnicianDetailsPage from "@/pages/TechnicianDashboard";
+import CustomerServiceTracker from "@/pages/CustomerServiceTracker";
 import CustomerDashboard from "@/pages/CustomerDashboard";
 import TechnicianLanding from "@/pages/TechnicianLanding";
 import TechnicianMatchingPage from "@/pages/TechnicianMatchingPage";
@@ -143,6 +143,7 @@ function Router() {
       <Route path="/chat" component={ChatPage} />
       <Route path="/dashboard" component={ClientDashboard} />
       <Route path="/customer-dashboard" component={CustomerDashboard} />
+      <Route path="/customer-service-tracker" component={CustomerServiceTracker} />
       <Route path="/issues" component={IssueCategorizationPage} />
       <Route path="/registration-success" component={RegistrationSuccess} />
       
@@ -165,7 +166,6 @@ function Router() {
       <Route path="/technician-home" component={ServiceProviderHomePage} />
       <Route path="/technician-register" component={ServiceProviderRegistration} />
       <Route path="/technician-registration" component={ServiceProviderRegistration} />
-      <Route path="/technician-dashboard" component={TechnicianDetailsPage} />
       <Route path="/service-provider-dashboard" component={ServiceProviderDashboard} />
       <Route path="/service-provider-chat" component={ServiceProviderChat} />
       <Route path="/service-provider-chat-page" component={ServiceProviderChatPage} />

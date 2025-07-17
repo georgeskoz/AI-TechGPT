@@ -46,7 +46,7 @@ export default function LoginPage() {
         return '/admin';
       case 'technician':
       case 'service_provider':
-        return '/technician-dashboard';
+        return '/service-provider-chat-page';
       case 'customer':
       default:
         return '/chat';

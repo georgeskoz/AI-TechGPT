@@ -87,7 +87,7 @@ export default function TechnicianLinks() {
                 <span className="text-sm">Accept and manage job requests</span>
               </div>
             </div>
-            <Link href="/technician-dashboard">
+            <Link href="/customer-service-tracker">
               <Button variant="outline" className="w-full flex items-center gap-2">
                 Access Dashboard <ArrowRight className="h-4 w-4" />
               </Button>
