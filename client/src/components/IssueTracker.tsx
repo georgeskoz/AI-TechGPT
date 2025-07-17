@@ -303,8 +303,16 @@ function IssuesList({ issues, onIssueSelect, onStatusChange }: IssuesListProps) 
   );
 }
 
-function formatDate(date: Date) {
-  return date.toLocaleDateString('en-US', {
+function formatDate(date: Date | string | number) {
+  if (!date) return 'N/A';
+  
+  const dateObj = date instanceof Date ? date : new Date(date);
+  
+  if (isNaN(dateObj.getTime())) {
+    return 'Invalid Date';
+  }
+  
+  return dateObj.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
