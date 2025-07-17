@@ -129,6 +129,8 @@ export default function RoleBasedNavigation() {
 
   const handleRoleSwitch = async (newRole: 'customer' | 'service_provider' | 'admin') => {
     console.log('Switching to role:', newRole);
+    console.log('Current user type:', user?.userType);
+    console.log('Current portal before switch:', user);
     
     // Update the current portal in auth context
     setCurrentPortal(newRole);
@@ -136,15 +138,19 @@ export default function RoleBasedNavigation() {
     // Navigate to the appropriate home page for the role
     switch (newRole) {
       case 'customer':
+        console.log('Navigating to customer portal: /chat');
         setLocation('/chat');
         break;
       case 'service_provider':
+        console.log('Navigating to service provider portal: /service-provider-chat-page');
         setLocation('/service-provider-chat-page');
         break;
       case 'admin':
+        console.log('Navigating to admin portal: /admin');
         setLocation('/admin');
         break;
       default:
+        console.log('Navigating to default: /');
         setLocation('/');
     }
   };
