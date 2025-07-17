@@ -110,8 +110,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     switch (portal) {
       case 'customer':
-        // Anyone can view customer portal, but only customers can perform actions
-        return true;
+        // Only customers can access customer portal
+        return user.userType === 'customer' || !user.userType; // Allow users without explicit userType as customers
       case 'service_provider':
         // Only service providers can access service provider portal
         return user.userType === 'service_provider';
