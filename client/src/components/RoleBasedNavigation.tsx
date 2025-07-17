@@ -134,9 +134,21 @@ export default function RoleBasedNavigation() {
   );
 
   const handleRoleSwitch = async (newRole: 'customer' | 'service_provider' | 'admin') => {
-    // For now, we'll just redirect to login to switch roles
-    // In a real app, this would need backend support
-    logout();
+    console.log('Switching to role:', newRole);
+    // Navigate to the appropriate home page for the role
+    switch (newRole) {
+      case 'customer':
+        setLocation('/chat');
+        break;
+      case 'service_provider':
+        setLocation('/service-provider-chat-page');
+        break;
+      case 'admin':
+        setLocation('/admin');
+        break;
+      default:
+        setLocation('/');
+    }
   };
 
   const getRoleColor = (role: string) => {
@@ -230,7 +242,7 @@ export default function RoleBasedNavigation() {
           {userType !== 'customer' && (
             <DropdownMenuItem
               onClick={() => handleRoleSwitch('customer')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 cursor-pointer"
             >
               <User className="h-4 w-4" />
               Switch to Customer
@@ -239,7 +251,7 @@ export default function RoleBasedNavigation() {
           {userType !== 'service_provider' && (
             <DropdownMenuItem
               onClick={() => handleRoleSwitch('service_provider')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 cursor-pointer"
             >
               <Briefcase className="h-4 w-4" />
               Switch to Service Provider
@@ -248,7 +260,7 @@ export default function RoleBasedNavigation() {
           {userType !== 'admin' && (
             <DropdownMenuItem
               onClick={() => handleRoleSwitch('admin')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 cursor-pointer"
             >
               <Shield className="h-4 w-4" />
               Switch to Admin
@@ -257,8 +269,11 @@ export default function RoleBasedNavigation() {
           
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={logout}
-            className="flex items-center gap-2 text-red-600"
+            onClick={() => {
+              console.log('Signing out user');
+              logout();
+            }}
+            className="flex items-center gap-2 text-red-600 cursor-pointer"
           >
             <LogOut className="h-4 w-4" />
             Sign Out
