@@ -10,12 +10,12 @@ export default function RoleBasedRedirect() {
     if (isAuthenticated && user) {
       // Redirect based on user type
       if (user.userType === 'service_provider' || user.userType === 'technician') {
-        setLocation('/service-provider-dashboard');
+        setLocation('/technician-dashboard');
       } else if (user.userType === 'admin') {
         setLocation('/admin');
       } else {
-        // Default to customer dashboard
-        setLocation('/customer-dashboard');
+        // Default to chat page for customers
+        setLocation('/chat');
       }
     } else {
       // If not authenticated, show chat page

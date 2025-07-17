@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/components/UserAuthProvider";
 import { Eye, EyeOff, Mail, Lock, LogIn, User, ArrowRight } from "lucide-react";
 import { FaGoogle, FaFacebookF, FaApple, FaInstagram, FaTwitter, FaGithub, FaLinkedinIn } from "react-icons/fa";
 import techGPTLogoPath from "@assets/image_1752537953157.png";
@@ -28,6 +29,7 @@ export default function LoginPage() {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginFormSchema),
@@ -37,6 +39,20 @@ export default function LoginPage() {
     },
   });
 
+  // Helper function to determine redirect path based on user role
+  const getRedirectPath = (userType: string) => {
+    switch (userType) {
+      case 'admin':
+        return '/admin';
+      case 'technician':
+      case 'service_provider':
+        return '/technician-dashboard';
+      case 'customer':
+      default:
+        return '/chat';
+    }
+  };
+
   // Regular email/password login mutation
   const loginMutation = useMutation({
     mutationFn: async (data: LoginForm) => {
@@ -44,20 +60,23 @@ export default function LoginPage() {
       return response.json();
     },
     onSuccess: (data) => {
+      // Store user data in localStorage for backward compatibility
       localStorage.setItem("techgpt_username", data.username);
       localStorage.setItem("techgpt_user_id", data.id.toString());
       localStorage.setItem("techgpt_auth_method", data.authMethod || "email");
       localStorage.setItem("currentUser", JSON.stringify(data));
+      
+      // Initialize auth context with user data
+      login(data);
+      
       toast({
         title: "Login Successful",
         description: "Welcome back to TechGPT!",
       });
+      
       // Redirect based on user type
-      if (data.userType === 'technician' || data.userType === 'service_provider') {
-        setLocation("/technician-dashboard");
-      } else {
-        setLocation("/chat");
-      }
+      const redirectPath = getRedirectPath(data.userType);
+      setLocation(redirectPath);
     },
     onError: (error: any) => {
       toast({
@@ -85,20 +104,23 @@ export default function LoginPage() {
       }
     },
     onSuccess: (data) => {
+      // Store user data in localStorage for backward compatibility
       localStorage.setItem("techgpt_username", data.username);
       localStorage.setItem("techgpt_user_id", data.id.toString());
       localStorage.setItem("techgpt_auth_method", data.authMethod);
       localStorage.setItem("currentUser", JSON.stringify(data));
+      
+      // Initialize auth context with user data
+      login(data);
+      
       toast({
         title: "Login Successful",
         description: `Welcome back via ${data.authMethod}!`,
       });
+      
       // Redirect based on user type
-      if (data.userType === 'technician' || data.userType === 'service_provider') {
-        setLocation("/technician-dashboard");
-      } else {
-        setLocation("/chat");
-      }
+      const redirectPath = getRedirectPath(data.userType);
+      setLocation(redirectPath);
     },
     onError: (error: any) => {
       console.error("Social login error details:", error);
