@@ -64,6 +64,7 @@ import TrackingPage from "@/pages/TrackingPage";
 import ServiceProviderChat from "@/pages/ServiceProviderChat";
 import RegistrationSuccess from "@/pages/RegistrationSuccess";
 import MultiRoleInterface from "@/pages/MultiRoleInterface";
+import DevRoleSwitcher from "@/components/DevRoleSwitcher";
 
 
 // Conditional Profile Route Component
@@ -229,6 +230,8 @@ function App() {
       <AuthProvider>
         <div className="min-h-screen bg-gray-50">
           <Router />
+          {/* Development role switcher for testing */}
+          <DevRoleSwitcher />
           {/* Temporarily disabled complex components causing loading issues */}
           {/* <FloatingChatWidget username={username} /> */}
           {/* <AIFeatureDiscoveryWrapper /> */}

@@ -41,16 +41,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Check for existing user session from multiple localStorage keys
-    const savedUser = localStorage.getItem('tech_user') || localStorage.getItem('currentUser');
-    if (savedUser) {
-      try {
+    try {
+      const savedUser = localStorage.getItem('tech_user') || localStorage.getItem('currentUser');
+      if (savedUser) {
         const userData = JSON.parse(savedUser);
-        setUser(userData);
-      } catch (error) {
-        console.error('Error parsing saved user data:', error);
-        localStorage.removeItem('tech_user');
-        localStorage.removeItem('currentUser');
+        // Validate user data structure
+        if (userData && userData.id && userData.username && userData.userType) {
+          setUser(userData);
+        } else {
+          // Clear invalid data
+          localStorage.removeItem('tech_user');
+          localStorage.removeItem('currentUser');
+        }
       }
+    } catch (error) {
+      console.error('Error reading from localStorage:', error);
+      // Clear corrupted data
+      localStorage.removeItem('tech_user');
+      localStorage.removeItem('currentUser');
     }
   }, []);
 
