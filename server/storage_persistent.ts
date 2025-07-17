@@ -271,8 +271,17 @@ export class PersistentStorage implements IStorage {
       return undefined;
     }
     
-    // Verify password
-    const isValid = await bcrypt.compare(password, user.password);
+    // Verify password - handle both hashed and plain text passwords
+    let isValid = false;
+    
+    // Check if password is hashed (bcrypt hashes start with $2b$)
+    if (user.password.startsWith('$2b$')) {
+      isValid = await bcrypt.compare(password, user.password);
+    } else {
+      // Plain text password comparison for temporary passwords
+      isValid = user.password === password;
+    }
+    
     if (!isValid) {
       return undefined;
     }
@@ -427,6 +436,17 @@ export class PersistentStorage implements IStorage {
   async getSupportCasesByCustomer(customerId: number): Promise<any[]> {
     // For now, return empty array - this can be expanded later
     return [];
+  }
+
+  // Update user last login
+  async updateUserLastLogin(userId: number): Promise<void> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.lastLogin = new Date();
+      user.updatedAt = new Date();
+      this.users.set(userId, user);
+      await this.saveUsers();
+    }
   }
 }
 
