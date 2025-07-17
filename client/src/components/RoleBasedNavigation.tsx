@@ -55,9 +55,16 @@ const navigationItems: NavigationItem[] = [
   
   // Service Provider Navigation
   {
-    label: "Provider Dashboard",
-    path: "/service-provider-dashboard",
+    label: "Provider Chat",
+    path: "/service-provider-chat-page",
     icon: <Briefcase className="h-4 w-4" />,
+    roles: ["service_provider"],
+    description: "AI assistant and dashboard"
+  },
+  {
+    label: "Provider Dashboard",
+    path: "/technician-dashboard",
+    icon: <Settings className="h-4 w-4" />,
     roles: ["service_provider"],
     description: "Manage jobs and earnings"
   },
@@ -74,6 +81,20 @@ const navigationItems: NavigationItem[] = [
     icon: <User className="h-4 w-4" />,
     roles: ["service_provider"],
     description: "Optimize your profile"
+  },
+  {
+    label: "Service Provider Home",
+    path: "/technician-home",
+    icon: <Briefcase className="h-4 w-4" />,
+    roles: ["service_provider"],
+    description: "Service provider portal"
+  },
+  {
+    label: "Registration",
+    path: "/technician-registration",
+    icon: <Settings className="h-4 w-4" />,
+    roles: ["service_provider"],
+    description: "Update profile"
   },
   
   // Admin Navigation
@@ -184,8 +205,11 @@ export default function RoleBasedNavigation() {
           {userNavigationItems.map((item) => (
             <DropdownMenuItem
               key={item.path}
-              onClick={() => setLocation(item.path)}
-              className="flex items-center gap-2"
+              onClick={() => {
+                console.log('Navigating to:', item.path);
+                setLocation(item.path);
+              }}
+              className="flex items-center gap-2 cursor-pointer"
             >
               {item.icon}
               <div className="flex flex-col">
