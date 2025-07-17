@@ -33,12 +33,17 @@ export default function LiveSupportPage({ username }: LiveSupportPageProps) {
   const [, setLocation] = useLocation();
 
   // Get user's support cases history
-  const { data: supportCases = [] } = useQuery({
+  const { data: supportCases = [], isError, error } = useQuery({
     queryKey: ["/api/support/cases/customer", selectedUserId],
     queryFn: async () => {
       const response = await fetch(`/api/support/cases/customer/${selectedUserId}`);
-      return response.json();
+      if (!response.ok) {
+        throw new Error('Failed to fetch support cases');
+      }
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
     },
+    retry: false,
   });
 
   const getStatusColor = (status: string) => {
@@ -280,7 +285,16 @@ export default function LiveSupportPage({ username }: LiveSupportPageProps) {
             </p>
           </CardHeader>
           <CardContent>
-            {supportCases.length === 0 ? (
+            {isError ? (
+              <div className="text-center py-8">
+                <XCircle className="h-12 w-12 text-red-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to load support cases</h3>
+                <p className="text-gray-600 mb-4">There was an error loading your support history</p>
+                <Button onClick={() => setShowChat(true)}>
+                  Start Live Chat
+                </Button>
+              </div>
+            ) : !Array.isArray(supportCases) || supportCases.length === 0 ? (
               <div className="text-center py-8">
                 <MessageSquare className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No support cases yet</h3>

@@ -84,6 +84,9 @@ export interface IStorage {
   getServiceRequestsByCustomer(customerId: number): Promise<any[]>;
   getJobsByCustomer(customerId: number): Promise<any[]>;
   getServiceBookingsByCustomer(customerId: number): Promise<any[]>;
+  
+  // Support case methods
+  getSupportCasesByCustomer(customerId: number): Promise<any[]>;
 }
 
 export class PersistentStorage implements IStorage {
@@ -416,6 +419,12 @@ export class PersistentStorage implements IStorage {
   }
 
   async getServiceBookingsByCustomer(customerId: number): Promise<any[]> {
+    // For now, return empty array - this can be expanded later
+    return [];
+  }
+
+  // Support case methods
+  async getSupportCasesByCustomer(customerId: number): Promise<any[]> {
     // For now, return empty array - this can be expanded later
     return [];
   }
