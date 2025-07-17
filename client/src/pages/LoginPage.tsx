@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/components/UserAuthProvider";
-import { Eye, EyeOff, Mail, Lock, LogIn, User, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, LogIn, User, ArrowRight, Briefcase, Shield } from "lucide-react";
 import { FaGoogle, FaFacebookF, FaApple, FaInstagram, FaTwitter, FaGithub, FaLinkedinIn } from "react-icons/fa";
 import techGPTLogoPath from "@assets/image_1752537953157.png";
 
@@ -28,6 +28,7 @@ type LoginForm = z.infer<typeof loginFormSchema>;
 export default function LoginPage() {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
+  const [selectedPortal, setSelectedPortal] = useState<'customer' | 'service_provider' | 'admin'>('customer');
   const { toast } = useToast();
   const { login } = useAuth();
 
@@ -66,16 +67,21 @@ export default function LoginPage() {
       localStorage.setItem("techgpt_auth_method", data.authMethod || "email");
       localStorage.setItem("currentUser", JSON.stringify(data));
       
+      // Store selected portal
+      localStorage.setItem("currentPortal", selectedPortal);
+      
       // Initialize auth context with user data
       login(data);
       
       toast({
         title: "Login Successful",
-        description: "Welcome back to TechGPT!",
+        description: `Welcome back to TechGPT ${selectedPortal.replace('_', ' ')} Portal!`,
       });
       
-      // Redirect based on user type
-      const redirectPath = getRedirectPath(data.userType);
+      console.log("User authenticated, redirecting based on selected portal:", selectedPortal);
+      
+      // Redirect based on selected portal instead of user type
+      const redirectPath = getRedirectPath(selectedPortal);
       setLocation(redirectPath);
     },
     onError: (error: any) => {
@@ -110,16 +116,21 @@ export default function LoginPage() {
       localStorage.setItem("techgpt_auth_method", data.authMethod);
       localStorage.setItem("currentUser", JSON.stringify(data));
       
+      // Store selected portal
+      localStorage.setItem("currentPortal", selectedPortal);
+      
       // Initialize auth context with user data
       login(data);
       
       toast({
         title: "Login Successful",
-        description: `Welcome back via ${data.authMethod}!`,
+        description: `Welcome back via ${data.authMethod} to ${selectedPortal.replace('_', ' ')} Portal!`,
       });
       
-      // Redirect based on user type
-      const redirectPath = getRedirectPath(data.userType);
+      console.log("User authenticated via social login, redirecting based on selected portal:", selectedPortal);
+      
+      // Redirect based on selected portal instead of user type
+      const redirectPath = getRedirectPath(selectedPortal);
       setLocation(redirectPath);
     },
     onError: (error: any) => {
@@ -216,6 +227,42 @@ export default function LoginPage() {
         </CardHeader>
 
         <CardContent className="p-8">
+          {/* Portal Selection */}
+          <div className="mb-6">
+            <div className="text-center text-sm text-gray-600 mb-4">
+              Select your portal
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                variant={selectedPortal === 'customer' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedPortal('customer')}
+                className={`${selectedPortal === 'customer' ? 'bg-blue-500 hover:bg-blue-600' : ''} transition-all`}
+              >
+                <User className="h-4 w-4 mr-1" />
+                Customer
+              </Button>
+              <Button
+                variant={selectedPortal === 'service_provider' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedPortal('service_provider')}
+                className={`${selectedPortal === 'service_provider' ? 'bg-green-500 hover:bg-green-600' : ''} transition-all`}
+              >
+                <Briefcase className="h-4 w-4 mr-1" />
+                Service Provider
+              </Button>
+              <Button
+                variant={selectedPortal === 'admin' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedPortal('admin')}
+                className={`${selectedPortal === 'admin' ? 'bg-purple-500 hover:bg-purple-600' : ''} transition-all`}
+              >
+                <Shield className="h-4 w-4 mr-1" />
+                Admin
+              </Button>
+            </div>
+          </div>
+
           {/* Social Login Options */}
           <div className="space-y-4 mb-6">
             <div className="text-center text-sm text-gray-600 mb-4">
