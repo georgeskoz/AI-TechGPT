@@ -130,7 +130,7 @@ How can I assist you today?`,
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
+      <Navigation showBackButton={false} showHomeButton={false} showLogo={false} />
       
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
