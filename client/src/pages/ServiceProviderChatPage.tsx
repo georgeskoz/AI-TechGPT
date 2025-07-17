@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Navigation from "@/components/Navigation";
 import { useAuth } from "@/components/UserAuthProvider";
-import { Send, Bot, User, Wrench, MessageCircle, Clock, TrendingUp, CheckCircle, AlertCircle } from "lucide-react";
+import { Send, Bot, User, Wrench, MessageCircle, Clock, TrendingUp, CheckCircle, AlertCircle, Inbox, Users, Briefcase, Settings, HelpCircle, BookOpen, Star, DollarSign, Calendar, Award } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface Message {
@@ -108,12 +108,18 @@ export default function ServiceProviderChatPage() {
         id: "welcome",
         content: `Welcome to the Service Provider AI Assistant! I'm here to help you with:
 
-• Job management and scheduling
-• Customer communication best practices
-• Technical troubleshooting guidance
-• Earnings and pricing optimization
-• Professional development tips
-• Platform features and tools
+• **Job Management**: Scheduling, prioritizing, and organizing service requests
+• **Customer Communication**: Professional strategies and handling difficult situations
+• **Technical Guidance**: Troubleshooting support and best practices
+• **Earnings Optimization**: Pricing strategies and revenue maximization
+• **Professional Development**: Skills improvement and career advancement
+• **Platform Features**: Using TechGPT tools effectively
+
+**Quick Stats Today:**
+📧 Inbox: 12 new messages
+👥 Referrals: $125 earned
+💼 Opportunities: 8 available jobs
+📚 Learning Center: 3 new courses
 
 How can I assist you today?`,
         isUser: false,
@@ -179,6 +185,39 @@ How can I assist you today?`,
                       {stats.completedJobs} jobs
                     </Badge>
                   </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-2">
+                  <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Inbox className="h-4 w-4 mr-2" />
+                    Inbox
+                    <Badge variant="secondary" className="ml-auto">12</Badge>
+                  </Button>
+                  <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Users className="h-4 w-4 mr-2" />
+                    Referrals
+                    <Badge variant="secondary" className="ml-auto">$125</Badge>
+                  </Button>
+                  <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Briefcase className="h-4 w-4 mr-2" />
+                    Opportunities
+                    <Badge variant="secondary" className="ml-auto">8</Badge>
+                  </Button>
+                  <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Account
+                  </Button>
+                  <Button variant="outline" size="sm" className="w-full justify-start">
+                    <HelpCircle className="h-4 w-4 mr-2" />
+                    Help
+                  </Button>
+                  <Button variant="outline" size="sm" className="w-full justify-start">
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Learning Center
+                    <Badge variant="secondary" className="ml-auto">3</Badge>
+                  </Button>
                 </div>
                 
                 <Separator />
