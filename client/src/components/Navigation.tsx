@@ -13,6 +13,7 @@ interface NavigationProps {
   backTo?: string;
   title?: string;
   showHomeButton?: boolean;
+  showLogo?: boolean;
   customBackAction?: () => void;
 }
 
@@ -21,6 +22,7 @@ export default function Navigation({
   backTo = "/", 
   title,
   showHomeButton = true,
+  showLogo = true,
   customBackAction 
 }: NavigationProps) {
   const [location, setLocation] = useLocation();
@@ -133,19 +135,21 @@ export default function Navigation({
           </div>
 
           {/* Center - Logo/Brand */}
-          <div className="absolute left-1/2 transform -translate-x-1/2">
-            <Button
-              variant="ghost"
-              onClick={() => setLocation(getHomePath())}
-              className="p-2 hover:bg-white"
-            >
-              <img 
-                src={techGPTLogoPath} 
-                alt="TechGPT Logo" 
-                className="h-16 w-32"
-              />
-            </Button>
-          </div>
+          {showLogo && (
+            <div className="absolute left-1/2 transform -translate-x-1/2">
+              <Button
+                variant="ghost"
+                onClick={() => setLocation(getHomePath())}
+                className="p-2 hover:bg-white"
+              >
+                <img 
+                  src={techGPTLogoPath} 
+                  alt="TechGPT Logo" 
+                  className="h-16 w-32"
+                />
+              </Button>
+            </div>
+          )}
 
           {/* Right side - Authentication, Chat, Home button and Menu */}
           <div className="flex items-center gap-2">
