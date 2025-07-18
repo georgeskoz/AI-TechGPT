@@ -133,7 +133,7 @@ export default function ServiceProviderHomePage() {
                 <Briefcase className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">TechGPT Pro</h1>
+                <h1 className="text-xl font-bold text-gray-900">TechersGPT Pro</h1>
                 <p className="text-sm text-gray-600">Service Provider Platform</p>
               </div>
             </div>
@@ -752,7 +752,7 @@ export default function ServiceProviderHomePage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Why Join TechGPT Pro?
+              Why Join TechersGPT Pro?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Join the leading platform for technical professionals and start building your freelance career
@@ -851,7 +851,7 @@ export default function ServiceProviderHomePage() {
         <div className="container mx-auto px-4 text-center">
           <h3 className="text-4xl font-bold mb-4">Ready to Start Your Tech Career?</h3>
           <p className="text-xl mb-8 opacity-90">
-            Join thousands of successful technicians earning flexible income on TechGPT Pro
+            Join thousands of successful technicians earning flexible income on TechersGPT Pro
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
@@ -885,7 +885,7 @@ export default function ServiceProviderHomePage() {
                 <div className="bg-green-600 p-1 rounded">
                   <Briefcase className="h-4 w-4 text-white" />
                 </div>
-                <span className="font-bold">TechGPT Pro</span>
+                <span className="font-bold">TechersGPT Pro</span>
               </div>
               <p className="text-gray-400 text-sm">
                 Professional platform for technical experts to earn flexible income helping customers worldwide.
@@ -917,7 +917,7 @@ export default function ServiceProviderHomePage() {
             </div>
           </div>
           <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
-            <p>&copy; 2025 TechGPT Pro. All rights reserved. Professional technical services platform.</p>
+            <p>&copy; 2025 TechersGPT Pro. All rights reserved. Professional technical services platform.</p>
           </div>
         </div>
       </footer>
