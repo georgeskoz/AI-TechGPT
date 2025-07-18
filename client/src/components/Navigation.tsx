@@ -136,11 +136,11 @@ export default function Navigation({
 
           {/* Center - Logo/Brand */}
           {showLogo && (
-            <div className="absolute left-1/2 transform -translate-x-1/2">
+            <div className="absolute left-1/2 transform -translate-x-1/2 z-10 hidden md:block">
               <Button
                 variant="ghost"
                 onClick={() => setLocation(getHomePath())}
-                className="p-2 hover:bg-white text-2xl font-bold text-blue-600"
+                className="p-2 hover:bg-white text-xl font-bold text-blue-600"
               >
                 TechersGPT
               </Button>
@@ -148,7 +148,7 @@ export default function Navigation({
           )}
 
           {/* Right side - Authentication, Chat, Home button and Menu */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 relative z-20">
             {/* Role-based navigation for authenticated users */}
             {isAuthenticated && (
               <div className="hidden sm:block">
