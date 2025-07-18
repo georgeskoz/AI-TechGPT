@@ -117,7 +117,7 @@ export default function Navigation({
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Left side - Back button and Title */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-1">
             {showBackButton && (
               <Button
                 variant="ghost"
@@ -136,7 +136,7 @@ export default function Navigation({
 
           {/* Center - Logo/Brand */}
           {showLogo && (
-            <div className="absolute left-1/2 transform -translate-x-1/2 z-10 hidden md:block">
+            <div className="hidden md:flex justify-center flex-1">
               <Button
                 variant="ghost"
                 onClick={() => setLocation(getHomePath())}
@@ -148,7 +148,7 @@ export default function Navigation({
           )}
 
           {/* Right side - Authentication, Chat, Home button and Menu */}
-          <div className="flex items-center gap-2 relative z-20">
+          <div className="flex items-center gap-2 flex-1 justify-end">
             {/* Role-based navigation for authenticated users */}
             {isAuthenticated && (
               <div className="hidden sm:block">
