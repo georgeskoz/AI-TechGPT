@@ -41,7 +41,7 @@ const NewsletterManagement: React.FC = () => {
     {
       id: "1",
       title: "Monthly Platform Updates",
-      subject: "TechGPT January 2025 Updates",
+      subject: "TechersGPT January 2025 Updates",
       content: "Welcome to our monthly newsletter with the latest platform updates and features...",
       status: "sent",
       recipients: 2847,
@@ -390,7 +390,7 @@ const NewsletterManagement: React.FC = () => {
                 <Label htmlFor="sender-name">Sender Name</Label>
                 <Input
                   id="sender-name"
-                  defaultValue="TechGPT Team"
+                  defaultValue="TechersGPT Team"
                   placeholder="Enter sender name"
                 />
               </div>

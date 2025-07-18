@@ -176,7 +176,7 @@ export default function FloatingChatWidget({ username }: FloatingChatWidgetProps
                 <Bot className="h-4 w-4 text-blue-600" />
               </div>
               <div>
-                <CardTitle className="text-sm">TechGPT Assistant</CardTitle>
+                <CardTitle className="text-sm">TechersGPT Assistant</CardTitle>
                 <p className="text-xs text-gray-600">Ask about any technical issue</p>
               </div>
             </div>

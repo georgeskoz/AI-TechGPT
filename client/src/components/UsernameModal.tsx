@@ -39,7 +39,7 @@ export default function UsernameModal({ isOpen, onSave }: UsernameModalProps) {
             <User className="h-8 w-8 text-blue-500" />
           </div>
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-gray-800">Welcome to TechGPT</DialogTitle>
+            <DialogTitle className="text-xl font-bold text-gray-800">Welcome to TechersGPT</DialogTitle>
             <DialogDescription className="text-gray-600">Your personal AI assistant for technical support</DialogDescription>
           </DialogHeader>
         </div>

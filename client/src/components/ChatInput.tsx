@@ -85,7 +85,7 @@ export default function ChatInput({ onSendMessage, isLoading, onToggleTopics }: 
         </form>
         
         <div className="mt-2 text-xs text-gray-500">
-          <p>TechGPT is optimized for technical problem-solving. For more complex issues, provide detailed information.</p>
+          <p>TechersGPT is optimized for technical problem-solving. For more complex issues, provide detailed information.</p>
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 import { useChat } from '@/hooks/useChat';
 import { useAuth } from '@/components/UserAuthProvider';
 import SimpleNavigation from '@/components/SimpleNavigation';
-import TechGPTHeader from '@/components/TechGPTHeader';
+import TechersGPTHeader from '@/components/TechersGPTHeader';
 import TopicSidebar from '@/components/TopicSidebar';
 import ChatArea from '@/components/ChatArea';
 import ChatInput from '@/components/ChatInput';
@@ -138,7 +138,7 @@ export default function ChatPage() {
       />
       
       {/* App Header */}
-      <TechGPTHeader username={username || 'User'} />
+      <TechersGPTHeader username={username || 'User'} />
       
       {/* Main Chat Area */}
       <div className="flex-grow flex flex-col md:flex-row overflow-hidden">

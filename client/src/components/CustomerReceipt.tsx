@@ -178,7 +178,7 @@ export default function CustomerReceipt({
           </div>
           <div>
             <CardTitle className="text-2xl font-bold text-gray-900">
-              TechGPT Service Receipt
+              TechersGPT Service Receipt
             </CardTitle>
             <p className="text-sm text-gray-600">Professional Technical Support Services</p>
           </div>
@@ -381,9 +381,9 @@ export default function CustomerReceipt({
 
         {/* Footer */}
         <div className="mt-8 text-center text-sm text-gray-600">
-          <p>Thank you for choosing TechGPT Technical Support Services</p>
+          <p>Thank you for choosing TechersGPT Technical Support Services</p>
           <p className="mt-2">For support or questions, contact us at support@techgpt.com</p>
-          <p className="mt-1">© {new Date().getFullYear()} TechGPT. All rights reserved.</p>
+          <p className="mt-1">© {new Date().getFullYear()} TechersGPT. All rights reserved.</p>
         </div>
       </CardContent>
     </Card>

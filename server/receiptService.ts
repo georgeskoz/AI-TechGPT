@@ -105,8 +105,8 @@ export class ReceiptService {
       : 'No hardware items';
 
     return `
-TechGPT Service Receipt
-======================
+TechersGPT Service Receipt
+=========================
 
 Invoice: ${receiptData.invoiceNumber}
 Job ID: ${receiptData.jobId}
@@ -134,8 +134,8 @@ Billing Summary:
 Payment: ${receiptData.paymentMethod} (${receiptData.paymentStatus})
 Completed: ${receiptData.completedAt}
 
-Thank you for choosing TechGPT!
-Support: support@techgpt.com
+Thank you for choosing TechersGPT!
+Support: support@techersGPT.com
     `.trim();
   }
 
@@ -160,7 +160,7 @@ Support: support@techgpt.com
 <html>
 <head>
     <meta charset="utf-8">
-    <title>TechGPT Service Receipt</title>
+    <title>TechersGPT Service Receipt</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 800px; margin: 0 auto; padding: 20px; }
@@ -184,7 +184,7 @@ Support: support@techgpt.com
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">TechGPT Service Receipt</div>
+            <div class="logo">TechersGPT Service Receipt</div>
             <p>Professional Technical Support Services</p>
         </div>
 
@@ -282,9 +282,9 @@ Support: support@techgpt.com
         </div>
 
         <div class="footer">
-            <p>Thank you for choosing TechGPT Technical Support Services</p>
-            <p>For support or questions, contact us at support@techgpt.com</p>
-            <p>&copy; ${new Date().getFullYear()} TechGPT. All rights reserved.</p>
+            <p>Thank you for choosing TechersGPT Technical Support Services</p>
+            <p>For support or questions, contact us at support@techersGPT.com</p>
+            <p>&copy; ${new Date().getFullYear()} TechersGPT. All rights reserved.</p>
         </div>
     </div>
 </body>

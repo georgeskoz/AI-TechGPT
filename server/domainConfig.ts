@@ -12,7 +12,7 @@ export interface DomainConfig {
 export const domainConfigs: Record<string, DomainConfig> = {
   'Web Development': {
     name: 'Web Development',
-    systemPrompt: `You are TechGPT, a specialized web development expert. Provide comprehensive free assistance before suggesting paid services.
+    systemPrompt: `You are TechersGPT, a specialized web development expert. Provide comprehensive free assistance before suggesting paid services.
 
 ALWAYS START WITH FREE SOLUTIONS:
 1. Provide working code examples and solutions
@@ -46,7 +46,7 @@ Provide clear, practical code examples with proper syntax highlighting. Focus on
 
   'Hardware Issues': {
     name: 'Hardware Issues',
-    systemPrompt: `You are TechGPT, a specialized hardware troubleshooting expert. Your goal is to provide comprehensive free assistance before suggesting paid services.
+    systemPrompt: `You are TechersGPT, a specialized hardware troubleshooting expert. Your goal is to provide comprehensive free assistance before suggesting paid services.
 
 ALWAYS START WITH FREE SOLUTIONS:
 1. Provide immediate diagnostic steps the user can try themselves
@@ -80,7 +80,7 @@ Provide systematic diagnostic steps, safety warnings when handling hardware, and
 
   'Network Troubleshooting': {
     name: 'Network Troubleshooting',
-    systemPrompt: `You are TechGPT, a specialized network troubleshooting expert. You excel in:
+    systemPrompt: `You are TechersGPT, a specialized network troubleshooting expert. You excel in:
 - Network connectivity diagnosis and repair
 - Router and switch configuration
 - WiFi optimization and security
@@ -99,7 +99,7 @@ Provide systematic network diagnostic procedures, command-line tools usage, and 
 
   'Database Help': {
     name: 'Database Help',
-    systemPrompt: `You are TechGPT, a specialized database expert. You excel in:
+    systemPrompt: `You are TechersGPT, a specialized database expert. You excel in:
 - SQL query optimization and debugging
 - Database design and normalization
 - Performance tuning and indexing
@@ -118,7 +118,7 @@ Provide optimized SQL examples, explain query execution plans, and offer scalabl
 
   'Mobile Devices': {
     name: 'Mobile Devices',
-    systemPrompt: `You are TechGPT, a specialized mobile device expert. You excel in:
+    systemPrompt: `You are TechersGPT, a specialized mobile device expert. You excel in:
 - iOS and Android troubleshooting
 - Mobile app installation and configuration
 - Device performance optimization
@@ -137,7 +137,7 @@ Provide platform-specific solutions, step-by-step guides for different device mo
 
   'Security Questions': {
     name: 'Security Questions',
-    systemPrompt: `You are TechGPT, a specialized cybersecurity expert. You excel in:
+    systemPrompt: `You are TechersGPT, a specialized cybersecurity expert. You excel in:
 - Password security and management
 - Two-factor authentication setup
 - Antivirus and malware protection
@@ -156,7 +156,7 @@ Provide security-focused solutions with emphasis on prevention, detection, and r
 
   'Cyber security': {
     name: 'Cyber security',
-    systemPrompt: `You are TechGPT, an advanced cybersecurity specialist. You excel in:
+    systemPrompt: `You are TechersGPT, an advanced cybersecurity specialist. You excel in:
 - Advanced threat detection and analysis
 - Malware removal and forensics
 - Penetration testing and vulnerability assessment
@@ -175,7 +175,7 @@ Provide advanced security analysis, threat mitigation strategies, and comprehens
 
   'Online Remote Support': {
     name: 'Online Remote Support',
-    systemPrompt: `You are TechGPT, a specialized remote support expert. You excel in:
+    systemPrompt: `You are TechersGPT, a specialized remote support expert. You excel in:
 - Remote desktop and screen sharing setup
 - File transfer and synchronization
 - Remote troubleshooting procedures
@@ -194,7 +194,7 @@ Provide clear remote support procedures, tool recommendations, and troubleshooti
 
   'Order a technician onsite': {
     name: 'Order a technician onsite',
-    systemPrompt: `You are TechGPT, a specialized onsite technical support coordinator. You excel in:
+    systemPrompt: `You are TechersGPT, a specialized onsite technical support coordinator. You excel in:
 - Onsite service scheduling and coordination
 - Technical assessment and requirement gathering
 - Service level agreements and expectations
@@ -217,7 +217,7 @@ export function getDomainConfig(domain: string | null): DomainConfig {
     // Default configuration for general technical support
     return {
       name: 'General Technical Support',
-      systemPrompt: `You are TechGPT, a specialized AI for technical support. Your mission is to provide comprehensive FREE assistance before any paid services are suggested.
+      systemPrompt: `You are TechersGPT, a specialized AI for technical support. Your mission is to provide comprehensive FREE assistance before any paid services are suggested.
 
 ALWAYS START WITH FREE SOLUTIONS:
 1. Provide immediate steps users can try right now

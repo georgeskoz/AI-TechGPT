@@ -127,11 +127,11 @@ export default function ChatArea({ messages, isLoading, username, typingMessage,
             </div>
             <div className="rounded-lg bg-white p-4 shadow-sm max-w-3xl">
               <div className="flex items-center mb-1">
-                <span className="text-sm font-semibold text-gray-800">TechGPT</span>
+                <span className="text-sm font-semibold text-gray-800">TechersGPT</span>
                 <span className="text-xs text-gray-500 ml-2">Just now</span>
               </div>
               <div className="text-gray-700">
-                <p>Welcome to TechGPT! I'm here to help with all your technical questions and problems. Whether you're dealing with coding issues, hardware problems, or need guidance on technology decisions, I'm here to assist.</p>
+                <p>Welcome to TechersGPT! I'm here to help with all your technical questions and problems. Whether you're dealing with coding issues, hardware problems, or need guidance on technology decisions, I'm here to assist.</p>
                 <p className="mt-2">How can I help you today?</p>
               </div>
             </div>
@@ -157,7 +157,7 @@ export default function ChatArea({ messages, isLoading, username, typingMessage,
                   <span className="text-xs text-blue-100 mr-2">{formatTimestamp(message.timestamp)}</span>
                 )}
                 <span className={`text-sm font-semibold ${message.isUser ? '' : 'text-gray-800'}`}>
-                  {message.isUser ? 'You' : 'TechGPT'}
+                  {message.isUser ? 'You' : 'TechersGPT'}
                 </span>
                 {!message.isUser && message.domain && (
                   <DomainIndicator domain={message.domain} className="ml-2" />
@@ -210,7 +210,7 @@ export default function ChatArea({ messages, isLoading, username, typingMessage,
             </div>
             <div className="rounded-lg bg-white p-4 shadow-sm max-w-3xl">
               <div className="flex items-center mb-1">
-                <span className="text-sm font-semibold text-gray-800">TechGPT</span>
+                <span className="text-sm font-semibold text-gray-800">TechersGPT</span>
                 <span className="text-xs text-gray-500 ml-2">Now</span>
               </div>
               
@@ -224,7 +224,7 @@ export default function ChatArea({ messages, isLoading, username, typingMessage,
                   <div className="typing-indicator text-gray-500 flex items-center space-x-1">
                     <span>●</span><span>●</span><span>●</span>
                   </div>
-                  <span className="text-xs text-gray-400 ml-2 italic">TechGPT is thinking...</span>
+                  <span className="text-xs text-gray-400 ml-2 italic">TechersGPT is thinking...</span>
                 </div>
               )}
             </div>
