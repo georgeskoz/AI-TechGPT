@@ -66,6 +66,9 @@ import RegistrationSuccess from "@/pages/RegistrationSuccess";
 import MultiRoleInterface from "@/pages/MultiRoleInterface";
 import DevRoleSwitcher from "@/components/DevRoleSwitcher";
 import ServiceProviderChatPage from "@/pages/ServiceProviderChatPage";
+import TechnicianReferrals from "@/pages/TechnicianReferrals";
+import TechnicianOpportunities from "@/pages/TechnicianOpportunities";
+import LearningCenter from "@/pages/LearningCenter";
 import { PortalAuthGuard } from "@/components/PortalAuthGuard";
 
 
@@ -220,6 +223,21 @@ function Router() {
       } />
       <Route path="/technician-matching" component={TechnicianMatchingPage} />
       <Route path="/test-notifications" component={TestNotificationSystem} />
+      <Route path="/technician-referrals" component={() => 
+        <PortalAuthGuard requiredPortal="service_provider">
+          <TechnicianReferrals />
+        </PortalAuthGuard>
+      } />
+      <Route path="/technician-opportunities" component={() => 
+        <PortalAuthGuard requiredPortal="service_provider">
+          <TechnicianOpportunities />
+        </PortalAuthGuard>
+      } />
+      <Route path="/learning-center" component={() => 
+        <PortalAuthGuard requiredPortal="service_provider">
+          <LearningCenter />
+        </PortalAuthGuard>
+      } />
       
       {/* Admin Portal */}
       <Route path="/admin-home" component={AdminHomePage} />
