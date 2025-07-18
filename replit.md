@@ -128,6 +128,12 @@ TechGPT is a full-stack web application that provides AI-powered technical suppo
   - **Portal State Persistence**: Selected portal is saved to localStorage during login process
   - **Enhanced User Experience**: Portal selection with blue (Customer), green (Service Provider), and purple (Admin) color coding
   - **Social Login Integration**: Portal selection applies to both email/password and social login methods
+- **Enhanced Access Denied Screens**: Improved PortalAuthGuard with comprehensive navigation options
+  - **Multiple Sign-In Options**: Added "Sign In as Different User" and "Sign Up" buttons to access denied screens
+  - **Sign Out Functionality**: Added sign out option that clears session and redirects to login
+  - **Clear Instructions**: Added explanatory text showing available options for users
+  - **Professional Layout**: Improved button layout with proper spacing and visual hierarchy
+  - **User-Friendly Navigation**: Users can now easily switch between portals or access different accounts
 - **Bug Fixes**: Fixed profile visibility page runtime error and added debugging console logs
   - **Profile Visibility Fix**: Added proper null checks for country data to prevent undefined states.find() errors
   - **Debug Logging**: Added console logging to portal switching functionality for troubleshooting
