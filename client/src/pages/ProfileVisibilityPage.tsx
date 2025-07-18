@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/components/UserAuthProvider";
 import { 
   Eye, 
   Settings, 
@@ -24,6 +25,7 @@ import {
 } from "lucide-react";
 
 export default function ProfileVisibilityPage() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("preview");
   const [simulatedChanges, setSimulatedChanges] = useState({
     profileDescription: "",
@@ -32,7 +34,19 @@ export default function ProfileVisibilityPage() {
     experience: "intermediate"
   });
 
-  // Mock technician data - in real app, this would come from user's profile
+  // Get actual user data from authentication context
+  const { data: userData, isLoading } = useQuery({
+    queryKey: ["/api/users", user?.username],
+    queryFn: async () => {
+      if (!user?.username) return null;
+      const res = await fetch(`/api/users/${user.username}`);
+      if (!res.ok) throw new Error("Failed to fetch user data");
+      return res.json();
+    },
+    enabled: !!user?.username
+  });
+
+  // Initialize technician data with actual user data or fallback to mock data
   const [technicianData, setTechnicianData] = useState({
     id: 1,
     businessName: "Professional Tech Services",
@@ -55,6 +69,36 @@ export default function ProfileVisibilityPage() {
     isVerified: true,
     isActive: true
   });
+
+  // Update technician data when user data is loaded
+  useEffect(() => {
+    if (userData) {
+      console.log("Loaded user data:", userData);
+      setTechnicianData(prev => ({
+        ...prev,
+        id: userData.id,
+        businessName: userData.businessName || userData.fullName || userData.username || "Professional Tech Services",
+        companyName: userData.companyName || userData.businessName || "TechCorp Solutions",
+        experience: userData.experience || "intermediate",
+        hourlyRatePercentage: userData.hourlyRatePercentage || 85,
+        country: userData.country || "US",
+        state: userData.state || "CA",
+        city: userData.city || "San Francisco",
+        serviceRadius: userData.serviceRadius || 25,
+        profileDescription: userData.profileDescription || userData.bio || "Experienced technician specializing in hardware troubleshooting, network setup, and software installation. Available for remote and on-site support.",
+        responseTime: userData.responseTime || 60,
+        skills: userData.skills || ["PC Hardware Repair", "Network Troubleshooting", "Software Installation", "Virus Removal", "Wi-Fi Setup"],
+        categories: userData.categories || ["Hardware Issues", "Software Issues", "Network Troubleshooting"],
+        languages: userData.languages || ["English"],
+        certifications: userData.certifications || [],
+        serviceAreas: userData.serviceAreas || [userData.city || "San Francisco"],
+        rating: userData.rating || "4.8",
+        completedJobs: userData.completedJobs || 127,
+        isVerified: userData.isVerified || true,
+        isActive: userData.isActive || true
+      }));
+    }
+  }, [userData]);
 
   const [visibilityScore, setVisibilityScore] = useState(0);
   const [competitiveAnalysis, setCompetitiveAnalysis] = useState({
