@@ -59,7 +59,7 @@ export default function RoleSwitcher({ currentRole, onRoleChange }: RoleSwitcher
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <h1 className="text-xl font-bold text-gray-900">TechGPT Platform</h1>
+            <h1 className="text-xl font-bold text-gray-900">TechersGPT Platform</h1>
             <Badge variant="outline" className="text-xs">
               Multi-Role Interface
             </Badge>

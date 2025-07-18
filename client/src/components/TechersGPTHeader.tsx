@@ -8,13 +8,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/components/UserAuthProvider';
-import techGPTLogoPath from "@assets/image_1752537953157.png";
+// Logo removed - will be updated later
 
-interface TechGPTHeaderProps {
+interface TechersGPTHeaderProps {
   username: string;
 }
 
-export default function TechGPTHeader({ username }: TechGPTHeaderProps) {
+export default function TechersGPTHeader({ username }: TechersGPTHeaderProps) {
   const [, navigate] = useLocation();
   const { logout } = useAuth();
 
@@ -36,14 +36,10 @@ export default function TechGPTHeader({ username }: TechGPTHeaderProps) {
         <div className="flex items-center space-x-2">
           <button 
             onClick={handleLogoClick}
-            className="focus:outline-none hover:bg-white hover:opacity-80"
+            className="focus:outline-none hover:bg-white hover:opacity-80 text-2xl font-bold text-blue-600"
             title="Go to Home"
           >
-            <img 
-              src={techGPTLogoPath} 
-              alt="TechGPT Logo" 
-              className="h-16 w-32"
-            />
+            TechersGPT
           </button>
         </div>
         <div className="flex items-center space-x-4">

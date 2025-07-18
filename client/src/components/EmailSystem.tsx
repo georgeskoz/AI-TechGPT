@@ -94,8 +94,8 @@ export default function EmailSystem() {
   const mockCampaigns: EmailCampaign[] = [
     {
       id: 1,
-      subject: 'Welcome to TechGPT - Your Technical Support Partner',
-      content: '<h1>Welcome!</h1><p>Thank you for joining TechGPT. We are here to help with all your technical needs.</p>',
+      subject: 'Welcome to TechersGPT - Your Technical Support Partner',
+      content: '<h1>Welcome!</h1><p>Thank you for joining TechersGPT. We are here to help with all your technical needs.</p>',
       contentType: 'html',
       recipients: [],
       recipientGroups: ['new_users'],
@@ -156,8 +156,8 @@ export default function EmailSystem() {
     {
       id: 1,
       name: 'Welcome Email',
-      subject: 'Welcome to TechGPT',
-      content: '<h1>Welcome to TechGPT!</h1><p>Thank you for joining our platform...</p>',
+      subject: 'Welcome to TechersGPT',
+      content: '<h1>Welcome to TechersGPT!</h1><p>Thank you for joining our platform...</p>',
       category: 'welcome',
       isActive: true,
       createdAt: new Date('2024-01-01')
@@ -701,7 +701,7 @@ export default function EmailSystem() {
                   <CardContent className="space-y-4">
                     <div>
                       <Label htmlFor="fromName">From Name</Label>
-                      <Input id="fromName" placeholder="TechGPT Support" />
+                      <Input id="fromName" placeholder="TechersGPT Support" />
                     </div>
                     <div>
                       <Label htmlFor="fromEmail">From Email</Label>

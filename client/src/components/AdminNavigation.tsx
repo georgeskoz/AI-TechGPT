@@ -17,7 +17,7 @@ export default function AdminNavigation() {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">TechGPT Admin Panel</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">TechersGPT Admin Panel</h1>
         <p className="text-gray-600">Platform management and analytics dashboard</p>
       </div>
 

@@ -4,7 +4,7 @@ import { ArrowLeft, Home, Menu, X, MessageCircle, Users, Shield, User } from "lu
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import techGPTLogoPath from "@assets/image_1752537953157.png";
+// Logo removed - will be updated later
 import RoleBasedNavigation from "@/components/RoleBasedNavigation";
 import { useAuth } from "@/components/UserAuthProvider";
 
@@ -140,13 +140,9 @@ export default function Navigation({
               <Button
                 variant="ghost"
                 onClick={() => setLocation(getHomePath())}
-                className="p-2 hover:bg-white"
+                className="p-2 hover:bg-white text-2xl font-bold text-blue-600"
               >
-                <img 
-                  src={techGPTLogoPath} 
-                  alt="TechGPT Logo" 
-                  className="h-16 w-32"
-                />
+                TechersGPT
               </Button>
             </div>
           )}
