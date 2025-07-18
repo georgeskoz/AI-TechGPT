@@ -11,6 +11,7 @@ import Navigation from "@/components/Navigation";
 import { useAuth } from "@/components/UserAuthProvider";
 import { Send, Bot, User, Wrench, MessageCircle, Clock, TrendingUp, CheckCircle, AlertCircle, Inbox, Users, Briefcase, Settings, HelpCircle, BookOpen, Star, DollarSign, Calendar, Award } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
 
 interface Message {
   id: string;
@@ -37,6 +38,7 @@ export default function ServiceProviderChatPage() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   // Mock stats for now - in real implementation, these would come from API
   const stats: ServiceProviderStats = {
@@ -95,6 +97,11 @@ export default function ServiceProviderChatPage() {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Navigation handlers for buttons
+  const handleNavigate = (path: string) => {
+    setLocation(path);
   };
 
   useEffect(() => {
@@ -190,30 +197,60 @@ How can I assist you today?`,
                 <Separator />
                 
                 <div className="space-y-2">
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start hover:bg-green-50 hover:border-green-200"
+                    onClick={() => handleNavigate('/technician-dashboard')}
+                  >
                     <Inbox className="h-4 w-4 mr-2" />
                     Inbox
                     <Badge variant="secondary" className="ml-auto">12</Badge>
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start hover:bg-green-50 hover:border-green-200"
+                    onClick={() => handleNavigate('/technician-referrals')}
+                  >
                     <Users className="h-4 w-4 mr-2" />
                     Referrals
                     <Badge variant="secondary" className="ml-auto">$125</Badge>
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start hover:bg-green-50 hover:border-green-200"
+                    onClick={() => handleNavigate('/technician-opportunities')}
+                  >
                     <Briefcase className="h-4 w-4 mr-2" />
                     Opportunities
                     <Badge variant="secondary" className="ml-auto">8</Badge>
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start hover:bg-green-50 hover:border-green-200"
+                    onClick={() => handleNavigate('/profile-visibility')}
+                  >
                     <Settings className="h-4 w-4 mr-2" />
                     Account
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start hover:bg-green-50 hover:border-green-200"
+                    onClick={() => handleNavigate('/customer-home')}
+                  >
                     <HelpCircle className="h-4 w-4 mr-2" />
                     Help
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start hover:bg-green-50 hover:border-green-200"
+                    onClick={() => handleNavigate('/learning-center')}
+                  >
                     <BookOpen className="h-4 w-4 mr-2" />
                     Learning Center
                     <Badge variant="secondary" className="ml-auto">3</Badge>
@@ -223,15 +260,30 @@ How can I assist you today?`,
                 <Separator />
                 
                 <div className="space-y-2">
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start hover:bg-green-50 hover:border-green-200"
+                    onClick={() => handleNavigate('/technician-dashboard')}
+                  >
                     <CheckCircle className="h-4 w-4 mr-2" />
                     View Active Jobs
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start hover:bg-green-50 hover:border-green-200"
+                    onClick={() => handleNavigate('/technician-earnings')}
+                  >
                     <TrendingUp className="h-4 w-4 mr-2" />
                     Earnings Report
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start hover:bg-green-50 hover:border-green-200"
+                    onClick={() => handleNavigate('/test-notifications')}
+                  >
                     <AlertCircle className="h-4 w-4 mr-2" />
                     Notifications
                   </Button>
