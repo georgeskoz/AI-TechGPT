@@ -102,12 +102,17 @@ TechersGPT is a comprehensive full-stack web application that provides AI-powere
 
 ## Recent Changes
 
-### January 18, 2025 - Navigation Enhancement and Complete Application Rebranding
+### January 18, 2025 - Navigation Enhancement and Profile Visibility Fix
 - **Enhanced Technician Earnings Page**: Added Quick Access menu functionality to technician-earnings page
   - **Navigation Component Integration**: Replaced SimpleNavigation with full Navigation component
   - **Quick Access Menu**: Service providers now have access to Quick Access menu from earnings dashboard
   - **Portal-Specific Navigation**: Full navigation functionality including role-based menu options
   - **Improved User Experience**: Consistent navigation experience across all service provider pages
+- **Fixed Profile Visibility Page**: Resolved issue where logged-in service provider accounts weren't showing in profile visibility
+  - **Multi-Database User Lookup**: Updated /api/users/:username endpoint to check all three databases (users, service providers, customers)
+  - **Real User Data Integration**: Profile visibility page now loads actual user data instead of placeholder information
+  - **Authentication Context**: Added useAuth hook to profile visibility page for proper user context
+  - **Dynamic Profile Display**: vanessa1 and other service providers now see their actual profile information in full profile view
 
 ### January 18, 2025 - Complete Application Rebranding from TechGPT to TechersGPT
 - **Complete Brand Transformation**: Successfully rebranded entire application from TechGPT to TechersGPT across all components and systems
