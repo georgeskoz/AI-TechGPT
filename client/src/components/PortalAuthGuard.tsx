@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle, Shield, User, Briefcase, LogIn } from 'lucide-react';
+import { AlertTriangle, Shield, User, Briefcase, LogIn, UserPlus, LogOut } from 'lucide-react';
 
 interface PortalAuthGuardProps {
   children: React.ReactNode;
@@ -17,7 +17,7 @@ export function PortalAuthGuard({
   requiredPortal, 
   fallbackMessage 
 }: PortalAuthGuardProps) {
-  const { user, isAuthenticated, currentPortal, isUserAllowedInPortal, setCurrentPortal } = useAuth();
+  const { user, isAuthenticated, currentPortal, isUserAllowedInPortal, setCurrentPortal, logout } = useAuth();
 
   // If user is not authenticated, show login prompt
   if (!isAuthenticated) {
@@ -81,9 +81,19 @@ export function PortalAuthGuard({
             <Alert className="border-red-200">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                {fallbackMessage || `You don't have permission to access the ${requiredPortalInfo.name}.`}
+                {fallbackMessage || `You don't have permission to access the ${requiredPortalInfo.name}. You are currently signed in as a ${user?.userType?.replace('_', ' ')} and can only access the ${userPortalInfo.name}.`}
               </AlertDescription>
             </Alert>
+            
+            <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+              <p><strong>Options:</strong></p>
+              <ul className="list-disc ml-5 mt-1 space-y-1">
+                <li>Continue to your authorized portal</li>
+                <li>Sign in as a different user with access to {requiredPortalInfo.name}</li>
+                <li>Create a new account with the appropriate role</li>
+                <li>Sign out and return to the login page</li>
+              </ul>
+            </div>
 
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -137,13 +147,47 @@ export function PortalAuthGuard({
                 Go to Your Portal ({userPortalInfo.name})
               </Button>
               
-              <Button 
-                variant="outline" 
-                onClick={() => window.location.href = '/'}
-                className="w-full"
-              >
-                Return to Home
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.location.href = '/login'}
+                  className="flex-1"
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign In as Different User
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.location.href = '/register'}
+                  className="flex-1"
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Sign Up
+                </Button>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.location.href = '/'}
+                  className="flex-1"
+                >
+                  Return to Home
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    logout();
+                    window.location.href = '/login';
+                  }}
+                  className="flex-1 text-red-600 hover:text-red-700"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
