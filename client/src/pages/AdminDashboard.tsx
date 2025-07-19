@@ -1073,6 +1073,7 @@ Last Updated: ${effectiveDate}
         { id: "pending-service-providers", label: "Recent Pending Service Pro", icon: Clock },
         { id: "service-provider-earnings", label: "Earnings", icon: DollarSign },
         { id: "service-provider-referrals", label: "Referrals", icon: Users },
+        { id: "technician-referral-program", label: "Referral Program Management", icon: Gift },
         { id: "service-provider-opportunities", label: "Opportunities", icon: Target },
         { id: "refund-policy-sp", label: "Refund Policy", icon: FileText },
         { id: "privacy-policy-sp", label: "Privacy Policy", icon: Shield },
@@ -1142,6 +1143,7 @@ Last Updated: ${effectiveDate}
       icon: Server,
       subItems: [
         { id: "coupons", label: "Coupons", icon: Percent },
+        { id: "customer-promotions", label: "Customer Promotions", icon: Tag },
         { id: "email", label: "Email System", icon: Mail },
         { id: "regional-announcements", label: "Regional Announcements", icon: Megaphone },
         { id: "system-settings", label: "System Settings", icon: Settings }
@@ -3130,6 +3132,643 @@ Last Updated: ${effectiveDate}
                         <p className="text-sm text-gray-600">Professional service provider requests</p>
                       </div>
                       <Button variant="outline">Enabled</Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Technician Referral Program Management Section */}
+          {activeTab === "technician-referral-program" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Technician Referral Program Management</h2>
+                <p className="text-gray-600">Manage technician-to-technician referral program with unique codes and configurable bonuses</p>
+              </div>
+
+              {/* Program Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total Referrals</p>
+                        <p className="text-2xl font-bold text-blue-600">247</p>
+                      </div>
+                      <Users className="h-8 w-8 text-blue-500" />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">+12% this month</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Active Referrers</p>
+                        <p className="text-2xl font-bold text-green-600">89</p>
+                      </div>
+                      <Gift className="h-8 w-8 text-green-500" />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">73 new referrals</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Bonuses Paid</p>
+                        <p className="text-2xl font-bold text-purple-600">$15,420</p>
+                      </div>
+                      <DollarSign className="h-8 w-8 text-purple-500" />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">$2,850 pending</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Conversion Rate</p>
+                        <p className="text-2xl font-bold text-orange-600">68.2%</p>
+                      </div>
+                      <TrendingUp className="h-8 w-8 text-orange-500" />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">+5.1% improvement</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Program Settings */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings className="h-5 w-5" />
+                      Referral Program Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h3 className="font-medium">Program Status</h3>
+                        <p className="text-sm text-gray-600">Enable or disable the referral program</p>
+                      </div>
+                      <Button variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        Enabled
+                      </Button>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Referral Bonus Amount (CAD)</label>
+                      <div className="flex items-center gap-2">
+                        <Input type="number" placeholder="150.00" className="flex-1" />
+                        <Button size="sm">Update</Button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Amount paid to referrer when referred technician completes first job</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Bonus for Referred Technician (CAD)</label>
+                      <div className="flex items-center gap-2">
+                        <Input type="number" placeholder="75.00" className="flex-1" />
+                        <Button size="sm">Update</Button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Welcome bonus for new technician upon first job completion</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Minimum Jobs Required</label>
+                      <div className="flex items-center gap-2">
+                        <Input type="number" placeholder="1" className="flex-1" />
+                        <Button size="sm">Update</Button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Jobs referred technician must complete to trigger bonus</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Code className="h-5 w-5" />
+                      Referral Code Management
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Code Format</label>
+                      <Select defaultValue="auto">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="auto">Auto-generated (TECH-ABC123)</SelectItem>
+                          <SelectItem value="username">Username-based (USERNAME-123)</SelectItem>
+                          <SelectItem value="custom">Custom format</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Code Length</label>
+                      <Input type="number" defaultValue="8" min="6" max="12" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">Sample Codes</label>
+                      <div className="bg-gray-50 p-3 rounded-lg space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <code className="bg-blue-100 px-2 py-1 rounded">TECH-VAN847</code>
+                          <span className="text-gray-500">vanessa1</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <code className="bg-green-100 px-2 py-1 rounded">TECH-GEO123</code>
+                          <span className="text-gray-500">georgeskoz</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <code className="bg-purple-100 px-2 py-1 rounded">TECH-DAN456</code>
+                          <span className="text-gray-500">dany</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Active Referrals Table */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Active Referral Codes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2 flex-1 max-w-md">
+                        <Search className="h-4 w-4 text-gray-400" />
+                        <Input placeholder="Search technicians, codes, or referrals..." />
+                      </div>
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Generate New Code
+                      </Button>
+                    </div>
+                    
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Technician</TableHead>
+                            <TableHead>Referral Code</TableHead>
+                            <TableHead>Uses</TableHead>
+                            <TableHead>Successful</TableHead>
+                            <TableHead>Earnings</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium">Vanessa Martinez</p>
+                                <p className="text-sm text-gray-500">vanessa1</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <code className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">TECH-VAN847</code>
+                            </TableCell>
+                            <TableCell>12</TableCell>
+                            <TableCell>8</TableCell>
+                            <TableCell className="font-medium text-green-600">$1,200</TableCell>
+                            <TableCell>
+                              <Badge className="bg-green-100 text-green-800 border-0">Active</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-3 w-3" />
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <Settings className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium">Georges Kozaily</p>
+                                <p className="text-sm text-gray-500">georgeskoz</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <code className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">TECH-GEO123</code>
+                            </TableCell>
+                            <TableCell>7</TableCell>
+                            <TableCell>5</TableCell>
+                            <TableCell className="font-medium text-green-600">$750</TableCell>
+                            <TableCell>
+                              <Badge className="bg-green-100 text-green-800 border-0">Active</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-3 w-3" />
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <Settings className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium">Dany Wilson</p>
+                                <p className="text-sm text-gray-500">dany</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <code className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm">TECH-DAN456</code>
+                            </TableCell>
+                            <TableCell>3</TableCell>
+                            <TableCell>2</TableCell>
+                            <TableCell className="font-medium text-green-600">$300</TableCell>
+                            <TableCell>
+                              <Badge className="bg-green-100 text-green-800 border-0">Active</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-3 w-3" />
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <Settings className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Customer Promotions Section */}
+          {activeTab === "customer-promotions" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Customer Promotions Management</h2>
+                <p className="text-gray-600">Create and manage promotional coupon codes for customer acquisition and retention</p>
+              </div>
+
+              {/* Promotion Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Active Promotions</p>
+                        <p className="text-2xl font-bold text-blue-600">23</p>
+                      </div>
+                      <Tag className="h-8 w-8 text-blue-500" />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">5 expiring soon</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total Redemptions</p>
+                        <p className="text-2xl font-bold text-green-600">1,847</p>
+                      </div>
+                      <CheckCircle className="h-8 w-8 text-green-500" />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">+28% this month</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Discount Value</p>
+                        <p className="text-2xl font-bold text-purple-600">$24,350</p>
+                      </div>
+                      <DollarSign className="h-8 w-8 text-purple-500" />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Customer savings</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Conversion Rate</p>
+                        <p className="text-2xl font-bold text-orange-600">42.8%</p>
+                      </div>
+                      <TrendingUp className="h-8 w-8 text-orange-500" />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Code to purchase</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Create New Promotion */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Plus className="h-5 w-5" />
+                      Create New Promotion
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Promotion Name</label>
+                      <Input placeholder="e.g., New Customer Welcome 25%" />
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Coupon Code</label>
+                      <div className="flex items-center gap-2">
+                        <Input placeholder="WELCOME25" className="flex-1" />
+                        <Button variant="outline" size="sm">
+                          <RefreshCw className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Discount Type</label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select discount type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="percentage">Percentage Discount</SelectItem>
+                          <SelectItem value="fixed">Fixed Amount Discount</SelectItem>
+                          <SelectItem value="free_service">Free Service Credit</SelectItem>
+                          <SelectItem value="bogo">Buy One Get One</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">Discount Value</label>
+                        <Input type="number" placeholder="25" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">Max Uses</label>
+                        <Input type="number" placeholder="100" />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">Start Date</label>
+                        <Input type="date" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">End Date</label>
+                        <Input type="date" />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Target Audience</label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select target audience" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="new_customers">New Customers Only</SelectItem>
+                          <SelectItem value="existing_customers">Existing Customers</SelectItem>
+                          <SelectItem value="all_customers">All Customers</SelectItem>
+                          <SelectItem value="inactive_customers">Inactive Customers (90+ days)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <Button className="w-full">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Promotion
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart className="h-5 w-5" />
+                      Promotion Analytics
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h3 className="font-medium text-blue-900 mb-2">Top Performing Promotions</h3>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">WELCOME25</span>
+                          <span className="text-sm font-medium text-blue-700">847 uses</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">FIRST50</span>
+                          <span className="text-sm font-medium text-blue-700">623 uses</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">HOLIDAY20</span>
+                          <span className="text-sm font-medium text-blue-700">377 uses</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <h3 className="font-medium text-green-900 mb-2">Customer Acquisition</h3>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">New Customers This Month</span>
+                          <span className="text-sm font-medium text-green-700">234</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">Via Promotions</span>
+                          <span className="text-sm font-medium text-green-700">187 (80%)</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">Avg. Order Value</span>
+                          <span className="text-sm font-medium text-green-700">$145</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <h3 className="font-medium text-purple-900 mb-2">Revenue Impact</h3>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">Revenue Generated</span>
+                          <span className="text-sm font-medium text-purple-700">$67,430</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">Discounts Given</span>
+                          <span className="text-sm font-medium text-purple-700">$24,350</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">Net Revenue</span>
+                          <span className="text-sm font-medium text-purple-700">$43,080</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Active Promotions Table */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Tag className="h-5 w-5" />
+                    Active Promotional Campaigns
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2 flex-1 max-w-md">
+                        <Search className="h-4 w-4 text-gray-400" />
+                        <Input placeholder="Search promotions, codes, or campaigns..." />
+                      </div>
+                      <Select defaultValue="all">
+                        <SelectTrigger className="w-40">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Status</SelectItem>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="scheduled">Scheduled</SelectItem>
+                          <SelectItem value="expired">Expired</SelectItem>
+                          <SelectItem value="paused">Paused</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Campaign Name</TableHead>
+                            <TableHead>Code</TableHead>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Value</TableHead>
+                            <TableHead>Uses / Limit</TableHead>
+                            <TableHead>Valid Until</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium">New Customer Welcome</p>
+                                <p className="text-sm text-gray-500">First-time customer offer</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <code className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">WELCOME25</code>
+                            </TableCell>
+                            <TableCell>25% Off</TableCell>
+                            <TableCell>$0 - $50 max</TableCell>
+                            <TableCell>847 / 1000</TableCell>
+                            <TableCell>Dec 31, 2025</TableCell>
+                            <TableCell>
+                              <Badge className="bg-green-100 text-green-800 border-0">Active</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-3 w-3" />
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <Settings className="h-3 w-3" />
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <Pause className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium">First Service $50 Off</p>
+                                <p className="text-sm text-gray-500">Premium service discount</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <code className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">FIRST50</code>
+                            </TableCell>
+                            <TableCell>$50 Fixed</TableCell>
+                            <TableCell>$50 off</TableCell>
+                            <TableCell>623 / 800</TableCell>
+                            <TableCell>Nov 30, 2025</TableCell>
+                            <TableCell>
+                              <Badge className="bg-green-100 text-green-800 border-0">Active</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-3 w-3" />
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <Settings className="h-3 w-3" />
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <Pause className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium">Holiday Special</p>
+                                <p className="text-sm text-gray-500">Seasonal promotion</p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <code className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">HOLIDAY20</code>
+                            </TableCell>
+                            <TableCell>20% Off</TableCell>
+                            <TableCell>$0 - $100 max</TableCell>
+                            <TableCell>377 / 500</TableCell>
+                            <TableCell>Jan 15, 2025</TableCell>
+                            <TableCell>
+                              <Badge className="bg-orange-100 text-orange-800 border-0">Expiring Soon</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-3 w-3" />
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <Settings className="h-3 w-3" />
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <Calendar className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
                     </div>
                   </div>
                 </CardContent>

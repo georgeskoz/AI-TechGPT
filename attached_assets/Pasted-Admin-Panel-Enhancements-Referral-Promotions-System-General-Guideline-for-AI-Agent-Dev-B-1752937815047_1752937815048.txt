@@ -1,0 +1,113 @@
+Admin Panel Enhancements – Referral & Promotions System
+🧠 General Guideline for AI Agent / Dev
+⚠️ Before creating any new feature/module:
+
+Check if a similar function or module already exists in the admin panel.
+
+If found, enhance or extend the existing module.
+
+Avoid duplication — use existing schema, components, and structure wherever possible.
+
+🛠️ 1. Technician Referral Program
+[Purpose] Allow technicians to earn rewards by referring other technicians.
+
+[Agent Instructions]
+
+Look for existing referral program logic, likely under "Technicians" or "Settings".
+
+Confirm if referral codes and tracking are already present.
+
+If present, enhance to include:
+
+Per-region referral reward settings.
+
+View referral stats for each technician (e.g. who they referred, total earnings).
+
+Ability for Region Admin to:
+
+Toggle referral program ON/OFF
+
+Set reward amount (currency-based)
+
+If not found, create a new Technician Referral section under "Technician Management" or "Rewards".
+
+🛠️ 2. Promotions / Coupon System for Customer Acquisition
+[Purpose] Region Admins can launch customer-focused promotions (e.g., coupon codes, discounts).
+
+[Agent Instructions]
+
+First, search admin panel for any of the following:
+
+"Promotions"
+
+"Coupons"
+
+"Discount Codes"
+
+Any marketing-related modules
+
+If found, extend functionality to support:
+
+Region-based creation and management
+
+Code types: % Discount, Fixed Discount, Free Service, First Booking Bonus
+
+Validity period, usage limits, and audience targeting (e.g., new users only)
+
+If not found, create a new section:
+
+Module Name: Customer Promotions
+
+Access Level: Region Admin only
+
+Actions:
+
+Create/Edit/Delete promo campaigns
+
+Generate unique promo codes
+
+Monitor usage analytics
+
+Set:
+
+Type
+
+Region
+
+Start/End Dates
+
+Redemption Rules
+
+🔒 Clear Boundaries
+Technicians:
+
+Only use the Referral Program to bring in other technicians.
+
+Cannot create or use promotions/coupons.
+
+Region Admins:
+
+Manage both:
+
+Referral reward settings
+
+Promotions/coupons for customer acquisition
+
+✅ Suggested UI Structure (If Building or Enhancing)
+Admin Panel Navigation:
+
+pgsql
+Copy
+Edit
+└── Settings
+    ├── Technician Referral Program
+    │   ├── Enable Referral Program [toggle]
+    │   ├── Referral Reward Amount [input]
+    │   └── Referral Tracking Table
+    └── Customer Promotions
+        ├── Create New Promotion [button]
+        ├── Promo Code List [table]
+        ├── Promo Type: [% | Fixed | Free Service]
+        ├── Region Selector
+        ├── Target Audience [All | New Customers Only]
+        └── Analytics
