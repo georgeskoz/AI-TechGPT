@@ -195,6 +195,11 @@ function Router() {
           <ServiceProviderDashboard />
         </PortalAuthGuard>
       } />
+      <Route path="/technician-dashboard" component={() => 
+        <PortalAuthGuard requiredPortal="service_provider">
+          <ServiceProviderDashboard />
+        </PortalAuthGuard>
+      } />
       <Route path="/service-provider-chat" component={() => 
         <PortalAuthGuard requiredPortal="service_provider">
           <ServiceProviderChat />
