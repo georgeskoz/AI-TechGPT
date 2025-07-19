@@ -201,6 +201,506 @@ interface SidebarItem {
   superAdminOnly?: boolean;
 }
 
+// Service Provider Management Component
+function ServiceProvidersManagement() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [selectedProviders, setSelectedProviders] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState("table");
+  const [sortField, setSortField] = useState("joinDate");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const { toast } = useToast();
+
+  // Mock data - in production, this would come from API
+  const serviceProviders = [
+    {
+      id: "sp001",
+      name: "Vanessa Rodriguez",
+      username: "vanessa1",
+      email: "vanessa@techgpt.com",
+      phone: "+1-555-0123",
+      location: "Toronto, ON",
+      status: "active",
+      verificationStatus: "verified",
+      rating: 4.8,
+      completedJobs: 342,
+      joinDate: "2024-01-15",
+      lastActive: "2024-12-08",
+      skills: ["Hardware Repair", "Networking", "Security"],
+      hourlyRate: 75,
+      region: "Ontario",
+      referrals: 23,
+      earnings: 25650.00,
+      applicationStatus: "approved",
+      identityVerified: true,
+      backgroundCheck: "completed",
+      accountStatus: "active"
+    },
+    {
+      id: "sp002", 
+      name: "George Skouzmakis",
+      username: "georgeskoz",
+      email: "george@techgpt.com",
+      phone: "+1-555-0124",
+      location: "Montreal, QC", 
+      status: "active",
+      verificationStatus: "pending",
+      rating: 4.5,
+      completedJobs: 187,
+      joinDate: "2024-02-20",
+      lastActive: "2024-12-07",
+      skills: ["Web Development", "Database", "Mobile"],
+      hourlyRate: 80,
+      region: "Quebec",
+      referrals: 15,
+      earnings: 14950.00,
+      applicationStatus: "approved",
+      identityVerified: false,
+      backgroundCheck: "pending",
+      accountStatus: "active"
+    },
+    {
+      id: "sp003",
+      name: "Emily Rodriguez", 
+      username: "emily",
+      email: "emily@techgpt.com",
+      phone: "+1-555-0125",
+      location: "Denver, CO",
+      status: "active",
+      verificationStatus: "verified",
+      rating: 4.9,
+      completedJobs: 423,
+      joinDate: "2023-11-10",
+      lastActive: "2024-12-08",
+      skills: ["Cloud Security", "Remote Support", "System Admin"],
+      hourlyRate: 90,
+      region: "Colorado",
+      referrals: 31,
+      earnings: 38070.00,
+      applicationStatus: "approved", 
+      identityVerified: true,
+      backgroundCheck: "completed",
+      accountStatus: "active"
+    },
+    {
+      id: "sp004",
+      name: "David Kim",
+      username: "davidk",
+      email: "david@techgpt.com", 
+      phone: "+1-555-0126",
+      location: "Seattle, WA",
+      status: "inactive",
+      verificationStatus: "needs_attention", 
+      rating: 4.2,
+      completedJobs: 98,
+      joinDate: "2024-05-12",
+      lastActive: "2024-11-28",
+      skills: ["Phone Support", "Software", "Network"],
+      hourlyRate: 70,
+      region: "Washington",
+      referrals: 8,
+      earnings: 6860.00,
+      applicationStatus: "under_review",
+      identityVerified: true,
+      backgroundCheck: "flagged",
+      accountStatus: "suspended"
+    }
+  ];
+
+  const filteredProviders = serviceProviders.filter(provider => {
+    const matchesSearch = provider.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         provider.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         provider.email.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesFilter = filterStatus === "all" || provider.verificationStatus === filterStatus;
+    
+    return matchesSearch && matchesFilter;
+  });
+
+  const sortedProviders = [...filteredProviders].sort((a, b) => {
+    let aValue = a[sortField as keyof typeof a];
+    let bValue = b[sortField as keyof typeof b];
+    
+    if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+    if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+    
+    if (sortOrder === 'asc') {
+      return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    } else {
+      return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+    }
+  });
+
+  const handleBulkAction = async (action: string) => {
+    if (selectedProviders.length === 0) {
+      toast({
+        title: "No Selection",
+        description: "Please select service providers first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // API call would go here
+      toast({
+        title: "Action Completed",
+        description: `${action} applied to ${selectedProviders.length} service providers.`,
+      });
+      setSelectedProviders([]);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to perform bulk action.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleProviderAction = async (providerId: string, action: string) => {
+    try {
+      // API call would go here
+      toast({
+        title: "Action Completed", 
+        description: `${action} applied to service provider.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to perform action.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      verified: { variant: "default" as const, color: "bg-green-100 text-green-800" },
+      pending: { variant: "secondary" as const, color: "bg-yellow-100 text-yellow-800" },
+      needs_attention: { variant: "destructive" as const, color: "bg-red-100 text-red-800" },
+      active: { variant: "default" as const, color: "bg-green-100 text-green-800" },
+      inactive: { variant: "secondary" as const, color: "bg-gray-100 text-gray-800" },
+      suspended: { variant: "destructive" as const, color: "bg-red-100 text-red-800" }
+    };
+    
+    return statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900">Service Providers Management</h2>
+          <p className="text-gray-600">Manage service provider accounts, verification, and performance</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <Button>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Add Provider
+          </Button>
+          <Button variant="outline">
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+        </div>
+      </div>
+
+      {/* Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">Total Providers</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{serviceProviders.length}</div>
+            <div className="flex items-center text-xs text-green-600">
+              <TrendingUp className="h-3 w-3 mr-1" />
+              +12% this month
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">Verified Providers</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {serviceProviders.filter(p => p.verificationStatus === 'verified').length}
+            </div>
+            <div className="text-xs text-gray-600">
+              {Math.round((serviceProviders.filter(p => p.verificationStatus === 'verified').length / serviceProviders.length) * 100)}% of total
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">Average Rating</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">4.6</div>
+            <div className="flex items-center text-xs">
+              <Star className="h-3 w-3 mr-1 text-yellow-500" />
+              Across all providers
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">Pending Reviews</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {serviceProviders.filter(p => p.verificationStatus === 'pending' || p.verificationStatus === 'needs_attention').length}
+            </div>
+            <div className="flex items-center text-xs text-orange-600">
+              <AlertCircle className="h-3 w-3 mr-1" />
+              Requires attention
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters and Controls */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Service Providers</CardTitle>
+            <div className="flex items-center gap-4">
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Search providers..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 w-64"
+                />
+              </div>
+
+              {/* Status Filter */}
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="verified">Verified</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="needs_attention">Needs Attention</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* View Mode */}
+              <div className="flex items-center gap-1">
+                <Button
+                  variant={viewMode === 'table' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('table')}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'cards' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('cards')}
+                >
+                  <Grid className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          {/* Bulk Actions */}
+          {selectedProviders.length > 0 && (
+            <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">
+                  {selectedProviders.length} provider{selectedProviders.length > 1 ? 's' : ''} selected
+                </span>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline" onClick={() => handleBulkAction('verify')}>
+                    <CheckCircle className="h-4 w-4 mr-1" />
+                    Verify
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleBulkAction('suspend')}>
+                    <Ban className="h-4 w-4 mr-1" />
+                    Suspend
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleBulkAction('message')}>
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    Message
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Provider Table */}
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">
+                    <input
+                      type="checkbox"
+                      checked={selectedProviders.length === sortedProviders.length}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedProviders(sortedProviders.map(p => p.id));
+                        } else {
+                          setSelectedProviders([]);
+                        }
+                      }}
+                      className="rounded"
+                    />
+                  </TableHead>
+                  <TableHead>Provider</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Rating</TableHead>
+                  <TableHead>Jobs</TableHead>
+                  <TableHead>Earnings</TableHead>
+                  <TableHead>Region</TableHead>
+                  <TableHead>Join Date</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedProviders.map((provider) => (
+                  <TableRow key={provider.id}>
+                    <TableCell>
+                      <input
+                        type="checkbox"
+                        checked={selectedProviders.includes(provider.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedProviders([...selectedProviders, provider.id]);
+                          } else {
+                            setSelectedProviders(selectedProviders.filter(id => id !== provider.id));
+                          }
+                        }}
+                        className="rounded"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${provider.username}`} />
+                          <AvatarFallback>
+                            {provider.name.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{provider.name}</div>
+                          <div className="text-sm text-gray-600">@{provider.username}</div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <Badge className={getStatusBadge(provider.verificationStatus).color}>
+                          {provider.verificationStatus.replace('_', ' ')}
+                        </Badge>
+                        <div className="flex items-center gap-1">
+                          {provider.identityVerified ? (
+                            <Shield className="h-3 w-3 text-green-600" />
+                          ) : (
+                            <AlertCircle className="h-3 w-3 text-yellow-600" />
+                          )}
+                          <span className="text-xs text-gray-600">ID Verified</span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 text-yellow-500" />
+                        <span className="font-medium">{provider.rating}</span>
+                        <span className="text-sm text-gray-600">({provider.completedJobs})</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-center">
+                        <div className="font-medium">{provider.completedJobs}</div>
+                        <div className="text-xs text-gray-600">completed</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-right">
+                        <div className="font-medium">${provider.earnings.toLocaleString()}</div>
+                        <div className="text-xs text-gray-600">${provider.hourlyRate}/hr</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3 text-gray-400" />
+                        <span className="text-sm">{provider.region}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        {new Date(provider.joinDate).toLocaleDateString()}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleProviderAction(provider.id, 'view')}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            View Profile
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleProviderAction(provider.id, 'edit')}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleProviderAction(provider.id, 'message')}>
+                            <MessageCircle className="h-4 w-4 mr-2" />
+                            Send Message
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => handleProviderAction(provider.id, 'verify')}>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Verify Account
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleProviderAction(provider.id, 'suspend')}
+                            className="text-red-600"
+                          >
+                            <Ban className="h-4 w-4 mr-2" />
+                            Suspend Account
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* No Results */}
+          {sortedProviders.length === 0 && (
+            <div className="text-center py-12">
+              <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <div className="text-lg font-medium text-gray-900 mb-2">No service providers found</div>
+              <div className="text-gray-600">Try adjusting your search or filter criteria.</div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentAdmin, setCurrentAdmin] = useState<AdminUser | null>(null);
@@ -1706,6 +2206,8 @@ Last Updated: ${effectiveDate}
               </Card>
             </div>
           )}
+
+          {activeTab === "service-providers-list" && <ServiceProvidersManagement />}
 
           {activeTab === "register-business" && (
             <div>
