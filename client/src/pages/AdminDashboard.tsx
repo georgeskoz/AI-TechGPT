@@ -142,7 +142,8 @@ import {
   UserX,
   UserMinus,
   Megaphone,
-  Tag
+  Tag,
+  AlertCircle
 } from "lucide-react";
 
 interface AdminUser {
@@ -211,8 +212,48 @@ function ServiceProvidersManagement() {
   const [sortOrder, setSortOrder] = useState("desc");
   const { toast } = useToast();
 
-  // Mock data - in production, this would come from API
-  const serviceProviders = [
+  // Fetch service providers from API
+  const { data: serviceProviders = [], isLoading: providersLoading, refetch } = useQuery({
+    queryKey: ["/api/admin/service-providers", { search: searchTerm, status: filterStatus, sortBy: sortField, sortOrder }],
+    refetchInterval: 30000 // Refresh every 30 seconds
+  });
+
+  // Fetch service provider statistics
+  const { data: stats = {} } = useQuery({
+    queryKey: ["/api/admin/service-providers/stats"],
+    refetchInterval: 60000 // Refresh every minute
+  });
+
+  // Bulk actions mutation
+  const bulkActionMutation = useMutation({
+    mutationFn: async ({ action, providerIds, data }: { action: string; providerIds: string[]; data?: any }) => {
+      const response = await fetch("/api/admin/service-providers/bulk-action", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, providerIds, data })
+      });
+      if (!response.ok) throw new Error("Bulk action failed");
+      return response.json();
+    },
+    onSuccess: (result) => {
+      toast({
+        title: "Success",
+        description: `${result.message}. ${result.successful}/${result.processed} providers updated.`,
+      });
+      refetch();
+      setSelectedProviders([]);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Bulk action failed",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Mock fallback data for demo purposes
+  const fallbackProviders = [
     {
       id: "sp001",
       name: "Vanessa Rodriguez",
@@ -341,20 +382,21 @@ function ServiceProvidersManagement() {
       return;
     }
 
-    try {
-      // API call would go here
-      toast({
-        title: "Action Completed",
-        description: `${action} applied to ${selectedProviders.length} service providers.`,
-      });
-      setSelectedProviders([]);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to perform bulk action.",
-        variant: "destructive",
-      });
+    let actionData = {};
+    if (action === 'message') {
+      const message = prompt("Enter message to send to selected providers:");
+      if (!message) return;
+      actionData = { message };
+    } else if (action === 'suspend') {
+      const reason = prompt("Enter suspension reason:") || 'Administrative action';
+      actionData = { reason };
     }
+
+    bulkActionMutation.mutate({
+      action,
+      providerIds: selectedProviders,
+      data: actionData
+    });
   };
 
   const handleProviderAction = async (providerId: string, action: string) => {
