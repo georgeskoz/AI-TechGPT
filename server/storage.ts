@@ -27,6 +27,7 @@ export interface IServiceProviderStorage {
   getServiceProvider(id: number): Promise<ServiceProvider | undefined>;
   getServiceProviderByUsername(username: string): Promise<ServiceProvider | undefined>;
   getServiceProviderByEmail(email: string): Promise<ServiceProvider | undefined>;
+  getAllServiceProviders(): Promise<ServiceProvider[]>;
   createServiceProvider(serviceProvider: InsertServiceProvider): Promise<ServiceProvider>;
   updateServiceProvider(id: number, updates: Partial<ServiceProvider>): Promise<ServiceProvider | undefined>;
   
@@ -167,6 +168,11 @@ export class ServiceProviderStorage implements IServiceProviderStorage {
     if (!email) return undefined;
     const [serviceProvider] = await db.select().from(serviceProviders).where(eq(serviceProviders.email, email));
     return serviceProvider || undefined;
+  }
+
+  async getAllServiceProviders(): Promise<ServiceProvider[]> {
+    const allServiceProviders = await db.select().from(serviceProviders);
+    return allServiceProviders;
   }
 
   async createServiceProvider(insertServiceProvider: InsertServiceProvider): Promise<ServiceProvider> {

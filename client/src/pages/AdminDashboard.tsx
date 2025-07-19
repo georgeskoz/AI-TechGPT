@@ -99,12 +99,15 @@ import {
   Award,
   Globe,
   UserPlus,
+  Download,
+  Plus,
+  X,
+  MapPin,
+  Mail,
   MessageSquare,
   Bell,
   LogOut,
   ChevronDown,
-  Plus,
-  Download,
   Upload,
   RefreshCw,
   List,
@@ -114,13 +117,10 @@ import {
   CreditCard,
   Building,
   PhoneCall,
-  Mail,
-  MapPin,
   Database,
   Server,
   Moon,
   Sun,
-  X,
   ChevronRight,
   Loader2,
   Sparkles,
@@ -210,7 +210,20 @@ function ServiceProvidersManagement() {
   const [viewMode, setViewMode] = useState("table");
   const [sortField, setSortField] = useState("joinDate");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newProviderData, setNewProviderData] = useState({
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    phone: "",
+    location: "",
+    skills: "",
+    hourlyRate: "",
+    bio: ""
+  });
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch service providers from API
   const { data: serviceProviders = [], isLoading: providersLoading, refetch } = useQuery({
@@ -247,6 +260,52 @@ function ServiceProvidersManagement() {
       toast({
         title: "Error",
         description: error.message || "Bulk action failed",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Add provider mutation
+  const addProviderMutation = useMutation({
+    mutationFn: async (providerData: any) => {
+      const response = await fetch("/api/admin/service-providers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...providerData,
+          hourlyRate: parseFloat(providerData.hourlyRate) || 75,
+          skills: providerData.skills.split(',').map((s: string) => s.trim()).filter(Boolean),
+          isActive: true,
+          isVerified: false
+        })
+      });
+      if (!response.ok) throw new Error("Failed to add service provider");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Service provider added successfully",
+      });
+      setShowAddModal(false);
+      setNewProviderData({
+        firstName: "",
+        lastName: "",
+        username: "",
+        email: "",
+        phone: "",
+        location: "",
+        skills: "",
+        hourlyRate: "",
+        bio: ""
+      });
+      refetch();
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/service-providers/stats"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add service provider",
         variant: "destructive",
       });
     }
@@ -437,9 +496,9 @@ function ServiceProvidersManagement() {
           <p className="text-gray-600">Manage service provider accounts, verification, and performance</p>
         </div>
         <div className="flex items-center gap-4">
-          <Button>
+          <Button onClick={() => setShowAddModal(true)} disabled={addProviderMutation.isPending}>
             <UserPlus className="h-4 w-4 mr-2" />
-            Add Provider
+            {addProviderMutation.isPending ? "Adding..." : "Add Provider"}
           </Button>
           <Button variant="outline">
             <Download className="h-4 w-4 mr-2" />
@@ -739,6 +798,113 @@ function ServiceProvidersManagement() {
           )}
         </CardContent>
       </Card>
+
+      {/* Add Provider Modal */}
+      <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add New Service Provider</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="firstName">First Name *</Label>
+              <Input
+                id="firstName"
+                value={newProviderData.firstName}
+                onChange={(e) => setNewProviderData(prev => ({ ...prev, firstName: e.target.value }))}
+                placeholder="Enter first name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="lastName">Last Name *</Label>
+              <Input
+                id="lastName"
+                value={newProviderData.lastName}
+                onChange={(e) => setNewProviderData(prev => ({ ...prev, lastName: e.target.value }))}
+                placeholder="Enter last name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                value={newProviderData.username}
+                onChange={(e) => setNewProviderData(prev => ({ ...prev, username: e.target.value }))}
+                placeholder="Enter username (optional)"
+              />
+            </div>
+            <div>
+              <Label htmlFor="email">Email *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={newProviderData.email}
+                onChange={(e) => setNewProviderData(prev => ({ ...prev, email: e.target.value }))}
+                placeholder="Enter email address"
+              />
+            </div>
+            <div>
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                value={newProviderData.phone}
+                onChange={(e) => setNewProviderData(prev => ({ ...prev, phone: e.target.value }))}
+                placeholder="Enter phone number"
+              />
+            </div>
+            <div>
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                value={newProviderData.location}
+                onChange={(e) => setNewProviderData(prev => ({ ...prev, location: e.target.value }))}
+                placeholder="City, Province/State"
+              />
+            </div>
+            <div>
+              <Label htmlFor="hourlyRate">Hourly Rate ($)</Label>
+              <Input
+                id="hourlyRate"
+                type="number"
+                value={newProviderData.hourlyRate}
+                onChange={(e) => setNewProviderData(prev => ({ ...prev, hourlyRate: e.target.value }))}
+                placeholder="75"
+              />
+            </div>
+            <div>
+              <Label htmlFor="skills">Skills (comma-separated)</Label>
+              <Input
+                id="skills"
+                value={newProviderData.skills}
+                onChange={(e) => setNewProviderData(prev => ({ ...prev, skills: e.target.value }))}
+                placeholder="Hardware, Network, Security"
+              />
+            </div>
+            <div className="col-span-2">
+              <Label htmlFor="bio">Bio/Description</Label>
+              <Textarea
+                id="bio"
+                value={newProviderData.bio}
+                onChange={(e) => setNewProviderData(prev => ({ ...prev, bio: e.target.value }))}
+                placeholder="Brief description of experience and expertise"
+                rows={3}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 mt-6">
+            <Button variant="outline" onClick={() => setShowAddModal(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => addProviderMutation.mutate(newProviderData)}
+              disabled={addProviderMutation.isPending || !newProviderData.firstName || !newProviderData.lastName || !newProviderData.email}
+            >
+              {addProviderMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Add Provider
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
