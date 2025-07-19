@@ -43,6 +43,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateProfile(username: string, profile: UpdateProfile): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
@@ -51,6 +52,9 @@ export interface IStorage {
   authenticateUser(emailOrUsername: string, password: string): Promise<User | undefined>;
   getUserBySocialId(provider: string, socialId: string): Promise<User | undefined>;
   createOrUpdateSocialUser(provider: string, userData: any): Promise<User>;
+  
+  // Admin dashboard stats
+  getAdminDashboardStats(): Promise<any>;
 }
 
 // Customer storage implementation
@@ -426,6 +430,29 @@ export class DatabaseStorage implements IStorage {
     });
     
     return newUser;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    const allUsers = await db.select().from(users);
+    return allUsers;
+  }
+
+  async getAdminDashboardStats(): Promise<any> {
+    const totalUsers = await db.select().from(users);
+    const allCustomers = await db.select().from(customers);
+    const allServiceProviders = await db.select().from(serviceProviders);
+    
+    return {
+      totalUsers: totalUsers.length,
+      totalCustomers: allCustomers.length,
+      totalServiceProviders: allServiceProviders.length,
+      activeJobs: 28, // Mock data - would come from jobs table
+      completedJobs: 1593, // Mock data
+      totalRevenue: 147382, // Mock data
+      pendingDisputes: 3, // Mock data
+      responseTime: "2.3 min", // Mock data
+      systemUptime: "99.9%" // Mock data
+    };
   }
 
   private generateUniqueUsername(baseUsername: string): string {

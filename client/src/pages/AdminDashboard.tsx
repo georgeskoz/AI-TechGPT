@@ -2401,14 +2401,308 @@ Last Updated: ${effectiveDate}
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Users List</h2>
               <Card>
                 <CardHeader>
-                  <CardTitle>All Platform Users</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    All Platform Users
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="mb-4">
+                  <div className="mb-4 flex items-center gap-4">
                     <Input placeholder="Search users..." className="max-w-sm" />
+                    <Select defaultValue="all">
+                      <SelectTrigger className="w-[160px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Users</SelectItem>
+                        <SelectItem value="customer">Customers</SelectItem>
+                        <SelectItem value="service_provider">Service Providers</SelectItem>
+                        <SelectItem value="admin">Admins</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="text-center py-8 text-gray-600">
-                    User management interface will be displayed here
+                  
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>User</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Last Login</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {adminUsers?.slice(0, 10).map((user: any) => (
+                          <TableRow key={user.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarImage src={user.avatar} />
+                                  <AvatarFallback>
+                                    {user.fullName?.[0] || user.username?.[0] || 'U'}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <div className="font-medium">{user.fullName || user.username}</div>
+                                  <div className="text-sm text-gray-500">@{user.username}</div>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{user.email || 'N/A'}</TableCell>
+                            <TableCell>
+                              <Badge variant={user.userType === 'admin' ? 'destructive' : user.userType === 'service_provider' ? 'default' : 'secondary'}>
+                                {user.userType?.replace('_', ' ') || 'Customer'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={user.isActive ? 'default' : 'secondary'}>
+                                {user.isActive ? 'Active' : 'Inactive'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm text-gray-500">
+                              {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-3 w-3" />
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        {!adminUsers?.length && (
+                          <TableRow>
+                            <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                              No users found
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "customer-profiles" && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Customer Profiles</h2>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Customer Profile Management
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-4 flex items-center gap-4">
+                    <Input placeholder="Search customers..." className="max-w-sm" />
+                    <Select defaultValue="all">
+                      <SelectTrigger className="w-[160px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Customers</SelectItem>
+                        <SelectItem value="verified">Verified</SelectItem>
+                        <SelectItem value="unverified">Unverified</SelectItem>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Customer</TableHead>
+                          <TableHead>Contact</TableHead>
+                          <TableHead>Location</TableHead>
+                          <TableHead>Verification</TableHead>
+                          <TableHead>Total Spent</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {[1, 2, 3, 4, 5].map((customer) => (
+                          <TableRow key={customer}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarFallback>C{customer}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <div className="font-medium">Customer {customer}</div>
+                                  <div className="text-sm text-gray-500">customer{customer}@example.com</div>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                <div>+1 (555) 123-456{customer}</div>
+                                <div className="text-gray-500">customer{customer}@example.com</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                <div>Toronto, ON</div>
+                                <div className="text-gray-500">Canada</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                <Badge variant={customer % 2 === 0 ? 'default' : 'secondary'} className="text-xs">
+                                  {customer % 2 === 0 ? 'Verified' : 'Pending'}
+                                </Badge>
+                                <div className="text-xs text-gray-500">
+                                  Email {customer % 3 === 0 ? '✓' : '✗'} Phone {customer % 2 === 0 ? '✓' : '✗'}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="font-medium text-green-600">
+                              ${(customer * 234).toFixed(2)}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-3 w-3" />
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <MessageCircle className="h-3 w-3" />
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <Settings className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "customer-bookings" && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Customer Bookings</h2>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5" />
+                    Booking Management
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-4 flex items-center gap-4">
+                    <Input placeholder="Search bookings..." className="max-w-sm" />
+                    <Select defaultValue="all">
+                      <SelectTrigger className="w-[160px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Bookings</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="confirmed">Confirmed</SelectItem>
+                        <SelectItem value="in-progress">In Progress</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Booking ID</TableHead>
+                          <TableHead>Customer</TableHead>
+                          <TableHead>Service</TableHead>
+                          <TableHead>Provider</TableHead>
+                          <TableHead>Date & Time</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Amount</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {[1, 2, 3, 4, 5].map((booking) => (
+                          <TableRow key={booking}>
+                            <TableCell>
+                              <code className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+                                BK-{booking.toString().padStart(4, '0')}
+                              </code>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Avatar className="h-6 w-6">
+                                  <AvatarFallback>C{booking}</AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm">Customer {booking}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                <div className="font-medium">
+                                  {booking % 3 === 0 ? 'Hardware Repair' : booking % 2 === 0 ? 'Network Setup' : 'Software Install'}
+                                </div>
+                                <div className="text-gray-500">
+                                  {booking % 3 === 0 ? 'On-site' : 'Remote'}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Avatar className="h-6 w-6">
+                                  <AvatarFallback>P{booking}</AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm">Provider {booking}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                <div>Jan {booking + 15}, 2025</div>
+                                <div className="text-gray-500">{booking + 8}:00 AM</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={
+                                booking % 4 === 0 ? 'default' : 
+                                booking % 3 === 0 ? 'secondary' : 
+                                booking % 2 === 0 ? 'destructive' : 'outline'
+                              }>
+                                {booking % 4 === 0 ? 'Completed' : 
+                                 booking % 3 === 0 ? 'In Progress' : 
+                                 booking % 2 === 0 ? 'Cancelled' : 'Pending'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              ${(booking * 75 + 50).toFixed(2)}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-3 w-3" />
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 </CardContent>
               </Card>
