@@ -240,7 +240,7 @@ How can I assist you today?`,
                     variant="outline" 
                     size="sm" 
                     className="w-full justify-start hover:bg-green-50 hover:border-green-200"
-                    onClick={() => handleNavigate('/customer-home')}
+                    onClick={() => handleNavigate('/technician-help')}
                   >
                     <HelpCircle className="h-4 w-4 mr-2" />
                     Help
