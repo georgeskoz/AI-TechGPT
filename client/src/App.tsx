@@ -70,6 +70,7 @@ import TechnicianReferrals from "@/pages/TechnicianReferrals";
 import TechnicianOpportunities from "@/pages/TechnicianOpportunities";
 import LearningCenter from "@/pages/LearningCenter";
 import { PortalAuthGuard } from "@/components/PortalAuthGuard";
+import TechnicianInbox from '@/pages/TechnicianInbox';
 
 
 // Conditional Profile Route Component
@@ -241,6 +242,11 @@ function Router() {
       <Route path="/learning-center" component={() => 
         <PortalAuthGuard requiredPortal="service_provider">
           <LearningCenter />
+        </PortalAuthGuard>
+      } />
+      <Route path="/technician-inbox" component={() => 
+        <PortalAuthGuard requiredPortal="service_provider">
+          <TechnicianInbox />
         </PortalAuthGuard>
       } />
       
