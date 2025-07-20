@@ -87,6 +87,27 @@ export interface IStorage {
   
   // Support case methods
   getSupportCasesByCustomer(customerId: number): Promise<any[]>;
+  
+  // Admin dashboard methods
+  getAllUsers(): Promise<User[]>;
+  getAdminDashboardStats(): Promise<any>;
+  
+  // Service request management (for backward compatibility)
+  createServiceRequest(request: any): Promise<any>;
+  getAllTechnicians(): Promise<any>;
+  
+  // FAQ management
+  getFAQs(type?: string): Promise<any[]>;
+  createFAQ(faq: any): Promise<any>;
+  updateFAQ(id: number, updates: any): Promise<any>;
+  deleteFAQ(id: number): Promise<void>;
+  
+  // Diagnostic tools management
+  getDiagnosticTools(): Promise<any[]>;
+  getDiagnosticAnalytics(): Promise<any>;
+  createDiagnosticTool(tool: any): Promise<any>;
+  updateDiagnosticTool(id: number, updates: any): Promise<any>;
+  deleteDiagnosticTool(id: number): Promise<void>;
 }
 
 export class PersistentStorage implements IStorage {
@@ -447,6 +468,158 @@ export class PersistentStorage implements IStorage {
       this.users.set(userId, user);
       await this.saveUsers();
     }
+  }
+
+  // Admin dashboard methods
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
+  async getAdminDashboardStats(): Promise<any> {
+    return {
+      totalUsers: this.users.size,
+      totalCustomers: 0, // Would be populated from customer storage
+      totalServiceProviders: 0, // Would be populated from service provider storage
+      activeJobs: 28, // Mock data - would come from jobs table
+      completedJobs: 1593, // Mock data
+      totalRevenue: 147382, // Mock data
+      pendingDisputes: 3, // Mock data
+      responseTime: "2.3 min", // Mock data
+      systemUptime: "99.9%" // Mock data
+    };
+  }
+
+  // Service request management for backward compatibility
+  async createServiceRequest(request: any): Promise<any> {
+    return {
+      id: Math.floor(Math.random() * 10000),
+      ...request,
+      status: 'pending',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+
+  async getAllTechnicians(): Promise<any[]> {
+    // Return empty array - in real implementation would come from service providers
+    return [];
+  }
+
+  // FAQ management methods
+  async getFAQs(type?: string): Promise<any[]> {
+    const mockFAQs = [
+      {
+        id: 1,
+        question: "How do I request technical support?",
+        answer: "You can request technical support by clicking on the 'AI Support' button and describing your issue.",
+        category: "General",
+        type: "general",
+        order: 1,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+
+    if (type) {
+      return mockFAQs.filter(faq => faq.type === type);
+    }
+    return mockFAQs;
+  }
+
+  async createFAQ(faq: any): Promise<any> {
+    return {
+      id: Math.floor(Math.random() * 10000),
+      ...faq,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isActive: true,
+      order: 1
+    };
+  }
+
+  async updateFAQ(id: number, updates: any): Promise<any> {
+    const existingFAQs = await this.getFAQs();
+    const faq = existingFAQs.find(f => f.id === id);
+    if (!faq) {
+      throw new Error('FAQ not found');
+    }
+    
+    return {
+      ...faq,
+      ...updates,
+      updatedAt: new Date()
+    };
+  }
+
+  async deleteFAQ(id: number): Promise<void> {
+    // Mock deletion - would actually remove from database
+  }
+
+  // Diagnostic tools management methods
+  async getDiagnosticTools(): Promise<any[]> {
+    return [
+      {
+        id: 1,
+        name: "Network Connectivity Test",
+        description: "Tests network connectivity and identifies connection issues",
+        category: "Connectivity",
+        type: "network",
+        isActive: true,
+        estimatedDuration: 45,
+        successRate: 96.8,
+        usageCount: 1247,
+        lastUsed: "2025-01-20T10:30:00Z",
+        createdAt: new Date("2024-12-15"),
+        updatedAt: new Date("2025-01-18")
+      }
+    ];
+  }
+
+  async getDiagnosticAnalytics(): Promise<any> {
+    return {
+      totalTools: 6,
+      totalUsage: 3847,
+      averageSuccessRate: 94.2,
+      averageDuration: 52,
+      categoryBreakdown: {
+        "Connectivity": 2,
+        "Performance": 2,
+        "Compatibility": 1,
+        "Security": 1
+      },
+      recentActivity: []
+    };
+  }
+
+  async createDiagnosticTool(tool: any): Promise<any> {
+    return {
+      id: Math.floor(Math.random() * 10000),
+      ...tool,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isActive: true,
+      usageCount: 0,
+      successRate: 0
+    };
+  }
+
+  async updateDiagnosticTool(id: number, updates: any): Promise<any> {
+    const existingTools = await this.getDiagnosticTools();
+    const tool = existingTools.find(t => t.id === id);
+    if (!tool) {
+      throw new Error('Diagnostic tool not found');
+    }
+    
+    return {
+      ...tool,
+      ...updates,
+      updatedAt: new Date()
+    };
+  }
+
+  async deleteDiagnosticTool(id: number): Promise<void> {
+    // Mock deletion - would actually remove from database
   }
 }
 

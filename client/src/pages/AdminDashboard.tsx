@@ -44,6 +44,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { useAuth } from "@/components/UserAuthProvider";
 import SimpleNavigation from "@/components/SimpleNavigation";
 import AdminDisputeManagement from "@/components/AdminDisputeManagement";
 import PaymentGatewayManagement from "@/components/PaymentGatewayManagement";
@@ -1328,6 +1329,7 @@ export default function AdminDashboard() {
 
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { logout } = useAuth(); // Add useAuth hook for proper logout functionality
   const queryClient = useQueryClient();
 
   // Service Provider Registration Settings API Handlers
@@ -1541,17 +1543,13 @@ export default function AdminDashboard() {
   };
 
   const handleLogout = () => {
-    // Clear any stored authentication data
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
-    
     toast({
       title: "Logged out successfully",
       description: "You have been logged out of the admin panel.",
     });
     
-    // Redirect to admin login or main page
-    setLocation("/");
+    // Use the centralized logout function from UserAuthProvider
+    logout();
   };
 
   const handlePasswordChange = async () => {
