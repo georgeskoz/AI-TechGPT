@@ -73,6 +73,7 @@ import { PortalAuthGuard } from "@/components/PortalAuthGuard";
 import TechnicianInbox from '@/pages/TechnicianInbox';
 import TechnicianHelp from '@/pages/TechnicianHelp';
 import AIChatAnalytics from '@/pages/AIChatAnalytics';
+import PhoneSupportLogs from '@/pages/PhoneSupportLogs';
 
 
 // Conditional Profile Route Component
@@ -287,6 +288,11 @@ function Router() {
       <Route path="/ai-chat-analytics" component={() => 
         <PortalAuthGuard requiredPortal="admin">
           <AIChatAnalytics />
+        </PortalAuthGuard>
+      } />
+      <Route path="/phone-support-logs" component={() => 
+        <PortalAuthGuard requiredPortal="admin">
+          <PhoneSupportLogs />
         </PortalAuthGuard>
       } />
       

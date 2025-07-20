@@ -59,6 +59,7 @@ import FinancialStatements from "@/components/FinancialStatements";
 import AdminManagement from "@/components/AdminManagement";
 import NotificationsCenter from "@/components/NotificationsCenter";
 import DiagnosticToolsManagement from "@/components/DiagnosticToolsManagement";
+import PhoneSupportLogs from "@/pages/PhoneSupportLogs";
 import AdminAnnouncements from "@/pages/AdminAnnouncements";
 import ServiceManagement from "@/components/ServiceManagement";
 import AdminIssueTracking from "@/components/AdminIssueTracking";
@@ -2702,6 +2703,7 @@ Jurisdiction: ${companyInfo.jurisdiction}
   const sidebarItems = [
     { id: "overview", label: "Overview", icon: BarChart3 },
     { id: "ai-chat-analytics", label: "AI Chat Analytics", icon: MessageSquare },
+    { id: "phone-support-logs", label: "Phone Support Logs", icon: PhoneCall },
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "push-notifications", label: "Push Notifications", icon: Bell },
     { 
@@ -3294,6 +3296,10 @@ Jurisdiction: ${companyInfo.jurisdiction}
 
           {activeTab === "ai-chat-analytics" && (
             <AIChatAnalytics />
+          )}
+
+          {activeTab === "phone-support-logs" && (
+            <PhoneSupportLogs />
           )}
 
           {activeTab === "notifications" && (
