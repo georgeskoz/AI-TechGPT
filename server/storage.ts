@@ -65,6 +65,13 @@ export interface IStorage {
   createFAQ(faq: any): Promise<any>;
   updateFAQ(id: number, updates: any): Promise<any>;
   deleteFAQ(id: number): Promise<void>;
+  
+  // Diagnostic tools management
+  getDiagnosticTools(): Promise<any[]>;
+  getDiagnosticAnalytics(): Promise<any>;
+  createDiagnosticTool(tool: any): Promise<any>;
+  updateDiagnosticTool(id: number, updates: any): Promise<any>;
+  deleteDiagnosticTool(id: number): Promise<void>;
 }
 
 // Customer storage implementation
@@ -590,6 +597,225 @@ export class DatabaseStorage implements IStorage {
     const faq = existingFAQs.find(f => f.id === id);
     if (!faq) {
       throw new Error('FAQ not found');
+    }
+    // Mock deletion - would actually remove from database
+  }
+
+  // Diagnostic tools management methods
+  async getDiagnosticTools(): Promise<any[]> {
+    // Mock diagnostic tools data - in a real implementation, this would come from a database table
+    const mockTools = [
+      {
+        id: 1,
+        name: "Network Connectivity Test",
+        description: "Tests network connectivity and identifies connection issues including DNS resolution, ping tests, and port accessibility",
+        category: "Connectivity",
+        type: "network",
+        script: `// Network Connectivity Test
+function runNetworkTest() {
+  const results = {
+    dns: testDNSResolution(),
+    ping: testPingConnectivity(),
+    ports: testCommonPorts(),
+    speed: measureConnectionSpeed()
+  };
+  return generateNetworkReport(results);
+}`,
+        parameters: ["target_host", "timeout_seconds"],
+        isActive: true,
+        estimatedDuration: 45,
+        successRate: 96.8,
+        usageCount: 1247,
+        lastUsed: "2025-01-20T10:30:00Z",
+        createdAt: new Date("2024-12-15"),
+        updatedAt: new Date("2025-01-18")
+      },
+      {
+        id: 2,
+        name: "System Performance Check",
+        description: "Analyzes CPU usage, memory consumption, disk space, and running processes to identify performance bottlenecks",
+        category: "Performance",
+        type: "system",
+        script: `// System Performance Check
+function runPerformanceCheck() {
+  const metrics = {
+    cpu: getCPUUsage(),
+    memory: getMemoryStats(),
+    disk: getDiskSpace(),
+    processes: getTopProcesses()
+  };
+  return analyzePerformanceMetrics(metrics);
+}`,
+        parameters: ["duration_minutes", "include_processes"],
+        isActive: true,
+        estimatedDuration: 60,
+        successRate: 94.2,
+        usageCount: 892,
+        lastUsed: "2025-01-20T09:15:00Z",
+        createdAt: new Date("2024-11-20"),
+        updatedAt: new Date("2025-01-19")
+      },
+      {
+        id: 3,
+        name: "Browser Compatibility Test",
+        description: "Tests browser functionality including JavaScript execution, CSS support, cookies, local storage, and plugin compatibility",
+        category: "Compatibility",
+        type: "browser",
+        script: `// Browser Compatibility Test
+function runBrowserTest() {
+  const compatibility = {
+    javascript: testJavaScriptSupport(),
+    css: testCSSFeatures(),
+    storage: testStorageAPIs(),
+    plugins: testPluginSupport()
+  };
+  return generateBrowserReport(compatibility);
+}`,
+        parameters: ["test_features", "browser_version"],
+        isActive: true,
+        estimatedDuration: 30,
+        successRate: 98.1,
+        usageCount: 567,
+        lastUsed: "2025-01-19T16:45:00Z",
+        createdAt: new Date("2024-10-05"),
+        updatedAt: new Date("2025-01-15")
+      },
+      {
+        id: 4,
+        name: "Hardware Diagnostic Scan",
+        description: "Comprehensive hardware health check including temperature monitoring, hard drive health, RAM testing, and component status",
+        category: "Hardware",
+        type: "hardware",
+        script: `// Hardware Diagnostic Scan
+function runHardwareScan() {
+  const hardware = {
+    temperature: checkSystemTemperature(),
+    storage: testStorageHealth(),
+    memory: runMemoryTest(),
+    components: checkComponentStatus()
+  };
+  return generateHardwareReport(hardware);
+}`,
+        parameters: ["deep_scan", "component_filter"],
+        isActive: true,
+        estimatedDuration: 120,
+        successRate: 91.5,
+        usageCount: 423,
+        lastUsed: "2025-01-19T14:20:00Z",
+        createdAt: new Date("2025-01-05"),
+        updatedAt: new Date("2025-01-18")
+      },
+      {
+        id: 5,
+        name: "Security Vulnerability Scan",
+        description: "Scans for common security vulnerabilities, open ports, outdated software, and potential malware indicators",
+        category: "Security",
+        type: "security",
+        script: `// Security Vulnerability Scan
+function runSecurityScan() {
+  const security = {
+    ports: scanOpenPorts(),
+    software: checkOutdatedSoftware(),
+    malware: runMalwareCheck(),
+    firewall: checkFirewallStatus()
+  };
+  return generateSecurityReport(security);
+}`,
+        parameters: ["scan_depth", "include_malware_scan"],
+        isActive: true,
+        estimatedDuration: 90,
+        successRate: 89.3,
+        usageCount: 334,
+        lastUsed: "2025-01-20T08:00:00Z",
+        createdAt: new Date("2024-12-01"),
+        updatedAt: new Date("2025-01-17")
+      },
+      {
+        id: 6,
+        name: "Database Connection Test",
+        description: "Tests database connectivity, query performance, and checks for common database issues including connection pooling and query optimization",
+        category: "Database",
+        type: "database",
+        script: `// Database Connection Test
+function runDatabaseTest() {
+  const dbTest = {
+    connection: testDBConnection(),
+    performance: measureQueryPerformance(),
+    health: checkDatabaseHealth(),
+    optimization: analyzeQueryOptimization()
+  };
+  return generateDatabaseReport(dbTest);
+}`,
+        parameters: ["connection_string", "test_queries"],
+        isActive: false,
+        estimatedDuration: 40,
+        successRate: 95.7,
+        usageCount: 201,
+        lastUsed: "2025-01-18T12:30:00Z",
+        createdAt: new Date("2024-11-10"),
+        updatedAt: new Date("2025-01-16")
+      }
+    ];
+
+    return mockTools;
+  }
+
+  async getDiagnosticAnalytics(): Promise<any> {
+    // Mock analytics data
+    return {
+      totalUsage: 3664,
+      averageSuccessRate: 94.2,
+      mostUsedTool: "Network Connectivity Test",
+      toolsCreatedThisMonth: 3,
+      activeTools: 5,
+      totalTools: 6,
+      averageDuration: 64,
+      popularCategories: [
+        { name: "Connectivity", usage: 1247, percentage: 34 },
+        { name: "Performance", usage: 892, percentage: 24 },
+        { name: "Compatibility", usage: 567, percentage: 15 },
+        { name: "Hardware", usage: 423, percentage: 12 },
+        { name: "Security", usage: 334, percentage: 9 },
+        { name: "Database", usage: 201, percentage: 6 }
+      ]
+    };
+  }
+
+  async createDiagnosticTool(tool: any): Promise<any> {
+    // Mock implementation - in a real app, this would insert into database
+    const newTool = {
+      id: Math.floor(Math.random() * 10000),
+      ...tool,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      successRate: 0,
+      usageCount: 0,
+      parameters: tool.parameters || []
+    };
+    return newTool;
+  }
+
+  async updateDiagnosticTool(id: number, updates: any): Promise<any> {
+    // Mock implementation - in a real app, this would update the database record
+    const existingTools = await this.getDiagnosticTools();
+    const tool = existingTools.find(t => t.id === id);
+    if (!tool) {
+      throw new Error('Diagnostic tool not found');
+    }
+    
+    return {
+      ...tool,
+      ...updates,
+      updatedAt: new Date()
+    };
+  }
+
+  async deleteDiagnosticTool(id: number): Promise<void> {
+    // Mock implementation - in a real app, this would delete from database
+    const existingTools = await this.getDiagnosticTools();
+    const tool = existingTools.find(t => t.id === id);
+    if (!tool) {
+      throw new Error('Diagnostic tool not found');
     }
     // Mock deletion - would actually remove from database
   }
