@@ -942,9 +942,299 @@ export default function AdminDashboard() {
     companyDescription: "",
     missionStatement: ""
   });
+
+  // Service Provider Registration Settings State
+  const [registrationOverview, setRegistrationOverview] = useState({
+    pendingApplications: 12,
+    approvedThisMonth: 24,
+    rejectionRate: 8.5,
+    avgReviewTime: 2.3
+  });
+  const [registrationConfig, setRegistrationConfig] = useState({
+    documents: [
+      { name: "Government ID", required: true, verified: true },
+      { name: "Professional Certifications", required: true, verified: false },
+      { name: "Business License", required: false, verified: true },
+      { name: "Insurance Certificate", required: true, verified: true },
+      { name: "Background Check", required: true, verified: false },
+      { name: "References (3)", required: true, verified: true }
+    ],
+    eligibilityCriteria: {
+      minimumExperience: 2,
+      ageRequirement: "18+",
+      geographicRestrictions: "none"
+    },
+    verificationSteps: [
+      { step: "Identity Verification", status: "automated", duration: "5 min", enabled: true },
+      { step: "Skills Assessment", status: "manual", duration: "30 min", enabled: true },
+      { step: "Background Check", status: "automated", duration: "24-48 hrs", enabled: true },
+      { step: "Reference Check", status: "manual", duration: "2-3 days", enabled: true },
+      { step: "Video Interview", status: "manual", duration: "15 min", enabled: true },
+      { step: "Technical Demo", status: "manual", duration: "20 min", enabled: true }
+    ],
+    timeline: {
+      initialReview: 24,
+      backgroundCheck: 48,
+      finalDecision: 5
+    },
+    autoApprovalCriteria: [
+      { criteria: "All documents verified", enabled: true },
+      { criteria: "Background check passed", enabled: true },
+      { criteria: "Skills assessment score > 85%", enabled: true },
+      { criteria: "Previous platform experience", enabled: false },
+      { criteria: "Professional certifications", enabled: false }
+    ],
+    manualReviewTriggers: [
+      { criteria: "Criminal background found", severity: "high" },
+      { criteria: "Skills assessment score < 70%", severity: "medium" },
+      { criteria: "Incomplete references", severity: "low" },
+      { criteria: "Multiple account attempts", severity: "high" },
+      { criteria: "Questionable work history", severity: "medium" }
+    ],
+    welcomeSequence: [
+      { step: "Welcome Email", timing: "Immediate", enabled: true },
+      { step: "Platform Tutorial", timing: "Day 1", enabled: true },
+      { step: "Profile Setup Guide", timing: "Day 1", enabled: true },
+      { step: "First Job Assistance", timing: "Day 3", enabled: true },
+      { step: "30-Day Check-in", timing: "Day 30", enabled: false },
+      { step: "Performance Review", timing: "Day 90", enabled: true }
+    ],
+    trainingModules: [
+      { module: "Platform Navigation", duration: "15 min", required: true },
+      { module: "Customer Communication", duration: "20 min", required: true },
+      { module: "Safety Protocols", duration: "30 min", required: true },
+      { module: "Billing & Payments", duration: "10 min", required: true },
+      { module: "Quality Standards", duration: "25 min", required: false }
+    ],
+    emailAutomation: [
+      { trigger: "Application submitted", action: "Send confirmation email", enabled: true },
+      { trigger: "Document missing", action: "Send reminder email", enabled: true },
+      { trigger: "Application approved", action: "Send welcome package", enabled: true },
+      { trigger: "Application rejected", action: "Send feedback email", enabled: false },
+      { trigger: "Training incomplete", action: "Send reminder", enabled: true }
+    ],
+    processAutomation: [
+      { process: "Auto-assign reviewer", condition: "Based on workload", enabled: true },
+      { process: "Background check order", condition: "After document verification", enabled: true },
+      { process: "Skills test scheduling", condition: "Auto-schedule available slots", enabled: false },
+      { process: "Reference check automation", condition: "Send automated requests", enabled: true },
+      { process: "Profile activation", condition: "Upon approval", enabled: true }
+    ]
+  });
+
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+
+  // Service Provider Registration Settings API Handlers
+  const handleRequirementsUpdate = async () => {
+    try {
+      const response = await fetch("/api/admin/service-provider-registration/requirements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          documents: registrationConfig.documents,
+          eligibilityCriteria: registrationConfig.eligibilityCriteria
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast({
+          title: "Requirements Updated",
+          description: data.message,
+        });
+      } else {
+        throw new Error(data.error || "Failed to update requirements");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleVerificationUpdate = async () => {
+    try {
+      const response = await fetch("/api/admin/service-provider-registration/verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          verificationSteps: registrationConfig.verificationSteps,
+          timeline: registrationConfig.timeline
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast({
+          title: "Verification Settings Updated",
+          description: data.message,
+        });
+      } else {
+        throw new Error(data.error || "Failed to update verification settings");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleApprovalUpdate = async () => {
+    try {
+      const response = await fetch("/api/admin/service-provider-registration/approval", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          autoApprovalCriteria: registrationConfig.autoApprovalCriteria,
+          manualReviewTriggers: registrationConfig.manualReviewTriggers,
+          rejectionReasons: []
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast({
+          title: "Approval Process Updated",
+          description: data.message,
+        });
+      } else {
+        throw new Error(data.error || "Failed to update approval process");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleOnboardingUpdate = async () => {
+    try {
+      const response = await fetch("/api/admin/service-provider-registration/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          welcomeSequence: registrationConfig.welcomeSequence,
+          trainingRequirements: registrationConfig.trainingModules
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast({
+          title: "Onboarding Settings Updated",
+          description: data.message,
+        });
+      } else {
+        throw new Error(data.error || "Failed to update onboarding settings");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAutomationUpdate = async () => {
+    try {
+      const response = await fetch("/api/admin/service-provider-registration/automation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emailAutomation: registrationConfig.emailAutomation,
+          processAutomation: registrationConfig.processAutomation
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast({
+          title: "Automation Settings Updated",
+          description: data.message,
+        });
+      } else {
+        throw new Error(data.error || "Failed to update automation settings");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleTestWorkflows = async (workflowType: string) => {
+    try {
+      const response = await fetch("/api/admin/service-provider-registration/test-workflows", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workflowType })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast({
+          title: "Workflow Test Complete",
+          description: `${data.testResult.testResults.length} steps tested successfully`,
+        });
+      } else {
+        throw new Error(data.error || "Failed to test workflow");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Test Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleExportConfiguration = async () => {
+    try {
+      const response = await fetch("/api/admin/service-provider-registration/export");
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'service-provider-registration-config.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        toast({
+          title: "Configuration Exported",
+          description: "Registration settings have been downloaded as JSON file",
+        });
+      } else {
+        throw new Error("Failed to export configuration");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Export Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleLogout = () => {
     // Clear any stored authentication data
@@ -3499,7 +3789,7 @@ Jurisdiction: ${companyInfo.jurisdiction}
                             </div>
                           ))}
                         </div>
-                        <Button className="w-full">
+                        <Button className="w-full" onClick={handleRequirementsUpdate}>
                           <Save className="h-4 w-4 mr-2" />
                           Update Requirements
                         </Button>
@@ -3555,7 +3845,7 @@ Jurisdiction: ${companyInfo.jurisdiction}
                             ))}
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleRequirementsUpdate}>
                           <Save className="h-4 w-4 mr-2" />
                           Save Criteria
                         </Button>
@@ -3645,7 +3935,7 @@ Jurisdiction: ${companyInfo.jurisdiction}
                             <span className="font-medium">48 hours</span>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleVerificationUpdate}>
                           <Save className="h-4 w-4 mr-2" />
                           Save Timeline
                         </Button>
@@ -3728,15 +4018,15 @@ Jurisdiction: ${companyInfo.jurisdiction}
                       </div>
 
                       <div className="flex items-center gap-4 pt-4 border-t">
-                        <Button>
+                        <Button onClick={handleApprovalUpdate}>
                           <Save className="h-4 w-4 mr-2" />
                           Save Approval Settings
                         </Button>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => handleTestWorkflows("approval")}>
                           <Eye className="h-4 w-4 mr-2" />
                           Preview Workflow
                         </Button>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={handleExportConfiguration}>
                           <Download className="h-4 w-4 mr-2" />
                           Export Configuration
                         </Button>
@@ -3774,9 +4064,9 @@ Jurisdiction: ${companyInfo.jurisdiction}
                             </div>
                           ))}
                         </div>
-                        <Button className="w-full">
-                          <Settings className="h-4 w-4 mr-2" />
-                          Customize Sequence
+                        <Button className="w-full" onClick={handleOnboardingUpdate}>
+                          <Save className="h-4 w-4 mr-2" />
+                          Save Sequence
                         </Button>
                       </CardContent>
                     </Card>
@@ -3823,7 +4113,7 @@ Jurisdiction: ${companyInfo.jurisdiction}
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleOnboardingUpdate}>
                           <Save className="h-4 w-4 mr-2" />
                           Save Training Config
                         </Button>
@@ -3887,15 +4177,15 @@ Jurisdiction: ${companyInfo.jurisdiction}
                       </div>
 
                       <div className="flex items-center gap-4 pt-4 border-t">
-                        <Button>
+                        <Button onClick={handleAutomationUpdate}>
                           <Save className="h-4 w-4 mr-2" />
                           Save Automation Settings
                         </Button>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => handleTestWorkflows("automation")}>
                           <Play className="h-4 w-4 mr-2" />
                           Test Workflows
                         </Button>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => handleTestWorkflows("analytics")}>
                           <BarChart3 className="h-4 w-4 mr-2" />
                           View Analytics
                         </Button>
