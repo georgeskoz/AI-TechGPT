@@ -66,6 +66,7 @@ import AdminIssueTracking from "@/components/AdminIssueTracking";
 import AdminLiveChatMonitoring from "@/components/AdminLiveChatMonitoring";
 import AdminScreenSharingSessions from "@/components/AdminScreenSharingSessions";
 import AIChatAnalytics from "@/pages/AIChatAnalytics";
+import SupportCategoriesManagement from "@/pages/SupportCategoriesManagement";
 import { 
   Users, 
   Settings, 
@@ -2704,6 +2705,7 @@ Jurisdiction: ${companyInfo.jurisdiction}
     { id: "overview", label: "Overview", icon: BarChart3 },
     { id: "ai-chat-analytics", label: "AI Chat Analytics", icon: MessageSquare },
     { id: "phone-support-logs", label: "Phone Support Logs", icon: PhoneCall },
+    { id: "support-categories", label: "Support Categories", icon: Settings },
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "push-notifications", label: "Push Notifications", icon: Bell },
     { 
@@ -3296,6 +3298,16 @@ Jurisdiction: ${companyInfo.jurisdiction}
 
           {activeTab === "ai-chat-analytics" && (
             <AIChatAnalytics />
+          )}
+
+          {activeTab === "support-categories" && (
+            <div>
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Support Categories Management</h2>
+                <p className="text-gray-600">Create, manage, and monitor technical support service categories available to service providers</p>
+              </div>
+              <SupportCategoriesManagement />
+            </div>
           )}
 
           {activeTab === "phone-support-logs" && (

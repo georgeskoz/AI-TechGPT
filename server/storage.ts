@@ -95,6 +95,24 @@ export interface IStorage {
   getPhoneSupportLogById(id: string): Promise<any | undefined>;
   createPhoneSupportLog(logData: any): Promise<any>;
   updatePhoneSupportLog(id: string, updates: any): Promise<any | undefined>;
+
+  // Support categories operations
+  createSupportCategory(category: any): Promise<any>;
+  getAllSupportCategories(): Promise<any[]>;
+  getSupportCategoriesByType(serviceType: string): Promise<any[]>;
+  updateSupportCategory(id: number, updates: any): Promise<any>;
+  deleteSupportCategory(id: number): Promise<void>;
+
+  // Service provider services operations
+  createServiceProviderService(service: any): Promise<any>;
+  getServiceProviderServices(providerId: number): Promise<any[]>;
+  getActiveServicesByCategory(categoryId: number): Promise<any[]>;
+  activateServiceForProvider(providerId: number, categoryId: number, data: any): Promise<any>;
+  checkServiceAvailability(categoryId: number): Promise<{ hasProviders: boolean; count: number; providers: any[] }>;
+
+  // AI chat fallback operations
+  logAiChatFallback(log: any): Promise<any>;
+  getAiChatFallbackStats(): Promise<any>;
 }
 
 // Customer storage implementation
