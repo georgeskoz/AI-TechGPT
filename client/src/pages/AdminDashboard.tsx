@@ -144,8 +144,11 @@ import {
   UserMinus,
   Megaphone,
   Tag,
-  AlertCircle
+  AlertCircle,
+  BookOpen,
+  Play
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 interface AdminUser {
   id: number;
@@ -3394,32 +3397,513 @@ Jurisdiction: ${companyInfo.jurisdiction}
           )}
 
           {activeTab === "become-service-provider" && (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Become a Service Provider</h2>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Service Provider Registration Settings</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 mb-2 block">Registration Requirements</label>
-                      <textarea 
-                        className="w-full h-32 p-3 border border-gray-300 rounded-md"
-                        placeholder="Enter registration requirements..."
-                      />
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Service Provider Registration Settings</h2>
+                <p className="text-gray-600">Configure registration requirements, approval process, and onboarding workflow</p>
+              </div>
+
+              {/* Registration Overview Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Pending Applications</p>
+                        <p className="text-2xl font-bold text-orange-600">12</p>
+                      </div>
+                      <Clock className="h-8 w-8 text-orange-500" />
                     </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 mb-2 block">Application Process</label>
-                      <textarea 
-                        className="w-full h-32 p-3 border border-gray-300 rounded-md"
-                        placeholder="Enter application process details..."
-                      />
+                    <p className="text-xs text-gray-500 mt-1">Awaiting approval</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Approved This Month</p>
+                        <p className="text-2xl font-bold text-green-600">24</p>
+                      </div>
+                      <CheckCircle className="h-8 w-8 text-green-500" />
                     </div>
-                    <Button>Update Registration Info</Button>
+                    <p className="text-xs text-gray-500 mt-1">+15% from last month</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Rejection Rate</p>
+                        <p className="text-2xl font-bold text-red-600">8.5%</p>
+                      </div>
+                      <XCircle className="h-8 w-8 text-red-500" />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Below 10% target</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Avg. Review Time</p>
+                        <p className="text-2xl font-bold text-blue-600">2.3</p>
+                      </div>
+                      <Clock className="h-8 w-8 text-blue-500" />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Days to approval</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Configuration Tabs */}
+              <Tabs defaultValue="requirements" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-5">
+                  <TabsTrigger value="requirements">Requirements</TabsTrigger>
+                  <TabsTrigger value="verification">Verification</TabsTrigger>
+                  <TabsTrigger value="approval">Approval Process</TabsTrigger>
+                  <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
+                  <TabsTrigger value="automation">Automation</TabsTrigger>
+                </TabsList>
+
+                {/* Registration Requirements */}
+                <TabsContent value="requirements" className="space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          Required Documents
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {[
+                            { name: "Government ID", required: true, verified: true },
+                            { name: "Professional Certifications", required: true, verified: false },
+                            { name: "Business License", required: false, verified: true },
+                            { name: "Insurance Certificate", required: true, verified: true },
+                            { name: "Background Check", required: true, verified: false },
+                            { name: "References (3)", required: true, verified: true }
+                          ].map((doc, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Switch checked={doc.required} />
+                                <span className="font-medium">{doc.name}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {doc.verified && <CheckCircle className="h-4 w-4 text-green-500" />}
+                                <Button variant="outline" size="sm">
+                                  <Settings className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <Button className="w-full">
+                          <Save className="h-4 w-4 mr-2" />
+                          Update Requirements
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Users className="h-5 w-5" />
+                          Eligibility Criteria
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 mb-2 block">Minimum Experience (Years)</label>
+                          <Input type="number" defaultValue="2" />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 mb-2 block">Age Requirement</label>
+                          <Select defaultValue="18">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="18">18+ years</SelectItem>
+                              <SelectItem value="21">21+ years</SelectItem>
+                              <SelectItem value="25">25+ years</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 mb-2 block">Geographic Restrictions</label>
+                          <Select defaultValue="none">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">No Restrictions</SelectItem>
+                              <SelectItem value="canada">Canada Only</SelectItem>
+                              <SelectItem value="usa">USA Only</SelectItem>
+                              <SelectItem value="north_america">North America</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-700">Required Skills (minimum 3)</label>
+                          <div className="flex flex-wrap gap-2">
+                            {["Hardware Repair", "Network Setup", "Software Support", "Security", "Database Management"].map((skill) => (
+                              <Badge key={skill} variant="outline" className="cursor-pointer hover:bg-blue-50">
+                                {skill}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Save className="h-4 w-4 mr-2" />
+                          Save Criteria
+                        </Button>
+                      </CardContent>
+                    </Card>
                   </div>
-                </CardContent>
-              </Card>
+                </TabsContent>
+
+                {/* Verification Process */}
+                <TabsContent value="verification" className="space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="h-5 w-5" />
+                          Verification Steps
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {[
+                            { step: "Identity Verification", status: "automated", duration: "5 min" },
+                            { step: "Skills Assessment", status: "manual", duration: "30 min" },
+                            { step: "Background Check", status: "automated", duration: "24-48 hrs" },
+                            { step: "Reference Check", status: "manual", duration: "2-3 days" },
+                            { step: "Video Interview", status: "manual", duration: "15 min" },
+                            { step: "Technical Demo", status: "manual", duration: "20 min" }
+                          ].map((item, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div>
+                                <div className="font-medium">{item.step}</div>
+                                <div className="text-sm text-gray-500">{item.duration}</div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge variant={item.status === "automated" ? "default" : "secondary"}>
+                                  {item.status === "automated" ? "Auto" : "Manual"}
+                                </Badge>
+                                <Switch checked={true} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <Button className="w-full">
+                          <Settings className="h-4 w-4 mr-2" />
+                          Configure Verification
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Clock className="h-5 w-5" />
+                          Review Timeline
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 mb-2 block">Initial Review (Business Hours)</label>
+                          <Input defaultValue="24" type="number" placeholder="Hours" />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 mb-2 block">Background Check Processing</label>
+                          <Select defaultValue="48">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="24">24 hours</SelectItem>
+                              <SelectItem value="48">48 hours</SelectItem>
+                              <SelectItem value="72">72 hours</SelectItem>
+                              <SelectItem value="168">1 week</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 mb-2 block">Final Decision Timeline</label>
+                          <Input defaultValue="5" type="number" placeholder="Business days" />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span>Auto-reject incomplete applications after:</span>
+                            <span className="font-medium">7 days</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span>Send reminder notifications every:</span>
+                            <span className="font-medium">48 hours</span>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Save className="h-4 w-4 mr-2" />
+                          Save Timeline
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+
+                {/* Approval Process */}
+                <TabsContent value="approval" className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <CheckCircle className="h-5 w-5" />
+                        Approval Workflow Configuration
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="space-y-4">
+                          <h3 className="font-semibold text-gray-900">Auto-Approval Criteria</h3>
+                          <div className="space-y-3">
+                            {[
+                              { criteria: "All documents verified", enabled: true },
+                              { criteria: "Background check passed", enabled: true },
+                              { criteria: "Skills assessment score > 85%", enabled: true },
+                              { criteria: "Previous platform experience", enabled: false },
+                              { criteria: "Professional certifications", enabled: false }
+                            ].map((item, index) => (
+                              <div key={index} className="flex items-center justify-between">
+                                <span className="text-sm">{item.criteria}</span>
+                                <Switch checked={item.enabled} />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <h3 className="font-semibold text-gray-900">Manual Review Required</h3>
+                          <div className="space-y-3">
+                            {[
+                              { criteria: "Criminal background found", severity: "high" },
+                              { criteria: "Skills assessment score < 70%", severity: "medium" },
+                              { criteria: "Incomplete references", severity: "low" },
+                              { criteria: "Multiple account attempts", severity: "high" },
+                              { criteria: "Questionable work history", severity: "medium" }
+                            ].map((item, index) => (
+                              <div key={index} className="flex items-center justify-between">
+                                <span className="text-sm">{item.criteria}</span>
+                                <Badge variant={item.severity === "high" ? "destructive" : item.severity === "medium" ? "secondary" : "outline"}>
+                                  {item.severity}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <h3 className="font-semibold text-gray-900">Rejection Reasons</h3>
+                          <div className="space-y-2">
+                            <Input placeholder="Add custom rejection reason..." className="text-sm" />
+                            <div className="space-y-1">
+                              {[
+                                "Insufficient experience",
+                                "Failed background check", 
+                                "Incomplete application",
+                                "Geographic restrictions",
+                                "Skills not aligned"
+                              ].map((reason, index) => (
+                                <div key={index} className="flex items-center justify-between text-sm">
+                                  <span>{reason}</span>
+                                  <Button variant="outline" size="sm">
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 pt-4 border-t">
+                        <Button>
+                          <Save className="h-4 w-4 mr-2" />
+                          Save Approval Settings
+                        </Button>
+                        <Button variant="outline">
+                          <Eye className="h-4 w-4 mr-2" />
+                          Preview Workflow
+                        </Button>
+                        <Button variant="outline">
+                          <Download className="h-4 w-4 mr-2" />
+                          Export Configuration
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Onboarding Process */}
+                <TabsContent value="onboarding" className="space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Users className="h-5 w-5" />
+                          Welcome Sequence
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {[
+                            { step: "Welcome Email", timing: "Immediate", enabled: true },
+                            { step: "Platform Tutorial", timing: "Day 1", enabled: true },
+                            { step: "Profile Setup Guide", timing: "Day 1", enabled: true },
+                            { step: "First Job Assistance", timing: "Day 3", enabled: true },
+                            { step: "30-Day Check-in", timing: "Day 30", enabled: false },
+                            { step: "Performance Review", timing: "Day 90", enabled: true }
+                          ].map((item, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div>
+                                <div className="font-medium">{item.step}</div>
+                                <div className="text-sm text-gray-500">{item.timing}</div>
+                              </div>
+                              <Switch checked={item.enabled} />
+                            </div>
+                          ))}
+                        </div>
+                        <Button className="w-full">
+                          <Settings className="h-4 w-4 mr-2" />
+                          Customize Sequence
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <BookOpen className="h-5 w-5" />
+                          Training Requirements
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 mb-2 block">Required Training Modules</label>
+                          <div className="space-y-2">
+                            {[
+                              { module: "Platform Navigation", duration: "15 min", required: true },
+                              { module: "Customer Communication", duration: "20 min", required: true },
+                              { module: "Safety Protocols", duration: "30 min", required: true },
+                              { module: "Billing & Payments", duration: "10 min", required: true },
+                              { module: "Quality Standards", duration: "25 min", required: false }
+                            ].map((item, index) => (
+                              <div key={index} className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <Switch checked={item.required} />
+                                  <span className="text-sm font-medium">{item.module}</span>
+                                </div>
+                                <span className="text-xs text-gray-500">{item.duration}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-700 mb-2 block">Completion Deadline</label>
+                          <Select defaultValue="7">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="3">3 days</SelectItem>
+                              <SelectItem value="7">7 days</SelectItem>
+                              <SelectItem value="14">14 days</SelectItem>
+                              <SelectItem value="30">30 days</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Save className="h-4 w-4 mr-2" />
+                          Save Training Config
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+
+                {/* Automation Settings */}
+                <TabsContent value="automation" className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Zap className="h-5 w-5" />
+                        Automated Workflows
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <h3 className="font-semibold text-gray-900">Email Automation</h3>
+                          <div className="space-y-3">
+                            {[
+                              { trigger: "Application submitted", action: "Send confirmation email", enabled: true },
+                              { trigger: "Document missing", action: "Send reminder email", enabled: true },
+                              { trigger: "Application approved", action: "Send welcome package", enabled: true },
+                              { trigger: "Application rejected", action: "Send feedback email", enabled: false },
+                              { trigger: "Training incomplete", action: "Send reminder", enabled: true }
+                            ].map((item, index) => (
+                              <div key={index} className="p-3 border rounded-lg">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-sm font-medium">{item.trigger}</span>
+                                  <Switch checked={item.enabled} />
+                                </div>
+                                <div className="text-xs text-gray-500">{item.action}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <h3 className="font-semibold text-gray-900">Process Automation</h3>
+                          <div className="space-y-3">
+                            {[
+                              { process: "Auto-assign reviewer", condition: "Based on workload", enabled: true },
+                              { process: "Background check order", condition: "After document verification", enabled: true },
+                              { process: "Skills test scheduling", condition: "Auto-schedule available slots", enabled: false },
+                              { process: "Reference check automation", condition: "Send automated requests", enabled: true },
+                              { process: "Profile activation", condition: "Upon approval", enabled: true }
+                            ].map((item, index) => (
+                              <div key={index} className="p-3 border rounded-lg">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-sm font-medium">{item.process}</span>
+                                  <Switch checked={item.enabled} />
+                                </div>
+                                <div className="text-xs text-gray-500">{item.condition}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 pt-4 border-t">
+                        <Button>
+                          <Save className="h-4 w-4 mr-2" />
+                          Save Automation Settings
+                        </Button>
+                        <Button variant="outline">
+                          <Play className="h-4 w-4 mr-2" />
+                          Test Workflows
+                        </Button>
+                        <Button variant="outline">
+                          <BarChart3 className="h-4 w-4 mr-2" />
+                          View Analytics
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
             </div>
           )}
 
