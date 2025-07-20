@@ -11,7 +11,8 @@ import {
   DialogDescription,
   DialogHeader, 
   DialogTitle, 
-  DialogTrigger 
+  DialogTrigger,
+  DialogFooter 
 } from "@/components/ui/dialog";
 import { 
   Table,
@@ -204,6 +205,308 @@ interface SidebarItem {
   icon: any;
   subItems?: SidebarItem[];
   superAdminOnly?: boolean;
+}
+
+interface FAQ {
+  id: string;
+  question: string;
+  answer: string;
+  category: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface FAQFormData {
+  question: string;
+  answer: string;
+  category: string;
+  isActive: boolean;
+}
+
+// FAQ Management Component
+function FAQManagement({ type = "general" }: { type: "general" | "service-provider" }) {
+  const [faqs, setFaqs] = useState<FAQ[]>([]);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingFAQ, setEditingFAQ] = useState<FAQ | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [faqForm, setFaqForm] = useState<FAQFormData>({
+    question: "",
+    answer: "",
+    category: "",
+    isActive: true
+  });
+  const { toast } = useToast();
+
+  // Load FAQs on component mount
+  useEffect(() => {
+    loadFAQs();
+  }, [type]);
+
+  const loadFAQs = async () => {
+    try {
+      const response = await fetch(`/api/admin/faqs/${type}`);
+      if (response.ok) {
+        const data = await response.json();
+        setFaqs(data);
+      }
+    } catch (error) {
+      console.error("Error loading FAQs:", error);
+    }
+  };
+
+  const saveFAQ = async () => {
+    try {
+      const url = editingFAQ 
+        ? `/api/admin/faqs/${type}/${editingFAQ.id}`
+        : `/api/admin/faqs/${type}`;
+      
+      const method = editingFAQ ? "PUT" : "POST";
+      
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(faqForm)
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: `FAQ ${editingFAQ ? 'updated' : 'created'} successfully`,
+        });
+        loadFAQs();
+        resetForm();
+      } else {
+        throw new Error("Failed to save FAQ");
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save FAQ",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteFAQ = async (id: string) => {
+    try {
+      const response = await fetch(`/api/admin/faqs/${type}/${id}`, {
+        method: "DELETE"
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "FAQ deleted successfully",
+        });
+        loadFAQs();
+      } else {
+        throw new Error("Failed to delete FAQ");
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete FAQ",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const resetForm = () => {
+    setFaqForm({
+      question: "",
+      answer: "",
+      category: "",
+      isActive: true
+    });
+    setEditingFAQ(null);
+    setShowAddModal(false);
+  };
+
+  const editFAQ = (faq: FAQ) => {
+    setFaqForm({
+      question: faq.question,
+      answer: faq.answer,
+      category: faq.category,
+      isActive: faq.isActive
+    });
+    setEditingFAQ(faq);
+    setShowAddModal(true);
+  };
+
+  const categories = Array.from(new Set(faqs.map(faq => faq.category))).filter(Boolean);
+  
+  const filteredFAQs = faqs.filter(faq => {
+    const matchesSearch = faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         faq.answer.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = filterCategory === "all" || faq.category === filterCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-900">
+          {type === "general" ? "General FAQs" : "Service Provider FAQs"}
+        </h2>
+        <Button onClick={() => setShowAddModal(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add FAQ
+        </Button>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <div className="flex-1">
+          <Input
+            placeholder="Search FAQs..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <Select value={filterCategory} onValueChange={setFilterCategory}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Filter by category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {categories.map(category => (
+              <SelectItem key={category} value={category}>{category}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>FAQs ({filteredFAQs.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {filteredFAQs.map(faq => (
+              <div key={faq.id} className="border rounded-lg p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant={faq.isActive ? "default" : "secondary"}>
+                        {faq.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                      {faq.category && (
+                        <Badge variant="outline">{faq.category}</Badge>
+                      )}
+                    </div>
+                    <h4 className="font-semibold text-lg mb-2">{faq.question}</h4>
+                    <p className="text-gray-600 mb-2">{faq.answer}</p>
+                    <div className="text-xs text-gray-500">
+                      Updated: {new Date(faq.updatedAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 ml-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => editFAQ(faq)}
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => deleteFAQ(faq.id)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {filteredFAQs.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                {searchTerm || filterCategory !== "all" 
+                  ? "No FAQs match your search criteria"
+                  : "No FAQs found. Click 'Add FAQ' to create your first FAQ."
+                }
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Add/Edit FAQ Modal */}
+      <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {editingFAQ ? "Edit FAQ" : "Add New FAQ"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Question</label>
+              <Input
+                value={faqForm.question}
+                onChange={(e) => setFaqForm(prev => ({
+                  ...prev,
+                  question: e.target.value
+                }))}
+                placeholder="Enter the question"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Answer</label>
+              <textarea
+                className="w-full p-3 border rounded-md resize-none"
+                rows={5}
+                value={faqForm.answer}
+                onChange={(e) => setFaqForm(prev => ({
+                  ...prev,
+                  answer: e.target.value
+                }))}
+                placeholder="Enter the answer"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Category</label>
+              <Input
+                value={faqForm.category}
+                onChange={(e) => setFaqForm(prev => ({
+                  ...prev,
+                  category: e.target.value
+                }))}
+                placeholder="Enter category (e.g., General, Support, Billing)"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="isActive"
+                checked={faqForm.isActive}
+                onChange={(e) => setFaqForm(prev => ({
+                  ...prev,
+                  isActive: e.target.checked
+                }))}
+              />
+              <label htmlFor="isActive" className="text-sm font-medium">
+                Active (visible to users)
+              </label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetForm}>
+              Cancel
+            </Button>
+            <Button
+              onClick={saveFAQ}
+              disabled={!faqForm.question || !faqForm.answer}
+            >
+              {editingFAQ ? "Update FAQ" : "Create FAQ"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 }
 
 // Service Provider Management Component
@@ -4223,28 +4526,7 @@ Jurisdiction: ${companyInfo.jurisdiction}
           )}
 
           {activeTab === "faqs" && (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">FAQs Management</h2>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Frequently Asked Questions</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <h3 className="text-lg font-medium">FAQ Items</h3>
-                      <Button>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add FAQ
-                      </Button>
-                    </div>
-                    <div className="text-center py-8 text-gray-600">
-                      FAQ management interface will be displayed here
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <FAQManagement type="general" />
           )}
 
           {/* Service Providers Section */}
@@ -5045,39 +5327,7 @@ Jurisdiction: ${companyInfo.jurisdiction}
           )}
 
           {activeTab === "faqs-sp" && (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Service Provider FAQs</h2>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Service Provider Frequently Asked Questions</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <h3 className="text-lg font-medium">Service Provider FAQ Items</h3>
-                      <Button>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add FAQ
-                      </Button>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium">How do I become a service provider?</h4>
-                        <p className="text-sm text-gray-600 mt-1">Complete our application process and pass our verification requirements.</p>
-                      </div>
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium">What are the earning opportunities?</h4>
-                        <p className="text-sm text-gray-600 mt-1">Service providers can earn 85% of service fees with additional bonuses for performance.</p>
-                      </div>
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium">How do I get paid?</h4>
-                        <p className="text-sm text-gray-600 mt-1">Payments are processed weekly via direct deposit or your preferred payment method.</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <FAQManagement type="service-provider" />
           )}
 
           {activeTab === "jobs" && <JobManagement />}

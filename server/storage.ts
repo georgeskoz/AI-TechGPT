@@ -59,6 +59,12 @@ export interface IStorage {
   // Service request management (for backward compatibility)
   createServiceRequest(request: any): Promise<any>;
   getAllTechnicians(): Promise<any>;
+  
+  // FAQ management
+  getFAQs(type?: string): Promise<any[]>;
+  createFAQ(faq: any): Promise<any>;
+  updateFAQ(id: number, updates: any): Promise<any>;
+  deleteFAQ(id: number): Promise<void>;
 }
 
 // Customer storage implementation
@@ -481,6 +487,111 @@ export class DatabaseStorage implements IStorage {
       skills: sp.categories || [],
       isAvailable: sp.isActive || false
     }));
+  }
+
+  // FAQ management methods
+  async getFAQs(type?: string): Promise<any[]> {
+    // Mock FAQ data for now - in a real implementation, this would come from a database table
+    const mockFAQs = [
+      {
+        id: 1,
+        question: "How do I request technical support?",
+        answer: "You can request technical support by clicking on the 'AI Support' button and describing your issue. Our AI will help diagnose your problem and connect you with the appropriate service provider if needed.",
+        category: "General",
+        type: "general",
+        order: 1,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 2,
+        question: "What types of technical issues can you help with?",
+        answer: "We provide support for hardware issues, software troubleshooting, network problems, web development, database management, mobile device support, cybersecurity, and system administration.",
+        category: "Services",
+        type: "general",
+        order: 2,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 3,
+        question: "How do I become a service provider?",
+        answer: "To become a service provider, complete our application process through the Service Provider portal. You'll need to provide your technical credentials, pass our verification requirements, and complete the onboarding process.",
+        category: "Registration",
+        type: "service-provider",
+        order: 1,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 4,
+        question: "What are the earning opportunities?",
+        answer: "Service providers earn 85% of service fees with additional performance bonuses. Earnings vary based on service type (remote: $60-120/hr, phone: $50-100/hr, onsite: $80-150/hr) and your expertise level.",
+        category: "Earnings",
+        type: "service-provider",
+        order: 2,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 5,
+        question: "How do payments work?",
+        answer: "Payments are processed weekly via direct deposit, PayPal, or your preferred payment method. Platform fees (15%) are automatically deducted, and you receive detailed earnings statements.",
+        category: "Payments",
+        type: "service-provider",
+        order: 3,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+
+    if (type) {
+      return mockFAQs.filter(faq => faq.type === type);
+    }
+    return mockFAQs;
+  }
+
+  async createFAQ(faq: any): Promise<any> {
+    // Mock implementation - in a real app, this would insert into database
+    const newFAQ = {
+      id: Math.floor(Math.random() * 10000),
+      ...faq,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isActive: true,
+      order: 1
+    };
+    return newFAQ;
+  }
+
+  async updateFAQ(id: number, updates: any): Promise<any> {
+    // Mock implementation - in a real app, this would update the database record
+    const existingFAQs = await this.getFAQs();
+    const faq = existingFAQs.find(f => f.id === id);
+    if (!faq) {
+      throw new Error('FAQ not found');
+    }
+    
+    return {
+      ...faq,
+      ...updates,
+      updatedAt: new Date()
+    };
+  }
+
+  async deleteFAQ(id: number): Promise<void> {
+    // Mock implementation - in a real app, this would delete from database
+    const existingFAQs = await this.getFAQs();
+    const faq = existingFAQs.find(f => f.id === id);
+    if (!faq) {
+      throw new Error('FAQ not found');
+    }
+    // Mock deletion - would actually remove from database
   }
 
   private generateUniqueUsername(baseUsername: string): string {
