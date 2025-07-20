@@ -3767,17 +3767,20 @@ Jurisdiction: ${companyInfo.jurisdiction}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="space-y-3">
-                          {[
-                            { name: "Government ID", required: true, verified: true },
-                            { name: "Professional Certifications", required: true, verified: false },
-                            { name: "Business License", required: false, verified: true },
-                            { name: "Insurance Certificate", required: true, verified: true },
-                            { name: "Background Check", required: true, verified: false },
-                            { name: "References (3)", required: true, verified: true }
-                          ].map((doc, index) => (
+                          {registrationConfig.documents.map((doc, index) => (
                             <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                               <div className="flex items-center gap-3">
-                                <Switch checked={doc.required} />
+                                <Switch 
+                                  checked={doc.required} 
+                                  onCheckedChange={(checked) => {
+                                    setRegistrationConfig(prev => ({
+                                      ...prev,
+                                      documents: prev.documents.map((d, i) => 
+                                        i === index ? { ...d, required: checked } : d
+                                      )
+                                    }));
+                                  }}
+                                />
                                 <span className="font-medium">{doc.name}</span>
                               </div>
                               <div className="flex items-center gap-2">
@@ -3866,14 +3869,7 @@ Jurisdiction: ${companyInfo.jurisdiction}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="space-y-3">
-                          {[
-                            { step: "Identity Verification", status: "automated", duration: "5 min" },
-                            { step: "Skills Assessment", status: "manual", duration: "30 min" },
-                            { step: "Background Check", status: "automated", duration: "24-48 hrs" },
-                            { step: "Reference Check", status: "manual", duration: "2-3 days" },
-                            { step: "Video Interview", status: "manual", duration: "15 min" },
-                            { step: "Technical Demo", status: "manual", duration: "20 min" }
-                          ].map((item, index) => (
+                          {registrationConfig.verificationSteps.map((item, index) => (
                             <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                               <div>
                                 <div className="font-medium">{item.step}</div>
@@ -3883,7 +3879,17 @@ Jurisdiction: ${companyInfo.jurisdiction}
                                 <Badge variant={item.status === "automated" ? "default" : "secondary"}>
                                   {item.status === "automated" ? "Auto" : "Manual"}
                                 </Badge>
-                                <Switch checked={true} />
+                                <Switch 
+                                  checked={item.enabled} 
+                                  onCheckedChange={(checked) => {
+                                    setRegistrationConfig(prev => ({
+                                      ...prev,
+                                      verificationSteps: prev.verificationSteps.map((v, i) => 
+                                        i === index ? { ...v, enabled: checked } : v
+                                      )
+                                    }));
+                                  }}
+                                />
                               </div>
                             </div>
                           ))}
@@ -3958,16 +3964,20 @@ Jurisdiction: ${companyInfo.jurisdiction}
                         <div className="space-y-4">
                           <h3 className="font-semibold text-gray-900">Auto-Approval Criteria</h3>
                           <div className="space-y-3">
-                            {[
-                              { criteria: "All documents verified", enabled: true },
-                              { criteria: "Background check passed", enabled: true },
-                              { criteria: "Skills assessment score > 85%", enabled: true },
-                              { criteria: "Previous platform experience", enabled: false },
-                              { criteria: "Professional certifications", enabled: false }
-                            ].map((item, index) => (
+                            {registrationConfig.autoApprovalCriteria.map((item, index) => (
                               <div key={index} className="flex items-center justify-between">
                                 <span className="text-sm">{item.criteria}</span>
-                                <Switch checked={item.enabled} />
+                                <Switch 
+                                  checked={item.enabled}
+                                  onCheckedChange={(checked) => {
+                                    setRegistrationConfig(prev => ({
+                                      ...prev,
+                                      autoApprovalCriteria: prev.autoApprovalCriteria.map((a, i) => 
+                                        i === index ? { ...a, enabled: checked } : a
+                                      )
+                                    }));
+                                  }}
+                                />
                               </div>
                             ))}
                           </div>
@@ -4047,20 +4057,23 @@ Jurisdiction: ${companyInfo.jurisdiction}
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="space-y-3">
-                          {[
-                            { step: "Welcome Email", timing: "Immediate", enabled: true },
-                            { step: "Platform Tutorial", timing: "Day 1", enabled: true },
-                            { step: "Profile Setup Guide", timing: "Day 1", enabled: true },
-                            { step: "First Job Assistance", timing: "Day 3", enabled: true },
-                            { step: "30-Day Check-in", timing: "Day 30", enabled: false },
-                            { step: "Performance Review", timing: "Day 90", enabled: true }
-                          ].map((item, index) => (
+                          {registrationConfig.welcomeSequence.map((item, index) => (
                             <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                               <div>
                                 <div className="font-medium">{item.step}</div>
                                 <div className="text-sm text-gray-500">{item.timing}</div>
                               </div>
-                              <Switch checked={item.enabled} />
+                              <Switch 
+                                checked={item.enabled}
+                                onCheckedChange={(checked) => {
+                                  setRegistrationConfig(prev => ({
+                                    ...prev,
+                                    welcomeSequence: prev.welcomeSequence.map((w, i) => 
+                                      i === index ? { ...w, enabled: checked } : w
+                                    )
+                                  }));
+                                }}
+                              />
                             </div>
                           ))}
                         </div>
@@ -4082,16 +4095,20 @@ Jurisdiction: ${companyInfo.jurisdiction}
                         <div>
                           <label className="text-sm font-medium text-gray-700 mb-2 block">Required Training Modules</label>
                           <div className="space-y-2">
-                            {[
-                              { module: "Platform Navigation", duration: "15 min", required: true },
-                              { module: "Customer Communication", duration: "20 min", required: true },
-                              { module: "Safety Protocols", duration: "30 min", required: true },
-                              { module: "Billing & Payments", duration: "10 min", required: true },
-                              { module: "Quality Standards", duration: "25 min", required: false }
-                            ].map((item, index) => (
+                            {registrationConfig.trainingModules.map((item, index) => (
                               <div key={index} className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                  <Switch checked={item.required} />
+                                  <Switch 
+                                    checked={item.required}
+                                    onCheckedChange={(checked) => {
+                                      setRegistrationConfig(prev => ({
+                                        ...prev,
+                                        trainingModules: prev.trainingModules.map((t, i) => 
+                                          i === index ? { ...t, required: checked } : t
+                                        )
+                                      }));
+                                    }}
+                                  />
                                   <span className="text-sm font-medium">{item.module}</span>
                                 </div>
                                 <span className="text-xs text-gray-500">{item.duration}</span>
@@ -4136,17 +4153,21 @@ Jurisdiction: ${companyInfo.jurisdiction}
                         <div className="space-y-4">
                           <h3 className="font-semibold text-gray-900">Email Automation</h3>
                           <div className="space-y-3">
-                            {[
-                              { trigger: "Application submitted", action: "Send confirmation email", enabled: true },
-                              { trigger: "Document missing", action: "Send reminder email", enabled: true },
-                              { trigger: "Application approved", action: "Send welcome package", enabled: true },
-                              { trigger: "Application rejected", action: "Send feedback email", enabled: false },
-                              { trigger: "Training incomplete", action: "Send reminder", enabled: true }
-                            ].map((item, index) => (
+                            {registrationConfig.emailAutomation.map((item, index) => (
                               <div key={index} className="p-3 border rounded-lg">
                                 <div className="flex items-center justify-between mb-2">
                                   <span className="text-sm font-medium">{item.trigger}</span>
-                                  <Switch checked={item.enabled} />
+                                  <Switch 
+                                    checked={item.enabled}
+                                    onCheckedChange={(checked) => {
+                                      setRegistrationConfig(prev => ({
+                                        ...prev,
+                                        emailAutomation: prev.emailAutomation.map((e, i) => 
+                                          i === index ? { ...e, enabled: checked } : e
+                                        )
+                                      }));
+                                    }}
+                                  />
                                 </div>
                                 <div className="text-xs text-gray-500">{item.action}</div>
                               </div>
@@ -4157,17 +4178,21 @@ Jurisdiction: ${companyInfo.jurisdiction}
                         <div className="space-y-4">
                           <h3 className="font-semibold text-gray-900">Process Automation</h3>
                           <div className="space-y-3">
-                            {[
-                              { process: "Auto-assign reviewer", condition: "Based on workload", enabled: true },
-                              { process: "Background check order", condition: "After document verification", enabled: true },
-                              { process: "Skills test scheduling", condition: "Auto-schedule available slots", enabled: false },
-                              { process: "Reference check automation", condition: "Send automated requests", enabled: true },
-                              { process: "Profile activation", condition: "Upon approval", enabled: true }
-                            ].map((item, index) => (
+                            {registrationConfig.processAutomation.map((item, index) => (
                               <div key={index} className="p-3 border rounded-lg">
                                 <div className="flex items-center justify-between mb-2">
                                   <span className="text-sm font-medium">{item.process}</span>
-                                  <Switch checked={item.enabled} />
+                                  <Switch 
+                                    checked={item.enabled}
+                                    onCheckedChange={(checked) => {
+                                      setRegistrationConfig(prev => ({
+                                        ...prev,
+                                        processAutomation: prev.processAutomation.map((p, i) => 
+                                          i === index ? { ...p, enabled: checked } : p
+                                        )
+                                      }));
+                                    }}
+                                  />
                                 </div>
                                 <div className="text-xs text-gray-500">{item.condition}</div>
                               </div>
