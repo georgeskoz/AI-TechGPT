@@ -1786,6 +1786,125 @@ Last Updated: ${effectiveDate}
     }
   };
 
+  const savePolicyContent = async () => {
+    try {
+      const response = await fetch("/api/admin/save-policy", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          policyType: getPolicyType(activeTab),
+          content: policyContent,
+          companyInfo,
+          savedDate: new Date().toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Policy Saved",
+          description: "Your policy document has been saved successfully.",
+        });
+      } else {
+        throw new Error("Failed to save policy");
+      }
+    } catch (error) {
+      toast({
+        title: "Save Failed",
+        description: "Failed to save policy document. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const previewPolicy = () => {
+    const previewWindow = window.open("", "_blank", "width=800,height=600,scrollbars=yes");
+    if (previewWindow) {
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${getPolicyType(activeTab).charAt(0).toUpperCase() + getPolicyType(activeTab).slice(1)} Policy - ${companyInfo.name}</title>
+          <style>
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+              line-height: 1.6; 
+              max-width: 800px; 
+              margin: 40px auto; 
+              padding: 20px; 
+              color: #333; 
+            }
+            h1 { color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px; }
+            h2 { color: #1e40af; margin-top: 30px; }
+            h3 { color: #1e3a8a; }
+            .header { text-align: center; margin-bottom: 40px; }
+            .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 0.9em; color: #6b7280; }
+            pre { white-space: pre-wrap; font-family: inherit; }
+            @media print { body { margin: 0; padding: 20px; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>${companyInfo.name}</h1>
+            <p><strong>${getPolicyType(activeTab).charAt(0).toUpperCase() + getPolicyType(activeTab).slice(1)} Policy</strong></p>
+          </div>
+          <pre>${policyContent}</pre>
+          <div class="footer">
+            <p>Generated on ${new Date().toLocaleDateString()} | ${companyInfo.website} | ${companyInfo.contactEmail}</p>
+          </div>
+        </body>
+        </html>
+      `;
+      previewWindow.document.write(htmlContent);
+      previewWindow.document.close();
+    }
+  };
+
+  const exportToPDF = async () => {
+    try {
+      const response = await fetch("/api/admin/export-policy-pdf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          policyType: getPolicyType(activeTab),
+          content: policyContent,
+          companyInfo,
+        }),
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${companyInfo.name}-${getPolicyType(activeTab)}-policy.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        toast({
+          title: "PDF Downloaded",
+          description: "Your policy document has been exported as PDF.",
+        });
+      } else {
+        throw new Error("Failed to generate PDF");
+      }
+    } catch (error) {
+      // Fallback: Open print dialog for manual PDF export
+      previewPolicy();
+      setTimeout(() => {
+        toast({
+          title: "PDF Export",
+          description: "Policy opened in new window. Use Ctrl+P (Cmd+P on Mac) to save as PDF.",
+        });
+      }, 1000);
+    }
+  };
+
 
 
   const sidebarItems = [
@@ -2961,9 +3080,9 @@ Last Updated: ${effectiveDate}
                             <Copy className="h-4 w-4 mr-2" />
                             Copy
                           </Button>
-                          <Button variant="outline">
+                          <Button variant="outline" onClick={exportToPDF}>
                             <Download className="h-4 w-4 mr-2" />
-                            Download
+                            Download PDF
                           </Button>
                         </>
                       )}
@@ -2983,7 +3102,7 @@ Last Updated: ${effectiveDate}
                           <Copy className="h-4 w-4 mr-2" />
                           Copy
                         </Button>
-                        <Button size="sm">
+                        <Button size="sm" onClick={savePolicyContent}>
                           <Save className="h-4 w-4 mr-2" />
                           Save Policy
                         </Button>
@@ -3008,15 +3127,15 @@ Last Updated: ${effectiveDate}
                     </div>
                     
                     <div className="flex items-center gap-4 mt-4">
-                      <Button>
+                      <Button onClick={savePolicyContent}>
                         <Save className="h-4 w-4 mr-2" />
                         Save Changes
                       </Button>
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={previewPolicy}>
                         <Eye className="h-4 w-4 mr-2" />
                         Preview
                       </Button>
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={exportToPDF}>
                         <Download className="h-4 w-4 mr-2" />
                         Export as PDF
                       </Button>
@@ -3850,15 +3969,25 @@ Last Updated: ${effectiveDate}
                 <Card className="mt-6">
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-4 mt-4">
-                      <Button>
+                      <Button onClick={() => {
+                        setGeneratedContent(generatedContent);
+                        setPolicyContent(generatedContent);
+                        savePolicyContent();
+                      }}>
                         <Save className="h-4 w-4 mr-2" />
                         Save Changes
                       </Button>
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={() => {
+                        setPolicyContent(generatedContent);
+                        previewPolicy();
+                      }}>
                         <Eye className="h-4 w-4 mr-2" />
                         Preview
                       </Button>
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={() => {
+                        setPolicyContent(generatedContent);
+                        exportToPDF();
+                      }}>
                         <Download className="h-4 w-4 mr-2" />
                         Export as PDF
                       </Button>
