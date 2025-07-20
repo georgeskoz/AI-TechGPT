@@ -890,6 +890,62 @@ export const disputeEscalations = pgTable("dispute_escalations", {
   createdAt: timestamp("created_at").defaultNow().notNull()
 });
 
+// Support categories table - Admin managed service categories
+export const supportCategories = pgTable("support_categories", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  description: text("description"),
+  icon: varchar("icon", { length: 50 }).default("Wrench"),
+  basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(),
+  serviceType: varchar("service_type", { length: 20 }).notNull(), // 'remote', 'phone', 'onsite'
+  estimatedDuration: integer("estimated_duration").notNull(), // in minutes
+  skillsRequired: text("skills_required").array().default([]),
+  isActive: boolean("is_active").default(true),
+  isPublic: boolean("is_public").default(true), // visible to customers
+  adminId: integer("admin_id").references(() => adminUsers.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Service provider activated services - Services that providers offer
+export const serviceProviderServices = pgTable("service_provider_services", {
+  id: serial("id").primaryKey(),
+  serviceProviderId: integer("service_provider_id").references(() => serviceProviders.id).notNull(),
+  categoryId: integer("category_id").references(() => supportCategories.id).notNull(),
+  customPrice: decimal("custom_price", { precision: 10, scale: 2 }), // Override base price
+  isActive: boolean("is_active").default(true),
+  experienceLevel: varchar("experience_level", { length: 20 }).default("intermediate"), // 'beginner', 'intermediate', 'expert'
+  availableHours: jsonb("available_hours").$type<{
+    monday?: { start: string; end: string }[];
+    tuesday?: { start: string; end: string }[];
+    wednesday?: { start: string; end: string }[];
+    thursday?: { start: string; end: string }[];
+    friday?: { start: string; end: string }[];
+    saturday?: { start: string; end: string }[];
+    sunday?: { start: string; end: string }[];
+  }>(),
+  serviceAreas: text("service_areas").array().default([]), // Geographic areas for onsite
+  notes: text("notes"), // Special notes or conditions
+  activatedAt: timestamp("activated_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// AI Chat fallback notifications - For startup phase when no technicians available
+export const aiChatFallbackLogs = pgTable("ai_chat_fallback_logs", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").references(() => customers.id),
+  categoryId: integer("category_id").references(() => supportCategories.id),
+  requestedService: text("requested_service").notNull(),
+  fallbackReason: varchar("fallback_reason", { length: 100 }).notNull(), // 'no_providers', 'outside_hours', 'no_qualified_providers'
+  customerMessage: text("customer_message"),
+  aiResponse: text("ai_response"),
+  customerSatisfaction: integer("customer_satisfaction"), // 1-5 rating
+  escalatedToHuman: boolean("escalated_to_human").default(false),
+  escalatedAt: timestamp("escalated_at"),
+  sessionDuration: integer("session_duration"), // in minutes
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const usersRelations = relations(users, ({ many, one }) => ({
   messages: many(messages),
   technicianProfile: one(technicians, {
@@ -1596,6 +1652,21 @@ export const phoneSupportLogs = pgTable("phone_support_logs", {
 export const insertPhoneSupportLogSchema = createInsertSchema(phoneSupportLogs);
 export type InsertPhoneSupportLog = typeof phoneSupportLogs.$inferInsert;
 export type PhoneSupportLog = typeof phoneSupportLogs.$inferSelect;
+
+// Support categories schema and types
+export const insertSupportCategorySchema = createInsertSchema(supportCategories);
+export type InsertSupportCategory = typeof supportCategories.$inferInsert;
+export type SupportCategory = typeof supportCategories.$inferSelect;
+
+// Service provider services schema and types
+export const insertServiceProviderServiceSchema = createInsertSchema(serviceProviderServices);
+export type InsertServiceProviderService = typeof serviceProviderServices.$inferInsert;
+export type ServiceProviderService = typeof serviceProviderServices.$inferSelect;
+
+// AI chat fallback logs schema and types
+export const insertAiChatFallbackLogSchema = createInsertSchema(aiChatFallbackLogs);
+export type InsertAiChatFallbackLog = typeof aiChatFallbackLogs.$inferInsert;
+export type AiChatFallbackLog = typeof aiChatFallbackLogs.$inferSelect;
 export type InsertIssueCategory = z.infer<typeof insertIssueCategorySchema>;
 export type IssueCategory = typeof issueCategories.$inferSelect;
 export type InsertDispute = z.infer<typeof insertDisputeSchema>;

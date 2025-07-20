@@ -129,6 +129,11 @@ export class MemoryStorage implements IStorage {
   private supportTicketMessages = new Map<number, SupportTicketMessage>();
   private supportTicketAttachments = new Map<number, SupportTicketAttachment>();
   
+  // Support categories and services data
+  private supportCategories: any[] = [];
+  private serviceProviderServices: any[] = [];
+  private aiChatFallbackLogs: any[] = [];
+  
   private nextId = 1;
   private nextUserId = 1;
   private nextTechnicianId = 1;
@@ -1154,6 +1159,185 @@ export class MemoryStorage implements IStorage {
       }
     }
     return false;
+  }
+
+  // Support Categories Management Methods
+  async getAllSupportCategories(): Promise<any[]> {
+    if (this.supportCategories.length === 0) {
+      // Initialize with sample categories
+      this.supportCategories = [
+        {
+          id: 1,
+          name: "Network Configuration",
+          description: "Setup and troubleshoot network settings, WiFi, and internet connectivity issues",
+          icon: "Monitor",
+          basePrice: 75.00,
+          serviceType: "remote",
+          estimatedDuration: 60,
+          skillsRequired: ["networking", "troubleshooting", "cisco"],
+          isActive: true,
+          isPublic: true,
+          adminId: 1,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 2,
+          name: "Hardware Diagnostics",
+          description: "Identify and resolve hardware issues, component failures, and system performance problems",
+          icon: "Wrench",
+          basePrice: 120.00,
+          serviceType: "onsite",
+          estimatedDuration: 90,
+          skillsRequired: ["hardware", "diagnostics", "repair"],
+          isActive: true,
+          isPublic: true,
+          adminId: 1,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 3,
+          name: "Software Support",
+          description: "Installation, configuration, and troubleshooting of software applications",
+          icon: "Settings",
+          basePrice: 60.00,
+          serviceType: "phone",
+          estimatedDuration: 45,
+          skillsRequired: ["software", "installation", "support"],
+          isActive: true,
+          isPublic: true,
+          adminId: 1,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ];
+    }
+    return this.supportCategories;
+  }
+
+  async createSupportCategory(categoryData: any): Promise<any> {
+    const newCategory = {
+      id: this.supportCategories.length + 1,
+      ...categoryData,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    this.supportCategories.push(newCategory);
+    return newCategory;
+  }
+
+  async updateSupportCategory(id: number, updates: any): Promise<any> {
+    const categoryIndex = this.supportCategories.findIndex(c => c.id === id);
+    if (categoryIndex === -1) {
+      throw new Error("Category not found");
+    }
+    
+    this.supportCategories[categoryIndex] = {
+      ...this.supportCategories[categoryIndex],
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+    
+    return this.supportCategories[categoryIndex];
+  }
+
+  async deleteSupportCategory(id: number): Promise<void> {
+    const categoryIndex = this.supportCategories.findIndex(c => c.id === id);
+    if (categoryIndex === -1) {
+      throw new Error("Category not found");
+    }
+    this.supportCategories.splice(categoryIndex, 1);
+  }
+
+  async getActiveServicesByCategory(categoryId: number): Promise<any[]> {
+    if (this.serviceProviderServices.length === 0) {
+      // Initialize with sample service provider services
+      this.serviceProviderServices = [
+        {
+          id: 1,
+          serviceProviderId: 1,
+          categoryId: 1,
+          customPrice: 85.00,
+          isActive: true,
+          experienceLevel: "Expert",
+          providerName: "John Tech",
+          categoryName: "Network Configuration"
+        },
+        {
+          id: 2,
+          serviceProviderId: 2,
+          categoryId: 2,
+          customPrice: null,
+          isActive: true,
+          experienceLevel: "Intermediate",
+          providerName: "Sarah Fix",
+          categoryName: "Hardware Diagnostics"
+        },
+        {
+          id: 3,
+          serviceProviderId: 3,
+          categoryId: 3,
+          customPrice: 55.00,
+          isActive: true,
+          experienceLevel: "Expert",
+          providerName: "Mike Support",
+          categoryName: "Software Support"
+        }
+      ];
+    }
+    
+    if (categoryId === 0) {
+      return this.serviceProviderServices;
+    }
+    
+    return this.serviceProviderServices.filter(s => s.categoryId === categoryId && s.isActive);
+  }
+
+  async activateServiceForProvider(providerId: number, categoryId: number, serviceData: any): Promise<any> {
+    const newService = {
+      id: this.serviceProviderServices.length + 1,
+      serviceProviderId: providerId,
+      categoryId: categoryId,
+      ...serviceData,
+      isActive: true
+    };
+    this.serviceProviderServices.push(newService);
+    return newService;
+  }
+
+  async checkServiceAvailability(categoryId: number): Promise<any> {
+    const activeServices = this.serviceProviderServices.filter(s => 
+      s.categoryId === categoryId && s.isActive
+    );
+    
+    return {
+      hasProviders: activeServices.length > 0,
+      providerCount: activeServices.length,
+      averagePrice: activeServices.length > 0 
+        ? activeServices.reduce((sum, s) => sum + (s.customPrice || 0), 0) / activeServices.length
+        : null
+    };
+  }
+
+  async logAiChatFallback(fallbackData: any): Promise<any> {
+    const log = {
+      id: this.aiChatFallbackLogs.length + 1,
+      ...fallbackData,
+      timestamp: new Date().toISOString()
+    };
+    this.aiChatFallbackLogs.push(log);
+    return log;
+  }
+
+  async getAiChatFallbackStats(): Promise<any> {
+    return {
+      totalFallbacks: this.aiChatFallbackLogs.length,
+      recentFallbacks: this.aiChatFallbackLogs.slice(-10),
+      categoriesWithoutProviders: this.supportCategories.filter(c => 
+        !this.serviceProviderServices.some(s => s.categoryId === c.id && s.isActive)
+      ).length
+    };
   }
 }
 
