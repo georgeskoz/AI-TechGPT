@@ -1177,32 +1177,48 @@ export default function AdminDashboard() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to generate policy");
-      }
-
       const data = await response.json();
       
-      // If AI service is unavailable, provide fallback content
+      // Handle AI-generated success response
+      if (response.ok && data.success) {
+        setGeneratedContent(data.content);
+        toast({
+          title: "Policy Generated Successfully",
+          description: `AI-generated ${data.policyType} policy with ${data.wordCount} words.`,
+        });
+        return;
+      }
+      
+      // Handle quota exceeded with fallback template
+      if (response.status === 429 && data.fallbackContent) {
+        setGeneratedContent(data.fallbackContent);
+        toast({
+          title: "Template Policy Generated",
+          description: "AI service is temporarily unavailable. Using professional template as starting point.",
+        });
+        return;
+      }
+      
+      // Handle AI service unavailable
       if (data.error === "AI service unavailable") {
         setGeneratedContent(getFallbackPolicyContent(getPolicyType(activeTab)));
         toast({
           title: "Policy Template Generated",
-          description: "A template policy document has been generated. Please review and customize as needed.",
+          description: "AI service unavailable. Template policy generated for customization.",
         });
-      } else {
-        setGeneratedContent(data.content);
-        toast({
-          title: "Policy Generated Successfully",
-          description: "The AI-powered policy document has been generated.",
-        });
+        return;
       }
-    } catch (error) {
+      
+      // Handle other errors
+      throw new Error(data.error || "Failed to generate policy");
+      
+    } catch (error: any) {
       console.error("Error generating policy:", error);
       setGeneratedContent(getFallbackPolicyContent(getPolicyType(activeTab)));
       toast({
         title: "Template Generated",
-        description: "A template policy document has been generated. Please review and customize as needed.",
+        description: "Using fallback template. Please review and customize as needed.",
+        variant: "destructive",
       });
     } finally {
       setIsGenerating(false);
@@ -1705,22 +1721,50 @@ Last Updated: ${effectiveDate}
           customPrompts,
         }),
       });
-      if (!response.ok) {
-        throw new Error("Failed to generate policy");
-      }
-      return response.json();
+      const data = await response.json();
+      return { response, data };
     },
-    onSuccess: (data) => {
-      setPolicyContent(data.content);
-      toast({
-        title: "Policy Generated",
-        description: "AI has successfully generated your policy document.",
-      });
+    onSuccess: ({ response, data }) => {
+      // Handle AI-generated success response
+      if (response.ok && data.success) {
+        setPolicyContent(data.content);
+        toast({
+          title: "Policy Generated Successfully",
+          description: `AI-generated ${data.policyType} policy with ${data.wordCount} words.`,
+        });
+        return;
+      }
+      
+      // Handle quota exceeded with fallback template
+      if (response.status === 429 && data.fallbackContent) {
+        setPolicyContent(data.fallbackContent);
+        toast({
+          title: "Template Policy Generated",
+          description: "AI service is temporarily unavailable. Using professional template as starting point.",
+        });
+        return;
+      }
+      
+      // Handle AI service unavailable
+      if (data.error === "AI service unavailable") {
+        const fallbackContent = getFallbackPolicyContent(data.policyType || "refund");
+        setPolicyContent(fallbackContent);
+        toast({
+          title: "Policy Template Generated",
+          description: "AI service unavailable. Template policy generated for customization.",
+        });
+        return;
+      }
+      
+      // Handle other errors
+      throw new Error(data.error || "Failed to generate policy");
     },
     onError: (error) => {
+      const fallbackContent = getFallbackPolicyContent("refund");
+      setPolicyContent(fallbackContent);
       toast({
-        title: "Generation Failed",
-        description: "Failed to generate policy. Please try again.",
+        title: "Template Generated",
+        description: "Using fallback template. Please review and customize as needed.",
         variant: "destructive",
       });
     },
