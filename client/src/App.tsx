@@ -72,6 +72,7 @@ import LearningCenter from "@/pages/LearningCenter";
 import { PortalAuthGuard } from "@/components/PortalAuthGuard";
 import TechnicianInbox from '@/pages/TechnicianInbox';
 import TechnicianHelp from '@/pages/TechnicianHelp';
+import AIChatAnalytics from '@/pages/AIChatAnalytics';
 
 
 // Conditional Profile Route Component
@@ -281,6 +282,11 @@ function Router() {
       <Route path="/admin/announcements" component={() => 
         <PortalAuthGuard requiredPortal="admin">
           <AdminAnnouncements />
+        </PortalAuthGuard>
+      } />
+      <Route path="/ai-chat-analytics" component={() => 
+        <PortalAuthGuard requiredPortal="admin">
+          <AIChatAnalytics />
         </PortalAuthGuard>
       } />
       

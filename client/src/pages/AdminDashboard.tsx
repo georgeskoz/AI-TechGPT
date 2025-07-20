@@ -63,6 +63,7 @@ import ServiceManagement from "@/components/ServiceManagement";
 import AdminIssueTracking from "@/components/AdminIssueTracking";
 import AdminLiveChatMonitoring from "@/components/AdminLiveChatMonitoring";
 import AdminScreenSharingSessions from "@/components/AdminScreenSharingSessions";
+import AIChatAnalytics from "@/pages/AIChatAnalytics";
 import { 
   Users, 
   Settings, 
@@ -2702,6 +2703,7 @@ Jurisdiction: ${companyInfo.jurisdiction}
 
   const sidebarItems = [
     { id: "overview", label: "Overview", icon: BarChart3 },
+    { id: "ai-chat-analytics", label: "AI Chat Analytics", icon: MessageSquare },
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "push-notifications", label: "Push Notifications", icon: Bell },
     { 
@@ -3290,6 +3292,10 @@ Jurisdiction: ${companyInfo.jurisdiction}
                 </Card>
               </div>
             </div>
+          )}
+
+          {activeTab === "ai-chat-analytics" && (
+            <AIChatAnalytics />
           )}
 
           {activeTab === "notifications" && (
