@@ -55,6 +55,10 @@ export interface IStorage {
   
   // Admin dashboard stats
   getAdminDashboardStats(): Promise<any>;
+  
+  // Service request management (for backward compatibility)
+  createServiceRequest(request: any): Promise<any>;
+  getAllTechnicians(): Promise<any>;
 }
 
 // Customer storage implementation
@@ -453,6 +457,30 @@ export class DatabaseStorage implements IStorage {
       responseTime: "2.3 min", // Mock data
       systemUptime: "99.9%" // Mock data
     };
+  }
+
+  // Service request management for backward compatibility
+  async createServiceRequest(request: any): Promise<any> {
+    // For now, return a mock service request since we don't have the table yet
+    return {
+      id: Math.floor(Math.random() * 10000),
+      ...request,
+      status: 'pending',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+
+  async getAllTechnicians(): Promise<any[]> {
+    // For now, return service providers as technicians for backward compatibility
+    const serviceProviders = await db.select().from(serviceProviders);
+    return serviceProviders.map(sp => ({
+      ...sp,
+      // Map service provider fields to technician fields
+      technicianId: sp.id,
+      skills: sp.categories || [],
+      isAvailable: sp.isActive || false
+    }));
   }
 
   private generateUniqueUsername(baseUsername: string): string {
