@@ -621,6 +621,244 @@ export class PersistentStorage implements IStorage {
   async deleteDiagnosticTool(id: number): Promise<void> {
     // Mock deletion - would actually remove from database
   }
+
+  // Phone Support Logs methods
+  async getPhoneSupportLogs(filters?: {
+    searchTerm?: string;
+    callType?: string;
+    status?: string;
+    priority?: string;
+    dateRange?: string;
+  }): Promise<{
+    logs: any[];
+    stats: {
+      total: number;
+      active: number;
+      completed: number;
+      avgDuration: number;
+      customerCalls: number;
+      providerCalls: number;
+      adminCalls: number;
+    };
+  }> {
+    // Mock phone support logs data
+    const mockLogs = [
+      {
+        id: "1",
+        callId: "PSL-2025-001",
+        customerName: "John Smith",
+        customerEmail: "john.smith@email.com",
+        customerPhone: "+1-555-0123",
+        serviceProviderName: "Alex Johnson",
+        serviceProviderEmail: "alex.johnson@techersproviders.com",
+        adminName: null,
+        callType: "customer",
+        category: "Hardware Issues",
+        issue: "Computer won't start after power outage, need immediate assistance",
+        status: "completed",
+        duration: 45,
+        startTime: "2025-01-20T09:30:00Z",
+        endTime: "2025-01-20T10:15:00Z",
+        resolution: "Power supply failure identified and replaced. System restored to full functionality.",
+        priority: "high",
+        transferredTo: null,
+        notes: "Customer very satisfied with quick resolution. Recommended backup power solution.",
+        satisfaction: 5,
+        recordings: ["PSL-2025-001-recording.mp3"],
+        createdAt: "2025-01-20T09:30:00Z"
+      },
+      {
+        id: "2",
+        callId: "PSL-2025-002",
+        customerName: "Sarah Wilson",
+        customerEmail: "sarah.wilson@business.com",
+        customerPhone: "+1-555-0456",
+        serviceProviderName: "Emily Rodriguez",
+        serviceProviderEmail: "emily.rodriguez@techersproviders.com",
+        adminName: null,
+        callType: "service_provider",
+        category: "Network Troubleshooting",
+        issue: "Office network intermittent connectivity affecting productivity",
+        status: "active",
+        duration: 25,
+        startTime: "2025-01-20T11:00:00Z",
+        endTime: null,
+        resolution: "In progress - investigating router configuration",
+        priority: "medium",
+        transferredTo: null,
+        notes: "Network analysis ongoing, potential router firmware issue identified",
+        satisfaction: null,
+        recordings: [],
+        createdAt: "2025-01-20T11:00:00Z"
+      },
+      {
+        id: "3",
+        callId: "PSL-2025-003",
+        customerName: "Michael Davis",
+        customerEmail: "m.davis@company.org",
+        customerPhone: "+1-555-0789",
+        serviceProviderName: "David Kim",
+        serviceProviderEmail: "david.kim@techersproviders.com",
+        adminName: "Admin Sarah",
+        callType: "admin",
+        category: "Security Questions",
+        issue: "Security breach concern, need immediate assessment and response",
+        status: "transferred",
+        duration: 15,
+        startTime: "2025-01-20T08:15:00Z",
+        endTime: "2025-01-20T08:30:00Z",
+        resolution: "Transferred to senior security specialist for advanced assessment",
+        priority: "urgent",
+        transferredTo: "Senior Security Team",
+        notes: "Escalated due to severity. Customer contacted within 30 minutes.",
+        satisfaction: 4,
+        recordings: ["PSL-2025-003-initial.mp3"],
+        createdAt: "2025-01-20T08:15:00Z"
+      },
+      {
+        id: "4",
+        callId: "PSL-2025-004",
+        customerName: "Lisa Brown",
+        customerEmail: "lisa.brown@startup.io",
+        customerPhone: "+1-555-0321",
+        serviceProviderName: "Rachel Lee",
+        serviceProviderEmail: "rachel.lee@techersproviders.com",
+        adminName: null,
+        callType: "customer",
+        category: "Software Issues",
+        issue: "Database connection errors preventing application access",
+        status: "completed",
+        duration: 35,
+        startTime: "2025-01-20T13:45:00Z",
+        endTime: "2025-01-20T14:20:00Z",
+        resolution: "Database configuration updated and connection pool optimized. Application fully operational.",
+        priority: "high",
+        transferredTo: null,
+        notes: "Provided documentation for database maintenance best practices.",
+        satisfaction: 5,
+        recordings: ["PSL-2025-004-session.mp3"],
+        createdAt: "2025-01-20T13:45:00Z"
+      },
+      {
+        id: "5",
+        callId: "PSL-2025-005",
+        customerName: "Robert Johnson",
+        customerEmail: "rob.johnson@tech.com",
+        customerPhone: "+1-555-0654",
+        serviceProviderName: "Lisa Thompson",
+        serviceProviderEmail: "lisa.thompson@techersproviders.com",
+        adminName: null,
+        callType: "service_provider",
+        category: "Web Development",
+        issue: "Website deployment issues and SSL certificate problems",
+        status: "failed",
+        duration: 20,
+        startTime: "2025-01-20T16:00:00Z",
+        endTime: "2025-01-20T16:20:00Z",
+        resolution: "Call disconnected due to technical issues. Follow-up scheduled.",
+        priority: "medium",
+        transferredTo: null,
+        notes: "Technical difficulties interrupted call. Customer will be contacted for rescheduling.",
+        satisfaction: 2,
+        recordings: [],
+        createdAt: "2025-01-20T16:00:00Z"
+      }
+    ];
+
+    let filteredLogs = [...mockLogs];
+
+    // Apply filters
+    if (filters?.searchTerm) {
+      const searchLower = filters.searchTerm.toLowerCase();
+      filteredLogs = filteredLogs.filter(log => 
+        log.customerName.toLowerCase().includes(searchLower) ||
+        log.customerEmail.toLowerCase().includes(searchLower) ||
+        log.customerPhone.includes(searchLower) ||
+        log.serviceProviderName.toLowerCase().includes(searchLower) ||
+        log.callId.toLowerCase().includes(searchLower)
+      );
+    }
+
+    if (filters?.callType && filters.callType !== 'all') {
+      filteredLogs = filteredLogs.filter(log => log.callType === filters.callType);
+    }
+
+    if (filters?.status && filters.status !== 'all') {
+      filteredLogs = filteredLogs.filter(log => log.status === filters.status);
+    }
+
+    if (filters?.priority && filters.priority !== 'all') {
+      filteredLogs = filteredLogs.filter(log => log.priority === filters.priority);
+    }
+
+    if (filters?.dateRange && filters.dateRange !== 'all') {
+      const now = new Date();
+      const filterDate = new Date(now);
+      
+      switch (filters.dateRange) {
+        case 'today':
+          filterDate.setHours(0, 0, 0, 0);
+          break;
+        case 'week':
+          filterDate.setDate(now.getDate() - 7);
+          break;
+        case 'month':
+          filterDate.setMonth(now.getMonth() - 1);
+          break;
+        case 'quarter':
+          filterDate.setMonth(now.getMonth() - 3);
+          break;
+      }
+      
+      filteredLogs = filteredLogs.filter(log => 
+        new Date(log.createdAt) >= filterDate
+      );
+    }
+
+    // Calculate stats
+    const stats = {
+      total: mockLogs.length,
+      active: mockLogs.filter(log => log.status === 'active').length,
+      completed: mockLogs.filter(log => log.status === 'completed').length,
+      avgDuration: Math.round(mockLogs.reduce((sum, log) => sum + log.duration, 0) / mockLogs.length),
+      customerCalls: mockLogs.filter(log => log.callType === 'customer').length,
+      providerCalls: mockLogs.filter(log => log.callType === 'service_provider').length,
+      adminCalls: mockLogs.filter(log => log.callType === 'admin').length
+    };
+
+    return {
+      logs: filteredLogs,
+      stats
+    };
+  }
+
+  async getPhoneSupportLogById(id: string): Promise<any | undefined> {
+    const { logs } = await this.getPhoneSupportLogs();
+    return logs.find(log => log.id === id);
+  }
+
+  async createPhoneSupportLog(logData: any): Promise<any> {
+    return {
+      id: `${Date.now()}`,
+      callId: `PSL-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
+      ...logData,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  async updatePhoneSupportLog(id: string, updates: any): Promise<any | undefined> {
+    const log = await this.getPhoneSupportLogById(id);
+    if (!log) {
+      return undefined;
+    }
+
+    return {
+      ...log,
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+  }
 }
 
 // Customer persistent storage implementation

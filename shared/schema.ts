@@ -1565,6 +1565,37 @@ export type InsertStatement = z.infer<typeof insertStatementSchema>;
 export type Statement = typeof statements.$inferSelect;
 export type InsertTechnicianEarningSettings = z.infer<typeof insertTechnicianEarningSettingsSchema>;
 export type TechnicianEarningSettings = typeof technicianEarningSettings.$inferSelect;
+
+// Phone Support Logs table
+export const phoneSupportLogs = pgTable("phone_support_logs", {
+  id: serial("id").primaryKey(),
+  callId: text("call_id").notNull().unique(),
+  customerName: text("customer_name").notNull(),
+  customerEmail: text("customer_email").notNull(),
+  customerPhone: text("customer_phone").notNull(),
+  serviceProviderName: text("service_provider_name").notNull(),
+  serviceProviderEmail: text("service_provider_email").notNull(),
+  adminName: text("admin_name"),
+  callType: text("call_type").notNull(), // customer, service_provider, admin
+  category: text("category").notNull(),
+  issue: text("issue").notNull(),
+  status: text("status").notNull(), // active, completed, failed, transferred
+  duration: integer("duration").notNull().default(0), // in minutes
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time"),
+  resolution: text("resolution").notNull().default(""),
+  priority: text("priority").notNull().default("medium"), // low, medium, high, urgent
+  transferredTo: text("transferred_to"),
+  notes: text("notes").notNull().default(""),
+  satisfaction: integer("satisfaction"), // 1-5 rating
+  recordings: jsonb("recordings").$type<string[]>(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertPhoneSupportLogSchema = createInsertSchema(phoneSupportLogs);
+export type InsertPhoneSupportLog = typeof phoneSupportLogs.$inferInsert;
+export type PhoneSupportLog = typeof phoneSupportLogs.$inferSelect;
 export type InsertIssueCategory = z.infer<typeof insertIssueCategorySchema>;
 export type IssueCategory = typeof issueCategories.$inferSelect;
 export type InsertDispute = z.infer<typeof insertDisputeSchema>;

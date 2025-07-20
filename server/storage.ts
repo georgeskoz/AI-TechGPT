@@ -72,6 +72,29 @@ export interface IStorage {
   createDiagnosticTool(tool: any): Promise<any>;
   updateDiagnosticTool(id: number, updates: any): Promise<any>;
   deleteDiagnosticTool(id: number): Promise<void>;
+
+  // Phone Support Logs operations
+  getPhoneSupportLogs(filters?: {
+    searchTerm?: string;
+    callType?: string;
+    status?: string;
+    priority?: string;
+    dateRange?: string;
+  }): Promise<{
+    logs: any[];
+    stats: {
+      total: number;
+      active: number;
+      completed: number;
+      avgDuration: number;
+      customerCalls: number;
+      providerCalls: number;
+      adminCalls: number;
+    };
+  }>;
+  getPhoneSupportLogById(id: string): Promise<any | undefined>;
+  createPhoneSupportLog(logData: any): Promise<any>;
+  updatePhoneSupportLog(id: string, updates: any): Promise<any | undefined>;
 }
 
 // Customer storage implementation
