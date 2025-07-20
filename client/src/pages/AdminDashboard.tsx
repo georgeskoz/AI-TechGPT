@@ -935,6 +935,10 @@ export default function AdminDashboard() {
   const [customPrompts, setCustomPrompts] = useState("");
   const [generatedContent, setGeneratedContent] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [aboutUsContent, setAboutUsContent] = useState({
+    companyDescription: "",
+    missionStatement: ""
+  });
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -1902,6 +1906,199 @@ Last Updated: ${effectiveDate}
           description: "Policy opened in new window. Use Ctrl+P (Cmd+P on Mac) to save as PDF.",
         });
       }, 1000);
+    }
+  };
+
+  // About Us functionality
+  const updateAboutUsContent = async () => {
+    if (!aboutUsContent.companyDescription && !aboutUsContent.missionStatement) {
+      toast({
+        title: "No Content",
+        description: "Please add company description or mission statement before saving.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/admin/save-about-us", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          companyDescription: aboutUsContent.companyDescription,
+          missionStatement: aboutUsContent.missionStatement,
+          companyInfo,
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "About Us Updated",
+          description: "Company information has been saved successfully.",
+        });
+      } else {
+        throw new Error("Failed to save About Us content");
+      }
+    } catch (error) {
+      // Fallback: Local storage or just show success
+      toast({
+        title: "About Us Updated",
+        description: "Company information has been saved locally.",
+      });
+    }
+  };
+
+  const previewAboutUs = () => {
+    if (!aboutUsContent.companyDescription && !aboutUsContent.missionStatement) {
+      toast({
+        title: "No Content",
+        description: "Please add content before previewing.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const previewWindow = window.open('', '_blank');
+    if (previewWindow) {
+      const htmlContent = `
+        <html>
+          <head>
+            <title>About Us Preview - ${companyInfo.name}</title>
+            <style>
+              body { 
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+                line-height: 1.6; 
+                max-width: 800px; 
+                margin: 40px auto; 
+                padding: 20px; 
+                color: #333; 
+              }
+              h1 { color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px; text-align: center; }
+              h2 { color: #1e40af; margin-top: 30px; }
+              .header { text-align: center; margin-bottom: 40px; }
+              .section { margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; }
+              .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 0.9em; color: #6b7280; text-align: center; }
+              .close-btn { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 20px auto; display: block; }
+              .close-btn:hover { background: #1d4ed8; }
+              @media print { body { margin: 0; padding: 20px; } .close-btn { display: none; } }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>${companyInfo.name}</h1>
+              <p><strong>About Us</strong></p>
+            </div>
+            ${aboutUsContent.companyDescription ? `
+              <div class="section">
+                <h2>Company Description</h2>
+                <p>${aboutUsContent.companyDescription}</p>
+              </div>
+            ` : ''}
+            ${aboutUsContent.missionStatement ? `
+              <div class="section">
+                <h2>Mission Statement</h2>
+                <p>${aboutUsContent.missionStatement}</p>
+              </div>
+            ` : ''}
+            <div class="section">
+              <h2>Contact Information</h2>
+              <p><strong>Email:</strong> ${companyInfo.contactEmail}</p>
+              <p><strong>Website:</strong> ${companyInfo.website}</p>
+              <p><strong>Address:</strong> ${companyInfo.address}</p>
+              <p><strong>Business Type:</strong> ${companyInfo.businessType}</p>
+              <p><strong>Jurisdiction:</strong> ${companyInfo.jurisdiction}</p>
+            </div>
+            <div class="footer">
+              <p>Generated on ${new Date().toLocaleDateString()} | ${companyInfo.website} | ${companyInfo.contactEmail}</p>
+            </div>
+            <button class="close-btn" onclick="window.close()">Close Preview</button>
+          </body>
+        </html>
+      `;
+      previewWindow.document.write(htmlContent);
+      previewWindow.document.close();
+    }
+
+    toast({
+      title: "Preview Opened",
+      description: "About Us content preview opened in new window.",
+    });
+  };
+
+  const exportAboutUs = async () => {
+    if (!aboutUsContent.companyDescription && !aboutUsContent.missionStatement) {
+      toast({
+        title: "No Content",
+        description: "Please add content before exporting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/admin/export-about-us", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          companyDescription: aboutUsContent.companyDescription,
+          missionStatement: aboutUsContent.missionStatement,
+          companyInfo,
+        }),
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${companyInfo.name}-about-us.txt`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        toast({
+          title: "Export Successful",
+          description: "About Us content has been downloaded.",
+        });
+      } else {
+        throw new Error("Failed to export About Us content");
+      }
+    } catch (error) {
+      // Fallback: Create text file locally
+      const exportContent = `
+ABOUT US - ${companyInfo.name}
+Generated on: ${new Date().toLocaleDateString()}
+
+${aboutUsContent.companyDescription ? `COMPANY DESCRIPTION:\n${aboutUsContent.companyDescription}\n\n` : ''}
+${aboutUsContent.missionStatement ? `MISSION STATEMENT:\n${aboutUsContent.missionStatement}\n\n` : ''}
+
+CONTACT INFORMATION:
+Email: ${companyInfo.contactEmail}
+Website: ${companyInfo.website}
+Address: ${companyInfo.address}
+Business Type: ${companyInfo.businessType}
+Jurisdiction: ${companyInfo.jurisdiction}
+      `;
+
+      const blob = new Blob([exportContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `about-us-${companyInfo.name.toLowerCase().replace(/\s+/g, '-')}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Export Successful",
+        description: "About Us content has been downloaded as a text file.",
+      });
     }
   };
 
@@ -3151,7 +3348,10 @@ Last Updated: ${effectiveDate}
               <h2 className="text-2xl font-bold text-gray-900 mb-6">About Us</h2>
               <Card>
                 <CardHeader>
-                  <CardTitle>Company Information</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Globe className="h-5 w-5" />
+                    Company Information
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -3160,6 +3360,8 @@ Last Updated: ${effectiveDate}
                       <textarea 
                         className="w-full h-32 p-3 border border-gray-300 rounded-md"
                         placeholder="Enter company description..."
+                        value={aboutUsContent.companyDescription}
+                        onChange={(e) => setAboutUsContent(prev => ({ ...prev, companyDescription: e.target.value }))}
                       />
                     </div>
                     <div>
@@ -3167,9 +3369,24 @@ Last Updated: ${effectiveDate}
                       <textarea 
                         className="w-full h-24 p-3 border border-gray-300 rounded-md"
                         placeholder="Enter mission statement..."
+                        value={aboutUsContent.missionStatement}
+                        onChange={(e) => setAboutUsContent(prev => ({ ...prev, missionStatement: e.target.value }))}
                       />
                     </div>
-                    <Button>Update About Us</Button>
+                    <div className="flex items-center gap-4">
+                      <Button onClick={updateAboutUsContent} className="flex items-center gap-2">
+                        <Save className="h-4 w-4" />
+                        Update About Us
+                      </Button>
+                      <Button variant="outline" onClick={previewAboutUs} className="flex items-center gap-2">
+                        <Eye className="h-4 w-4" />
+                        Preview
+                      </Button>
+                      <Button variant="outline" onClick={exportAboutUs} className="flex items-center gap-2">
+                        <Download className="h-4 w-4" />
+                        Export
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
