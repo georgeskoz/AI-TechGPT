@@ -123,6 +123,7 @@ import {
   CreditCard,
   Building,
   PhoneCall,
+  Code,
   Database,
   Server,
   Moon,
