@@ -133,6 +133,7 @@ import {
   Sparkles,
   Copy,
   Save,
+  Pause,
   Flag,
   Gift,
   Receipt,
