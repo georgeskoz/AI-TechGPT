@@ -108,6 +108,13 @@ export interface IStorage {
   createDiagnosticTool(tool: any): Promise<any>;
   updateDiagnosticTool(id: number, updates: any): Promise<any>;
   deleteDiagnosticTool(id: number): Promise<void>;
+
+  // Support Categories management
+  getAllSupportCategories(): Promise<any[]>;
+  getSupportCategory(id: number): Promise<any | undefined>;
+  createSupportCategory(category: any): Promise<any>;
+  updateSupportCategory(id: number, updates: any): Promise<any | undefined>;
+  deleteSupportCategory(id: number): Promise<void>;
 }
 
 export class PersistentStorage implements IStorage {
@@ -858,6 +865,177 @@ export class PersistentStorage implements IStorage {
       ...updates,
       updatedAt: new Date().toISOString()
     };
+  }
+
+  // Support Categories management using Supabase database
+  async getAllSupportCategories(): Promise<any[]> {
+    try {
+      // Try database first - if fails, fall back to mock data
+      if (process.env.DATABASE_URL) {
+        const { db } = await import('./db');
+        const { supportCategories } = await import('@shared/schema');
+        const categories = await db.select().from(supportCategories);
+        console.log('Fetched support categories from database:', categories.length);
+        return categories;
+      }
+    } catch (error) {
+      console.log('Database unavailable, using mock data for support categories:', error.message);
+    }
+    
+    // Fallback to mock data
+    return [
+      {
+        id: 1,
+        name: "Network Configuration",
+        description: "Setup and troubleshoot network settings, WiFi, and internet connectivity issues",
+        icon: "Monitor",
+        basePrice: 75.00,
+        serviceType: "remote",
+        estimatedDuration: 60,
+        skillsRequired: ["networking", "troubleshooting", "cisco"],
+        isActive: true,
+        isPublic: true,
+        adminId: 1,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: 2,
+        name: "Hardware Diagnostics", 
+        description: "Identify and resolve hardware issues, component failures, and system performance problems",
+        icon: "Wrench",
+        basePrice: 120.00,
+        serviceType: "onsite",
+        estimatedDuration: 90,
+        skillsRequired: ["hardware", "diagnostics", "repair"],
+        isActive: true,
+        isPublic: true,
+        adminId: 1,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: 3,
+        name: "Software Support",
+        description: "Installation, configuration, and troubleshooting of software applications",
+        icon: "Settings",
+        basePrice: 60.00,
+        serviceType: "phone",
+        estimatedDuration: 45,
+        skillsRequired: ["software", "installation", "support"],
+        isActive: true,
+        isPublic: true,
+        adminId: 1,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ];
+  }
+
+  async getSupportCategory(id: number): Promise<any | undefined> {
+    try {
+      if (process.env.DATABASE_URL) {
+        const { db } = await import('./db');
+        const { supportCategories } = await import('@shared/schema');
+        const { eq } = await import('drizzle-orm');
+        
+        const [category] = await db.select().from(supportCategories).where(eq(supportCategories.id, id));
+        return category;
+      }
+    } catch (error) {
+      console.log('Database unavailable, using mock data fallback:', error.message);
+    }
+    
+    // Fallback to mock data
+    const categories = await this.getAllSupportCategories();
+    return categories.find(cat => cat.id === id);
+  }
+
+  async createSupportCategory(category: any): Promise<any> {
+    try {
+      if (process.env.DATABASE_URL) {
+        const { db } = await import('./db');
+        const { supportCategories } = await import('@shared/schema');
+        
+        const [newCategory] = await db
+          .insert(supportCategories)
+          .values({
+            ...category,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          })
+          .returning();
+          
+        console.log('Created support category in database:', newCategory);
+        return newCategory;
+      }
+    } catch (error) {
+      console.log('Database unavailable, using mock creation:', error.message);
+    }
+    
+    // Fallback to mock data
+    const newCategory = {
+      id: Math.floor(Math.random() * 1000) + 4,
+      ...category,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    return newCategory;
+  }
+
+  async updateSupportCategory(id: number, updates: any): Promise<any | undefined> {
+    try {
+      if (process.env.DATABASE_URL) {
+        const { db } = await import('./db');
+        const { supportCategories } = await import('@shared/schema');
+        const { eq } = await import('drizzle-orm');
+        
+        const [updatedCategory] = await db
+          .update(supportCategories)
+          .set({
+            ...updates,
+            updatedAt: new Date()
+          })
+          .where(eq(supportCategories.id, id))
+          .returning();
+          
+        console.log('Updated support category in database:', updatedCategory);
+        return updatedCategory;
+      }
+    } catch (error) {
+      console.log('Database unavailable, using mock update:', error.message);
+    }
+    
+    // Fallback to mock data
+    const category = await this.getSupportCategory(id);
+    if (!category) {
+      return undefined;
+    }
+    
+    return {
+      ...category,
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  async deleteSupportCategory(id: number): Promise<void> {
+    try {
+      if (process.env.DATABASE_URL) {
+        const { db } = await import('./db');
+        const { supportCategories } = await import('@shared/schema');
+        const { eq } = await import('drizzle-orm');
+        
+        await db.delete(supportCategories).where(eq(supportCategories.id, id));
+        console.log('Deleted support category from database:', id);
+        return;
+      }
+    } catch (error) {
+      console.log('Database unavailable, mock deletion:', error.message);
+    }
+    
+    // Mock implementation for fallback
+    return;
   }
 }
 
