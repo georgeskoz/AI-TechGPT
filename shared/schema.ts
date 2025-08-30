@@ -1,4 +1,4 @@
-import { pgTable, text, serial, boolean, timestamp, decimal, jsonb, integer, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, timestamp, decimal, jsonb, integer, varchar, real } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -1654,7 +1654,19 @@ export type InsertPhoneSupportLog = typeof phoneSupportLogs.$inferInsert;
 export type PhoneSupportLog = typeof phoneSupportLogs.$inferSelect;
 
 // Support categories schema and types
-export const insertSupportCategorySchema = createInsertSchema(supportCategories);
+export const insertSupportCategorySchema = createInsertSchema(supportCategories).pick({
+  name: true,
+  description: true,
+  icon: true,
+  basePrice: true,
+  serviceType: true,
+  estimatedDuration: true,
+  isActive: true,
+  isPublic: true,
+  adminId: true,
+}).extend({
+  skillsRequired: z.array(z.string()).optional(),
+});
 export type InsertSupportCategory = typeof supportCategories.$inferInsert;
 export type SupportCategory = typeof supportCategories.$inferSelect;
 
@@ -2171,3 +2183,5 @@ export type Customer = typeof customers.$inferSelect;
 export type InsertCustomer = typeof customers.$inferInsert;
 export type ServiceProvider = typeof serviceProviders.$inferSelect;
 export type InsertServiceProvider = typeof serviceProviders.$inferInsert;
+
+// Support Categories types (already defined above)
