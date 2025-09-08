@@ -131,7 +131,7 @@ export interface IStorage {
   }): Promise<Technician[]>;
 }
 
-export class PersistentStorage implements IStorage {
+export class PersistentStorage {
   private users: Map<number, User> = new Map();
   private nextUserId = 1;
   private passwordResetTokens: Map<string, {userId: number, expiresAt: Date, used: boolean, createdAt: Date}> = new Map();
