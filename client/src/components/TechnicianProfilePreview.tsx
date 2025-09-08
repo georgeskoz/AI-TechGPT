@@ -25,6 +25,7 @@ interface TechnicianProfilePreviewProps {
     country?: string;
     state?: string;
     city?: string;
+    location?: string;
     serviceRadius?: number;
     profileDescription?: string;
     responseTime?: number;
@@ -57,7 +58,7 @@ export default function TechnicianProfilePreview({
       advanced: { label: "Advanced", color: "bg-orange-100 text-orange-800" },
       expert: { label: "Expert", color: "bg-purple-100 text-purple-800" }
     };
-    return levels[level] || levels.intermediate;
+    return levels[level as keyof typeof levels] || levels.intermediate;
   };
 
   const experienceLevel = getExperienceDisplay(formData.experience);
@@ -70,7 +71,7 @@ export default function TechnicianProfilePreview({
     expert: { remote: 85, phone: 95, onsite: 200 }
   };
 
-  const rates = serviceRates[formData.experience] || serviceRates.intermediate;
+  const rates = serviceRates[formData.experience as keyof typeof serviceRates] || serviceRates.intermediate;
 
   return (
     <Card className="h-full border-2 border-blue-200 bg-blue-50/30">
