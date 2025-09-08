@@ -12,7 +12,7 @@ import SimpleNavigation from "@/components/SimpleNavigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { countries, getCountryByCode, getCitiesByState } from "@/data/locations";
+import { countries, getCountryByCode, getCitiesByState, getProvincesByCountry } from "@/data/locations";
 import { 
   User, 
   Building, 
@@ -185,8 +185,8 @@ export default function ServiceProviderRegistration() {
     form.setValue("state", "");
     form.setValue("city", "");
     
-    const country = getCountryByCode(countryCode);
-    setAvailableStates(country?.states || []);
+    const states = getProvincesByCountry(countryCode);
+    setAvailableStates(states);
     setAvailableCities([]);
   };
 
@@ -195,8 +195,8 @@ export default function ServiceProviderRegistration() {
     form.setValue("state", stateCode);
     form.setValue("city", "");
     
-    const cities = getCitiesByState(selectedCountry, stateCode);
-    setAvailableCities(cities);
+    const cities = getCitiesByState(stateCode, selectedCountry);
+    setAvailableCities(cities.map(city => city.name));
   };
 
   const handleCityChange = (city: string) => {
@@ -323,14 +323,14 @@ export default function ServiceProviderRegistration() {
   const toggleAvailability = (day: string) => {
     setAvailability(prev => ({
       ...prev,
-      [day]: { ...prev[day], available: !prev[day].available }
+      [day]: { ...prev[day as keyof typeof prev], available: !prev[day as keyof typeof prev].available }
     }));
   };
 
   const updateAvailabilityTime = (day: string, field: 'start' | 'end', value: string) => {
     setAvailability(prev => ({
       ...prev,
-      [day]: { ...prev[day], [field]: value }
+      [day]: { ...prev[day as keyof typeof prev], [field]: value }
     }));
   };
 
