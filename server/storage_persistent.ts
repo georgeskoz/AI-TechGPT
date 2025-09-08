@@ -1738,6 +1738,15 @@ export class ServiceProviderPersistentStorage implements IServiceProviderStorage
       id: this.nextTechnicianId++,
       ...technician,
       userId: technician.userId || 0, // Will be set when user is created
+      rating: "5.00",
+      completedJobs: 0,
+      totalEarnings: "0.00",
+      isActive: false,
+      isVerified: false,
+      verificationStatus: "pending",
+      remoteEarningPercentage: "85.00",
+      phoneEarningPercentage: "85.00",
+      onsiteEarningPercentage: "85.00",
       createdAt: new Date(),
       updatedAt: new Date()
     };
