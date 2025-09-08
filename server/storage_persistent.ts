@@ -4,7 +4,8 @@ import path from 'path';
 import { 
   type User, type InsertUser, type UpdateProfile,
   type Customer, type InsertCustomer,
-  type ServiceProvider, type InsertServiceProvider
+  type ServiceProvider, type InsertServiceProvider,
+  type Technician, type InsertTechnician
 } from "@shared/schema";
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -115,12 +116,27 @@ export interface IStorage {
   createSupportCategory(category: any): Promise<any>;
   updateSupportCategory(id: number, updates: any): Promise<any | undefined>;
   deleteSupportCategory(id: number): Promise<void>;
+
+  // Technician management
+  createTechnician(technician: InsertTechnician): Promise<Technician>;
+  registerTechnician(technician: any): Promise<Technician>;
+  getTechnician(id: number): Promise<Technician | undefined>;
+  getTechnicianByUserId(userId: number): Promise<Technician | undefined>;
+  updateTechnician(id: number, updates: Partial<Technician>): Promise<Technician>;
+  searchTechnicians(criteria: {
+    skills?: string[];
+    location?: string;
+    serviceRadius?: number;
+    availability?: boolean;
+  }): Promise<Technician[]>;
 }
 
 export class PersistentStorage implements IStorage {
   private users: Map<number, User> = new Map();
   private nextUserId = 1;
   private passwordResetTokens: Map<string, {userId: number, expiresAt: Date, used: boolean, createdAt: Date}> = new Map();
+  private technicians: Map<number, Technician> = new Map();
+  private nextTechnicianId = 1;
 
   constructor() {
     this.loadUsers();
@@ -1714,6 +1730,143 @@ export class ServiceProviderPersistentStorage implements IServiceProviderStorage
         !this.serviceProviderServices.some(s => s.categoryId === c.id && s.isActive)
       ).length
     };
+  }
+
+  // Technician methods
+  async createTechnician(technician: InsertTechnician): Promise<Technician> {
+    const newTechnician: Technician = {
+      id: this.nextTechnicianId++,
+      ...technician,
+      userId: technician.userId || 0, // Will be set when user is created
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.technicians.set(newTechnician.id, newTechnician);
+    return newTechnician;
+  }
+
+  async registerTechnician(technicianData: any): Promise<Technician> {
+    // Create a user first if needed
+    let userId = technicianData.userId;
+    
+    if (!userId) {
+      // Create a basic user entry
+      const newUser: InsertUser = {
+        username: technicianData.email || `tech${this.nextTechnicianId}`,
+        email: technicianData.email,
+        userType: 'technician',
+        password: 'temp_password', // Should be handled by proper auth flow
+        firstName: technicianData.firstName,
+        lastName: technicianData.lastName
+      };
+      
+      const user = await this.createUser(newUser);
+      userId = user.id;
+    }
+
+    // Create technician with proper data structure
+    const technicianInsert: InsertTechnician = {
+      userId,
+      firstName: technicianData.firstName,
+      lastName: technicianData.lastName,
+      email: technicianData.email,
+      phoneNumber: technicianData.phoneNumber,
+      address: technicianData.address,
+      businessName: technicianData.businessName,
+      companyName: technicianData.companyName,
+      experience: technicianData.experience,
+      hourlyRate: technicianData.hourlyRate || '85.00',
+      country: technicianData.country,
+      state: technicianData.state,
+      city: technicianData.city,
+      location: technicianData.location,
+      serviceRadius: technicianData.serviceRadius || 25,
+      serviceAreas: technicianData.serviceAreas || [],
+      skills: technicianData.skills || [],
+      categories: technicianData.categories || [],
+      certifications: technicianData.certifications || [],
+      languages: technicianData.languages || ['English'],
+      availability: technicianData.availability || {},
+      profileDescription: technicianData.profileDescription,
+      responseTime: technicianData.responseTime || 60,
+      vehicleType: technicianData.vehicleType,
+      vehicleMake: technicianData.vehicleMake,
+      vehicleModel: technicianData.vehicleModel,
+      vehicleYear: technicianData.vehicleYear,
+      vehicleLicensePlate: technicianData.vehicleLicensePlate,
+      backgroundCheckUrl: technicianData.backgroundCheckUrl,
+      driverLicenseUrl: technicianData.driverLicenseUrl,
+      insuranceUrl: technicianData.insuranceUrl
+    };
+
+    return await this.createTechnician(technicianInsert);
+  }
+
+  async getTechnician(id: number): Promise<Technician | undefined> {
+    return this.technicians.get(id);
+  }
+
+  async getTechnicianByUserId(userId: number): Promise<Technician | undefined> {
+    for (const technician of this.technicians.values()) {
+      if (technician.userId === userId) {
+        return technician;
+      }
+    }
+    return undefined;
+  }
+
+  async updateTechnician(id: number, updates: Partial<Technician>): Promise<Technician> {
+    const technician = this.technicians.get(id);
+    if (!technician) {
+      throw new Error("Technician not found");
+    }
+
+    const updatedTechnician: Technician = {
+      ...technician,
+      ...updates,
+      updatedAt: new Date()
+    };
+    this.technicians.set(id, updatedTechnician);
+    return updatedTechnician;
+  }
+
+  async searchTechnicians(criteria: {
+    skills?: string[];
+    location?: string;
+    serviceRadius?: number;
+    availability?: boolean;
+  }): Promise<Technician[]> {
+    const technicians = Array.from(this.technicians.values());
+    
+    return technicians.filter(tech => {
+      // Filter by skills
+      if (criteria.skills && criteria.skills.length > 0) {
+        const hasMatchingSkills = criteria.skills.some(skill => 
+          tech.skills?.includes(skill)
+        );
+        if (!hasMatchingSkills) return false;
+      }
+      
+      // Filter by location
+      if (criteria.location) {
+        const techLocation = `${tech.city}, ${tech.state}`.toLowerCase();
+        if (!techLocation.includes(criteria.location.toLowerCase())) {
+          return false;
+        }
+      }
+      
+      // Filter by service radius
+      if (criteria.serviceRadius && tech.serviceRadius && tech.serviceRadius < criteria.serviceRadius) {
+        return false;
+      }
+      
+      // Filter by availability
+      if (criteria.availability && !tech.isActive) {
+        return false;
+      }
+      
+      return true;
+    });
   }
 }
 
