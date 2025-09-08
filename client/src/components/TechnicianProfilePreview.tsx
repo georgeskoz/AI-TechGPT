@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { countries, getCountryByCode } from "@/data/locations";
+import { countries, getCountryByCode, getProvincesByCountry } from "@/data/locations";
 import { 
   Star, 
   MapPin, 
@@ -119,7 +119,8 @@ export default function TechnicianProfilePreview({
                     {formData.city && formData.state && formData.country 
                       ? (() => {
                           const country = getCountryByCode(formData.country);
-                          const state = country?.states.find(s => s.code === formData.state);
+                          const states = getProvincesByCountry(formData.country);
+                          const state = states.find(s => s.code === formData.state);
                           return `${formData.city}, ${state?.name}, ${country?.name}`;
                         })()
                       : "Your Location"
