@@ -193,10 +193,11 @@ const AdminDisputeManagement: React.FC = () => {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/disputes'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error('Detailed dispute creation error:', error);
       toast({
         title: "Error creating dispute",
-        description: "Failed to create the dispute. Please try again.",
+        description: error.message || error.toString() || "Failed to create the dispute. Please try again.",
         variant: "destructive"
       });
     }
@@ -312,7 +313,15 @@ const AdminDisputeManagement: React.FC = () => {
 
   // Handle create dispute
   const handleCreateDispute = () => {
+    console.log('Creating dispute with data:', newDispute);
+    
     if (!newDispute.title || !newDispute.description || !newDispute.disputeType || !newDispute.severity) {
+      console.log('Validation failed:', {
+        title: newDispute.title,
+        description: newDispute.description,
+        disputeType: newDispute.disputeType,
+        severity: newDispute.severity
+      });
       toast({
         title: "Please fill in all required fields",
         description: "Title, description, type, and severity are required.",
@@ -321,14 +330,17 @@ const AdminDisputeManagement: React.FC = () => {
       return;
     }
 
-    createDispute.mutate({
+    const disputePayload = {
       ...newDispute,
-      reportedBy: newDispute.reportedBy || 'Admin',
+      reportedBy: newDispute.reportedBy || 'admin',
       status: 'new',
       priority: newDispute.priority || 'medium',
       category: newDispute.category || 'general',
       subcategory: newDispute.subcategory || 'other'
-    });
+    };
+    
+    console.log('Sending dispute payload:', disputePayload);
+    createDispute.mutate(disputePayload);
   };
 
   // Handle status update
