@@ -5,7 +5,8 @@ import {
   type User, type InsertUser, type UpdateProfile,
   type Customer, type InsertCustomer,
   type ServiceProvider, type InsertServiceProvider,
-  type Technician, type InsertTechnician
+  type Technician, type InsertTechnician,
+  type Dispute, type InsertDispute
 } from "@shared/schema";
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -129,6 +130,19 @@ export interface IStorage {
     serviceRadius?: number;
     availability?: boolean;
   }): Promise<Technician[]>;
+
+  // Dispute management
+  getAllDisputes(): Promise<Dispute[]>;
+  getDisputeAnalytics(): Promise<any>;
+  resolveDispute(disputeId: number, resolution: any): Promise<Dispute>;
+  getDisputesByStatus(status: string): Promise<Dispute[]>;
+  getDispute(id: number): Promise<Dispute | undefined>;
+  createDispute(disputeData: any): Promise<Dispute>;
+  updateDisputeStatus(id: number, status: string, adminId?: number): Promise<Dispute>;
+  createDisputeAttachment(attachmentData: any): Promise<any>;
+  deleteDisputeAttachment(attachmentId: number): Promise<void>;
+  getDisputesByCustomer(customerId: number): Promise<Dispute[]>;
+  getDisputesByTechnician(technicianId: number): Promise<Dispute[]>;
 }
 
 export class PersistentStorage {
@@ -137,6 +151,8 @@ export class PersistentStorage {
   private passwordResetTokens: Map<string, {userId: number, expiresAt: Date, used: boolean, createdAt: Date}> = new Map();
   private technicians: Map<number, Technician> = new Map();
   private nextTechnicianId = 1;
+  private disputes: Map<number, Dispute> = new Map();
+  private nextDisputeId = 1;
 
   constructor() {
     this.loadUsers();
@@ -672,6 +688,140 @@ export class PersistentStorage {
       
       return true;
     });
+  }
+
+  // Dispute management methods
+  async getAllDisputes(): Promise<Dispute[]> {
+    return Array.from(this.disputes.values());
+  }
+
+  async getDisputeAnalytics(): Promise<any> {
+    const disputes = Array.from(this.disputes.values());
+    
+    return {
+      totalDisputes: disputes.length,
+      openDisputes: disputes.filter(d => d.status !== 'resolved' && d.status !== 'closed').length,
+      resolvedDisputes: disputes.filter(d => d.status === 'resolved').length,
+      closedDisputes: disputes.filter(d => d.status === 'closed').length,
+      disputesByType: {
+        payment: disputes.filter(d => d.disputeType === 'payment').length,
+        service_quality: disputes.filter(d => d.disputeType === 'service_quality').length,
+        communication: disputes.filter(d => d.disputeType === 'communication').length,
+        cancellation: disputes.filter(d => d.disputeType === 'cancellation').length,
+        other: disputes.filter(d => d.disputeType === 'other').length,
+      },
+      disputesBySeverity: {
+        low: disputes.filter(d => d.severity === 'low').length,
+        medium: disputes.filter(d => d.severity === 'medium').length,
+        high: disputes.filter(d => d.severity === 'high').length,
+        critical: disputes.filter(d => d.severity === 'critical').length,
+      },
+      averageResolutionTime: 24, // Mock data - hours
+      recentDisputes: disputes.slice(-5).reverse()
+    };
+  }
+
+  async resolveDispute(disputeId: number, resolution: any): Promise<Dispute> {
+    const dispute = this.disputes.get(disputeId);
+    if (!dispute) {
+      throw new Error("Dispute not found");
+    }
+
+    const resolvedDispute: Dispute = {
+      ...dispute,
+      status: 'resolved',
+      resolutionNotes: resolution.notes || '',
+      resolvedAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    this.disputes.set(disputeId, resolvedDispute);
+    return resolvedDispute;
+  }
+
+  async getDisputesByStatus(status: string): Promise<Dispute[]> {
+    return Array.from(this.disputes.values()).filter(dispute => dispute.status === status);
+  }
+
+  async getDispute(id: number): Promise<Dispute | undefined> {
+    return this.disputes.get(id);
+  }
+
+  async createDispute(disputeData: any): Promise<Dispute> {
+    const newDispute: Dispute = {
+      id: this.nextDisputeId++,
+      jobId: disputeData.jobId || null,
+      customerId: disputeData.customerId || null,
+      technicianId: disputeData.technicianId || null,
+      disputeType: disputeData.type || disputeData.disputeType || 'other',
+      title: disputeData.title,
+      description: disputeData.description,
+      severity: disputeData.severity || 'medium',
+      status: 'new',
+      reportedBy: disputeData.reportedBy || 'admin',
+      assignedAdminId: disputeData.assignedAdminId || null,
+      priority: disputeData.priority || 'medium',
+      resolutionNotes: null,
+      adminNotes: null,
+      customerSatisfaction: null,
+      technicianSatisfaction: null,
+      amountInDispute: disputeData.amountInDispute || null,
+      refundAmount: null,
+      escalationLevel: 1,
+      dueDate: disputeData.dueDate || null,
+      resolvedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    this.disputes.set(newDispute.id, newDispute);
+    return newDispute;
+  }
+
+  async updateDisputeStatus(id: number, status: string, adminId?: number): Promise<Dispute> {
+    const dispute = this.disputes.get(id);
+    if (!dispute) {
+      throw new Error("Dispute not found");
+    }
+
+    const updatedDispute: Dispute = {
+      ...dispute,
+      status: status,
+      assignedAdminId: adminId || dispute.assignedAdminId,
+      updatedAt: new Date()
+    };
+
+    this.disputes.set(id, updatedDispute);
+    return updatedDispute;
+  }
+
+  async createDisputeAttachment(attachmentData: any): Promise<any> {
+    // Mock implementation - in real app would handle file uploads
+    return {
+      id: Date.now(),
+      disputeId: attachmentData.disputeId,
+      uploaderId: attachmentData.uploaderId,
+      uploaderType: attachmentData.uploaderType,
+      fileName: attachmentData.fileName,
+      fileUrl: attachmentData.fileUrl,
+      fileType: attachmentData.fileType,
+      fileSize: attachmentData.fileSize,
+      description: attachmentData.description,
+      createdAt: new Date()
+    };
+  }
+
+  async deleteDisputeAttachment(attachmentId: number): Promise<void> {
+    // Mock implementation - in real app would delete file and database record
+    console.log(`Deleting dispute attachment ${attachmentId}`);
+  }
+
+  async getDisputesByCustomer(customerId: number): Promise<Dispute[]> {
+    return Array.from(this.disputes.values()).filter(dispute => dispute.customerId === customerId);
+  }
+
+  async getDisputesByTechnician(technicianId: number): Promise<Dispute[]> {
+    return Array.from(this.disputes.values()).filter(dispute => dispute.technicianId === technicianId);
   }
 
   // FAQ management methods
