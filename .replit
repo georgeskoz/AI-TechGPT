@@ -14,6 +14,10 @@ build = ["npm", "run", "build"]
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 40115
+externalPort = 3000
+
 [workflows]
 runButton = "Project"
 
@@ -42,4 +46,4 @@ args = "npm run dev"
 waitForPort = 5000
 
 [agent]
-integrations = ["javascript_openai==1.0.0", "javascript_supabase==1.0.0", "firebase_barebones_javascript==1.0.0", "javascript_sendgrid==1.0.0"]
+integrations = ["javascript_openai:1.0.0", "javascript_supabase:1.0.0", "firebase_barebones_javascript:1.0.0", "javascript_sendgrid:1.0.0", "github:1.0.0"]
