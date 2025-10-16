@@ -43,10 +43,44 @@ Navigation preferences:
 - **Notification System**: Real-time WebSocket notifications for job dispatch and system alerts.
 
 ## External Dependencies
-- **Database**: PostgreSQL (via Neon serverless), Drizzle ORM.
+- **Database**: Supabase PostgreSQL (migrated from local JSON files), Drizzle ORM.
 - **AI/ML**: OpenAI (GPT-4).
 - **UI Libraries**: Radix UI, shadcn/ui, Tailwind CSS, Lucide React (icons), cmdk (command palette).
 - **State Management/Routing**: @tanstack/react-query, Wouter.
 - **Form Handling/Validation**: React Hook Form, Zod.
 - **Utilities**: date-fns.
 - **Build Tools**: Vite, TypeScript, tsx, ESBuild.
+- **Version Control**: GitHub integration via Replit connector.
+
+## Recent Updates (October 2025)
+
+### Database Migration to Supabase
+- **Status**: Connected to Supabase PostgreSQL
+- **Connection**: Using pooler connection for better performance
+- **Data**: Service providers, customers, and users successfully connected
+
+### Service Provider Portal (In Development)
+- **Location**: `provider-portal/` directory
+- **Status**: Prototype stage with complete UI structure
+- **Features**:
+  - Authentication (login/register) - ✅ Working
+  - Dashboard with stats - ⚠️ Prototype (mock data)
+  - Jobs management - ⚠️ Prototype (mock data)
+  - Earnings tracking - ⚠️ Prototype (mock data)
+  - Profile management - ⚠️ Prototype (mock data)
+  - Messaging system - ⚠️ Prototype (mock data)
+- **Next Steps**: 
+  - Add authentication middleware to provider endpoints
+  - Connect to real serviceProviderStorage
+  - Integrate into main app OR deploy separately
+- **See**: PROVIDER_PORTAL_STATUS.md for detailed status
+
+### Mobile App Capability
+- Platform supports Expo + React Native for iOS/Android development
+- Single codebase deployment to both platforms
+- App Store and Google Play publishing available
+
+### GitHub Integration
+- Repository: georgeskoz/techersgpt-support-platform
+- Connector: Installed and configured
+- Manual push required for code sync
