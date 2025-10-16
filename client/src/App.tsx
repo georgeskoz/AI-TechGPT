@@ -74,6 +74,13 @@ import TechnicianInbox from '@/pages/TechnicianInbox';
 import TechnicianHelp from '@/pages/TechnicianHelp';
 import AIChatAnalytics from '@/pages/AIChatAnalytics';
 import PhoneSupportLogs from '@/pages/PhoneSupportLogs';
+import ProviderLogin from '@/pages/ProviderLogin';
+import ProviderRegister from '@/pages/ProviderRegister';
+import ProviderDashboard from '@/pages/ProviderDashboard';
+import ProviderJobs from '@/pages/ProviderJobs';
+import ProviderEarnings from '@/pages/ProviderEarnings';
+import ProviderProfile from '@/pages/ProviderProfile';
+import ProviderMessages from '@/pages/ProviderMessages';
 
 
 // Conditional Profile Route Component
@@ -255,6 +262,35 @@ function Router() {
       <Route path="/technician-help" component={() => 
         <PortalAuthGuard requiredPortal="service_provider">
           <TechnicianHelp />
+        </PortalAuthGuard>
+      } />
+      
+      {/* New Provider Portal */}
+      <Route path="/provider/login" component={ProviderLogin} />
+      <Route path="/provider/register" component={ProviderRegister} />
+      <Route path="/provider/dashboard" component={() => 
+        <PortalAuthGuard requiredPortal="service_provider">
+          <ProviderDashboard />
+        </PortalAuthGuard>
+      } />
+      <Route path="/provider/jobs" component={() => 
+        <PortalAuthGuard requiredPortal="service_provider">
+          <ProviderJobs />
+        </PortalAuthGuard>
+      } />
+      <Route path="/provider/earnings" component={() => 
+        <PortalAuthGuard requiredPortal="service_provider">
+          <ProviderEarnings />
+        </PortalAuthGuard>
+      } />
+      <Route path="/provider/profile" component={() => 
+        <PortalAuthGuard requiredPortal="service_provider">
+          <ProviderProfile />
+        </PortalAuthGuard>
+      } />
+      <Route path="/provider/messages" component={() => 
+        <PortalAuthGuard requiredPortal="service_provider">
+          <ProviderMessages />
         </PortalAuthGuard>
       } />
       
