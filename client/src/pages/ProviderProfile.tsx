@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,13 +17,27 @@ export default function ProviderProfile() {
   });
 
   const [formData, setFormData] = useState({
-    fullName: profile?.fullName || "",
-    email: profile?.email || "",
-    phone: profile?.phone || "",
-    bio: profile?.bio || "",
-    city: profile?.city || "",
-    state: profile?.state || "",
+    fullName: "",
+    email: "",
+    phone: "",
+    bio: "",
+    city: "",
+    state: "",
   });
+
+  // Update form data when profile loads
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        fullName: profile.fullName || "",
+        email: profile.email || "",
+        phone: profile.phone || "",
+        bio: profile.bio || "",
+        city: profile.city || "",
+        state: profile.state || "",
+      });
+    }
+  }, [profile]);
 
   const updateMutation = useMutation({
     mutationFn: async (data: any) => {
