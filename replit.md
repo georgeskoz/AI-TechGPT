@@ -75,10 +75,25 @@ Navigation preferences:
   - Integrate into main app OR deploy separately
 - **See**: PROVIDER_PORTAL_STATUS.md for detailed status
 
-### Mobile App Capability
-- Platform supports Expo + React Native for iOS/Android development
-- Single codebase deployment to both platforms
-- App Store and Google Play publishing available
+### Mobile Applications (October 2025)
+- **Status**: ✅ Complete and ready to deploy
+- **Location**: `mobile-apps/` directory
+- **Technology**: Expo + React Native for iOS/Android
+- **Apps Available**:
+  1. **Customer App** (`customer-app/`) - For users seeking technical support
+     - Home dashboard with quick actions
+     - AI chat support interface
+     - Service categories browser
+     - Profile management
+  2. **Provider App** (`provider-app/`) - For service providers managing jobs
+     - Earnings dashboard with stats
+     - Job management (Active/Pending/Completed)
+     - Earnings tracker with transactions
+     - Availability toggle and profile settings
+- **Features**: Single codebase deployment, bottom tab navigation, modern UI
+- **Setup**: See `mobile-apps/SETUP_GUIDE.md` for complete instructions
+- **Testing**: Use Expo Go app for instant testing on real devices
+- **Publishing**: Ready for App Store and Google Play submission
 
 ### GitHub Integration
 - Repository: georgeskoz/techersgpt-support-platform
