@@ -1,0 +1,513 @@
+═══════════════════════════════════════════════════════════════
+CUSTOMER APP - COMPLETE FILES
+Copy each section to create the files on your computer
+═══════════════════════════════════════════════════════════════
+
+FOLDER STRUCTURE TO CREATE:
+C:\AI TechGPT\customer-app\
+C:\AI TechGPT\customer-app\app\
+
+═══════════════════════════════════════════════════════════════
+FILE 1 of 7: package.json
+LOCATION: C:\AI TechGPT\customer-app\package.json
+═══════════════════════════════════════════════════════════════
+
+{
+  "name": "techersgpt-customer",
+  "version": "1.0.0",
+  "main": "expo-router",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "expo": "~52.0.0",
+    "expo-router": "~4.0.0",
+    "react": "18.3.1",
+    "react-native": "0.76.5",
+    "react-native-safe-area-context": "4.12.0",
+    "react-native-screens": "4.4.0",
+    "@expo/vector-icons": "^14.0.0",
+    "expo-constants": "~17.0.0",
+    "expo-linking": "~7.0.0",
+    "expo-status-bar": "~2.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.0",
+    "@types/react": "~18.3.0",
+    "typescript": "^5.3.0"
+  },
+  "private": true
+}
+
+═══════════════════════════════════════════════════════════════
+FILE 2 of 7: app.json
+LOCATION: C:\AI TechGPT\customer-app\app.json
+═══════════════════════════════════════════════════════════════
+
+{
+  "expo": {
+    "name": "TechersGPT",
+    "slug": "techersgpt-customer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#3B82F6"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.techersgpt.customer"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#3B82F6"
+      },
+      "package": "com.techersgpt.customer"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "techersgpt",
+    "plugins": [
+      "expo-router"
+    ]
+  }
+}
+
+═══════════════════════════════════════════════════════════════
+FILE 3 of 7: app/_layout.tsx
+LOCATION: C:\AI TechGPT\customer-app\app\_layout.tsx
+═══════════════════════════════════════════════════════════════
+
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+
+export default function RootLayout() {
+  return (
+    <>
+      <Stack
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: '#3B82F6',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      >
+        <Stack.Screen 
+          name="index" 
+          options={{ 
+            title: 'TechersGPT',
+            headerShown: false 
+          }} 
+        />
+        <Stack.Screen 
+          name="chat" 
+          options={{ title: 'AI Support Chat' }} 
+        />
+        <Stack.Screen 
+          name="services" 
+          options={{ title: 'Services' }} 
+        />
+        <Stack.Screen 
+          name="profile" 
+          options={{ title: 'Profile' }} 
+        />
+      </Stack>
+      <StatusBar style="light" />
+    </>
+  );
+}
+
+═══════════════════════════════════════════════════════════════
+FILE 4 of 7: app/index.tsx  (HOME SCREEN - LONG FILE!)
+LOCATION: C:\AI TechGPT\customer-app\app\index.tsx
+═══════════════════════════════════════════════════════════════
+
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { Link } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+
+export default function HomeScreen() {
+  return (
+    <ScrollView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.logo}>TechersGPT</Text>
+        <Text style={styles.subtitle}>Your AI-Powered Tech Support</Text>
+      </View>
+
+      {/* Quick Actions */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Quick Actions</Text>
+        
+        <Link href="/chat" asChild>
+          <TouchableOpacity style={[styles.card, styles.primaryCard]}>
+            <Ionicons name="chatbubbles" size={32} color="#fff" />
+            <Text style={styles.cardTitle}>AI Chat Support</Text>
+            <Text style={styles.cardDescription}>Get instant help from our AI assistant</Text>
+          </TouchableOpacity>
+        </Link>
+
+        <Link href="/services" asChild>
+          <TouchableOpacity style={styles.card}>
+            <Ionicons name="construct" size={32} color="#3B82F6" />
+            <Text style={[styles.cardTitle, styles.darkText]}>Book a Technician</Text>
+            <Text style={[styles.cardDescription, styles.darkText]}>Schedule an expert to help you</Text>
+          </TouchableOpacity>
+        </Link>
+
+        <TouchableOpacity style={styles.card}>
+          <Ionicons name="call" size={32} color="#10B981" />
+          <Text style={[styles.cardTitle, styles.darkText]}>Phone Support</Text>
+          <Text style={[styles.cardDescription, styles.darkText]}>Talk to a live expert now</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Popular Services */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Popular Services</Text>
+        
+        <View style={styles.grid}>
+          <TouchableOpacity style={styles.serviceCard}>
+            <Ionicons name="laptop" size={24} color="#3B82F6" />
+            <Text style={styles.serviceText}>Hardware</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.serviceCard}>
+            <Ionicons name="wifi" size={24} color="#3B82F6" />
+            <Text style={styles.serviceText}>Network</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.serviceCard}>
+            <Ionicons name="apps" size={24} color="#3B82F6" />
+            <Text style={styles.serviceText}>Software</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.serviceCard}>
+            <Ionicons name="phone-portrait" size={24} color="#3B82F6" />
+            <Text style={styles.serviceText}>Mobile</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Bottom Navigation */}
+      <View style={styles.bottomNav}>
+        <TouchableOpacity style={styles.navItem}>
+          <Ionicons name="home" size={24} color="#3B82F6" />
+          <Text style={[styles.navText, styles.activeNav]}>Home</Text>
+        </TouchableOpacity>
+        
+        <Link href="/chat" asChild>
+          <TouchableOpacity style={styles.navItem}>
+            <Ionicons name="chatbubbles-outline" size={24} color="#6B7280" />
+            <Text style={styles.navText}>Chat</Text>
+          </TouchableOpacity>
+        </Link>
+        
+        <Link href="/services" asChild>
+          <TouchableOpacity style={styles.navItem}>
+            <Ionicons name="grid-outline" size={24} color="#6B7280" />
+            <Text style={styles.navText}>Services</Text>
+          </TouchableOpacity>
+        </Link>
+        
+        <Link href="/profile" asChild>
+          <TouchableOpacity style={styles.navItem}>
+            <Ionicons name="person-outline" size={24} color="#6B7280" />
+            <Text style={styles.navText}>Profile</Text>
+          </TouchableOpacity>
+        </Link>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
+  header: {
+    backgroundColor: '#3B82F6',
+    padding: 40,
+    paddingTop: 60,
+    alignItems: 'center',
+  },
+  logo: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#E0E7FF',
+  },
+  section: {
+    padding: 20,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    color: '#111827',
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  primaryCard: {
+    backgroundColor: '#3B82F6',
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 12,
+    marginBottom: 4,
+    color: '#fff',
+  },
+  cardDescription: {
+    fontSize: 14,
+    color: '#E0E7FF',
+  },
+  darkText: {
+    color: '#111827',
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  serviceCard: {
+    width: '48%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  serviceText: {
+    marginTop: 8,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  bottomNav: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    paddingVertical: 8,
+    paddingBottom: 20,
+  },
+  navItem: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  navText: {
+    fontSize: 12,
+    marginTop: 4,
+    color: '#6B7280',
+  },
+  activeNav: {
+    color: '#3B82F6',
+    fontWeight: '600',
+  },
+});
+
+═══════════════════════════════════════════════════════════════
+FILE 5 of 7: app/chat.tsx (CHAT SCREEN)
+LOCATION: C:\AI TechGPT\customer-app\app\chat.tsx
+═══════════════════════════════════════════════════════════════
+
+import { useState } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+interface Message {
+  id: number;
+  text: string;
+  sender: 'user' | 'ai';
+  timestamp: Date;
+}
+
+export default function ChatScreen() {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: 1,
+      text: "Hello! I'm your AI tech support assistant. How can I help you today?",
+      sender: 'ai',
+      timestamp: new Date(),
+    },
+  ]);
+  const [inputText, setInputText] = useState('');
+
+  const sendMessage = () => {
+    if (!inputText.trim()) return;
+
+    const newMessage: Message = {
+      id: messages.length + 1,
+      text: inputText,
+      sender: 'user',
+      timestamp: new Date(),
+    };
+
+    setMessages([...messages, newMessage]);
+    setInputText('');
+
+    // Simulate AI response
+    setTimeout(() => {
+      const aiResponse: Message = {
+        id: messages.length + 2,
+        text: "I understand you need help. Let me assist you with that. Could you provide more details?",
+        sender: 'ai',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, aiResponse]);
+    }, 1000);
+  };
+
+  return (
+    <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={100}
+    >
+      <ScrollView style={styles.messagesContainer}>
+        {messages.map((message) => (
+          <View
+            key={message.id}
+            style={[
+              styles.messageBubble,
+              message.sender === 'user' ? styles.userMessage : styles.aiMessage,
+            ]}
+          >
+            <Text style={[
+              styles.messageText,
+              message.sender === 'user' && styles.userMessageText
+            ]}>
+              {message.text}
+            </Text>
+            <Text style={[
+              styles.timestamp,
+              message.sender === 'user' && styles.userTimestamp
+            ]}>
+              {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </Text>
+          </View>
+        ))}
+      </ScrollView>
+
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          value={inputText}
+          onChangeText={setInputText}
+          placeholder="Type your message..."
+          multiline
+        />
+        <TouchableOpacity 
+          style={styles.sendButton}
+          onPress={sendMessage}
+        >
+          <Ionicons name="send" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
+  messagesContainer: {
+    flex: 1,
+    padding: 16,
+  },
+  messageBubble: {
+    maxWidth: '80%',
+    padding: 12,
+    borderRadius: 16,
+    marginBottom: 12,
+  },
+  userMessage: {
+    backgroundColor: '#3B82F6',
+    alignSelf: 'flex-end',
+  },
+  aiMessage: {
+    backgroundColor: '#fff',
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  messageText: {
+    fontSize: 16,
+    color: '#111827',
+  },
+  userMessageText: {
+    color: '#fff',
+  },
+  timestamp: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 4,
+  },
+  userTimestamp: {
+    color: '#E0E7FF',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  input: {
+    flex: 1,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginRight: 8,
+    fontSize: 16,
+    maxHeight: 100,
+  },
+  sendButton: {
+    backgroundColor: '#3B82F6',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
+
+[Continued in next file...]
