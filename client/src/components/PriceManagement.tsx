@@ -26,6 +26,7 @@ const PriceManagement: React.FC = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("current-prices");
   const [editingRule, setEditingRule] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'name' | 'category' | 'none'>('none');
   const [newRule, setNewRule] = useState({
     name: "",
     serviceType: "",
@@ -237,6 +238,18 @@ const PriceManagement: React.FC = () => {
     });
   };
 
+  const getSortedPriceRules = () => {
+    const rulesCopy = [...priceRules];
+    
+    if (sortBy === 'name') {
+      return rulesCopy.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === 'category') {
+      return rulesCopy.sort((a, b) => a.category.localeCompare(b.category));
+    }
+    
+    return rulesCopy;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -398,7 +411,22 @@ const PriceManagement: React.FC = () => {
         <TabsContent value="pricing-rules" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Active Pricing Rules</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Active Pricing Rules</CardTitle>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="sort-select" className="text-sm text-gray-600">Sort by:</Label>
+                  <Select value={sortBy} onValueChange={(value: 'name' | 'category' | 'none') => setSortBy(value)}>
+                    <SelectTrigger className="w-40" id="sort-select" data-testid="select-sort-rules">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Default</SelectItem>
+                      <SelectItem value="name">Alphabetically (A-Z)</SelectItem>
+                      <SelectItem value="category">By Category</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <Table>
@@ -414,7 +442,7 @@ const PriceManagement: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {priceRules.map((rule) => (
+                  {getSortedPriceRules().map((rule) => (
                     <TableRow key={rule.id}>
                       {editingRule === rule.id ? (
                         <>
