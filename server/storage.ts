@@ -1,7 +1,8 @@
 import { 
   users, type User, type InsertUser, type UpdateProfile,
   customers, type Customer, type InsertCustomer,
-  serviceProviders, type ServiceProvider, type InsertServiceProvider
+  serviceProviders, type ServiceProvider, type InsertServiceProvider,
+  pricingRules, type PricingRule, type InsertPricingRule
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -113,6 +114,12 @@ export interface IStorage {
   // AI chat fallback operations
   logAiChatFallback(log: any): Promise<any>;
   getAiChatFallbackStats(): Promise<any>;
+
+  // Pricing rules operations
+  getAllPricingRules(): Promise<PricingRule[]>;
+  createPricingRule(rule: InsertPricingRule): Promise<PricingRule>;
+  updatePricingRule(id: number, updates: Partial<PricingRule>): Promise<PricingRule>;
+  deletePricingRule(id: number): Promise<void>;
 }
 
 // Customer storage implementation
@@ -859,6 +866,45 @@ function runDatabaseTest() {
       throw new Error('Diagnostic tool not found');
     }
     // Mock deletion - would actually remove from database
+  }
+
+  // Pricing rules operations
+  async getAllPricingRules(): Promise<PricingRule[]> {
+    const rules = await db.select().from(pricingRules);
+    return rules;
+  }
+
+  async createPricingRule(rule: InsertPricingRule): Promise<PricingRule> {
+    const [newRule] = await db
+      .insert(pricingRules)
+      .values({
+        ...rule,
+        lastModified: new Date()
+      })
+      .returning();
+    return newRule;
+  }
+
+  async updatePricingRule(id: number, updates: Partial<PricingRule>): Promise<PricingRule> {
+    const [updatedRule] = await db
+      .update(pricingRules)
+      .set({
+        ...updates,
+        lastModified: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(pricingRules.id, id))
+      .returning();
+    
+    if (!updatedRule) {
+      throw new Error('Pricing rule not found');
+    }
+    
+    return updatedRule;
+  }
+
+  async deletePricingRule(id: number): Promise<void> {
+    await db.delete(pricingRules).where(eq(pricingRules.id, id));
   }
 
   private generateUniqueUsername(baseUsername: string): string {
