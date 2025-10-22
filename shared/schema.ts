@@ -1209,6 +1209,21 @@ export const adminPanelConfig = pgTable("admin_panel_config", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Pricing rules for dynamic pricing management
+export const pricingRules = pgTable("pricing_rules", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  serviceType: text("service_type").notNull(), // remote, phone, onsite, consultation
+  category: text("category").notNull(), // Basic Support, Advanced Support, etc.
+  basePrice: real("base_price").notNull(),
+  multiplier: real("multiplier").notNull().default(1.0),
+  conditions: jsonb("conditions").$type<string[]>().default([]),
+  status: text("status").notNull().default("active"), // active, inactive
+  lastModified: timestamp("last_modified").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -2183,5 +2198,16 @@ export type Customer = typeof customers.$inferSelect;
 export type InsertCustomer = typeof customers.$inferInsert;
 export type ServiceProvider = typeof serviceProviders.$inferSelect;
 export type InsertServiceProvider = typeof serviceProviders.$inferInsert;
+
+// Pricing Rules schema and types
+export const insertPricingRuleSchema = createInsertSchema(pricingRules).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastModified: true,
+});
+
+export type PricingRule = typeof pricingRules.$inferSelect;
+export type InsertPricingRule = z.infer<typeof insertPricingRuleSchema>;
 
 // Support Categories types (already defined above)

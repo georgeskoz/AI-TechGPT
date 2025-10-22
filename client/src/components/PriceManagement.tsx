@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,44 @@ interface PriceRule {
   lastModified: string;
 }
 
+const DEFAULT_PRICE_RULES: PriceRule[] = [
+  {
+    id: "1",
+    name: "Remote Support - Basic",
+    serviceType: "remote",
+    category: "Basic Support",
+    basePrice: 45,
+    multiplier: 1.0,
+    conditions: ["weekday", "business_hours"],
+    status: "active",
+    lastModified: "2025-01-10"
+  },
+  {
+    id: "2",
+    name: "Phone Support - Advanced",
+    serviceType: "phone",
+    category: "Advanced Support",
+    basePrice: 95,
+    multiplier: 1.2,
+    conditions: ["urgent", "specialist_required"],
+    status: "active",
+    lastModified: "2025-01-09"
+  },
+  {
+    id: "3",
+    name: "On-Site Support - Enterprise",
+    serviceType: "onsite",
+    category: "Enterprise Support",
+    basePrice: 150,
+    multiplier: 1.5,
+    conditions: ["weekend", "emergency"],
+    status: "active",
+    lastModified: "2025-01-08"
+  }
+];
+
+const STORAGE_KEY = 'techersgpt_price_rules';
+
 const PriceManagement: React.FC = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("current-prices");
@@ -36,43 +74,24 @@ const PriceManagement: React.FC = () => {
     conditions: []
   });
 
-  const [priceRules, setPriceRules] = useState<PriceRule[]>([
-    {
-      id: "1",
-      name: "Remote Support - Basic",
-      serviceType: "remote",
-      category: "Basic Support",
-      basePrice: 45,
-      multiplier: 1.0,
-      conditions: ["weekday", "business_hours"],
-      status: "active",
-      lastModified: "2025-01-10"
-    },
-    {
-      id: "2",
-      name: "Phone Support - Advanced",
-      serviceType: "phone",
-      category: "Advanced Support",
-      basePrice: 95,
-      multiplier: 1.2,
-      conditions: ["urgent", "specialist_required"],
-      status: "active",
-      lastModified: "2025-01-09"
-    },
-    {
-      id: "3",
-      name: "On-Site Support - Enterprise",
-      serviceType: "onsite",
-      category: "Enterprise Support",
-      basePrice: 150,
-      multiplier: 1.5,
-      conditions: ["weekend", "emergency"],
-      status: "active",
-      lastModified: "2025-01-08"
+  const [priceRules, setPriceRules] = useState<PriceRule[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse saved price rules:', e);
+        return DEFAULT_PRICE_RULES;
+      }
     }
-  ]);
+    return DEFAULT_PRICE_RULES;
+  });
 
   const [editingValues, setEditingValues] = useState<Partial<PriceRule>>({});
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(priceRules));
+  }, [priceRules]);
 
   const serviceTypes = [
     { value: "remote", label: "Remote Support" },
