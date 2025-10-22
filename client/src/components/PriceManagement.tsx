@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { DollarSign, Edit, Trash2, Save, Plus, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
+import { DollarSign, Edit, Trash2, Save, Plus, TrendingUp, TrendingDown, AlertTriangle, X } from "lucide-react";
 
 interface PriceRule {
   id: string;
@@ -35,7 +35,7 @@ const PriceManagement: React.FC = () => {
     conditions: []
   });
 
-  const [priceRules] = useState<PriceRule[]>([
+  const [priceRules, setPriceRules] = useState<PriceRule[]>([
     {
       id: "1",
       name: "Remote Support - Basic",
@@ -71,6 +71,8 @@ const PriceManagement: React.FC = () => {
     }
   ]);
 
+  const [editingValues, setEditingValues] = useState<Partial<PriceRule>>({});
+
   const serviceTypes = [
     { value: "remote", label: "Remote Support" },
     { value: "phone", label: "Phone Support" },
@@ -87,11 +89,29 @@ const PriceManagement: React.FC = () => {
   ];
 
   const handleSaveRule = () => {
-    toast({
-      title: "Price Rule Saved",
-      description: "The pricing rule has been updated successfully.",
-    });
+    if (editingRule && editingValues) {
+      setPriceRules(priceRules.map(rule => 
+        rule.id === editingRule 
+          ? { ...rule, ...editingValues, lastModified: new Date().toISOString().split('T')[0] }
+          : rule
+      ));
+      toast({
+        title: "Price Rule Saved",
+        description: "The pricing rule has been updated successfully.",
+      });
+      setEditingRule(null);
+      setEditingValues({});
+    }
+  };
+
+  const handleStartEdit = (rule: PriceRule) => {
+    setEditingRule(rule.id);
+    setEditingValues(rule);
+  };
+
+  const handleCancelEdit = () => {
     setEditingRule(null);
+    setEditingValues({});
   };
 
   const handleAddRule = () => {
@@ -119,6 +139,7 @@ const PriceManagement: React.FC = () => {
   };
 
   const handleDeleteRule = (id: string) => {
+    setPriceRules(priceRules.filter(rule => rule.id !== id));
     toast({
       title: "Price Rule Deleted",
       description: "The pricing rule has been removed.",
@@ -305,36 +326,125 @@ const PriceManagement: React.FC = () => {
                 <TableBody>
                   {priceRules.map((rule) => (
                     <TableRow key={rule.id}>
-                      <TableCell className="font-medium">{rule.name}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{rule.serviceType}</Badge>
-                      </TableCell>
-                      <TableCell>{rule.category}</TableCell>
-                      <TableCell>${rule.basePrice}</TableCell>
-                      <TableCell>{rule.multiplier}x</TableCell>
-                      <TableCell>
-                        <Badge variant={rule.status === 'active' ? 'default' : 'secondary'}>
-                          {rule.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setEditingRule(rule.id)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDeleteRule(rule.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+                      {editingRule === rule.id ? (
+                        <>
+                          <TableCell>
+                            <Input
+                              value={editingValues.name || ''}
+                              onChange={(e) => setEditingValues({...editingValues, name: e.target.value})}
+                              className="max-w-xs"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Select 
+                              value={editingValues.serviceType || rule.serviceType}
+                              onValueChange={(value) => setEditingValues({...editingValues, serviceType: value})}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {serviceTypes.map((type) => (
+                                  <SelectItem key={type.value} value={type.value}>
+                                    {type.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              value={editingValues.category || ''}
+                              onChange={(e) => setEditingValues({...editingValues, category: e.target.value})}
+                              className="max-w-xs"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              type="number"
+                              value={editingValues.basePrice || 0}
+                              onChange={(e) => setEditingValues({...editingValues, basePrice: parseFloat(e.target.value)})}
+                              className="w-24"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              type="number"
+                              step="0.1"
+                              value={editingValues.multiplier || 1.0}
+                              onChange={(e) => setEditingValues({...editingValues, multiplier: parseFloat(e.target.value)})}
+                              className="w-20"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Select 
+                              value={editingValues.status || rule.status}
+                              onValueChange={(value: 'active' | 'inactive') => setEditingValues({...editingValues, status: value})}
+                            >
+                              <SelectTrigger className="w-28">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="inactive">Inactive</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2">
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={handleSaveRule}
+                              >
+                                <Save className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleCancelEdit}
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </>
+                      ) : (
+                        <>
+                          <TableCell className="font-medium">{rule.name}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{rule.serviceType}</Badge>
+                          </TableCell>
+                          <TableCell>{rule.category}</TableCell>
+                          <TableCell>${rule.basePrice}</TableCell>
+                          <TableCell>{rule.multiplier}x</TableCell>
+                          <TableCell>
+                            <Badge variant={rule.status === 'active' ? 'default' : 'secondary'}>
+                              {rule.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleStartEdit(rule)}
+                                data-testid={`button-edit-rule-${rule.id}`}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDeleteRule(rule.id)}
+                                data-testid={`button-delete-rule-${rule.id}`}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
