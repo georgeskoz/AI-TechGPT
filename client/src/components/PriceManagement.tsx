@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { DollarSign, Edit, Trash2, Save, Plus, TrendingUp, TrendingDown, AlertTriangle, X } from "lucide-react";
 
 interface PriceRule {
-  id: string;
+  id: number;
   name: string;
   serviceType: string;
   category: string;
@@ -22,43 +24,6 @@ interface PriceRule {
   lastModified: string;
 }
 
-const DEFAULT_PRICE_RULES: PriceRule[] = [
-  {
-    id: "1",
-    name: "Remote Support - Basic",
-    serviceType: "remote",
-    category: "Basic Support",
-    basePrice: 45,
-    multiplier: 1.0,
-    conditions: ["weekday", "business_hours"],
-    status: "active",
-    lastModified: "2025-01-10"
-  },
-  {
-    id: "2",
-    name: "Phone Support - Advanced",
-    serviceType: "phone",
-    category: "Advanced Support",
-    basePrice: 95,
-    multiplier: 1.2,
-    conditions: ["urgent", "specialist_required"],
-    status: "active",
-    lastModified: "2025-01-09"
-  },
-  {
-    id: "3",
-    name: "On-Site Support - Enterprise",
-    serviceType: "onsite",
-    category: "Enterprise Support",
-    basePrice: 150,
-    multiplier: 1.5,
-    conditions: ["weekend", "emergency"],
-    status: "active",
-    lastModified: "2025-01-08"
-  }
-];
-
-const STORAGE_KEY = 'techersgpt_price_rules';
 
 const PriceManagement: React.FC = () => {
   const { toast } = useToast();
@@ -74,24 +39,39 @@ const PriceManagement: React.FC = () => {
     conditions: []
   });
 
-  const [priceRules, setPriceRules] = useState<PriceRule[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error('Failed to parse saved price rules:', e);
-        return DEFAULT_PRICE_RULES;
-      }
-    }
-    return DEFAULT_PRICE_RULES;
-  });
-
   const [editingValues, setEditingValues] = useState<Partial<PriceRule>>({});
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(priceRules));
-  }, [priceRules]);
+  // Fetch pricing rules from API
+  const { data: priceRules = [], isLoading } = useQuery<PriceRule[]>({
+    queryKey: ['/api/admin/pricing-rules'],
+  });
+
+  // Create pricing rule mutation
+  const createRuleMutation = useMutation({
+    mutationFn: (rule: Omit<PriceRule, 'id' | 'lastModified' | 'createdAt' | 'updatedAt'>) =>
+      apiRequest('/api/admin/pricing-rules', 'POST', rule),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/pricing-rules'] });
+    },
+  });
+
+  // Update pricing rule mutation
+  const updateRuleMutation = useMutation({
+    mutationFn: ({ id, ...updates }: Partial<PriceRule> & { id: number }) =>
+      apiRequest(`/api/admin/pricing-rules/${id}`, 'PUT', updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/pricing-rules'] });
+    },
+  });
+
+  // Delete pricing rule mutation
+  const deleteRuleMutation = useMutation({
+    mutationFn: (id: number) =>
+      apiRequest(`/api/admin/pricing-rules/${id}`, 'DELETE'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/pricing-rules'] });
+    },
+  });
 
   const serviceTypes = [
     { value: "remote", label: "Remote Support" },
@@ -108,7 +88,7 @@ const PriceManagement: React.FC = () => {
     { value: "enterprise", label: "Enterprise Support" }
   ];
 
-  const handleSaveRule = () => {
+  const handleSaveRule = async () => {
     if (editingRule && editingValues) {
       // Validation
       if (!editingValues.name || editingValues.name.trim() === '') {
@@ -147,22 +127,26 @@ const PriceManagement: React.FC = () => {
         return;
       }
 
-      setPriceRules(priceRules.map(rule => 
-        rule.id === editingRule 
-          ? { ...rule, ...editingValues, lastModified: new Date().toISOString().split('T')[0] }
-          : rule
-      ));
-      toast({
-        title: "Price Rule Saved",
-        description: "The pricing rule has been updated successfully.",
-      });
-      setEditingRule(null);
-      setEditingValues({});
+      try {
+        await updateRuleMutation.mutateAsync({ id: parseInt(editingRule), ...editingValues });
+        toast({
+          title: "Price Rule Saved",
+          description: "The pricing rule has been updated successfully.",
+        });
+        setEditingRule(null);
+        setEditingValues({});
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to update pricing rule.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
   const handleStartEdit = (rule: PriceRule) => {
-    setEditingRule(rule.id);
+    setEditingRule(rule.id.toString());
     setEditingValues(rule);
   };
 
@@ -171,7 +155,7 @@ const PriceManagement: React.FC = () => {
     setEditingValues({});
   };
 
-  const handleAddRule = () => {
+  const handleAddRule = async () => {
     if (!newRule.name || newRule.name.trim() === '') {
       toast({
         title: "Validation Error",
@@ -217,44 +201,56 @@ const PriceManagement: React.FC = () => {
       return;
     }
 
-    const newPriceRule: PriceRule = {
-      id: Date.now().toString(),
-      name: newRule.name,
-      serviceType: newRule.serviceType,
-      category: newRule.category,
-      basePrice: newRule.basePrice,
-      multiplier: newRule.multiplier,
-      conditions: newRule.conditions,
-      status: "active",
-      lastModified: new Date().toISOString().split('T')[0]
-    };
+    try {
+      await createRuleMutation.mutateAsync({
+        name: newRule.name,
+        serviceType: newRule.serviceType,
+        category: newRule.category,
+        basePrice: newRule.basePrice,
+        multiplier: newRule.multiplier,
+        conditions: newRule.conditions,
+        status: "active"
+      });
 
-    setPriceRules([...priceRules, newPriceRule]);
+      toast({
+        title: "Price Rule Added",
+        description: "New pricing rule has been created successfully.",
+      });
 
-    toast({
-      title: "Price Rule Added",
-      description: "New pricing rule has been created successfully.",
-    });
+      setNewRule({
+        name: "",
+        serviceType: "",
+        category: "",
+        basePrice: 0,
+        multiplier: 1.0,
+        conditions: []
+      });
 
-    setNewRule({
-      name: "",
-      serviceType: "",
-      category: "",
-      basePrice: 0,
-      multiplier: 1.0,
-      conditions: []
-    });
-
-    setActiveTab("pricing-rules");
+      setActiveTab("pricing-rules");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create pricing rule.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeleteRule = (id: string) => {
-    setPriceRules(priceRules.filter(rule => rule.id !== id));
-    toast({
-      title: "Price Rule Deleted",
-      description: "The pricing rule has been removed.",
-      variant: "destructive",
-    });
+  const handleDeleteRule = async (id: number) => {
+    try {
+      await deleteRuleMutation.mutateAsync(id);
+      toast({
+        title: "Price Rule Deleted",
+        description: "The pricing rule has been removed.",
+        variant: "destructive",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete pricing rule.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getSortedPriceRules = () => {
@@ -463,7 +459,7 @@ const PriceManagement: React.FC = () => {
                 <TableBody>
                   {getSortedPriceRules().map((rule) => (
                     <TableRow key={rule.id}>
-                      {editingRule === rule.id ? (
+                      {editingRule === rule.id.toString() ? (
                         <>
                           <TableCell>
                             <Input
