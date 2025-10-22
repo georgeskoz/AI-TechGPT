@@ -90,6 +90,43 @@ const PriceManagement: React.FC = () => {
 
   const handleSaveRule = () => {
     if (editingRule && editingValues) {
+      // Validation
+      if (!editingValues.name || editingValues.name.trim() === '') {
+        toast({
+          title: "Validation Error",
+          description: "Rule name is required and cannot be empty.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!editingValues.basePrice || !Number.isFinite(editingValues.basePrice) || editingValues.basePrice <= 0) {
+        toast({
+          title: "Validation Error",
+          description: "Base price must be a valid positive number.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!editingValues.multiplier || !Number.isFinite(editingValues.multiplier) || editingValues.multiplier <= 0) {
+        toast({
+          title: "Validation Error",
+          description: "Multiplier must be a valid positive number.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!editingValues.category || editingValues.category.trim() === '') {
+        toast({
+          title: "Validation Error",
+          description: "Category is required and cannot be empty.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setPriceRules(priceRules.map(rule => 
         rule.id === editingRule 
           ? { ...rule, ...editingValues, lastModified: new Date().toISOString().split('T')[0] }
@@ -363,8 +400,15 @@ const PriceManagement: React.FC = () => {
                             <Input
                               type="number"
                               value={editingValues.basePrice || 0}
-                              onChange={(e) => setEditingValues({...editingValues, basePrice: parseFloat(e.target.value)})}
+                              onChange={(e) => {
+                                const value = parseFloat(e.target.value);
+                                if (Number.isFinite(value) && value >= 0) {
+                                  setEditingValues({...editingValues, basePrice: value});
+                                }
+                              }}
                               className="w-24"
+                              min="0"
+                              step="1"
                             />
                           </TableCell>
                           <TableCell>
@@ -372,8 +416,14 @@ const PriceManagement: React.FC = () => {
                               type="number"
                               step="0.1"
                               value={editingValues.multiplier || 1.0}
-                              onChange={(e) => setEditingValues({...editingValues, multiplier: parseFloat(e.target.value)})}
+                              onChange={(e) => {
+                                const value = parseFloat(e.target.value);
+                                if (Number.isFinite(value) && value >= 0) {
+                                  setEditingValues({...editingValues, multiplier: value});
+                                }
+                              }}
                               className="w-20"
+                              min="0"
                             />
                           </TableCell>
                           <TableCell>
