@@ -152,19 +152,70 @@ const PriceManagement: React.FC = () => {
   };
 
   const handleAddRule = () => {
-    if (!newRule.name || !newRule.serviceType || !newRule.category || newRule.basePrice <= 0) {
+    if (!newRule.name || newRule.name.trim() === '') {
       toast({
         title: "Validation Error",
-        description: "Please fill in all required fields.",
+        description: "Rule name is required and cannot be empty.",
         variant: "destructive",
       });
       return;
     }
 
+    if (!newRule.serviceType) {
+      toast({
+        title: "Validation Error",
+        description: "Please select a service type.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!newRule.category || newRule.category.trim() === '') {
+      toast({
+        title: "Validation Error",
+        description: "Category is required and cannot be empty.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!newRule.basePrice || !Number.isFinite(newRule.basePrice) || newRule.basePrice <= 0) {
+      toast({
+        title: "Validation Error",
+        description: "Base price must be a valid positive number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!newRule.multiplier || !Number.isFinite(newRule.multiplier) || newRule.multiplier <= 0) {
+      toast({
+        title: "Validation Error",
+        description: "Multiplier must be a valid positive number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newPriceRule: PriceRule = {
+      id: Date.now().toString(),
+      name: newRule.name,
+      serviceType: newRule.serviceType,
+      category: newRule.category,
+      basePrice: newRule.basePrice,
+      multiplier: newRule.multiplier,
+      conditions: newRule.conditions,
+      status: "active",
+      lastModified: new Date().toISOString().split('T')[0]
+    };
+
+    setPriceRules([...priceRules, newPriceRule]);
+
     toast({
       title: "Price Rule Added",
       description: "New pricing rule has been created successfully.",
     });
+
     setNewRule({
       name: "",
       serviceType: "",
@@ -173,6 +224,8 @@ const PriceManagement: React.FC = () => {
       multiplier: 1.0,
       conditions: []
     });
+
+    setActiveTab("pricing-rules");
   };
 
   const handleDeleteRule = (id: string) => {
