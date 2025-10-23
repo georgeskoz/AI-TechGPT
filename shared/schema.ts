@@ -1224,6 +1224,24 @@ export const pricingRules = pgTable("pricing_rules", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Commission rules for service provider earnings management
+export const commissionRules = pgTable("commission_rules", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  region: text("region").notNull(), // e.g., "North America", "Europe", "Asia"
+  country: text("country"), // specific country, optional if region-wide
+  state: text("state"), // specific state/province, optional
+  commissionRate: real("commission_rate").notNull(), // percentage (0-100)
+  serviceType: text("service_type"), // remote, phone, onsite, consultation (null = all types)
+  minAmount: real("min_amount"), // minimum transaction amount for this rule to apply
+  maxAmount: real("max_amount"), // maximum transaction amount for this rule to apply
+  status: text("status").notNull().default("active"), // active, inactive
+  description: text("description"),
+  lastModified: timestamp("last_modified").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -2209,5 +2227,16 @@ export const insertPricingRuleSchema = createInsertSchema(pricingRules).omit({
 
 export type PricingRule = typeof pricingRules.$inferSelect;
 export type InsertPricingRule = z.infer<typeof insertPricingRuleSchema>;
+
+// Commission Rules schema and types
+export const insertCommissionRuleSchema = createInsertSchema(commissionRules).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastModified: true,
+});
+
+export type CommissionRule = typeof commissionRules.$inferSelect;
+export type InsertCommissionRule = z.infer<typeof insertCommissionRuleSchema>;
 
 // Support Categories types (already defined above)
