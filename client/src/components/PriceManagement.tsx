@@ -802,12 +802,12 @@ const PriceManagement: React.FC = () => {
                   </div>
                   <div>
                     <Label htmlFor="comm-service-type">Service Type (Optional)</Label>
-                    <Select value={newCommission.serviceType} onValueChange={(value) => setNewCommission({...newCommission, serviceType: value})}>
+                    <Select value={newCommission.serviceType || "all"} onValueChange={(value) => setNewCommission({...newCommission, serviceType: value === "all" ? "" : value})}>
                       <SelectTrigger data-testid="select-commission-service-type">
                         <SelectValue placeholder="All types" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All types</SelectItem>
+                        <SelectItem value="all">All types</SelectItem>
                         {serviceTypes.map((type) => (
                           <SelectItem key={type.value} value={type.value}>
                             {type.label}
@@ -940,14 +940,14 @@ const PriceManagement: React.FC = () => {
                             </TableCell>
                             <TableCell>
                               <Select 
-                                value={editingCommissionValues.serviceType || ''} 
-                                onValueChange={(value) => setEditingCommissionValues({...editingCommissionValues, serviceType: value})}
+                                value={editingCommissionValues.serviceType || 'all'} 
+                                onValueChange={(value) => setEditingCommissionValues({...editingCommissionValues, serviceType: value === 'all' ? '' : value})}
                               >
                                 <SelectTrigger>
                                   <SelectValue placeholder="All" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="">All</SelectItem>
+                                  <SelectItem value="all">All</SelectItem>
                                   {serviceTypes.map((type) => (
                                     <SelectItem key={type.value} value={type.value}>
                                       {type.label}
