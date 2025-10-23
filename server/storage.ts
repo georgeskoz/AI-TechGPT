@@ -2,7 +2,8 @@ import {
   users, type User, type InsertUser, type UpdateProfile,
   customers, type Customer, type InsertCustomer,
   serviceProviders, type ServiceProvider, type InsertServiceProvider,
-  pricingRules, type PricingRule, type InsertPricingRule
+  pricingRules, type PricingRule, type InsertPricingRule,
+  commissionRules, type CommissionRule, type InsertCommissionRule
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -120,6 +121,12 @@ export interface IStorage {
   createPricingRule(rule: InsertPricingRule): Promise<PricingRule>;
   updatePricingRule(id: number, updates: Partial<PricingRule>): Promise<PricingRule>;
   deletePricingRule(id: number): Promise<void>;
+
+  // Commission rules operations
+  getAllCommissionRules(): Promise<CommissionRule[]>;
+  createCommissionRule(rule: InsertCommissionRule): Promise<CommissionRule>;
+  updateCommissionRule(id: number, updates: Partial<CommissionRule>): Promise<CommissionRule>;
+  deleteCommissionRule(id: number): Promise<void>;
 }
 
 // Customer storage implementation
@@ -905,6 +912,45 @@ function runDatabaseTest() {
 
   async deletePricingRule(id: number): Promise<void> {
     await db.delete(pricingRules).where(eq(pricingRules.id, id));
+  }
+
+  // Commission rules operations
+  async getAllCommissionRules(): Promise<CommissionRule[]> {
+    const rules = await db.select().from(commissionRules);
+    return rules;
+  }
+
+  async createCommissionRule(rule: InsertCommissionRule): Promise<CommissionRule> {
+    const [newRule] = await db
+      .insert(commissionRules)
+      .values({
+        ...rule,
+        lastModified: new Date()
+      })
+      .returning();
+    return newRule;
+  }
+
+  async updateCommissionRule(id: number, updates: Partial<CommissionRule>): Promise<CommissionRule> {
+    const [updatedRule] = await db
+      .update(commissionRules)
+      .set({
+        ...updates,
+        lastModified: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(commissionRules.id, id))
+      .returning();
+    
+    if (!updatedRule) {
+      throw new Error('Commission rule not found');
+    }
+    
+    return updatedRule;
+  }
+
+  async deleteCommissionRule(id: number): Promise<void> {
+    await db.delete(commissionRules).where(eq(commissionRules.id, id));
   }
 
   private generateUniqueUsername(baseUsername: string): string {
