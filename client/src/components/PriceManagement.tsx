@@ -24,6 +24,21 @@ interface PriceRule {
   lastModified: string;
 }
 
+interface CommissionRule {
+  id: number;
+  name: string;
+  region: string;
+  country?: string;
+  state?: string;
+  commissionRate: number;
+  serviceType?: string;
+  minAmount?: number;
+  maxAmount?: number;
+  status: 'active' | 'inactive';
+  description?: string;
+  lastModified: string;
+}
+
 
 const PriceManagement: React.FC = () => {
   const { toast } = useToast();
@@ -41,9 +56,29 @@ const PriceManagement: React.FC = () => {
 
   const [editingValues, setEditingValues] = useState<Partial<PriceRule>>({});
 
+  // Commission rules state
+  const [editingCommission, setEditingCommission] = useState<string | null>(null);
+  const [editingCommissionValues, setEditingCommissionValues] = useState<Partial<CommissionRule>>({});
+  const [newCommission, setNewCommission] = useState({
+    name: "",
+    region: "",
+    country: "",
+    state: "",
+    commissionRate: 0,
+    serviceType: "",
+    minAmount: 0,
+    maxAmount: 0,
+    description: ""
+  });
+
   // Fetch pricing rules from API
   const { data: priceRules = [], isLoading } = useQuery<PriceRule[]>({
     queryKey: ['/api/admin/pricing-rules'],
+  });
+
+  // Fetch commission rules from API
+  const { data: commissionRules = [], isLoading: isLoadingCommissions } = useQuery<CommissionRule[]>({
+    queryKey: ['/api/admin/commission-rules'],
   });
 
   // Create pricing rule mutation
@@ -70,6 +105,31 @@ const PriceManagement: React.FC = () => {
       apiRequest(`/api/admin/pricing-rules/${id}`, 'DELETE'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/pricing-rules'] });
+    },
+  });
+
+  // Commission rules mutations
+  const createCommissionMutation = useMutation({
+    mutationFn: (rule: Omit<CommissionRule, 'id' | 'lastModified' | 'createdAt' | 'updatedAt'>) =>
+      apiRequest('/api/admin/commission-rules', 'POST', rule),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/commission-rules'] });
+    },
+  });
+
+  const updateCommissionMutation = useMutation({
+    mutationFn: ({ id, ...updates }: Partial<CommissionRule> & { id: number }) =>
+      apiRequest(`/api/admin/commission-rules/${id}`, 'PUT', updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/commission-rules'] });
+    },
+  });
+
+  const deleteCommissionMutation = useMutation({
+    mutationFn: (id: number) =>
+      apiRequest(`/api/admin/commission-rules/${id}`, 'DELETE'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/commission-rules'] });
     },
   });
 
@@ -285,10 +345,11 @@ const PriceManagement: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="current-prices">Current Prices</TabsTrigger>
           <TabsTrigger value="pricing-rules">Pricing Rules</TabsTrigger>
           <TabsTrigger value="add-rule">Add New Rule</TabsTrigger>
+          <TabsTrigger value="commissions">Commission Rules</TabsTrigger>
           <TabsTrigger value="price-history">Price History</TabsTrigger>
         </TabsList>
 
@@ -674,6 +735,340 @@ const PriceManagement: React.FC = () => {
                   Add Rule
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="commissions" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Commission Management</CardTitle>
+              <p className="text-sm text-gray-600">Set company commission rates by region and country</p>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="comm-name">Commission Rule Name</Label>
+                    <Input
+                      id="comm-name"
+                      value={newCommission.name}
+                      onChange={(e) => setNewCommission({...newCommission, name: e.target.value})}
+                      placeholder="e.g., North America Standard"
+                      data-testid="input-commission-name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="comm-region">Region</Label>
+                    <Input
+                      id="comm-region"
+                      value={newCommission.region}
+                      onChange={(e) => setNewCommission({...newCommission, region: e.target.value})}
+                      placeholder="e.g., North America, Europe"
+                      data-testid="input-commission-region"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="comm-country">Country (Optional)</Label>
+                    <Input
+                      id="comm-country"
+                      value={newCommission.country}
+                      onChange={(e) => setNewCommission({...newCommission, country: e.target.value})}
+                      placeholder="e.g., Canada, USA"
+                      data-testid="input-commission-country"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="comm-state">State/Province (Optional)</Label>
+                    <Input
+                      id="comm-state"
+                      value={newCommission.state}
+                      onChange={(e) => setNewCommission({...newCommission, state: e.target.value})}
+                      placeholder="e.g., Ontario, California"
+                      data-testid="input-commission-state"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="comm-rate">Commission Rate (%)</Label>
+                    <Input
+                      id="comm-rate"
+                      type="number"
+                      step="0.1"
+                      value={newCommission.commissionRate}
+                      onChange={(e) => setNewCommission({...newCommission, commissionRate: parseFloat(e.target.value) || 0})}
+                      placeholder="e.g., 15.5"
+                      data-testid="input-commission-rate"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="comm-service-type">Service Type (Optional)</Label>
+                    <Select value={newCommission.serviceType} onValueChange={(value) => setNewCommission({...newCommission, serviceType: value})}>
+                      <SelectTrigger data-testid="select-commission-service-type">
+                        <SelectValue placeholder="All types" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All types</SelectItem>
+                        {serviceTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="comm-description">Description</Label>
+                    <Input
+                      id="comm-description"
+                      value={newCommission.description}
+                      onChange={(e) => setNewCommission({...newCommission, description: e.target.value})}
+                      placeholder="Description of this commission rule"
+                      data-testid="input-commission-description"
+                    />
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => {
+                    if (!newCommission.name || !newCommission.region || !newCommission.commissionRate) {
+                      toast({
+                        title: "Validation Error",
+                        description: "Name, region, and commission rate are required.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    // Normalize empty strings to undefined for optional fields
+                    const normalizedData = {
+                      name: newCommission.name,
+                      region: newCommission.region,
+                      country: newCommission.country || undefined,
+                      state: newCommission.state || undefined,
+                      commissionRate: newCommission.commissionRate,
+                      serviceType: newCommission.serviceType || undefined,
+                      minAmount: newCommission.minAmount || undefined,
+                      maxAmount: newCommission.maxAmount || undefined,
+                      description: newCommission.description || undefined,
+                      status: 'active' as const
+                    };
+                    createCommissionMutation.mutate(normalizedData);
+                    setNewCommission({
+                      name: "",
+                      region: "",
+                      country: "",
+                      state: "",
+                      commissionRate: 0,
+                      serviceType: "",
+                      minAmount: 0,
+                      maxAmount: 0,
+                      description: ""
+                    });
+                    toast({
+                      title: "Success",
+                      description: "Commission rule created successfully.",
+                    });
+                  }}
+                  data-testid="button-add-commission"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Commission Rule
+                </Button>
+              </div>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Region</TableHead>
+                    <TableHead>Country</TableHead>
+                    <TableHead>State</TableHead>
+                    <TableHead>Rate (%)</TableHead>
+                    <TableHead>Service Type</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoadingCommissions ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center">Loading...</TableCell>
+                    </TableRow>
+                  ) : commissionRules.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center text-gray-500">No commission rules yet. Add your first rule above.</TableCell>
+                    </TableRow>
+                  ) : (
+                    commissionRules.map((rule) => (
+                      <TableRow key={rule.id}>
+                        {editingCommission === rule.id.toString() ? (
+                          <>
+                            <TableCell>
+                              <Input
+                                value={editingCommissionValues.name || ''}
+                                onChange={(e) => setEditingCommissionValues({...editingCommissionValues, name: e.target.value})}
+                                data-testid={`input-edit-commission-name-${rule.id}`}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Input
+                                value={editingCommissionValues.region || ''}
+                                onChange={(e) => setEditingCommissionValues({...editingCommissionValues, region: e.target.value})}
+                                data-testid={`input-edit-commission-region-${rule.id}`}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Input
+                                value={editingCommissionValues.country || ''}
+                                onChange={(e) => setEditingCommissionValues({...editingCommissionValues, country: e.target.value})}
+                                data-testid={`input-edit-commission-country-${rule.id}`}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Input
+                                value={editingCommissionValues.state || ''}
+                                onChange={(e) => setEditingCommissionValues({...editingCommissionValues, state: e.target.value})}
+                                data-testid={`input-edit-commission-state-${rule.id}`}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Input
+                                type="number"
+                                step="0.1"
+                                value={editingCommissionValues.commissionRate || 0}
+                                onChange={(e) => setEditingCommissionValues({...editingCommissionValues, commissionRate: parseFloat(e.target.value) || 0})}
+                                data-testid={`input-edit-commission-rate-${rule.id}`}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Select 
+                                value={editingCommissionValues.serviceType || ''} 
+                                onValueChange={(value) => setEditingCommissionValues({...editingCommissionValues, serviceType: value})}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="All" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="">All</SelectItem>
+                                  {serviceTypes.map((type) => (
+                                    <SelectItem key={type.value} value={type.value}>
+                                      {type.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                            <TableCell>
+                              <Select 
+                                value={editingCommissionValues.status || 'active'} 
+                                onValueChange={(value) => setEditingCommissionValues({...editingCommissionValues, status: value as 'active' | 'inactive'})}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="active">Active</SelectItem>
+                                  <SelectItem value="inactive">Inactive</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (!editingCommissionValues.name || !editingCommissionValues.region || !editingCommissionValues.commissionRate) {
+                                      toast({
+                                        title: "Validation Error",
+                                        description: "Name, region, and commission rate are required.",
+                                        variant: "destructive",
+                                      });
+                                      return;
+                                    }
+                                    // Normalize empty strings to undefined for optional fields
+                                    const normalizedUpdates = {
+                                      ...editingCommissionValues,
+                                      country: editingCommissionValues.country || undefined,
+                                      state: editingCommissionValues.state || undefined,
+                                      serviceType: editingCommissionValues.serviceType || undefined,
+                                      description: editingCommissionValues.description || undefined,
+                                    };
+                                    updateCommissionMutation.mutate({ id: rule.id, ...normalizedUpdates });
+                                    setEditingCommission(null);
+                                    setEditingCommissionValues({});
+                                    toast({
+                                      title: "Success",
+                                      description: "Commission rule updated successfully.",
+                                    });
+                                  }}
+                                  data-testid={`button-save-commission-${rule.id}`}
+                                >
+                                  <Save className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingCommission(null);
+                                    setEditingCommissionValues({});
+                                  }}
+                                  data-testid={`button-cancel-commission-${rule.id}`}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </>
+                        ) : (
+                          <>
+                            <TableCell data-testid={`text-commission-name-${rule.id}`}>{rule.name}</TableCell>
+                            <TableCell data-testid={`text-commission-region-${rule.id}`}>{rule.region}</TableCell>
+                            <TableCell data-testid={`text-commission-country-${rule.id}`}>{rule.country || '-'}</TableCell>
+                            <TableCell data-testid={`text-commission-state-${rule.id}`}>{rule.state || '-'}</TableCell>
+                            <TableCell data-testid={`text-commission-rate-${rule.id}`}>{rule.commissionRate}%</TableCell>
+                            <TableCell data-testid={`text-commission-service-type-${rule.id}`}>{rule.serviceType || 'All'}</TableCell>
+                            <TableCell>
+                              <Badge variant={rule.status === 'active' ? 'default' : 'secondary'}>
+                                {rule.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingCommission(rule.id.toString());
+                                    setEditingCommissionValues(rule);
+                                  }}
+                                  data-testid={`button-edit-commission-${rule.id}`}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (window.confirm(`Delete commission rule "${rule.name}"?`)) {
+                                      deleteCommissionMutation.mutate(rule.id);
+                                      toast({
+                                        title: "Success",
+                                        description: "Commission rule deleted successfully.",
+                                      });
+                                    }
+                                  }}
+                                  data-testid={`button-delete-commission-${rule.id}`}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </>
+                        )}
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
