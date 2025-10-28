@@ -1,0 +1,239 @@
+import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
+import { ArrowLeft, Home, Menu, MessageCircle, Phone, Monitor, Users, Shield, Settings, Wrench, BarChart3, ChevronRight } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { useState } from "react";
+
+interface SimpleNavigationProps {
+  showBackButton?: boolean;
+  backTo?: string;
+  title?: string;
+}
+
+type UserRole = 'customer' | 'service_provider' | 'admin';
+
+export default function SimpleNavigation({ 
+  showBackButton = true, 
+  backTo = "/", 
+  title 
+}: SimpleNavigationProps) {
+  const [location, setLocation] = useLocation();
+  const [currentRole, setCurrentRole] = useState<UserRole>('customer');
+
+  const handleBack = () => {
+    window.history.back();
+  };
+
+  const customerQuickAccessItems = [
+    { label: "AI Chat Support", path: "/chat", icon: <MessageCircle className="h-4 w-4" />, description: "Free AI assistance" },
+    { label: "Live Support", path: "/live-support", icon: <Users className="h-4 w-4" />, description: "Chat with human experts" },
+    { label: "Phone Support", path: "/phone-support", icon: <Phone className="h-4 w-4" />, description: "Call-based support" },
+    { label: "Screen Sharing", path: "/screen-sharing", icon: <Monitor className="h-4 w-4" />, description: "Remote screen assistance" },
+    { label: "Request Service Provider", path: "/technician-request", icon: <Wrench className="h-4 w-4" />, description: "Book professional help" },
+    { label: "Marketplace", path: "/marketplace", icon: <Users className="h-4 w-4" />, description: "Browse technicians and services" },
+    { label: "Customer Dashboard", path: "/dashboard", icon: <BarChart3 className="h-4 w-4" />, description: "Your dashboard" },
+    { label: "Issue Tracker", path: "/issues", icon: <Settings className="h-4 w-4" />, description: "Track your issues" },
+  ];
+
+  const serviceProviderQuickAccessItems = [
+    { label: "Service Provider Dashboard", path: "/technician-dashboard", icon: <BarChart3 className="h-4 w-4" />, description: "Your dashboard" },
+    { label: "Service Provider Registration", path: "/technician-registration", icon: <Users className="h-4 w-4" />, description: "Register as service provider" },
+    { label: "Earnings Dashboard", path: "/technician-earnings", icon: <BarChart3 className="h-4 w-4" />, description: "Track your earnings" },
+    { label: "Profile Visibility", path: "/profile-visibility", icon: <Settings className="h-4 w-4" />, description: "Manage your profile" },
+    { label: "Service Provider Home", path: "/technician-home", icon: <Home className="h-4 w-4" />, description: "Service provider portal" },
+    { label: "Notifications", path: "/notifications-dashboard", icon: <MessageCircle className="h-4 w-4" />, description: "Job notifications" },
+    { label: "Technician Matching", path: "/technician-matching", icon: <Users className="h-4 w-4" />, description: "Find customers" },
+  ];
+
+  const adminQuickAccessItems = [
+    { label: "Admin Dashboard", path: "/admin", icon: <Shield className="h-4 w-4" />, description: "Admin control panel" },
+    { label: "Admin Home", path: "/admin-home", icon: <Home className="h-4 w-4" />, description: "Admin portal" },
+    { label: "Earnings Settings", path: "/admin-earnings", icon: <BarChart3 className="h-4 w-4" />, description: "Manage earnings" },
+    { label: "Category Management", path: "/admin-categories", icon: <Settings className="h-4 w-4" />, description: "Manage categories" },
+    { label: "Announcements", path: "/admin/announcements", icon: <MessageCircle className="h-4 w-4" />, description: "System announcements" },
+    { label: "Test Notifications", path: "/test-notifications", icon: <MessageCircle className="h-4 w-4" />, description: "Test notification system" },
+  ];
+
+  const getCurrentMenuItems = () => {
+    switch (currentRole) {
+      case 'customer':
+        return customerQuickAccessItems;
+      case 'service_provider':
+        return serviceProviderQuickAccessItems;
+      case 'admin':
+        return adminQuickAccessItems;
+      default:
+        return customerQuickAccessItems;
+    }
+  };
+
+  const getRoleDisplayName = (role: UserRole) => {
+    switch (role) {
+      case 'customer':
+        return 'Customer Portal';
+      case 'service_provider':
+        return 'Service Provider Portal';
+      case 'admin':
+        return 'Admin Portal';
+      default:
+        return 'Customer Portal';
+    }
+  };
+
+  const getRoleIcon = (role: UserRole) => {
+    switch (role) {
+      case 'customer':
+        return <Users className="h-4 w-4" />;
+      case 'service_provider':
+        return <Wrench className="h-4 w-4" />;
+      case 'admin':
+        return <Shield className="h-4 w-4" />;
+      default:
+        return <Users className="h-4 w-4" />;
+    }
+  };
+
+  return (
+    <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex items-center justify-between">
+          {/* Left side - Back button and Title */}
+          <div className="flex items-center gap-4">
+            {showBackButton && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBack}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+            )}
+            
+            {title && (
+              <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
+            )}
+          </div>
+
+          {/* Right side - Home button, Settings, and Quick Access */}
+          <div className="flex items-center gap-2">
+            {/* Home Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setLocation("/")}
+              className="flex items-center gap-2"
+            >
+              <Home className="h-4 w-4" />
+              Home
+            </Button>
+
+            {/* Settings Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const username = localStorage.getItem('techgpt_username');
+                if (username) {
+                  setLocation(`/profile/${username}`);
+                } else {
+                  setLocation("/profile/guest");
+                }
+              }}
+              className="flex items-center gap-2"
+            >
+              <Settings className="h-4 w-4" />
+              Settings
+            </Button>
+
+            {/* Role-Based Quick Access Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  {getRoleIcon(currentRole)}
+                  {getRoleDisplayName(currentRole)}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-72">
+                {/* Current Role Menu Items */}
+                <div className="p-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    {getRoleIcon(currentRole)}
+                    <span className="font-semibold text-sm">{getRoleDisplayName(currentRole)}</span>
+                  </div>
+                </div>
+                
+                {getCurrentMenuItems().map((item, index) => (
+                  <DropdownMenuItem 
+                    key={index}
+                    onClick={() => setLocation(item.path)}
+                    className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50"
+                  >
+                    <div className="flex items-center gap-3">
+                      {item.icon}
+                      <div className="flex flex-col">
+                        <span className="font-medium text-sm">{item.label}</span>
+                        <span className="text-xs text-gray-500">{item.description}</span>
+                      </div>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+                
+                <DropdownMenuSeparator />
+                
+                {/* Role Switcher */}
+                <div className="p-2">
+                  <span className="text-xs text-gray-500 mb-2 block">Switch Portal:</span>
+                  
+                  {currentRole !== 'customer' && (
+                    <DropdownMenuItem 
+                      onClick={() => setCurrentRole('customer')}
+                      className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50"
+                    >
+                      <Users className="h-4 w-4" />
+                      <span className="text-sm">Customer Portal</span>
+                      <ChevronRight className="h-3 w-3 ml-auto" />
+                    </DropdownMenuItem>
+                  )}
+                  
+                  {currentRole !== 'service_provider' && (
+                    <DropdownMenuItem 
+                      onClick={() => setCurrentRole('service_provider')}
+                      className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50"
+                    >
+                      <Wrench className="h-4 w-4" />
+                      <span className="text-sm">Service Provider Portal</span>
+                      <ChevronRight className="h-3 w-3 ml-auto" />
+                    </DropdownMenuItem>
+                  )}
+                  
+                  {currentRole !== 'admin' && (
+                    <DropdownMenuItem 
+                      onClick={() => setCurrentRole('admin')}
+                      className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50"
+                    >
+                      <Shield className="h-4 w-4" />
+                      <span className="text-sm">Admin Portal</span>
+                      <ChevronRight className="h-3 w-3 ml-auto" />
+                    </DropdownMenuItem>
+                  )}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
