@@ -1,7 +1,16 @@
-# TechersGPT - AI-Powered Technical Support Chat Application
+# TechersGPT - AI-Powered Technical Support Platform
 
 ## Overview
-TechersGPT is a full-stack web application providing AI-powered technical support via a chat interface. It integrates a React frontend, Express backend, PostgreSQL database, and OpenAI's GPT-4. The platform features a multi-role interface (Customer, Service Provider, Administrator) with distinct settings and functionalities for each role. It offers portal-based authentication, domain-specific technical support across various categories, and a comprehensive marketplace for service providers. The vision is to streamline technical assistance, enhance user experience, and create an efficient ecosystem for both users seeking help and professionals offering it.
+TechersGPT is a comprehensive technical support platform separated into 4 independent applications: Admin Portal, Customer Portal, Service Provider Portal, and Mobile Apps. It integrates a React frontend, Express backend, PostgreSQL database, and OpenAI's GPT-4. The platform features portal-based authentication, domain-specific technical support across various categories, and a comprehensive marketplace for service providers. The vision is to streamline technical assistance, enhance user experience, and create an efficient ecosystem for both users seeking help and professionals offering it.
+
+## Application Structure (October 2025)
+The platform has been separated into 4 independent applications:
+- **Admin Web App** (Port 5001): Platform administration
+- **Customer Web App** (Port 5002): Customer support interface
+- **Service Provider Web App** (Port 5003): Provider/technician portal
+- **Mobile Apps**: iOS/Android apps for customers and providers
+
+Each app can be run independently and deployed to separate hosting services. See `SEPARATION_COMPLETE.md` and `APPS_GUIDE.md` for complete details.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
